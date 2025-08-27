@@ -1,0 +1,191 @@
+.game-interface {
+    background-color: #1a2634;
+    border-radius: 15px;
+    padding: 20px;
+    width: 70vw;
+    max-width: initial;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: relative;
+    animation: fadeInScale 0.3s ease-out forwards;
+    opacity: 0;
+    transform: scale(0.85);
+
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.85);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .interface-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr 2fr;
+        flex: 1;
+        min-height: 0;
+        padding-top: 20px;
+        margin-top: -100px;
+
+        .column-left,
+        .column-right {
+            display: flex;
+            flex-direction: column;
+            border-radius: 10px;
+            padding: 15px;
+            position: relative;
+            transition: filter 0.3s ease;
+
+            app-player {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex: 1;
+                position: relative;
+                margin-top: 100px;
+                width: 490px;
+                transform: translateX(-13%);
+            }
+
+            &.active {
+                filter: drop-shadow(0 0 15px rgba(255, 215, 0, 1));
+            }
+        }
+
+        .column-center {
+            margin-top: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 15px;
+            gap: 1rem;
+            position: relative;
+            transform: translateX(-30%);
+
+            .dice-container {
+                display: flex;
+                flex-direction: column;
+                gap: 0.1rem;
+                width: 100%;
+
+                .dice-group {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 0.1rem;
+                    transition: transform 0.3s ease;
+                }
+
+                .dice-label {
+                    font-size: 0.8rem;
+                    color: #ffffff;
+                    text-align: center;
+                }
+            }
+
+            app-countdown {
+                width: 100%;
+            }
+        }
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: auto;
+
+        button {
+            font-family: 'Jaro', sans-serif;
+            font-size: 1.2rem;
+            padding: 12px 30px;
+            min-width: 150px;
+            border-radius: 44px;
+            border: 7px ridge #51b9ff;
+            background-color: #143e5a;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+
+            &:hover {
+                transform: scale(1.05);
+                background-color: #51b9ff;
+                border: 7px ridge #143e5a;
+            }
+
+            &.disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                filter: grayscale(50%);
+            }
+        }
+    }
+}
+
+.confirmation-bubble {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    width: 400px;
+    text-align: center;
+    animation: scaleIn 0.2s ease-in-out forwards;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+.confirmation-bubble p {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.confirmation-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 20px;
+}
+
+.confirmation-buttons button {
+    background-color: #51b9ff;
+    color: #143e5a;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'jaro';
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.confirmation-buttons button:hover {
+    background-color: #143e5a;
+    color: white;
+}
+
+.remaining-attempts {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 2rem;
+    color: #ffffff;
+}

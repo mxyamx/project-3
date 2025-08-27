@@ -1,0 +1,11 @@
+<div class="countdown-container">
+    <div class="countdown-circle">
+        <div class="countdown-number">{{ countdown }}</div>
+
+        @if (isInCombat) {
+        <p>{{ '/' + this.attackCLockMax() }}</p>
+        } @else {
+        <p>{{ '/30' }}</p>
+        }
+    </div>
+</div>

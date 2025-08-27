@@ -1,0 +1,95 @@
+<div class="game">
+    <div class="column-left">
+        <app-countdown [isInCombat]="false"></app-countdown>
+        <app-player-info></app-player-info>
+        <app-inventory></app-inventory>
+    </div>
+
+    <div class="column-center">
+        <app-playing-board></app-playing-board>
+        <div class="action-buttons">
+            <button
+                (click)="onActionClick()"
+                [class.disabled]="isActionButtonDisabled()"
+                [attr.disabled]="isActionButtonDisabled() ? 'disabled' : null"
+            >
+                Faire une action
+            </button>
+            <button
+                (click)="confirmEndTurn()"
+                [class.disabled]="isEndTurnButtonDisabled()"
+                [attr.disabled]="isEndTurnButtonDisabled() ? 'disabled' : null"
+            >
+                Finir le tour
+            </button>
+        </div>
+    </div>
+
+    <div class="column-right">
+        <div class="abandon-button">
+            <button (click)="confirmAbandon()">Abandonner</button>
+            <button
+                (click)="gameSessionManager.toggleDebugMode()"
+                (keydown)="onKeydown($event)"
+                [class.disabled]="!this.gameSessionManager.chosenPlayer().organizer"
+                [disabled]="!this.gameSessionManager.chosenPlayer().organizer"
+            >
+                Mode {{ gameSessionManager.debugModeStatus() ? 'débogage' : 'normal' }}
+            </button>
+        </div>
+        <app-game-info [gameId]="gameSessionManager.gameId()"></app-game-info>
+        @if (showChat) {
+        <app-chat></app-chat>
+        } @else {
+        <app-event-log></app-event-log>
+        }
+        <div class="nav-buttons">
+            <button (click)="toggleView(true)" [class.active]="showChat">Chat <i class="fas fa-comments"></i></button>
+            <button (click)="toggleView(false)" [class.active]="!showChat"><i class="fas fa-tasks"></i> Journal</button>
+        </div>
+    </div>
+</div>
+
+@if (showGameInterface) {
+<div class="dual-modal-layout">
+    <div class="combat-interface-area">
+        <app-game-interface></app-game-interface>
+    </div>
+    <div class="chat-log-area">
+        <div class="abandon-button">
+            <button (click)="confirmAbandon()">Abandonner</button>
+        </div>
+        @if (showChat) {
+        <app-chat [gameId]="gameSessionManager.gameId()"></app-chat>
+        } @else {
+        <app-event-log></app-event-log>
+        }
+        <div class="nav-buttons">
+            <button (click)="toggleView(true)" [class.active]="showChat">
+                <i class="fas fa-comments"></i>
+            </button>
+            <button (click)="toggleView(false)" [class.active]="!showChat">
+                <i class="fas fa-tasks"></i>
+            </button>
+        </div>
+    </div>
+</div>
+} @if (showAbandonConfirmation) {
+<div class="confirmation-bubble">
+    <p>Êtes-vous sûr de vouloir abandonner la partie ?</p>
+    <div class="confirmation-buttons">
+        <button (click)="abandonGame()">Oui</button>
+        <button (click)="cancelAbandon()">Non</button>
+    </div>
+</div>
+} @if (showEndTurnConfirmation) {
+<div class="confirmation-bubble">
+    <p>Êtes-vous sûr de vouloir finir votre tour ?</p>
+    <div class="confirmation-buttons">
+        <button (click)="onCLickEndTurn()">Oui</button>
+        <button (click)="cancelEndTurn()">Non</button>
+    </div>
+</div>
+}
+
+<app-combat-notification></app-combat-notification>

@@ -1,0 +1,121 @@
+<div id="input">
+    <section class="attribute">
+        <section class="physical-attribute">
+            <div class="header">
+                <h2>Attributs physiques</h2>
+            </div>
+            <div class="frame">
+                <div class="form-field">
+                    <label for="life">Vie</label>
+                    <div class="hover-button">
+                        <p>? <span class="description">Le nombre de points de vie du personnage</span></p>
+                    </div>
+
+                    <div class="option">
+                        <p id="life">{{ lifeValue }}</p>
+                        <p>
+                            <input type="radio" name="bonus" value="life" (change)="applyBonus('life')" formControlName="bonus" />
+                            +2
+                        </p>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="speed">Rapidité</label>
+                    <div class="hover-button">
+                        <p>
+                            ?
+                            <span class="description"
+                                >Les points de mouvement par <br />
+                                tour et determine l'ordre des tours
+                            </span>
+                        </p>
+                    </div>
+                    <div class="option">
+                        <p id="speed">{{ speedValue }}</p>
+                        <p>
+                            <input type="radio" name="bonus" value="speed" (change)="applyBonus('speed')" formControlName="bonus" />
+                            +2
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="combat-attribute">
+            <div class="header">
+                <h2>Attributs de combat</h2>
+            </div>
+            <div class="frame">
+                <div class="form-field">
+                    <label for="attack">Attaque</label>
+                    <div class="hover-button">
+                        <p>?<span class="description">La force avec laquelle une attaque est faite sur l’adversaire</span></p>
+                    </div>
+
+                    <div class="option">
+                        <p id="attack">{{ attackValue }}</p>
+                        <label>
+                            <input
+                                type="radio"
+                                name="attackDice"
+                                value="D4"
+                                (change)="assignDice('attack', diceBonus.FourSideBonus)"
+                                [checked]="attackDice === 'Dé à 4 faces'"
+                            />
+                            Dé à 4 faces
+                        </label>
+                        <label>
+                            <input
+                                type="radio"
+                                name="attackDice"
+                                value="D6"
+                                (change)="assignDice('attack', diceBonus.SixSideBonus)"
+                                [checked]="attackDice === 'Dé à 6 faces'"
+                            />
+                            Dé à 6 faces
+                        </label>
+                        <p class="dice">{{ attackDice }}</p>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="defend">Défense</label>
+                    <div class="hover-button">
+                        <p>
+                            ?<span class="description"
+                                >La capacité à bloquer <br />
+                                l'attaque d'un adversaire</span
+                            >
+                        </p>
+                    </div>
+
+                    <div class="option">
+                        <p id="defend">{{ defenseValue }}</p>
+                        <label>
+                            <input
+                                type="radio"
+                                name="defenseDice"
+                                value="D4"
+                                (change)="assignDice('defense', diceBonus.FourSideBonus)"
+                                [checked]="defenseDice === 'Dé à 4 faces'"
+                            />
+                            Dé à 4 faces
+                        </label>
+                        <label>
+                            <input
+                                type="radio"
+                                name="defenseDice"
+                                value="D6"
+                                (change)="assignDice('defense', diceBonus.SixSideBonus)"
+                                [checked]="defenseDice === 'Dé à 6 faces'"
+                            />
+                            Dé à 6 faces
+                        </label>
+                        <p class="dice">{{ defenseDice }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </section>
+</div>

@@ -1,0 +1,15 @@
+<div class="main-container" (contextmenu)="$event.preventDefault()">
+    @for(tileGroup of boardgame().tiles; track $index; let idx = $index) { @for(tile of tileGroup; track $index; let jdx = $index){
+    <app-tile-element
+        [tile]="boardgame().tiles[idx][jdx]"
+        [xPosition]="idx"
+        [yPosition]="jdx"
+        [style.grid-row]="idx + 1"
+        [style.grid-column]="jdx + 1"
+        (mousedown)="mouseDownOnTile($event, idx, jdx)"
+        (mouseenter)="onMouseEnterTile($event, idx, jdx)"
+        class="hidden-caret"
+    >
+    </app-tile-element>
+    } }
+</div>

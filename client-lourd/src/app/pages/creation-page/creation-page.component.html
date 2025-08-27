@@ -1,0 +1,55 @@
+<div class="creation-container justified">
+    <section class="navigation">
+        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> Retour à l'accueil</button>
+    </section>
+
+    <section class="header-item">
+        <h1>Crée une nouvelle partie</h1>
+    </section>
+
+    @if(showAlertConfirmation) {
+    <div class="confirmation-bubble">
+        <p>Attention!! Ce jeu a déjà été supprimé. Veuillez rafraichir la page.</p>
+        <div class="confirmation-buttons">
+            <button (click)="hideAlert()">Confirmer</button>
+        </div>
+    </div>
+    } @if(showVisibilityAlert) {
+    <div class="confirmation-bubble">
+        <p>Attention!! Ce jeu a changé de visibilité. Veuillez rafraichir la page.</p>
+        <div class="confirmation-buttons">
+            <button (click)="hideAlert()">Confirmer</button>
+        </div>
+    </div>
+    }
+
+    <div class="creation-button-container"></div>
+
+    <div class="creation-content" [ngClass]="{ 'no-game-selected': !displayedObject?.visibility, 'game-selected': displayedObject?.visibility }">
+        <app-game-list [gamesList]="gamesList" [showOnlyVisible]="true" (gameSelected)="setDisplayedObject($event)" [theme]="'green'">
+        </app-game-list>
+
+        @if (displayedObject && displayedObject.visibility) {
+        <section class="game-state-changer">
+            <div class="game-name-header">
+                <h2>{{ displayedObject.name }}</h2>
+            </div>
+
+            <div class="game-card-list-2">
+                <div class="main-area">
+                    <img [src]="displayedObject.previewImage" alt="Preview Image" />
+                </div>
+
+                <div class="game-icons">
+                    @if (displayedObject.visibility) {
+                    <img src="assets/icones/eye icon white.svg" alt="Visible" />
+                    } @if (displayedObject.gameMode === 'CTF') {
+                    <img src="assets/icones/flag white.svg" alt="CTF Mode" />
+                    }
+                </div>
+            </div>
+            <button (click)="createNewGame()" [disabled]="hasBeenClicked">Créer une nouvelle partie</button>
+        </section>
+        }
+    </div>
+</div>

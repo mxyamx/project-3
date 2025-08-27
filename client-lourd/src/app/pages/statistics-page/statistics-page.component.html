@@ -1,0 +1,30 @@
+<div class="statistics-container">
+    <section class="navigation">
+        <div class="header-section">
+            <h1><i class="fas fa-chart-bar"></i> Statistiques de partie </h1>
+        </div>
+        <div class="button-wrapper">
+            <button class="navigation-button" routerLink="/main-page">
+                <i class="fas fa-home"></i> Retour à l'accueil
+            </button>
+        </div>
+    </section>
+
+    <section class="content-section">
+            <div class="left-container">
+                <div class="left-zone">
+                    <div class="stats-display">
+                        <app-statistics></app-statistics>
+                    </div>
+                </div>
+                <div class="left-zone">
+                    <div class="stats-display">
+                        <app-player-statistics></app-player-statistics>
+                </div>
+            </div>
+        </div>
+        <div class="chat-zone">
+            <app-chat></app-chat>
+        </div>
+    </section>
+</div>

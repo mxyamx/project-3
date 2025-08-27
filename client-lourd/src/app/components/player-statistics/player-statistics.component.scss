@@ -1,0 +1,48 @@
+.statistics-container {
+    color: white;
+}
+
+.header-container {
+    margin: 0;
+    padding: 0;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th {
+    cursor: pointer;
+    font-family: 'Open Sans', sans-serif;
+    padding: 3px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #ffffff;
+}
+
+th i {
+    margin-left: 4px;
+    font-size: 12px;
+}
+
+td {
+    font-family: 'Open Sans', sans-serif;
+    text-align: center;
+    font-size: small;
+    padding: 0.25%;
+}
+
+.unsorted-icon {
+    opacity: 0.3;
+}
+
+table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+th:first-child,
+td:first-child {
+    width: 12%;
+}

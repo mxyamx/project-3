@@ -1,0 +1,72 @@
+<div class="admin-container justified">
+    <section class="navigation">
+        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> Retour à l'accueil</button>
+    </section>
+
+    <section class="header-item">
+        <h1>Administrer les jeux</h1>
+    </section>
+
+    @if (showDeleteConfirmation) {
+    <div class="confirmation-bubble">
+        <p>Voulez-vous vraiment supprimer ce jeu ?</p>
+        <div class="confirmation-buttons">
+            <button (click)="deleteGame()">Oui</button>
+            <button (click)="cancelDelete()">Non</button>
+        </div>
+    </div>
+    }
+
+    @if (showAlertConfirmation) {
+        <div class="confirmation-bubble">
+            <p>Ce jeu a déjà été supprimé. Veuillez rafraichir la page.</p>
+            <div class="confirmation-buttons">
+                <button (click)="hideAlert()">Confirmer</button>
+            </div>
+        </div>
+        }
+
+    <div class="creation-button-container">
+        <button routerLink="/option">Créer un nouveau jeu</button>
+    </div>
+
+    <div class="admin-content" [ngClass]="{ 'no-game-selected': !displayedObject, 'game-selected': displayedObject }">
+        <app-game-list [gamesList]="gamesList" [showOnlyVisible]="false" (gameSelected)="setDisplayedObject($event)" [theme]="'brown'">
+        </app-game-list>
+
+        @if (displayedObject) {
+        <section class="game-state-changer">
+            <div class="game-name-header">
+                <h2><i class="fas fa-gamepad"></i> {{ displayedObject.name }}</h2>
+            </div>
+
+            <div class="game-card-list-2">
+                <div class="main-area">
+                    <img [src]="displayedObject.previewImage" alt="Preview Image" />
+                </div>
+
+                <div class="game-icons">
+                    @if (displayedObject.visibility) {
+                    <img src="assets/icones/eye icon white.svg" alt="Visible" />
+                    } @if (displayedObject.gameMode === 'CTF') {
+                    <img src="assets/icones/flag white.svg" alt="CTF Mode" />
+                    }
+                </div>
+            </div>
+
+            <div class="admin-option-container">
+                <button routerLink="/editor" (click)="editGame()">Éditer le jeu</button>
+                <button (click)="confirmDelete()">Supprimer le jeu</button>
+
+                <div class="visibility-toggle">
+                    <label class="switch">
+                        <input type="checkbox" [(ngModel)]="displayedObject.visibility" (change)="updateDisplayedObjectVisibility()" />=
+                        <span class="slider"></span>
+                    </label>
+                    <span class="visibility-text">Changer la visibilité</span>
+                </div>
+            </div>
+        </section>
+        }
+    </div>
+</div>

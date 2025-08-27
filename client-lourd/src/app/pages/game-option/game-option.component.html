@@ -1,0 +1,26 @@
+<div class="game-option-container" (submit)="onSubmit()">
+    <section class="navigation">
+        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> Retour à l'acceuil</button>
+    </section>
+    <div class="page-title">
+        <h1>Créer un nouveau jeu</h1>
+    </div>
+    <form [formGroup]="settingsForm">
+        <div>
+            <b><label for="game-mode"> Mode de jeu : </label></b>
+            <select id="game-mode" formControlName="gameMode">
+                <option [value]="gameModes[0]">Normal</option>
+                <option [value]="gameModes[1]">CTF</option>
+            </select>
+        </div>
+        <div>
+            <b><label for="board-size"> Taille de la carte : </label></b>
+            <select id="board-size" formControlName="boardSize">
+                <option value="10x10">10x10</option>
+                <option value="15x15">15x15</option>
+                <option value="20x20">20x20</option>
+            </select>
+        </div>
+        <button type="submit" class="primary" [disabled]="settingsForm.invalid">Créer</button>
+    </form>
+</div>

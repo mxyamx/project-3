@@ -1,0 +1,151 @@
+$font-primary: 'Jaro', sans-serif;
+$section-pacement: 1em;
+$main-color: #002f53;
+$second-color: #85c1e9;
+$background-z-index: -1;
+$background-blur: 0px;
+$page-header-width: 25%;
+$button-border-radius: 66px;
+$button-font-size-1: 1.25rem;
+$page-header-font-size: 1.25em;
+$button-padding-y: 10px;
+$button-padding-x: 30px;
+$animation-delay-1: 0.2s;
+$text-color: white;
+
+@keyframes backgroundScroll {
+    from { background-position: 0 0; }
+    to { background-position: -1000% 0; }
+}
+
+.statistics-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    background-image: url('../../../assets/background/arrierePlanPageCode.jpg');
+    background-size: cover;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.statistics-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/assets/background/arrierePlanPageCode.jpg');
+    background-size: auto 100%;
+    background-position: 0 0;
+    background-repeat: repeat-x;
+    z-index: $background-z-index;
+    animation: backgroundScroll 120s linear infinite;
+}
+
+.chat-zone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+app-chat {
+    height: 100%;
+    width: 90%;
+}
+
+.left-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.stats-display {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.header-section {
+    width: $page-header-width;
+    background-color: $main-color;
+    border-radius: 25px;
+    font-size: $page-header-font-size;
+    text-align: center;
+    font-weight: lighter;
+    color: $text-color;
+    margin-top: 25px;
+    border: 8px double $second-color;
+}
+
+.button-wrapper {
+    position: absolute;
+    right: 50px;
+}
+
+.header-section .h1 {
+    font-size: 1.8rem;
+    margin: 0;
+    color: $main-color;
+}
+
+.header-section .h1 .i {
+    margin-right: 15px;
+    color: $main-color;
+}
+
+.content-section {
+    display: grid;
+    grid-template-columns: 2.4fr 1fr;
+    width: 90%;
+    height: 75vh;
+    gap: 40px;
+}
+
+.left-zone {
+    background-color: rgba($main-color, 0.8);
+    border-radius: 25px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    border: 8px double $second-color;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+}
+
+.navigation-button {
+    font-family: $font-primary;
+    padding: $button-padding-y $button-padding-x;
+    font-size: 0.85em;
+    color: white;
+    background-color: #719ff0;
+    border: none;
+    border-radius: $button-border-radius;
+    cursor: pointer;
+    transition: transform $animation-delay-1 ease, background-color $animation-delay-1 ease;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 1);
+    border: 11px solid #162744;
+}
+
+.navigation-button .i {
+    margin-right: 5px;
+}
+
+.navigation-button:hover {
+    transform: scale(1.03);
+    background-color: #162744;
+    border-color: #719ff0;
+}

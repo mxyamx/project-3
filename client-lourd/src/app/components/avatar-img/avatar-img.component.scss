@@ -1,0 +1,71 @@
+$background-color: #0f3320;
+.container {
+    background: linear-gradient(15deg, #1a4d2e 0%, $background-color 100%);
+    border-radius: 1em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.container h2 {
+    display: flex;
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 1.5rem;
+    width: 10em;
+    height: 1em;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+    border-radius: 66px;
+    opacity: 0.85;
+    background: linear-gradient(284deg, #a8d5ba 0%, #7fb58f 100%);
+}
+
+div .images {
+    width: 600px;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+
+img {
+    background: none;
+    width: 7em;
+    height: 7em;
+    margin-left: 1.5em;
+}
+
+img:hover {
+    transform: scale(1.2);
+}
+
+img.selected {
+    filter: drop-shadow(0 0 1rem crimson);
+}
+
+img:active {
+    filter: drop-shadow(0 0 0.75rem crimson);
+}
+
+.avatar-item img {
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.avatar-item img.selected {
+    border: 3px solid blue;
+    opacity: 1;
+}
+
+.unselectable {
+    opacity: 0.6;
+    filter: grayscale(100%);
+    pointer-events: none;
+}

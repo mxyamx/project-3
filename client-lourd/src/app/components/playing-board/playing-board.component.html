@@ -1,0 +1,75 @@
+<div class="main-container" (contextmenu)="$event.preventDefault()">
+    <canvas #lineCanvas class="line-canvas"> </canvas>
+    <app-playing-board-canvas [canvasElement]="lineCanvas" class="canvas-component"></app-playing-board-canvas>
+    @for(tileGroup of boardgame().tiles; track $index; let idx = $index) { @for(tile of tileGroup; track $index; let jdx = $index){
+    <app-playing-tile
+        [tile]="boardgame().tiles[idx][jdx]"
+        [xPosition]="idx"
+        [yPosition]="jdx"
+        [style.grid-row]="idx + 1"
+        [style.grid-column]="jdx + 1"
+        class="hidden-caret"
+        (mousedown)="mouseDownOnTile($event, { x: idx, y: jdx }, boardgame().tiles[idx][jdx])"
+        (click)="clickOnTile($event, boardgame().tiles[idx][jdx])"
+        (mouseenter)="onMouseEnterTile({ x: idx, y: jdx })"
+        (mouseleave)="onMouseLeaveTile()"
+    >
+    </app-playing-tile>
+    } }
+</div>
+@if(showInfoNotification && selectedTile){
+<div class="tile-info-notification" (contextmenu)="contextMenuOnInfoPopUp($event)">
+    <div>type : {{ selectedTile.type }}</div>
+    <div>coût : {{ tileCostInfo(selectedTile) }}</div>
+    @if(selectedTile.containedPlayer){
+    <div class="player-info-container">
+        <img [src]="selectedTile.containedPlayer.character" [alt]="selectedTile.containedPlayer.name" />
+        @if(selectedTile.containedPlayer.virtualPlayer){
+        <div>
+                @if (selectedTile.containedPlayer.virtualPlayer) {
+                    <i class="fas fa-robot" [ngClass]="{'aggressive': isAggressive(selectedTile.containedPlayer), 'defensive': !isAggressive(selectedTile.containedPlayer)}"></i>
+                }
+                <span [style.color]="'red'">{{ selectedTile.containedPlayer.name }}</span>
+                <div class="virtual-player-profile">
+                    <span class="profile-label">Joueur virtuel :</span>
+                    <span class="profile-value">{{ getVirtualPlayerProfile(selectedTile.containedPlayer) }}</span>
+                </div>
+            </div>
+        }
+    </div>
+    } @if(selectedTile.containedItem && !selectedTile.containedItem.disabled){
+    <div class="item-info-container">
+        <img [src]="imageCorrespondance[selectedTile.containedItem.name]" [alt]="selectedTile.containedItem.name" class="item-image" />
+        <div>
+            <div><span style="color: red; font-weight: bold">Nom:</span> {{ selectedTile.containedItem.name }}</div>
+            <div><span style="color: red; font-weight: bold">Type:</span> {{ this.transformItemType(selectedTile.containedItem) }}</div>
+            <div><span style="color: red; font-weight: bold">Effet:</span> {{ this.transformItemDescription(selectedTile.containedItem) }}</div>
+            @if(getItemPreference(selectedTile.containedItem) === vpPreferenceItem.Defensive && hasVirtualPlayers()) {
+                <div class="warning-message" style="color: orange; font-weight: bold; margin-top: 5px;">
+                    Attention, les joueurs virtuels défensifs ont une préférence pour cet item
+                </div>
+            }
+            @if(getItemPreference(selectedTile.containedItem) === vpPreferenceItem.Aggressive && hasVirtualPlayers()) {
+                <div class="warning-message" style="color: orange; font-weight: bold; margin-top: 5px;">
+                    Attention, les joueurs virtuels agressifs ont une préférence pour cet item
+                </div>
+            }
+        </div>
+    </div>
+    }
+    <button (click)="closeInfoNotification()">ok</button>
+</div>
+
+} @if(this.sessionManager.showDropItemInterface()){
+<div class="drop-item-popup" (contextmenu)="contextMenuOnInfoPopUp($event)">
+    <p>déposer un item</p>
+    <div class="items-to-drop">
+        @for(item of this.sessionManager.chosenPlayer().inventory; track $index){
+        <div class="item-section" (click)="clickOnItemToDrop(item)" [style.cursor]="'pointer'">
+            <img [src]="imageCorrespondance[item.name]" [alt]="item.name" />
+        </div>
+
+        }
+    </div>
+</div>
+}

@@ -1,0 +1,9 @@
+<div class="dice" [ngClass]="{'pulse': isRolling}">
+    @if (currentValue$ | async; as value) {
+        <div class="dice-face">
+            @for (dot of getDots(value); track $index) {
+                <div class="dot"></div>
+            }
+        </div>
+    }
+</div>

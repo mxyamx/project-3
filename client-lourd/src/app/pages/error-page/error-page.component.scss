@@ -1,0 +1,65 @@
+$font-primary: 'Jaro', sans-serif;
+$section-pacement: 1em;
+$main-color: rgba(0, 47, 83, 0.8);
+$second-color: #85c1e9;
+$background-z-index: -1;
+$background-blur: 0px;
+$button-border-radius: 66px;
+$button-font-size-1: 1.25rem;
+$page-header-font-size: 1.25em;
+$button-padding-y: 10px;
+$button-padding-x: 30px;
+$animation-delay-1: 0.2s;
+$text-color: white;
+
+.error-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: url('/assets/background/arrierePlanPageCode.jpg');
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: $font-primary;
+    color: $text-color;
+    position: relative;
+}
+
+.error-page::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: $background-z-index;
+}
+
+.error-container {
+    text-align: center;
+    padding: $section-pacement * 2;
+    border-radius: 12px;
+    background-color: $main-color;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+}
+
+.error-message {
+    font-size: $page-header-font-size;
+    margin: 10px 0 20px;
+    font-weight: bold;
+}
+
+.back-button {
+    display: inline-block;
+    padding: $button-padding-y $button-padding-x;
+    border-radius: $button-border-radius;
+    background-color: $second-color;
+    color: $main-color;
+    font-size: $button-font-size-1;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s ease-in-out;
+}

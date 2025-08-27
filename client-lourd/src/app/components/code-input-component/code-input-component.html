@@ -1,0 +1,57 @@
+<section class="main-container">
+    <div class="code-container">
+        <input
+            #input1
+            type="text"
+            maxlength="1"
+            class="code-input"
+            (input)="moveToNext(input2, 0)"
+            (keydown.backspace)="moveToPrev(input1, 0)"
+            [(ngModel)]="codeArray[0]"
+        />
+        <input
+            #input2
+            type="text"
+            maxlength="1"
+            class="code-input"
+            (input)="moveToNext(input3, 1)"
+            (keydown.backspace)="moveToPrev(input1, 1)"
+            [(ngModel)]="codeArray[1]"
+        />
+        <input
+            #input3
+            type="text"
+            maxlength="1"
+            class="code-input"
+            (input)="moveToNext(input4, 2)"
+            (keydown.backspace)="moveToPrev(input2, 2)"
+            [(ngModel)]="codeArray[2]"
+        />
+        <input
+            #input4
+            type="text"
+            maxlength="1"
+            class="code-input"
+            (input)="updateCode()"
+            (keydown.backspace)="moveToPrev(input3, 3)"
+            [(ngModel)]="codeArray[3]"
+        />
+    </div>
+    <button class="join-button" (click)="validateCode()" [disabled]="!isCodeComplete() || hasBeenClicked">Rejoindre!</button>
+    @if (error()) {
+    <div class="modal-overlay" (click)="retry()">
+        <div class="error" (click)="$event.stopPropagation()">
+            <h2>Erreur</h2>
+            @if(codeError) {
+            <p>Code de partie invalide !</p>
+            } @if(lockedError || limitError) {
+            <p>Partie bloquée par l'administrateur !</p>
+            }
+            <div class="buttons">
+                <button class="option-button" (click)="retry()">Réessayer</button>
+                <button class="option-button" routerLink="/main-page">Retourner à l'acceuil</button>
+            </div>
+        </div>
+    </div>
+    }
+</section>

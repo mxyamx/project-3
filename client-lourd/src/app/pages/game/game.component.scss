@@ -1,0 +1,362 @@
+$animation-delay-1: 0.2s;
+
+@keyframes backgroundScroll {
+    from { background-position: 0 0; }
+    to { background-position: -1000% 0; }
+}
+
+.game {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 10px;
+    height: 100vh;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.game::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../../../assets/background/arrierePlanPageCode.jpg');
+    background-size: auto 100%;
+    background-position: 0 0;
+    background-repeat: repeat-x;
+    z-index: -1;
+    filter: blur(0px);
+    opacity: 1;
+    animation: backgroundScroll 120s linear infinite;
+}
+
+.column-left {
+    display: grid;
+    grid-template-rows: 0.75fr 1.75fr 0.75fr;
+    gap: 15px;
+    height: 100%;
+    min-height: 0;
+    align-content: start;
+
+    app-countdown {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    app-player-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    app-inventory {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.column-center {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 10px;
+    height: 100%;
+    min-height: 0;
+    align-content: start;
+
+    app-playing-board {
+        border: 2px solid #333;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1;
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        margin: auto;
+        align-self: center;
+        justify-self: center;
+        min-height: 0;
+        min-width: 0;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 50px;
+        justify-content: center;
+        align-items: center;
+
+        button {
+            font-family: 'Jaro', sans-serif;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: 34.5px;
+            border: 7px ridge #51b9ff;
+            background-color: #143e5a;
+            color: white;
+            cursor: pointer;
+            transition: transform $animation-delay-1 ease-in-out;
+            background-color: $animation-delay-1 ease-in-out;
+            border: $animation-delay-1 ease-in-out;
+
+            &:not(.disabled):hover {
+                transform: scale(1.1);
+                background-color: #51b9ff;
+                border: 7px ridge #143e5a;
+            }
+
+            &.disabled {
+                cursor: not-allowed;
+                opacity: 0.5;
+            }
+        }
+    }
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    align-items: center;
+
+    button {
+        font-family: 'Jaro', sans-serif;
+        font-size: 1rem;
+        width: 120px;
+        height: 60px;
+        padding: 10px;
+        border-radius: 25%;
+        border: 7px ridge #51b9ff;
+        background-color: #143e5a;
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        text-align: center;
+        color: white;
+        cursor: pointer;
+        aspect-ratio: 1;
+        transform: scale(0.65);
+        transition:
+            transform $animation-delay-1 ease-in-out,
+            background-color $animation-delay-1 ease-in-out,
+            border $animation-delay-1 ease-in-out;
+
+        &.active {
+            color: #fffb00;
+            transform: scale(0.85);
+        }
+
+        &:hover {
+            transform: scale(0.75);
+            background-color: #51b9ff;
+            border: 7px ridge #143e5a;
+        }
+    }
+}
+
+.column-right {
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    gap: 20px;
+    height: 100%;
+    min-height: 0;
+    align-content: start;
+
+    .abandon-button {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        justify-content: center;
+        margin-top: -0.5rem;
+        gap: 20px;
+
+        button {
+            font-family: 'Jaro', sans-serif;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: 30px;
+            background-color: #2b4b7e;
+            color: white;
+            border: 7px ridge #51b9ff;
+            background-color: #143e5a;
+            cursor: pointer;
+            transition: transform $animation-delay-1 ease-in-out;
+            background-color: $animation-delay-1 ease-in-out;
+            border: $animation-delay-1 ease-in-out;
+
+            &:not(.disabled):hover {
+                transform: scale(1.1);
+                background-color: #51b9ff;
+                border: 7px ridge #143e5a;
+            }
+            &.disabled {
+                cursor: not-allowed;
+                opacity: 0.5;
+            }
+        }
+    }
+
+    app-game-info {
+        margin-top: -1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    app-event-log,
+    app-chat {
+        max-height: 440px;
+        margin-top: -1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .nav-buttons {
+        margin-top: -1.5rem;
+    }
+}
+
+.dual-modal-layout {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 10px;
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+
+    .chat-log-area {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 10px;
+
+        .abandon-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+
+            button {
+                font-family: 'Jaro', sans-serif;
+                font-size: 1rem;
+                padding: 10px 20px;
+                border-radius: 30px;
+                background-color: #143e5a;
+                color: white;
+                border: 7px ridge #51b9ff;
+                cursor: pointer;
+                transition:
+                    transform 0.3s ease-in-out,
+                    background-color 0.3s ease-in-out,
+                    border 0.3s ease-in-out;
+
+                &:hover {
+                    transform: scale(1.1);
+                    background-color: #51b9ff;
+                    border: 7px ridge #143e5a;
+                }
+            }
+        }
+    }
+}
+
+.combat-interface-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    height: 100%;
+}
+
+.chat-log-area {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 10px;
+    height: 100%;
+    box-sizing: border-box;
+
+    app-chat,
+    app-event-log {
+        border-radius: 15px;
+        overflow: auto;
+        max-height: 100%;
+        min-height: 0;
+    }
+}
+
+.confirmation-bubble {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 2000;
+    width: 400px;
+    text-align: center;
+    animation: scaleIn 0.2s ease-in-out forwards;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+.confirmation-bubble p {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.confirmation-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 20px;
+}
+
+.confirmation-buttons button {
+    background-color: #51b9ff;
+    color: #143e5a;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'jaro';
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.confirmation-buttons button:hover {
+    background-color: #143e5a;
+    color: white;
+}
+
+app-combat-notification {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}

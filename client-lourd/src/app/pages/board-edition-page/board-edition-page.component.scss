@@ -1,0 +1,340 @@
+$font-primary: 'Jaro', sans-serif;
+$button-padding-y: 10px;
+$button-padding-x: 30px;
+$animation-delay-1: 0.2s;
+$button-border-radius: 66px;
+
+.editor-main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    min-width: 1285px;
+    min-height: 700px;
+    background-image: url('../../../assets/background/arrierePlanVueEdition.jpg');
+    background-size: 200% 100%;
+    background-position: 0% 0%;
+    animation: scrollBackground 80s linear infinite;
+}
+
+@keyframes scrollBackground {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 200% 0%;
+    }
+}
+
+.justified-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.title-section {
+    background: linear-gradient(to right, #89cff0, #ffb6c1, #ffd1dc);
+    color: #142b46;
+    width: 25%;
+    border-radius: 25px;
+    font-size: 1em;
+    text-align: center;
+    font-weight: lighter;
+    margin-top: 20px;
+    border: 7px double white;
+}
+
+.justified-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.editor-main-container > section:nth-child(2) {
+    width: 100%;
+    height: 100%;
+}
+
+.editor-main-container > section:nth-child(3) {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.editor-main-container > section:nth-child(3) > section:nth-child(1) {
+    flex-basis: 17%;
+    gap: 20px;
+    justify-content: center;
+}
+
+.editor-main-container > section:nth-child(3) > section:nth-child(2) {
+    flex-basis: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.editor-main-container > section:nth-child(3) > section:nth-child(3) {
+    flex-basis: 23%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.box {
+    background: linear-gradient(135deg, #f4faff, #d6e6f2);
+    border-radius: 25px;
+    border: 5px solid azure;
+    margin: 20px;
+    padding: 20px;
+    width: 75%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.game-info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.tool-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.board-container {
+    height: 600px;
+    width: 600px;
+}
+
+.board-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.tile-tool-container,
+.items-tool-container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 15px;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.name-edition-area,
+.description-edition-area {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 15px;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.tile-section,
+.item-section {
+    position: relative;
+}
+
+.tile-view {
+    height: 50px;
+    width: 50px;
+    border: 2px solid transparent;
+    box-shadow: 0px 0px 10px 5px transparent;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.item-view {
+    height: 50px;
+    width: 50px;
+    border-radius: 25px;
+    position: center;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid transparent;
+    box-shadow: 0px 0px 10px 5px transparent;
+}
+
+.boutons {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-around;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.action-button {
+    font-family: $font-primary;
+    padding: 5px 20px;
+    font-size: 12.3px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition:
+        transform $animation-delay-1 ease,
+        background-color $animation-delay-1 ease;
+    background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+    color: #0b2340;
+    border: 8px solid transparent;
+}
+
+.action-button::before {
+    content: '';
+    position: absolute;
+    top: -2.5px;
+    left: -2.5px;
+    right: -2.5px;
+    bottom: -2.5px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #6fb3e0, #d4eaf7);
+    z-index: -1;
+}
+
+.action-button:hover {
+    transform: scale(1.03);
+    background: linear-gradient(135deg, #6fb3e0, #d4eaf7);
+    color: white;
+    font-size: 12.7px;
+}
+
+.amount-item-container {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    z-index: 9998;
+}
+
+.mouse-follower {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 25px;
+    }
+}
+
+.item-view img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.active-tile,
+.active-item {
+    border: 2px solid gold;
+    box-shadow: 0px 0px 10px 5px rgba(255, 204, 0, 0.8);
+}
+
+.tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    width: 200px;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 15px;
+    white-space: pre-line;
+    transform: translateX(5%);
+    bottom: 110%;
+    right: 10%;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    pointer-events: none;
+}
+
+.tile-section:hover .tooltip {
+    opacity: 1;
+}
+
+.item-section:hover .tooltip {
+    opacity: 1;
+}
+
+.navigation {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    width: 90%;
+    top: 5%;
+    position: absolute;
+}
+
+.navigation-button {
+    font-family: $font-primary;
+    padding: $button-padding-y $button-padding-x;
+    font-size: 0.85em;
+    color: white;
+    background-color: #719ff0;
+    border: none;
+    border-radius: $button-border-radius;
+    cursor: pointer;
+    transition:
+        transform $animation-delay-1 ease,
+        background-color $animation-delay-1 ease;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 1);
+    border: 11px solid #162744;
+}
+
+.navigation-button:hover {
+    transform: scale(1.03);
+    background-color: #162744;
+    border-color: #719ff0;
+}
+
+#section-title {
+    color: #0a58b8;
+}
+
+#section-title i {
+    color: gray;
+    margin-right: 5px;
+}
+
+.action-button i {
+    color: white;
+    font-weight: bold;
+    font-size: 15px;
+    margin-right: 5px;
+}
+
+.annuler-button i {
+    color: red;
+    font-weight: bold;
+}
+
+.enregistre-button i {
+    color: green;
+}
+
+.reinitialise-button i {
+    color: orange;
+}

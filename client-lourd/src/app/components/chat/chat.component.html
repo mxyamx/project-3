@@ -1,0 +1,29 @@
+<div class="chat-container">
+    <div class="chat-header">
+        <h3>
+            Clavardage -
+            <span>{{ player.name }}</span>
+        </h3>
+    </div>
+    <div class="chat-messages" #scroll>
+        <div class="message-list">
+
+            @for (message of chatService.roomMessages; track message.timestamp) {
+            <div class="message" [ngClass]="{'my-message': message.sender === player.name}">
+                <div class="message-header">
+                    <span class="sender">{{ message.sender }}</span>
+                    <span class="timestamp">{{ message.timestamp | date: 'HH:mm:ss' }}</span>
+                </div>
+                <div class="message-content">
+                    {{ message.text }}
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+
+    <div class="chat-input">
+        <input id="roomMessage" [(ngModel)]="messageInput" (keydown.enter)="sendToRoom()" type="text" required minlength="1" maxlength="200"/>
+        <button (click)="sendToRoom()">Envoyer</button>
+    </div>
+</div>

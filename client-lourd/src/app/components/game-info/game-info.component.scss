@@ -1,0 +1,162 @@
+.game-info-container {
+    font-family: 'Open Sans', sans-serif;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    border: double 8px #51b9ff;
+    border-radius: 25px;
+    padding: 1rem;
+    box-sizing: border-box;
+    background-color: #143e5a;
+    color: white;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.info-header {
+    text-align: center;
+
+    p {
+        margin: 0;
+        font-size: 1rem;
+        color: white;
+        font-weight: bold;
+    }
+
+    .game-details {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        font-style: italic;
+    }
+}
+
+.info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    overflow: hidden;
+}
+
+.players-list {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+
+    .players-header {
+        color: #ffcc00;
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+        font-weight: bold;
+    }
+
+    p {
+        color: white;
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+    }
+
+    .player-count {
+        color: #ffcc00;
+        font-weight: bold;
+    }
+
+    .players-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        overflow: hidden;
+        flex: 1;
+    }
+
+    .flag-visible {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .flag-hidden {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .player-item {
+        height: auto;
+        min-height: 10px;
+        max-height: 25px;
+        margin-top: 0;
+        display: grid;
+        grid-template-columns: 0.7fr 2.5fr 0.5fr 1.75fr;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.2rem;
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        .player-avatar {
+            width: 28px;
+            height: 28px;
+        }
+
+        .player-name {
+            flex: 1;
+            color: white;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            &.active-player {
+                color: #ffcc00;
+                font-weight: bold;
+            }
+
+            .robot-icon {
+                font-size: 0.9em;
+                
+                &.aggressive {
+                    color: #ff0000;
+                }
+                
+                &.defensive {
+                    color: #00ff00;
+                }
+            }
+
+            &.not-in-game {
+                text-decoration: line-through;
+                color: gray;
+            }
+        }
+
+        .player-health {
+            color: #51b9ff;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .player-victories,
+        .player-team {
+            color: #51b9ff;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .organizer-star {
+            color: #ffa200;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .fa-fist-raised, .fa-shield-alt {
+            color: #ff0000;
+            margin-left: 5px;
+        }
+    }
+}

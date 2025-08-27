@@ -1,0 +1,16 @@
+<div class="inventory-container">
+    <div class="inventory-header">
+        <p>Inventaire</p>
+    </div>
+
+    <div class="items-grid">
+        @for (item of this.gameSessionManager.chosenPlayer().inventory; track $index) {
+        <div class="item-slot" [class.empty-slot]="!item" [title]="item ? item.description : ''">
+            @if (item) {
+            <img [src]="getItemImageCorrespondance()[item.name]" [alt]="item.name" class="item-image" />
+            <span class="item-name">{{ item.name }}</span>
+            }
+        </div>
+        }
+    </div>
+</div>

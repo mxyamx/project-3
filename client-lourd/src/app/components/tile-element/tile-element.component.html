@@ -1,0 +1,23 @@
+<div class="tile-element" (mouseup)="mouseUpOnTile()">
+    <img [src]="getTileImage(tile)" alt="{{ tile.type }}" />
+    @if(tile.containedItem){
+    <app-item-element
+        class="item-element"
+        [item]="tile.containedItem"
+        (mousedown)="mouseDownOnItem($event, tile.containedItem)"
+        [style.cursor]="this.itemApplicatorService.isActivated ? 'grabbing' : this.tileApplicatorService.isActivated ? 'crosshair' : 'grab'"
+    ></app-item-element>
+    }
+</div>
+
+@if(showItemLimitWarning){
+<div class="item-limit-warning">
+    <h2 class="item-limit-warning-title">Erreur</h2>
+    <div class="item-limit-warning-content">
+        <p>vous ne pouvez placer que {{ this.getItemLimit() }} items</p>
+    </div>
+    <div class="item-limit-warning-actions">
+        <button class="item-limit-warning-button" (click)="clickOnOk()">OK</button>
+    </div>
+</div>
+}

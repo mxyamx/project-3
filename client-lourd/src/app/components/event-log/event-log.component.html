@@ -1,0 +1,18 @@
+<div class="event-log-container">
+    <div class="event-log-header">
+        <p>Journal d'événements</p>
+        <button (click)="filteredEventsButton()">
+            {{ isFiltered ? 'Mes entrées seulement' : 'Toutes les entrées' }}
+        </button>
+    </div>
+
+    <div class="events-list" #scroll>
+        @for (event of gameEventService.filteredEvents; track event.timestamp) {
+        <div class="event-item" [ngClass]="event.type">
+            <span class="event-icon">{{ event.type }}</span>
+            <span class="event-message"><p [innerHTML]="replaceNewlines(event.message)"></p></span>
+            <span class="event-time">{{ event.timestamp | date: 'HH:mm:ss' }}</span>
+        </div>
+        }
+    </div>
+</div>

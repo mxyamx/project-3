@@ -1,0 +1,13 @@
+<section class="main-container">
+    <section class="navigation">
+        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> Retour à l'accueil</button>
+    </section>
+    <section class="title-section">
+        <h2 class="page-title">Joindre une partie</h2>
+    </section>
+
+    <section class="code-section">
+        <h2>Entrez le code d'accès vers la partie :</h2>
+        <app-code-input-component (canEnterGame)="canJoinGame($event)" (accessCode)="gameId = $event">></app-code-input-component>
+    </section>
+</section>

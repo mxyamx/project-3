@@ -1,0 +1,46 @@
+<section class="players-list">
+    <h2>Liste des joueurs:</h2>
+    <div class="player-card-list">
+        @for(player of playersList; track player.name){
+        <div class="players-list-element" [ngClass]="{'organizer': player.organizer}" (click)="!player.organizer && openPlayerModal(player)">
+            <div class="character">
+                <img [src]="player.character" [alt]="player.character" />
+            </div>
+            <div class="player-info">
+                <p>
+                    @if (player.virtualPlayer) {
+                        <i class="fas fa-robot" [ngClass]="{'aggressive': isAggressive(player), 'defensive': !isAggressive(player)}"></i>
+                    }
+                    {{player.name}}
+                </p>
+            </div>
+        </div>
+        }
+    </div>
+</section>
+
+@if (selectedPlayer && isOrganizer()) {
+<div class="modal-overlay" (click)="closePlayerModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <button (click)="closePlayerModal()" class="button-red close-button">X</button>
+        <h2>{{ selectedPlayer.name }}</h2>
+        <img [src]="selectedPlayer.character" [alt]="selectedPlayer.character" />
+        <button (click)="kickPlayer(selectedPlayer)" class="button-red">Supprimer le joueur</button>
+    </div>
+</div>
+} @if (showAlert()) {
+<div class="modal-overlay" (click)="hideAlert()">
+    <div class="confirmation-bubble" (click)="$event.stopPropagation()">
+        <div>
+            @if (showAlertConfirmation) {
+            <p>Vous avez été retiré du jeu par l'organisateur.</p>
+            } @if (showAlertOfAdminLeft) {
+            <p>L'organisateur a quitté la partie.</p>
+            }
+        </div>
+        <div>
+            <button class="confirmation-buttons" (click)="hideAlert()">Confirmer</button>
+        </div>
+    </div>
+</div>
+}

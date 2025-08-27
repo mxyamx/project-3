@@ -1,0 +1,90 @@
+<div class="waiting-container">
+    <section class="navigation">
+        <div class="action-buttons">
+            <button class="navigation-button" routerLink="/main-page" (click)="deletePlayer(gameSessionManager.chosenPlayer())">
+                <i class="fas fa-home"></i>Quitter
+            </button>
+            @if(isOrganizer()) {
+                <button class="virtual-player-generation" 
+                        [class.disabled]="isRoomFull()"
+                        [disabled]="isRoomFull()"
+                        (click)="onGenerateVirtualPlayerClick()">
+                    <i class="fas fa-robot"></i> {{ isRoomFull() ? 'Salle pleine' : 'Générer joueur virtuel' }}
+                </button>   
+            }
+        </div>
+        <div class="blocked-section">
+            <i
+                [ngClass]="roomLockedState ? 'fa fa-lock' : 'fa fa-lock-open'"
+                (mouseenter)="showTooltip = true"
+                (mouseleave)="showTooltip = false"
+            ></i>
+            <button
+                [class.btn-locked]="roomLockedState"
+                [class.btn-unlocked]="!roomLockedState"
+                [ngClass]="[roomLockedState ? 'btn-locked' : 'btn-unlocked', !isOrganizer() ? 'hidden' : '']"
+                [disabled]="!isOrganizer() || hasToggleState"
+                (click)="toggleRoomState()"
+            >
+                {{ roomLockedState ? 'Débloquer la salle' : 'Bloquer la salle' }}
+            </button>
+            @if(showTooltip) { @if(currentGame.locked) {
+            <div class="tooltip">Salle bloquée! Personne ne peut plus entrer.</div>
+            } @else {
+            <div class="tooltip">Salle débloquée! La partie est encore ouverte.</div>
+            } }
+        </div>
+    </section>
+    <section>
+        <div class="access-code-section">
+            <div>
+                <h1><i class="fa fa-key"></i>Code d'accès:</h1>
+            </div>
+            <div>
+                <p class="game-code">{{ gameId }}</p>
+            </div>
+        </div>
+        <div class="second-section">
+            <div class="left-zone">
+                <div class="text">En attente de joueurs ...</div>
+                <div class="players-list">
+                    <app-players-list [gameId]="gameId"></app-players-list>
+                </div>
+                <button
+                    [ngClass]="!isOrganizer() ? 'hidden' : ''"
+                    [disabled]="playersLimitReached || !roomLockedState || hasBeenClicked || showPlayerAmountWarning"
+                    class="button-gold"
+                    (click)="startGame()"
+                >
+                    Lancer la partie
+                </button>
+            </div>
+            <div class="chat-zone">
+                <app-chat></app-chat>
+            </div>
+        </div>
+    </section>
+</div>
+
+@if (showVirtualPlayerProfile) {
+    <div class="confirmation-bubble">
+        <button class="close-button" (click)="hideVirtualPlayerProfilePopup()">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <p>Choisissez le profil du joueur virtuel</p>
+        <div class="confirmation-buttons">
+            <button (click)="selectProfile(virtualPlayerProfile.Agressive)">Agressif</button>
+            <button (click)="selectProfile(virtualPlayerProfile.Defensive)">Défensif</button>
+        </div>
+    </div>
+}
+
+@if(showPlayerAmountWarning) {
+<div class="modal-overlay" (click)="showPlayerAmountWarning = false">
+    <div class="player-amount-warning" (click)="$event.stopPropagation()">
+        <span>Le nombre de joueurs doit être pair pour commencer une partie en mode CTF.</span>
+        <button class="close-btn" (click)="showPlayerAmountWarning = false">Fermer</button>
+    </div>
+</div>
+}

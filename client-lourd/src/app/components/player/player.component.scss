@@ -1,0 +1,166 @@
+.player-combat-info {
+    transform: scale(1.4);
+    transform-origin: center center;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: rgb(255, 255, 255);
+    width: 50%;
+
+    .player-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        text-align: center;
+
+        .player-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            animation: playerBounce 1s ease-in-out infinite;
+            transform-origin: bottom;
+        }
+
+        p {
+            margin: 0;
+            color: #143e5a;
+            font-size: 1.2rem;
+
+            .robot-icon {
+                font-size: 1.1em;
+                
+                &.aggressive {
+                    color: #ff0000;
+                }
+                
+                &.defensive {
+                    color: #00ff00;
+                }
+            }
+        }
+    }
+
+    .player-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            .stat-label {
+                color: #666;
+                font-size: 0.9rem;
+            }
+
+            .stat-value {
+                font-weight: bold;
+                color: #143e5a;
+            }
+        }
+
+        .health-bar {
+            flex: 1;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            margin-left: 1rem;
+
+            .health-fill {
+                height: 100%;
+                background-color: #51b9ff;
+                transition: width 0.3s ease;
+            }
+
+            .health-text {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+                pointer-events: none;
+            }
+        }
+
+        .fight-info {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+
+            .bonus-info {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+
+                .attack-line,
+                .defense-line {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    width: 100%;
+
+                    .bonus-label {
+                        color: #666;
+                        font-size: 0.9rem;
+                    }
+
+                    .bonus-value {
+                        font-weight: bold;
+                        color: #51b9ff;
+                    }
+                }
+            }
+        }
+    }
+
+    &.opponent {
+        .player-header {
+            flex-direction: row-reverse;
+            p {
+                color: #960606;
+            }
+        }
+
+        .player-stats {
+            .stat-row .stat-value {
+                color: #960606;
+            }
+
+            .health-bar .health-fill {
+                background-color: #ff5151;
+            }
+
+            .fight-info .bonus-info {
+                .attack-line .bonus-value,
+                .defense-line .bonus-value {
+                    color: #ff5151;
+                }
+            }
+        }
+    }
+}
+
+@keyframes playerBounce {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.fa-fist-raised, .fa-shield-alt {
+    color: #ff0000;
+    margin-left: 5px;
+}

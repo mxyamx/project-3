@@ -1,0 +1,154 @@
+<div
+    class="editor-main-container"
+    [style.cursor]="this.tileApplicatorService.isActivated ? 'crosshair' : this.itemApplicatorService.isActivated ? 'grabbing' : ''"
+    (mouseup)="mouseUpOnMainDiv($event)"
+    (mousemove)="onMouseMove($event)"
+    (mouseleave)="onMouseLeavePage()"
+>
+    <section class="navigation">
+        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> Retour à l'accueil</button>
+    </section>
+    <div class="title-section">
+        <h1>Edition de jeu</h1>
+    </div>
+    <section>
+        <section class="box">
+            <div class="game-info-section">
+                <h2 id="section-title"><i class="fas fa-file-alt"></i> Informations du Jeu</h2>
+                <div class="name-edition-area justified-column">
+                    <label><b> Nom du jeu :</b></label>
+                    <textarea
+                        [value]="boardManager.editedBoardGame().name"
+                        (input)="onInputName($event)"
+                        rows="2"
+                        cols="40"
+                        placeholder="Entrez le nom du jeu"
+                        maxlength="50"
+                    ></textarea>
+                </div>
+                <div class="description-edition-area justified-column">
+                    <label><b> Description du jeu :</b></label>
+                    <textarea
+                        [value]="boardManager.editedBoardGame().description"
+                        (input)="onInputDescription($event)"
+                        rows="10"
+                        cols="40"
+                        placeholder="Entrez la description du jeu"
+                        maxlength="200"
+                    ></textarea>
+                </div>
+            </div>
+            <div class="boutons">
+                <div>
+                    <button type="submit" class="annuler-button action-button" routerLink="/admin-page"><i class="fas fa-times"></i> Annuler</button>
+                </div>
+                <div>
+                    <button type="submit" class="enregistre-button action-button" (click)="saveBoard()">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+                <div>
+                    <button class="reinitialise-button action-button" (click)="reinitialize()">
+                        <i class="fas fa-redo"></i>
+                        Réinitialiser
+                    </button>
+                </div>
+            </div>
+        </section>
+        <section class="board-section">
+            <app-boardgame-container class="board-container"> </app-boardgame-container>
+        </section>
+        <section class="box">
+            <div class="tool-container">
+                <h2 id="section-title"><i class="fas fa-tools"></i> Outils de création</h2>
+                <section class="justified-column">
+                    <h3>Applicateur de tuiles</h3>
+                    <div class="tile-tool-container">
+                        @for (tile of tiles; track tile.type) {
+                        <div
+                            class="tile-section justified-column hidden-caret"
+                            (click)="manageTileApplicator($event, tile.type)"
+                            (mouseenter)="tileOnMouseEnter(tile)"
+                            (mouseleave)="tileOnMouseLeave()"
+                            [style.cursor]="
+                                this.itemApplicatorService.isActivated ? 'grabbing' : this.tileApplicatorService.isActivated ? 'crosshair' : 'pointer'
+                            "
+                        >
+                            <div
+                                class="tile-view"
+                                [class.active-tile]="
+                                    this.tileApplicatorService.currentTileType === tile.type && this.tileApplicatorService.isActivated
+                                "
+                            >
+                                <img [src]="tile.image" [alt]="tile.type" />
+                            </div>
+                            <p>{{ tile.type }}</p>
+                            @if (hoveredTile === tile) {
+                            <div class="tooltip">
+                                {{ tile.description }}
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+                </section>
+                <section class="justified-column">
+                    <h3>Applicateur d'items</h3>
+                    <div class="items-tool-container">
+                        @for(itemInfoContainer of boardManager.getBoardGame().itemInfos; track $index){
+                        <div
+                            class="item-section justified-column hidden-caret"
+                            (mousedown)="itemInfoContainer.available ? activateItemApplicator($event, itemInfoContainer.item) : ''"
+                            [style.cursor]="
+                                this.itemApplicatorService.isActivated
+                                    ? 'grabbing'
+                                    : this.tileApplicatorService.isActivated
+                                    ? 'crosshair'
+                                    : itemInfoContainer.available
+                                    ? 'grab'
+                                    : ''
+                            "
+                            (mouseup)="mouseUpOnItemSection(itemInfoContainer.item)"
+                            (mouseenter)="itemOnMouseEnter(itemInfoContainer.item)"
+                            (mouseleave)="itemOnMouseLeave()"
+                        >
+                            <div
+                                class="item-view"
+                                [class.active-item]="
+                                    this.itemApplicatorService.currentItemSelected === itemInfoContainer.item &&
+                                    this.itemApplicatorService.isActivated
+                                "
+                            >
+                                <img
+                                    [src]="itemImage[itemInfoContainer.item.name]"
+                                    [alt]="itemInfoContainer.item.name"
+                                    [style.filter]="itemInfoContainer.available ? '' : 'grayscale(100%)'"
+                                />
+                                <p>{{ itemInfoContainer.item.type }}</p>
+                            </div>
+                            @if(itemInfoContainer.available > 1 ){
+                            <div class="amount-item-container">{{ itemInfoContainer.available }}</div>
+                            } @if (hoveredItem?.name === itemInfoContainer.item.name) {
+                            <div class="tooltip">
+                                {{ itemDescription[itemInfoContainer.item.name] }}
+                            </div>
+                            }
+                        </div>
+                        }
+                        <div
+                            class="mouse-follower"
+                            [style.left]="mouseX + 'px'"
+                            [style.top]="mouseY + 'px'"
+                            [style.display]="this.itemApplicatorService.isActivated ? 'block' : 'none'"
+                        >
+                            <img
+                                [src]="itemImage[this.itemApplicatorService.currentItemSelected.name]"
+                                [alt]="this.itemApplicatorService.currentItemSelected.name"
+                            />
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </section>
+</div>

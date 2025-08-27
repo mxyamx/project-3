@@ -1,0 +1,14 @@
+.main-container {
+    height: 95%;
+    width: 95%;
+    display: grid;
+    gap: 1px;
+    border: 10px solid black;
+    background-color: gainsboro;
+}
+
+app-tile-element {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+}

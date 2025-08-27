@@ -1,0 +1,131 @@
+$font-primary: 'Jaro', sans-serif;
+$button-padding-y: 10px;
+$button-padding-x: 30px;
+$animation-delay-1: 0.2s;
+$button-border-radius: 66px;
+
+.game-option-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: white;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    background-image: url('../../../assets/background/arrierePlanOption.jpg');
+    gap: 20px;
+}
+
+h1 {
+    color: white;
+}
+
+html,
+body {
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+div {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+}
+
+form {
+    height: 60%;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    border: 5px solid black;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 25px;
+    background-color: aliceblue;
+}
+
+label {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 12px;
+    display: block;
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 16px;
+    margin-top: 15px;
+}
+
+.page-title {
+    width: 35%;
+    background-color: cadetblue;
+    border-radius: 25px;
+    font-size: 1.25em;
+    text-align: center;
+    font-weight: lighter;
+    color: white;
+    margin-top: 25px;
+    border: 8px double white;
+}
+
+.primary {
+    width: 55%;
+    height: 15%;
+    border-radius: 30px;
+    background: radial-gradient(circle, #a8e063 30%, #56ab2f 100%);
+    border: 11px solid #183a09;
+    font-family: inherit;
+    font-size: large;
+    cursor: pointer;
+    transition:
+        transform $animation-delay-1 ease,
+        background-color $animation-delay-1 ease;
+}
+
+.primary:hover {
+    transform: scale(1.03);
+    background: linear-gradient(135deg, #4caf50, #2e7d32);
+    color: white;
+}
+
+.navigation {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    width: 90%;
+    top: 5%;
+    position: absolute;
+}
+
+.navigation-button {
+    font-family: $font-primary;
+    padding: $button-padding-y $button-padding-x;
+    font-size: 0.85em;
+    color: white;
+    background-color: #719ff0;
+    border: none;
+    border-radius: $button-border-radius;
+    cursor: pointer;
+    transition:
+        transform $animation-delay-1 ease,
+        background-color $animation-delay-1 ease;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 1);
+    border: 11px solid #162744;
+}
+
+.navigation-button:hover {
+    transform: scale(1.03);
+    background-color: #162744;
+    border-color: #719ff0;
+}

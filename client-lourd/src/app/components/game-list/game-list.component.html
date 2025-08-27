@@ -1,0 +1,39 @@
+<section class="games-list" [ngClass]="theme === 'green' ? 'green-theme' : 'brown-theme'">
+    <p class="subtitle-element"><i class="fas fa-list-alt -"></i> Liste des Jeux</p>
+    <div class="map-container">
+        <ng-container>
+            @if (filteredGames.length === 0) {
+            <p class="no-game-list">Aucun jeu n'est dans la liste, veuillez en créer un</p>
+            } @else { @for (object of filteredGames; track object.id) {
+            <div class="game-card-list-1" (click)="selectGame(object)" (mouseenter)="hoveredObject = object" (mouseleave)="hoveredObject = null">
+                <div class="game-element-list">
+                    <div class="main-area">
+                        <img [src]="object.previewImage" alt="Preview Image" />
+                    </div>
+
+                    <div class="game-icons">
+                        @if (object.visibility) {
+                        <img src="assets/icones/eye icon white.svg" alt="Visibility Icon" />
+                        } @if (object.gameMode === 'CTF') {
+                        <img src="assets/icones/flag white.svg" alt="Mode Icon" />
+                        }
+                    </div>
+                </div>
+
+                <div class="game-details">
+                    <p><i class="fas fa-gamepad"></i> Nom : {{ object.name }}</p>
+                    <p><i class="fas fa-ruler"></i> Taille : {{ object.size }} x {{ object.size }}</p>
+                    <p><i class="fas fa-flag"></i> Mode : {{ object.gameMode }}</p>
+                    <p><i class="fas fa-calendar-alt"></i> Modifié le : {{ object.lastModified | date: 'short' }}</p>
+                </div>
+
+                @if (hoveredObject === object) {
+                <div class="tooltip">
+                    {{ object.description }}
+                </div>
+                }
+            </div>
+            } }
+        </ng-container>
+    </div>
+</section>

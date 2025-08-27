@@ -1,0 +1,11 @@
+<div class="mat-dialog-container">
+    <h2 mat-dialog-title class="dialog-title">{{ data.success ? 'Succès' : 'Erreur' }}</h2>
+    <mat-dialog-content class="dialog-content">
+        @for( error of errorMessages; track error) {
+        <p>{{ error }}</p>
+        }
+    </mat-dialog-content>
+    <mat-dialog-actions class="dialog-actions">
+        <button mat-button class="dialog-button" (click)="close()">OK</button>
+    </mat-dialog-actions>
+</div>

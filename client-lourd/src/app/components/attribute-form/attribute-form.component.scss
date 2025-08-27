@@ -1,0 +1,116 @@
+$background-color: #0f3320;
+$border-color: #a8d5ba;
+$text-color: white;
+$background-frame: linear-gradient(15deg, #1a4d2e 0%, $background-color 100%);
+
+h2 {
+    text-align: center;
+}
+
+.physical-attribute h2,
+.combat-attribute h2 {
+    padding: 10px 20px;
+    font-size: 1em;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+    border-radius: 66px;
+    opacity: 0.85;
+    background: linear-gradient(284deg, $border-color 0%, #7fb58f 100%);
+    color: black;
+}
+
+.form-field label {
+    margin: 0 5mm;
+}
+
+.hover-button {
+    margin: 0 5mm;
+    position: relative;
+    display: inline-block;
+}
+
+.hover-button p {
+    text-align: center;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    border-radius: 50%;
+    border: 1mm solid $border-color;
+    background-color: $background-color;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.description {
+    visibility: hidden;
+    opacity: 0;
+    font-size: smaller;
+    background-color: $background-color;
+    text-align: center;
+    padding: 5px;
+    border-radius: 5px;
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: preserve nowrap;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.hover-button:hover .description {
+    visibility: visible;
+    opacity: 1;
+}
+
+.attribute {
+    display: flex;
+    flex-direction: row;
+    gap: 5mm;
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.attribute .combat-attribute,
+.attribute .physical-attribute {
+    display: flex;
+    flex-direction: column;
+    background: $background-frame;
+    border-radius: 1em;
+    color: $text-color;
+}
+
+.frame {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+input[type='radio'] {
+    transform: scale(2);
+}
+
+.frame .form-field .option {
+    display: flex;
+    flex-direction: column;
+    gap: 3mm;
+    margin: 0 3mm 3mm 3mm;
+}
+
+.frame .form-field .dice,
+#attack,
+#defend,
+#life,
+#speed {
+    text-align: center;
+    color: black;
+    border-radius: 66px;
+    opacity: 0.85;
+    background: linear-gradient(284deg, $border-color 0%, #7fb58f 100%);
+}

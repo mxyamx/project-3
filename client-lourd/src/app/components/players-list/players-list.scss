@@ -1,0 +1,193 @@
+.organizer {
+    color: red;
+}
+
+.players-list {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.players-list-element {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.player-card-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-around;
+    gap: 20px 60px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 30px;
+    white-space: pre-line;
+    transform: translateX(5%);
+    transition: opacity 0.2s ease-in-out;
+    height: 350px;
+    width: 800px;
+}
+
+.character {
+    height: 120px;
+    width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.players-list-element {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.players-list-element:hover {
+    transform: scale(1.05);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: antiquewhite;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 280px;
+}
+
+.modal-content img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    background-color: whitesmoke;
+}
+
+.button-red {
+    background: linear-gradient(to bottom, #ff3c3c, #cc0000);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(255, 0, 0, 0.4);
+    transition: all 0.3s ease-in-out;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.button-red:hover {
+    background: linear-gradient(to bottom, #d40000, #ff5555);
+    box-shadow: 0 6px 15px rgba(255, 0, 0, 0.6);
+}
+
+.confirmation-bubble {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    width: 400px;
+    height: 200px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.confirmation-bubble p {
+    margin-bottom: 20px;
+    font-size: 22px;
+}
+
+.confirmation-buttons {
+    background-color: #f4d19b;
+    color: #4a2a24;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'jaro';
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.confirmation-buttons:hover {
+    background-color: #7b3f28;
+    color: white;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(36, 35, 35, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.player-info {
+    display: flex;
+    align-items: center;
+
+    p {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .fa-robot {
+        font-size: 0.9em;
+        
+        &.aggressive {
+            color: #ff0000;
+        }
+        
+        &.defensive {
+            color: #00ff00;
+        }
+    }
+}

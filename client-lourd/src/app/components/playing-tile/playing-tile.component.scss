@@ -1,0 +1,74 @@
+.main-area {
+    height: 100%;
+    width: 100%;
+    position: relative;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.item-element {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.player-element {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.reachable-filter {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(168, 24, 137);
+    opacity: 0.5;
+}
+
+.action-filter {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: yellow;
+    opacity: 0.5;
+}
+
+.tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    width: 200px;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 15px;
+    white-space: pre-line;
+    transform: translateX(-50%);
+    bottom: 110%;
+    left: 50%;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-area:hover .tooltip {
+    opacity: 1;
+}

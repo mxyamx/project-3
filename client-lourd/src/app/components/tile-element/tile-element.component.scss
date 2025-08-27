@@ -1,0 +1,77 @@
+.tile-element {
+    height: 100%;
+    width: 100%;
+    position: relative;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.item-element {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.item-limit-warning {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    width: 400px;
+    text-align: center;
+    animation: scaleIn 0.2s ease-in forwards;
+}
+
+.item-limit-warning-title {
+    font-size: 30px;
+    padding-top: 0px;
+    padding-bottom: 15px;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+}
+
+.item-limit-warning-content {
+    font-size: 22px;
+    text-align: center;
+    padding: 15px;
+    color: white;
+}
+
+.item-limit-warning-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.item-limit-warning-button {
+    background-color: #f4d19b;
+    color: #4a2a24;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.item-limit-warning-button:hover {
+    background-color: #7b3f28;
+    color: white;
+}
+
+p {
+    color: white;
+}

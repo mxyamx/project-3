@@ -1,0 +1,57 @@
+<div class="game-interface">
+    <div class="remaining-attempts">
+        Tentatives d'évasion restantes : {{ currentPlayerEscapeAttempts }}
+    </div>
+
+    <div class="interface-content">
+        <div class="column-left" [class.active]="isPlayerTurnGetter">
+            
+            <app-player [player]="currentPlayer" [isAttacking]="isPlayerTurnGetter" [diceValue]="currentDiceValue" [remainingEscapeAttempts]="currentPlayerEscapeAttempts" [isCurrentPlayer]="true"></app-player>
+        </div>
+
+        <div class="column-center">
+            <div class="dice-container">
+                <div class="dice-group">
+                    <div class="dice-label">Dé d'attaque</div>
+                    <app-dice [isAttackDice]="true"></app-dice>
+                </div>
+
+                <div class="dice-group">
+                    <div class="dice-label">Dé de défense</div>
+                    <app-dice [isAttackDice]="false"></app-dice>
+                </div>
+            </div>
+            
+            <app-countdown [isInCombat]="true"></app-countdown>
+        </div>
+
+        <div class="column-right" [class.active]="!isPlayerTurnGetter">
+            <app-player [player]="opponent" [isAttacking]="!isPlayerTurnGetter" [diceValue]="currentDiceValue" [remainingEscapeAttempts]="opponentEscapeAttempts" [isCurrentPlayer]="false"></app-player>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button class="attack" 
+                (click)="onAttack()" 
+                [class.disabled]="isAttackButtonDisabled()"
+                [attr.disabled]="isAttackButtonDisabled() ? 'disabled' : null">
+            {{ getAttackButtonText() }}
+        </button>
+        <button class="escape" 
+                (click)="onEscape()" 
+                [class.disabled]="isEscapeButtonDisabled()"
+                [attr.disabled]="isEscapeButtonDisabled() ? 'disabled' : null">
+            S'évader
+        </button>
+    </div>
+    
+    @if (showEscapeConfirmation) {
+        <div class="confirmation-bubble">
+            <p>Êtes-vous sûr de vouloir tenter une évasion ? Il vous reste {{ currentPlayerEscapeAttempts }} tentative(s).</p>
+            <div class="confirmation-buttons">
+                <button (click)="confirmEscape()">Oui, tenter l'évasion</button>
+                <button (click)="cancelEscape()">Non, continuer le combat</button>
+            </div>
+        </div>
+    }
+</div>

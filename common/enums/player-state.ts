@@ -1,0 +1,14 @@
+export enum PlayerState {
+    WaitingForTurn = 'waitingForTurn',
+    WaitingForAction = 'waitingForAction',
+    Moving = 'moving',
+    SpectatingFight = 'spectatingFight',
+    Attacking = 'attacking',
+    Defending = 'defending',
+    Transitioning = 'transitioning',
+    EndGame = 'endGame',
+    DroppingItem = 'droppingItem',
+    Teleporting = 'teleporting',
+    PickingItem = 'pickingItem',
+    OpeningDoor = 'openingDoor',
+}
