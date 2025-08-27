@@ -1,24 +1,24 @@
 image: registry.gitlab.com/nikolayradoev/docker-images/chrome-mongo-node:20251
 
 cache:
-    key: '${CI_COMMIT_REF_SLUG}-client'
+    key: '${CI_COMMIT_REF_SLUG}-client-lourd'
     paths:
-        - client/node_modules/
+        - client-lourd/node_modules/
         - server/node_modules/
     policy: pull
 
-.only-client: &only-client
+.only-client-lourd: &only-client-lourd
     only:
         refs:
             - master
             - merge_requests
         changes:
-            - client/**/*
+            - client-lourd/**/*
             - common/**/*
     cache:
-        key: '${CI_COMMIT_REF_SLUG}-client'
+        key: '${CI_COMMIT_REF_SLUG}-client-lourd'
         paths:
-            - client/node_modules/
+            - client-lourd/node_modules/
         policy: pull
 
 .only-server: &only-server
@@ -41,17 +41,17 @@ stages:
     - test
     - deploy
 
-install:client:
+install:client-lourd:
     stage: install
-    <<: *only-client
+    <<: *only-client-lourd
     script:
-        - cd client
+        - cd client-lourd
         - npm ci --cache .npm --prefer-offline
     cache:
-        key: '${CI_COMMIT_REF_SLUG}-client'
+        key: '${CI_COMMIT_REF_SLUG}-client-lourd'
         paths:
-            - client/node_modules/
-            - client/.npm/
+            - client-lourd/node_modules/
+            - client-lourd/.npm/
         policy: pull-push
 
 install:server:
@@ -67,13 +67,13 @@ install:server:
             - server/.npm/
         policy: pull-push
 
-lint:client:
+lint:client-lourd:
     stage: lint
-    needs: ['install:client']
+    needs: ['install:client-lourd']
     allow_failure: true
-    <<: *only-client
+    <<: *only-client-lourd
     script:
-        - cd client
+        - cd client-lourd
         - npm run lint
 
 lint:server:
@@ -85,19 +85,19 @@ lint:server:
         - cd server
         - npm run lint
 
-test:client:
+test:client-lourd:
     stage: test
-    needs: ['install:client']
-    <<: *only-client
+    needs: ['install:client-lourd']
+    <<: *only-client-lourd
     script:
         - Xvfb :99 -ac -screen 0 1920x1080x24 &
-        - cd client
+        - cd client-lourd
         - npm run coverage -- --browsers=ChromeHeadlessNoSandbox --watch=false
     dependencies:
-        - install:client
+        - install:client-lourd
     artifacts:
         paths:
-            - client/coverage/
+            - client-lourd/coverage/
 
 test:server:
     stage: test
@@ -118,11 +118,11 @@ pages:
         - if: '$CI_COMMIT_TAG =~ /deploy/'
           when: manual
     script:
-        - cd client
+        - cd client-lourd
         - npm ci --cache .npm --prefer-offline
         - npm run deploy -- --base-href $BASE_HREF
         - mkdir ../public
-        - mv dist/client/* ../public/
+        - mv dist/client-lourd/* ../public/
     artifacts:
         paths:
             - public
