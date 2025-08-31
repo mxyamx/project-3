@@ -11,22 +11,46 @@ $animation-delay-1: 0.2s;
 }
 
 @keyframes backgroundScroll {
-    from { background-position: 0 0; }
-    to { background-position: -1000% 0; }
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: -1000% 0;
+    }
 }
 
 @keyframes bearEnter {
-    0% { transform: translateX(-100%) rotate(-5deg); opacity: 0; }
-    60% { transform: translateX(2%) rotate(2deg); opacity: 1; }
-    80% { transform: translateX(-1%) rotate(-1deg); }
-    100% { transform: translateX(0) rotate(0); }
+    0% {
+        transform: translateX(-100%) rotate(-5deg);
+        opacity: 0;
+    }
+    60% {
+        transform: translateX(2%) rotate(2deg);
+        opacity: 1;
+    }
+    80% {
+        transform: translateX(-1%) rotate(-1deg);
+    }
+    100% {
+        transform: translateX(0) rotate(0);
+    }
 }
 
 @keyframes hippoEnter {
-    0% { transform: translateX(100%) rotate(5deg); opacity: 0; }
-    60% { transform: translateX(-2%) rotate(-2deg); opacity: 1; }
-    80% { transform: translateX(1%) rotate(1deg); }
-    100% { transform: translateX(0) rotate(0); }
+    0% {
+        transform: translateX(100%) rotate(5deg);
+        opacity: 0;
+    }
+    60% {
+        transform: translateX(-2%) rotate(-2deg);
+        opacity: 1;
+    }
+    80% {
+        transform: translateX(1%) rotate(1deg);
+    }
+    100% {
+        transform: translateX(0) rotate(0);
+    }
 }
 
 .container::before {
@@ -230,6 +254,23 @@ $animation-delay-1: 0.2s;
     justify-content: center;
     gap: 10px;
     margin-top: 10px;
+}
+
+.logout-button {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    font-size: 2.5rem;
+    color: transparent;
+    background: linear-gradient(90deg, #000000, #0044cc, #1a1a1a, #0044cc);
+    background-size: 300%;
+    -webkit-background-clip: text;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.logout-button:hover {
+    transform: scale(1.2);
 }
 
 .music-button:hover {

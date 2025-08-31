@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { AuthentificationService } from '@app/services/authentification/authentification.service';
 
 @Component({
     selector: 'app-main-page',
@@ -8,5 +9,13 @@ import { RouterLink } from '@angular/router';
     imports: [RouterLink],
 })
 export class MainPageComponent {
+    private authService: AuthentificationService = inject(AuthentificationService);
+    constructor(private router: Router) {}
+
     readonly title: string = 'Méchante Patte';
+
+    logout() {
+        this.authService.logout();
+        this.router.navigate(['/login']);
+    }
 }
