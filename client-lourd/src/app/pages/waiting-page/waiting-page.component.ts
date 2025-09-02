@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { ChatComponent } from '@app/components/chat/chat.component';
 import { PlayersListComponent } from '@app/components/players-list/players-list';
 import { EMPTY_CODE } from '@app/constants/development-constants';
+import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
 import { GameEventService } from '@app/services/game-event/game-event.service';
@@ -36,6 +37,7 @@ export class WaitingPageComponent implements OnInit {
     hasToggleState: boolean = false;
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     showPlayerAmountWarning = false;
+    chatDockService: ChatDockService = inject(ChatDockService);
     protected showVirtualPlayerProfile: boolean = false;
     protected virtualPlayerProfile = VirtualPlayerProfile;
 

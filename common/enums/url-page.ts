@@ -8,5 +8,5 @@ export enum UrlPage {
     Editor = '/editor',
     Creation = '/creation',
     Error = './error-page',
-
+    Chat = '/chat',
 }

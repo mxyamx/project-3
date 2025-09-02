@@ -1,22 +1,53 @@
+import { ChatMessageDoc } from '@app/interfaces/chat-message-doc';
+import { ChatMessage } from '@common/chat-message';
 import { CombatLog, GameEventLog, RoomMessage } from '@common/socket-data-forms';
+import { Collection } from 'mongodb';
 import * as io from 'socket.io';
+import { DatabaseService } from '../database/database.service';
 export class SocketGameCommunication {
     private rooms: Map<string, Set<string>> = new Map();
 
-    constructor(private sio: io.Server) {}
+    constructor(
+        private sio: io.Server,
+        private databaseService: DatabaseService,
+    ) {}
+
+    get collection(): Collection<ChatMessageDoc> {
+        return this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME);
+    }
 
     handleSockets(socket: io.Socket): void {
         socket.on('join-room-chat', async (gameId: string) => {
             if (!this.rooms.has(gameId)) {
+                console.log(`Seting room id: ${gameId}`);
                 this.rooms.set(gameId, new Set());
             }
             this.rooms.get(gameId)?.add(socket.id);
             socket.join(gameId);
+            console.log(`Socket joining room ${socket.id}`);
+            //Document stored in Mongo
+            const lastDocs = await this.collection
+                .find({ gameId }, { projection: { _id: 0, text: 1, sender: 1, timestamp: 1 } })
+                .sort({ timestamp: -1 })
+                .limit(100)
+                .toArray();
+            //DTO send to client
+            const history: ChatMessage[] = lastDocs.reverse().map((chatMessageDoc) => {
+                const chatMessage: ChatMessage = { text: chatMessageDoc.text, sender: chatMessageDoc.sender, timestamp: chatMessageDoc.timestamp };
+                return chatMessage;
+            });
+            socket.emit('chat-history', history);
         });
 
         socket.on('room-message', (data: RoomMessage) => {
             const { gameId, message } = data;
             if (this.rooms.has(data.gameId)) {
+                console.log(`Socket sending message:${socket.id}`);
+                const doc: ChatMessageDoc = {
+                    ...message,
+                    gameId,
+                    _id: '',
+                };
                 this.sio.to(gameId).emit('message-sent', message);
             }
         });

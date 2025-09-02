@@ -1,12 +1,16 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ChatDockService {
-    // totalQuantity: Subject<number> = new BehaviorSubject<number>(0);
+    private bus = new BroadcastChannel('chat');
+    chatDetache = signal(false);
 
-    isEmbeded = true;
-
-    constructor() {}
+    constructor() {
+        this.bus.onmessage = (e) => {
+            if (e.data?.type === 'POPUP_OPENED') this.chatDetache.set(true);
+            if (e.data?.type === 'POPUP_CLOSED') this.chatDetache.set(false);
+        };
+    }
 }

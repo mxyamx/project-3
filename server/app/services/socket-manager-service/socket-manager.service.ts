@@ -3,8 +3,9 @@ import { GameScheduler } from '@app/classes/game-scheduler/game-scheduler';
 import { GameVpSocketEvent } from '@app/classes/game-vp-socket-event/game-vp-socket-event';
 import { VirtualPlayerManager } from '@app/classes/virtual-player-manager/virtual-player-manager';
 import { VpBehaviorInFight } from '@app/classes/vp-behavior-in-fight/vp-behavior-in-fight';
-import { VpGameSessionManager } from '@app/classes/vp-game-session/vp-game-session-manager';
 import { VpBehaviorInGame } from '@app/classes/vp-behavior-in-game/vp-behavior-in-game';
+import { VpGameSessionManager } from '@app/classes/vp-game-session/vp-game-session-manager';
+import { VpSocketAddingHandler } from '@app/classes/vp-socket-adding-handler/vp-socket-adding-handler';
 import { VpSocketManager } from '@app/classes/vp-socket-manager/vp-socket-manager';
 import { VpSocketAddingHandlerConfig } from '@app/interfaces/vp-socket-adding-handler-config';
 import { CurrentGamesService } from '@app/services/current-games/current-games.service';
@@ -15,7 +16,7 @@ import { Player } from '@common/player';
 import { AvatarManagement, RoomManagement } from '@common/socket-data-forms';
 import * as http from 'http';
 import * as io from 'socket.io';
-import { VpSocketAddingHandler } from '@app/classes/vp-socket-adding-handler/vp-socket-adding-handler';
+import { DatabaseService } from '../database/database.service';
 export class SocketManager {
     playerSocketMap = new Map<string, string>();
 
@@ -37,10 +38,11 @@ export class SocketManager {
     constructor(
         server: http.Server,
         private gameService: CurrentGamesService,
+        private databaseService: DatabaseService,
     ) {
         this.sio = new io.Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
         this.gameScheduler = new GameScheduler(this.sio, this.gameService);
-        this.socketGameCommunication = new SocketGameCommunication(this.sio);
+        this.socketGameCommunication = new SocketGameCommunication(this.sio, this.databaseService);
         const vpSocketAddingHandlerConfig: VpSocketAddingHandlerConfig = {
             sio: this.sio,
             gameService: this.gameService,
