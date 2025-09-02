@@ -1,55 +1,73 @@
 <div class="auth-container">
-  <div class="main-content">
-    <div class="header-container">
-      <h1 class="header-item">Méchante Patte</h1>
-    </div>
-    <img src="./assets/mainLogo/MP logo.svg" alt="Logo Méchante Patte" id="main-logo" />
-  </div>
-
-  <div class="auth-card">
-    <div class="header-section">
-      <h1 class="auth-title">{{ isLogin ? 'Connexion' : 'Créer un compte' }}</h1>
+    <div class="main-content">
+        <div class="header-container">
+            <h1 class="header-item">Méchante Patte</h1>
+        </div>
+        <img src="./assets/mainLogo/MP logo.svg" alt="Logo Méchante Patte" id="main-logo" />
     </div>
 
-    <form [formGroup]="formGroup" (ngSubmit)="isLogin ? onLogin() : onSignup()">
-      <div class="form-group">
-        <label for="username">Pseudonyme :</label>
-        <input type="text" id="username" class="form-control" formControlName="username" />
-        @if (formGroup.get('username')?.invalid && formGroup.get('username')?.touched) {
-          <small class="error-message">{{ getErrorMessage('username') }}</small>
-        }
-      </div>
+    <div class="auth-card">
+        <div class="header-section">
+            <h1 class="auth-title">{{ isLogin ? 'Connexion' : 'Créer un compte' }}</h1>
+        </div>
 
-      <div class="form-group">
-        <label for="password">Mot de passe :</label>
-        <input type="password" id="password" class="form-control" formControlName="password" />
-        @if (formGroup.get('password')?.invalid && formGroup.get('password')?.touched) {
-          <small class="error-message">{{ getErrorMessage('password') }}</small>
-        }
-      </div>
+        <form [formGroup]="formGroup" (ngSubmit)="isLogin ? onLogin() : onSignup()">
+            @if (!isLogin) {
+            <div class="form-group">
+                <label for="username">Pseudonyme :</label>
+                <input type="text" id="username" class="form-control" formControlName="username" />
+                @if (formGroup.get('username')?.invalid && formGroup.get('username')?.touched) {
+                <small class="error-message">{{ getErrorMessage('username') }}</small>
+                }
+            </div>
+            }
 
-      @if (!isLogin) {
-      <div class="form-group">
-        <label for="confirmPassword">Confirmer le mot de passe :</label>
-        <input type="password" id="confirmPassword" class="form-control" formControlName="confirmPassword" />
-        @if (formGroup.get('confirmPassword')?.invalid && formGroup.get('confirmPassword')?.touched) {
-          <small class="error-message">{{ getErrorMessage('confirmPassword') }}</small>
-        }
-      </div>
-      }
+            <div class="form-group">
+                <label for="email">Courriel :</label>
+                <input type="email" id="email" class="form-control" formControlName="email" />
+                @if (formGroup.get('email')?.invalid && formGroup.get('email')?.touched) {
+                <small class="error-message">{{ getErrorMessage('email') }}</small>
+                }
+            </div>
 
-      @if (errorMessage) {
-        <div class="error-message">{{ errorMessage }}</div>
-      }
+            @if (!isLogin) {
+            <div class="form-group">
+                <label for="avatar">Avatar :</label>
+                <input type="file" id="avatar" accept="image/*" (change)="onFileSelected($event)" />
+                @if (selectedAvatar) {
+                <img [src]="selectedAvatar" alt="Aperçu avatar" class="avatar-preview" />
+                }
+            </div>
+            }
 
-      <button type="submit" class="connection-button" [disabled]="formGroup.invalid">
-        {{ isLogin ? 'Se connecter' : 'Créer un compte' }}
-      </button>
-    </form>
+            <div class="form-group">
+                <label for="password">Mot de passe :</label>
+                <input type="password" id="password" class="form-control" formControlName="password" />
+                @if (formGroup.get('password')?.invalid && formGroup.get('password')?.touched) {
+                <small class="error-message">{{ getErrorMessage('password') }}</small>
+                }
+            </div>
 
-    <p class="auth-switch">
-      {{ isLogin ? 'Pas encore inscrit ?' : 'Déjà inscrit ?' }}
-      <a (click)="toggleAuth($event)">{{ isLogin ? 'Créer un compte' : 'Se connecter' }}</a>
-    </p>
-  </div>
+            @if (!isLogin) {
+            <div class="form-group">
+                <label for="confirmPassword">Confirmer le mot de passe :</label>
+                <input type="password" id="confirmPassword" class="form-control" formControlName="confirmPassword" />
+                @if (formGroup.get('confirmPassword')?.invalid && formGroup.get('confirmPassword')?.touched) {
+                <small class="error-message">{{ getErrorMessage('confirmPassword') }}</small>
+                }
+            </div>
+            } @if (errorMessage) {
+            <div class="error-message">{{ errorMessage }}</div>
+            }
+
+            <button type="submit" class="connection-button" [disabled]="formGroup.invalid">
+                {{ isLogin ? 'Se connecter' : 'Créer un compte' }}
+            </button>
+        </form>
+
+        <p class="auth-switch">
+            {{ isLogin ? 'Pas encore inscrit ?' : 'Déjà inscrit ?' }}
+            <a (click)="toggleAuth($event)">{{ isLogin ? 'Créer un compte' : 'Se connecter' }}</a>
+        </p>
+    </div>
 </div>

@@ -8,20 +8,16 @@ import { app } from 'src/firebase-config';
 export class AuthentificationService {
     auth: Auth;
 
-    private EMAIL_DOMAIN: string = 'mechantepatte.com';
-
     constructor() {
         this.auth = getAuth(app);
     }
 
-    signup(username: string, password: string) {
-        const fakeEmail = this.emailCreation(username);
-        return createUserWithEmailAndPassword(this.auth, fakeEmail, password);
+    signup(email: string, password: string) {
+        return createUserWithEmailAndPassword(this.auth, email, password);
     }
 
-    login(username: string, password: string) {
-        const fakeEmail = this.emailCreation(username);
-        return signInWithEmailAndPassword(this.auth, fakeEmail, password);
+    login(email: string, password: string) {
+        return signInWithEmailAndPassword(this.auth, email, password);
     }
 
     logout() {
@@ -32,6 +28,11 @@ export class AuthentificationService {
         return email.split('@')[0];
     }
 
+    getCurrentUserId(): string | undefined {
+        const user = this.auth.currentUser;
+        return user ? user.uid : undefined;
+    }
+
     mapFirebaseErrors(errorCode: string): string {
         switch (errorCode) {
             case 'auth/user-not-found':
@@ -39,17 +40,13 @@ export class AuthentificationService {
             case 'auth/invalid-credential':
                 return "Informations d'identification invalides";
             case 'auth/email-already-in-use':
-                return 'Le pseudonyme est déjà utilisé';
+                return 'Le courriel est déjà utilisé';
             case 'auth/weak-password':
                 return 'Le mot de passe doit comporter au moins 6 caractères';
             case 'auth/invalid-email':
-                return 'Pseudonyme invalide';
+                return 'Courriel invalide';
             default:
                 return 'Une erreur est survenue, veuillez réessayer';
         }
-    }
-
-    private emailCreation(username: string) {
-        return `${username}@${this.EMAIL_DOMAIN}`;
     }
 }
