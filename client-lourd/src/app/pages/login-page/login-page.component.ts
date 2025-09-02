@@ -151,6 +151,10 @@ export class LoginPageComponent {
         return '';
     }
 
+    clearError() {
+        this.errorMessage = '';
+    }
+
     onFileSelected(event: Event) {
         const file = (event.target as HTMLInputElement).files?.[0];
         if (!file) return;

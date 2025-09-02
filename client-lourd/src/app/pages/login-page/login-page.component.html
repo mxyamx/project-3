@@ -15,7 +15,7 @@
             @if (!isLogin) {
             <div class="form-group">
                 <label for="username">Pseudonyme :</label>
-                <input type="text" id="username" class="form-control" formControlName="username" />
+                <input type="text" id="username" class="form-control" formControlName="username" (input)="clearError()" />
                 @if (formGroup.get('username')?.invalid && formGroup.get('username')?.touched) {
                 <small class="error-message">{{ getErrorMessage('username') }}</small>
                 }
@@ -24,7 +24,7 @@
 
             <div class="form-group">
                 <label for="email">Courriel :</label>
-                <input type="email" id="email" class="form-control" formControlName="email" />
+                <input type="email" id="email" class="form-control" formControlName="email" (input)="clearError()" />
                 @if (formGroup.get('email')?.invalid && formGroup.get('email')?.touched) {
                 <small class="error-message">{{ getErrorMessage('email') }}</small>
                 }
@@ -33,7 +33,7 @@
             @if (!isLogin) {
             <div class="form-group">
                 <label for="avatar">Avatar :</label>
-                <input type="file" id="avatar" accept="image/*" (change)="onFileSelected($event)" />
+                <input type="file" id="avatar" accept="image/*" (change)="onFileSelected($event)" (input)="clearError()" />
                 @if (selectedAvatar) {
                 <img [src]="selectedAvatar" alt="Aperçu avatar" class="avatar-preview" />
                 }
@@ -42,7 +42,7 @@
 
             <div class="form-group">
                 <label for="password">Mot de passe :</label>
-                <input type="password" id="password" class="form-control" formControlName="password" />
+                <input type="password" id="password" class="form-control" formControlName="password" (input)="clearError()" />
                 @if (formGroup.get('password')?.invalid && formGroup.get('password')?.touched) {
                 <small class="error-message">{{ getErrorMessage('password') }}</small>
                 }
@@ -51,7 +51,7 @@
             @if (!isLogin) {
             <div class="form-group">
                 <label for="confirmPassword">Confirmer le mot de passe :</label>
-                <input type="password" id="confirmPassword" class="form-control" formControlName="confirmPassword" />
+                <input type="password" id="confirmPassword" class="form-control" formControlName="confirmPassword" (input)="clearError()" />
                 @if (formGroup.get('confirmPassword')?.invalid && formGroup.get('confirmPassword')?.touched) {
                 <small class="error-message">{{ getErrorMessage('confirmPassword') }}</small>
                 }
