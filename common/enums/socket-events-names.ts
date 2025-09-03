@@ -14,7 +14,7 @@ export enum SocketServerEventNames {
     PickUpItem = 'pickUpItem',
     DropItem = 'dropItem',
     GetActivePlayer = 'getActivePlayer',
-    GetGameState = 'getGameState'
+    GetGameState = 'getGameState',
 }
 
 export enum SocketClientEventNames {
@@ -42,4 +42,8 @@ export enum SocketClientEventNames {
     DropItem = 'dropItem',
     GetActivePlayer = 'getActivePlayer',
     GameState = 'gameState',
+}
+
+export enum SocketEventNames {
+    ChatHistory = 'chatHistory',
 }

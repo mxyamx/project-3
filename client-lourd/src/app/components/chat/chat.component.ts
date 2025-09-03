@@ -36,6 +36,10 @@ export class ChatComponent implements OnInit {
         const currentGame = this.currentGameManager.displayedCurrentGame?.();
         if (!this.gameId) this.gameId = currentGame?.id ?? null;
         if (!this.player) this.player = this.gameSessionManager.chosenPlayer();
+        this.playerSocketService.onChatHistory((msgs) => {
+            this.chatService.roomMessages = msgs;
+            setTimeout(() => this.scrollToBottom(), 0);
+        });
         this.joinRoom();
         this.configureBaseSocketFeatures();
     }

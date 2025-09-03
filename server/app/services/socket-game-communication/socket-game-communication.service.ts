@@ -1,5 +1,6 @@
 import { ChatMessageDoc } from '@app/interfaces/chat-message-doc';
 import { ChatMessage } from '@common/chat-message';
+import { SocketEventNames } from '@common/enums/socket-events-names';
 import { CombatLog, GameEventLog, RoomMessage } from '@common/socket-data-forms';
 import { Collection } from 'mongodb';
 import * as io from 'socket.io';
@@ -36,18 +37,20 @@ export class SocketGameCommunication {
                 const chatMessage: ChatMessage = { text: chatMessageDoc.text, sender: chatMessageDoc.sender, timestamp: chatMessageDoc.timestamp };
                 return chatMessage;
             });
-            socket.emit('chat-history', history);
+            socket.emit(SocketEventNames.ChatHistory, history);
         });
 
-        socket.on('room-message', (data: RoomMessage) => {
+        socket.on('room-message', async (data: RoomMessage) => {
             const { gameId, message } = data;
             if (this.rooms.has(data.gameId)) {
                 console.log(`Socket sending message:${socket.id}`);
-                const doc: ChatMessageDoc = {
+                //Converting to Mongo document
+                const doc: Omit<ChatMessageDoc, '_id'> = {
                     ...message,
                     gameId,
-                    _id: '',
                 };
+
+                await this.collection.insertOne(doc as ChatMessageDoc);
                 this.sio.to(gameId).emit('message-sent', message);
             }
         });
