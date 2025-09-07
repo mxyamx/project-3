@@ -9,10 +9,14 @@
         <div class="user-info">
             <p class="username-status">
                 <strong>{{ user.username }}</strong>
-                <span class="status-icon" [ngSwitch]="user.status">
-                    <i *ngSwitchCase="DeviceType.web" class="fa fa-desktop online-status"></i>
-                    <i *ngSwitchCase="DeviceType.android" class="fa fa-mobile-alt"></i>
-                    <i *ngSwitchCase="DeviceType.offline" class="fa-solid fa-ban offline-status"></i>
+                <span class="status-icon">
+                    @switch (user.status) { @case (DeviceType.web) {
+                    <i class="fa fa-desktop online-status"></i>
+                    } @case (DeviceType.android) {
+                    <i class="fa fa-mobile-alt"></i>
+                    } @case (DeviceType.offline) {
+                    <i class="fa-solid fa-ban offline-status"></i>
+                    } }
                 </span>
             </p>
             <p><strong>Courriel:</strong> {{ user.email }}</p>
@@ -36,21 +40,21 @@
             </div>
         </div>
 
+        <!-- TODO: Create component for each sub tab -->
+
         <div [ngSwitch]="activeTab" class="tab-content">
-            <ng-container *ngSwitchCase="'socials'">
-                <p>Amis: {{ user.friends.length }}</p>
-                <p>Utilisateurs Bloqués: {{ user.blocked.length }}</p>
-            </ng-container>
-            <ng-container *ngSwitchCase="'inventory'">
-                <ul>
-                    <li *ngFor="let item of user.inventory">{{ item }}</li>
-                </ul>
-            </ng-container>
-            <ng-container *ngSwitchCase="'statistics'">
-                <p>Victoires: {{ user.statistics.victoryAmount }}</p>
-                <p>Défaites: {{ user.statistics.defeatAmount }}</p>
-                <p>Combats: {{ user.statistics.combatAmount }}</p>
-            </ng-container>
+            @switch (activeTab) { @case ('socials') {
+            <p>Amis: {{ user.friends.length }}</p>
+            <p>Utilisateurs Bloqués: {{ user.blocked.length }}</p>
+            } @case ('inventory') {
+            <ul>
+                <li>Placeholder items</li>
+            </ul>
+            } @case ('statistics') {
+            <p>Victoires: {{ user.statistics.victoryAmount }}</p>
+            <p>Défaites: {{ user.statistics.defeatAmount }}</p>
+            <p>Combats: {{ user.statistics.combatAmount }}</p>
+            } }
         </div>
     </div>
 </div>
