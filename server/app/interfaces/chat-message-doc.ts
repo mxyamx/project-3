@@ -1,5 +1,5 @@
 export interface ChatMessageDoc {
-    gameId: string;
+    roomId: string;
     text: string;
     sender: string;
     timestamp: Date;

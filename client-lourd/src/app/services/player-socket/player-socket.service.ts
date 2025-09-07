@@ -46,6 +46,7 @@ export class PlayerSocketService {
     }
 
     emitLeaveGame(gameId: string, player: Player): void {
+        console.log('leaving');
         this.clientSocketService.emit('leave-game', { gameId, player });
     }
 
@@ -118,6 +119,7 @@ export class PlayerSocketService {
     }
 
     onAvatarRoomLeft(callback: (playerId: string) => void): void {
+        console.log('avatar left');
         this.clientSocketService.on('avatar-room-left', callback);
     }
 
@@ -134,13 +136,24 @@ export class PlayerSocketService {
     emitJoinChatRoom(gameId: string): void {
         this.clientSocketService.emit('join-room-chat', gameId);
     }
+    emitJoinGeneralChat() {
+        this.clientSocketService.emit('join-general-chat');
+    }
 
     emitSendMessage(gameId: string, message: ChatMessage, callback?: (response: unknown) => void): void {
         this.clientSocketService.emit('room-message', { gameId, message }, callback);
     }
+    emitSendGeneralMessage(message: ChatMessage, callback?: (response: unknown) => void): void {
+        this.clientSocketService.emit('general-message', message, callback);
+    }
 
     onNewMessage(callback: (message: ChatMessage) => void): void {
         this.clientSocketService.on<ChatMessage>('message-sent', (data: ChatMessage) => {
+            callback(data);
+        });
+    }
+    onNewGeneralMessage(callback: (message: ChatMessage) => void): void {
+        this.clientSocketService.on<ChatMessage>('general-message-sent', (data: ChatMessage) => {
             callback(data);
         });
     }

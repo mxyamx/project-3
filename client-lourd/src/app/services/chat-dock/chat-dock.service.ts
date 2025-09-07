@@ -13,4 +13,10 @@ export class ChatDockService {
             if (e.data?.type === 'POPUP_CLOSED') this.chatDetache.set(false);
         };
     }
+
+    leftGame(): void {
+        if (this.chatDetache()) {
+            this.bus.postMessage({ type: 'LEFT_GAME' });
+        }
+    }
 }

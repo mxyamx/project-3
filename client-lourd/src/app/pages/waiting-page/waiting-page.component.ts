@@ -79,6 +79,7 @@ export class WaitingPageComponent implements OnInit {
         });
 
         this.playerSocketService.onKicked((player: Player) => {
+            this.chatDockService.leftGame();
             this.currentGame.players = this.currentGame.players.filter((kickedPlayer) => kickedPlayer.name !== player.name);
             this.playersLimitReached = this.playerlimit();
         });
@@ -138,6 +139,7 @@ export class WaitingPageComponent implements OnInit {
 
     deletePlayer(player: Player) {
         if (this.gameId) {
+            this.chatDockService.leftGame();
             this.playerSocketService.emitLeaveGame(this.gameId, player);
         }
     }

@@ -28,7 +28,7 @@ export class SocketGameCommunication {
             console.log(`Socket joining room ${socket.id}`);
             //Document stored in Mongo
             const lastDocs = await this.collection
-                .find({ gameId }, { projection: { _id: 0, text: 1, sender: 1, timestamp: 1 } })
+                .find({ roomId: gameId }, { projection: { _id: 0, text: 1, sender: 1, timestamp: 1 } })
                 .sort({ timestamp: -1 })
                 .limit(100)
                 .toArray();
@@ -39,6 +39,30 @@ export class SocketGameCommunication {
             });
             socket.emit(SocketEventNames.ChatHistory, history);
         });
+        socket.on('join-general-chat', async () => {
+            const lastDocs = await this.collection
+                .find({ roomId: 'GENERAL' }, { projection: { _id: 0, text: 1, sender: 1, timestamp: 1 } })
+                .sort({ timestamp: -1 })
+                .limit(100)
+                .toArray();
+            //DTO send to client
+            const history: ChatMessage[] = lastDocs.reverse().map((chatMessageDoc) => {
+                const chatMessage: ChatMessage = { text: chatMessageDoc.text, sender: chatMessageDoc.sender, timestamp: chatMessageDoc.timestamp };
+                return chatMessage;
+            });
+            socket.emit(SocketEventNames.ChatHistory, history);
+        });
+        socket.on('general-message', async (message: ChatMessage) => {
+            console.log(`Socket sending message:${socket.id}`);
+            //Converting to Mongo document
+            const doc: Omit<ChatMessageDoc, '_id'> = {
+                ...message,
+                roomId: 'GENERAL',
+            };
+
+            await this.collection.insertOne(doc as ChatMessageDoc);
+            this.sio.sockets.emit('general-message-sent', message);
+        });
 
         socket.on('room-message', async (data: RoomMessage) => {
             const { gameId, message } = data;
@@ -47,7 +71,7 @@ export class SocketGameCommunication {
                 //Converting to Mongo document
                 const doc: Omit<ChatMessageDoc, '_id'> = {
                     ...message,
-                    gameId,
+                    roomId: gameId,
                 };
 
                 await this.collection.insertOne(doc as ChatMessageDoc);

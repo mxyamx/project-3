@@ -209,11 +209,6 @@ export class SocketManager {
                 if (playerToRemove) {
                     await this.gameService.removePlayer(playerToRemove, gameId);
 
-                    if (this.games[gameId]) {
-                        this.games[gameId].delete(player.character);
-                        this.sio.to(gameId).emit('avatar-list-updated', Array.from(this.games[gameId]));
-                    }
-
                     this.sio.to(gameId).emit('player-left', playerToRemove);
 
                     if (playerToRemove.virtualPlayer) {
@@ -231,21 +226,28 @@ export class SocketManager {
                 await this.gameService.removePlayer(player, gameId);
                 this.sio.to(gameId).emit('player-left', player);
 
+                if (this.games[gameId]) {
+                    this.games[gameId].delete(player.character);
+                    this.sio.to(gameId).emit('avatar-list-updated', Array.from(this.games[gameId]));
+                }
+
                 socket.leave(gameId);
 
-                const maxPlayers = PlayerLimits[game.boardGame.size].maxPlayers;
-                if (game.players.length < maxPlayers && game.locked) {
-                    game.locked = false;
-                    await this.gameService.updateGame(game);
+                const updatedGame = await this.gameService.getGame(gameId);
+                if (updatedGame) {
+                    const maxPlayers = PlayerLimits[updatedGame.boardGame.size].maxPlayers;
+                    if (updatedGame.players.length < maxPlayers && updatedGame.locked) {
+                        updatedGame.locked = false;
+                        await this.gameService.updateGame(updatedGame);
+                    }
+                    this.sio.to(gameId).emit('lock-updated', updatedGame);
                 }
-                this.sio.to(gameId).emit('lock-updated', game);
             });
 
             socket.on('kick-player', async (data: RoomManagement) => {
                 const { gameId, player } = data;
                 await this.gameService.removePlayer(player, gameId);
                 this.sio.to(gameId).emit('kicked', player);
-                const game = await this.gameService.getGame(gameId);
 
                 if (this.games[gameId]) {
                     this.games[gameId].delete(player.character);
@@ -270,12 +272,15 @@ export class SocketManager {
                     }
                 }
 
-                const maxPlayers = PlayerLimits[game.boardGame.size].maxPlayers;
-                if (game.players.length < maxPlayers && game.locked) {
-                    game.locked = false;
-                    await this.gameService.updateGame(game);
+                const updatedGame = await this.gameService.getGame(gameId);
+                if (updatedGame) {
+                    const maxPlayers = PlayerLimits[updatedGame.boardGame.size].maxPlayers;
+                    if (updatedGame.players.length < maxPlayers && updatedGame.locked) {
+                        updatedGame.locked = false;
+                        await this.gameService.updateGame(updatedGame);
+                    }
+                    this.sio.to(gameId).emit('lock-updated', updatedGame);
                 }
-                this.sio.to(gameId).emit('lock-updated', game);
             });
 
             socket.on('get-game', async (gameId: string, callback) => {
