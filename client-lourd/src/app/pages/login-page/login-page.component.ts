@@ -5,6 +5,7 @@ import { ProfileAvatarImgComponent } from '@app/components/profile-avatar-img/pr
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
+import { DeviceType } from '@common/enums/deviceType';
 
 const MIN_LENGTH = 3;
 const MAX_LENGTH = 14;
@@ -77,8 +78,17 @@ export class LoginPageComponent {
                         this.errorMessage = 'Cet utilisateur est déjà en ligne.';
                         return;
                     }
-                    this.userManager.currentUser.set(user);
-                    this.router.navigate(['/home']);
+
+                    const updatedUser = { ...user, status: DeviceType.web };
+                    this.httpUserService.updateUser(updatedUser).subscribe({
+                        next: () => {
+                            this.userManager.currentUser.set(updatedUser);
+                            this.router.navigate(['/home']);
+                        },
+                        error: (err) => {
+                            this.errorMessage = err.message || 'Erreur lors de la connexion';
+                        },
+                    });
                 },
                 error: (err) => (this.errorMessage = err.message),
             });

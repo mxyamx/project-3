@@ -1,4 +1,5 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
+import { ProfileAvatar } from '@common/enums/avatar';
 import { DeviceType } from '@common/enums/deviceType';
 import { InterfaceTheme } from '@common/enums/interfaceTheme';
 import { Language } from '@common/enums/language';
@@ -17,12 +18,12 @@ export class UserManagerService {
         return {
             id: '',
             username: 'DefaultUser',
-            email: '',
-            avatar: '',
+            email: 'defaultuser@test.com',
+            avatar: ProfileAvatar.Avatar1,
             friends: [],
             blocked: [],
             inventory: [],
-            money: 0,
+            money: 50,
             parameters: { language: Language.french, theme: InterfaceTheme.Light },
             statistics: this.getDefaultStatistics(),
             status: DeviceType.web,

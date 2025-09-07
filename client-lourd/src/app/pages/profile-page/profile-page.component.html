@@ -1,0 +1,56 @@
+<div class="profile-page-container">
+    <section class="navigation">
+        <button class="navigation-button" (click)="goHome()"><i class="fas fa-home"></i> Retour à l'accueil</button>
+    </section>
+
+    <div class="profile-left">
+        <img [src]="user.avatar" alt="Avatar" class="avatar-image" />
+
+        <div class="user-info">
+            <p class="username-status">
+                <strong>{{ user.username }}</strong>
+                <span class="status-icon" [ngSwitch]="user.status">
+                    <i *ngSwitchCase="DeviceType.web" class="fa fa-desktop online-status"></i>
+                    <i *ngSwitchCase="DeviceType.android" class="fa fa-mobile-alt"></i>
+                    <i *ngSwitchCase="DeviceType.offline" class="fa-solid fa-ban offline-status"></i>
+                </span>
+            </p>
+            <p><strong>Courriel:</strong> {{ user.email }}</p>
+            <p><strong>Argent:</strong> {{ user.money }} $</p>
+        </div>
+
+        <div class="profile-actions">
+            <button class="button" (click)="editAccount()">Modifier le compte</button>
+            <button class="button" (click)="deleteAccount()">Supprimer le compte</button>
+        </div>
+    </div>
+
+    <div class="profile-right">
+        <div class="tabs">
+            <div class="tabs">
+                <button [class.active]="activeTab === 'socials'" (click)="activeTab = 'socials'"><i class="fa fa-users"></i> Résaux sociaux</button>
+                <button [class.active]="activeTab === 'inventory'" (click)="activeTab = 'inventory'"><i class="fa fa-box"></i> Inventaire</button>
+                <button [class.active]="activeTab === 'statistics'" (click)="activeTab = 'statistics'">
+                    <i class="fa fa-chart-bar"></i> Statistiques
+                </button>
+            </div>
+        </div>
+
+        <div [ngSwitch]="activeTab" class="tab-content">
+            <ng-container *ngSwitchCase="'socials'">
+                <p>Amis: {{ user.friends.length }}</p>
+                <p>Utilisateurs Bloqués: {{ user.blocked.length }}</p>
+            </ng-container>
+            <ng-container *ngSwitchCase="'inventory'">
+                <ul>
+                    <li *ngFor="let item of user.inventory">{{ item }}</li>
+                </ul>
+            </ng-container>
+            <ng-container *ngSwitchCase="'statistics'">
+                <p>Victoires: {{ user.statistics.victoryAmount }}</p>
+                <p>Défaites: {{ user.statistics.defeatAmount }}</p>
+                <p>Combats: {{ user.statistics.combatAmount }}</p>
+            </ng-container>
+        </div>
+    </div>
+</div>
