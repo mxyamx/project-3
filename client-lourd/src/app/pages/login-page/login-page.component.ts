@@ -160,5 +160,6 @@ export class LoginPageComponent {
         this.selectedAvatar = image;
         this.formGroup.get('avatar')?.setValue(image);
         this.formGroup.get('avatar')?.markAsTouched();
+        this.clearError();
     }
 }
