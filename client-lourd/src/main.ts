@@ -12,17 +12,21 @@ import { EnteringCurrentGamePageComponent } from '@app/pages/entering-current-ga
 import { ErrorPageComponent } from '@app/pages/error-page/error-page.component';
 import { GameOptionComponent } from '@app/pages/game-option/game-option.component';
 import { GameComponent } from '@app/pages/game/game.component';
+import { LoginPageComponent } from '@app/pages/login-page/login-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { StatisticsPageComponent } from '@app/pages/statistics-page/statistics-page.component';
 import { WaitingPageComponent } from '@app/pages/waiting-page/waiting-page.component';
 import { environment } from './environments/environment';
+import { ProfilePageComponent } from '@app/pages/profile-page/profile-page.component';
 
 if (environment.production) {
     enableProdMode();
 }
 
 const routes: Routes = [
-    { path: '', redirectTo: '/home', pathMatch: 'full' },
+    { path: '', redirectTo: '/login', pathMatch: 'full' },
+    { path: 'login', component: LoginPageComponent },
+    { path: 'profile', component: ProfilePageComponent },
     { path: 'home', component: MainPageComponent },
     { path: 'admin-page', component: AdminPageComponent },
     { path: 'admin', component: AdminPageComponent },
