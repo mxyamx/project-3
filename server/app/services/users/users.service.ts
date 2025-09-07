@@ -72,6 +72,7 @@ export class UsersService {
                     money: user.money,
                     parameters: user.parameters,
                     statistics: user.statistics,
+                    status: user.status,
                 },
             },
         );
@@ -79,13 +80,5 @@ export class UsersService {
         if (result.matchedCount === 0 || result.modifiedCount === 0) {
             throw new Error("Échec lors de la mise à jour de l'utilisateur.");
         }
-    }
-
-    async isUsernameAvailable(username: string): Promise<boolean> {
-        const user = await this.collection.findOne({
-            $and: [{ username }, { username: { $ne: '[supprimé]' } }],
-        });
-        if (user) return false;
-        return true;
     }
 }

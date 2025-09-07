@@ -262,35 +262,5 @@ export class UsersController {
                 res.status(httpStatus.NOT_FOUND).json({ error: error.message });
             }
         });
-        /**
-         * @swagger
-         *
-         * /api/users/check-username/{username}:
-         *   get:
-         *     description: Check if a username is available
-         *     tags:
-         *       - Users
-         *     parameters:
-         *       - name: username
-         *         in: path
-         *         required: true
-         *         schema:
-         *           type: string
-         *     responses:
-         *       200:
-         *         description: Returns true if the username is available, false otherwise
-         *         content:
-         *           application/json:
-         *             schema:
-         *               type: boolean
-         */
-        this.router.get('/check-username/:username', async (req: Request, res: Response) => {
-            try {
-                const isAvailable = await this.usersService.isUsernameAvailable(req.params.username);
-                res.status(httpStatus.OK).json(isAvailable);
-            } catch (err) {
-                res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Une erreur est survenue.' });
-            }
-        });
     }
 }
