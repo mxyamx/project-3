@@ -33,10 +33,6 @@ export class HttpUserService {
         return this.http.delete<void>(`${this.apiUrl}/users/${id}`).pipe(catchError(this.handleError));
     }
 
-    checkUsername(username: string): Observable<boolean> {
-        return this.http.get<boolean>(`${this.apiUrl}/users/check-username/${username}`).pipe(catchError(this.handleError));
-    }
-
     private handleError(error: HttpErrorResponse) {
         console.error('HTTP Error Details:', error);
         let errorMessage = 'Une erreur inconnue est survenue.';

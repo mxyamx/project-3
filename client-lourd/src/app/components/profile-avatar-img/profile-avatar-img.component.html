@@ -1,0 +1,7 @@
+<div class="avatar-container">
+    @for(image of images; track $index; let idx = $index) {
+    <button type="button" [disabled]="isDisabled(image)" (click)="onImageButtonClick(image)" [class.selected]="selectedImage === image">
+        <img [src]="image" [alt]="image" />
+    </button>
+    }
+</div>

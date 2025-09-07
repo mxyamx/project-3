@@ -33,9 +33,11 @@
             @if (!isLogin) {
             <div class="form-group">
                 <label for="avatar">Avatar :</label>
-                <input type="file" id="avatar" accept="image/*" (change)="onFileSelected($event)" (input)="clearError()" />
-                @if (selectedAvatar) {
-                <img [src]="selectedAvatar" alt="Aperçu avatar" class="avatar-preview" />
+                <app-profile-avatar-img [formGroup]="formGroup" [selectedAvatars]="selectedAvatars" (imageSelected)="avatarSelected($event ?? '')">
+                </app-profile-avatar-img>
+
+                @if (formGroup.get('avatar')?.invalid && formGroup.get('avatar')?.touched) {
+                <small class="error-message">Avatar requis</small>
                 }
             </div>
             }

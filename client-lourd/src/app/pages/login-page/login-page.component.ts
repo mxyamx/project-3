@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ProfileAvatarImgComponent } from '@app/components/profile-avatar-img/profile-avatar-img.component';
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
@@ -10,7 +11,7 @@ const MAX_LENGTH = 14;
 
 @Component({
     selector: 'app-login-page',
-    imports: [ReactiveFormsModule],
+    imports: [ReactiveFormsModule, ProfileAvatarImgComponent],
     templateUrl: './login-page.component.html',
     styleUrl: './login-page.component.scss',
 })
@@ -21,6 +22,7 @@ export class LoginPageComponent {
     private httpUserService: HttpUserService = inject(HttpUserService);
     private userManager: UserManagerService = inject(UserManagerService);
     constructor(private router: Router) {}
+    selectedAvatars: Set<string> = new Set();
 
     formGroup = new FormGroup({
         username: new FormControl('', []),
@@ -31,7 +33,7 @@ export class LoginPageComponent {
     });
 
     errorMessage: string = '';
-    selectedAvatar: string = '';
+    selectedAvatar: string | null = null;
 
     toggleAuth(event: Event) {
         event.preventDefault();
@@ -99,14 +101,15 @@ export class LoginPageComponent {
             return;
         }
 
-        try {
-            this.httpUserService.checkUsername(username!).subscribe({
-                next: async (isAvailable) => {
-                    if (!isAvailable) {
-                        this.errorMessage = 'Ce pseudonyme est déjà utilisé.';
-                        return;
-                    }
+        this.httpUserService.getAllUsers().subscribe({
+            next: async (users) => {
+                const usernameTaken = users.some((user) => user.username === username) || username === '[supprimé]';
+                if (usernameTaken) {
+                    this.errorMessage = 'Ce pseudonyme est déjà utilisé ou non autorisé.';
+                    return;
+                }
 
+                try {
                     await this.authService.signup(email!, password!);
 
                     const userId = this.authService.getCurrentUserId();
@@ -124,19 +127,17 @@ export class LoginPageComponent {
                     this.httpUserService.createUser(this.userManager.getCurrentUser()).subscribe({
                         next: () => this.router.navigate(['/home']),
                         error: (err) => {
-                            console.error('Backend error:', err);
                             this.errorMessage = err.message || 'Une erreur serveur est survenue.';
                         },
                     });
-                },
-                error: (err) => {
-                    console.error('Username check error:', err);
-                    this.errorMessage = 'Il y a eu une erreur lors de la vérification du pseudonyme. Veuillez réessayer.';
-                },
-            });
-        } catch (err: any) {
-            this.errorMessage = this.authService.mapFirebaseErrors(err.code);
-        }
+                } catch (err: any) {
+                    this.errorMessage = this.authService.mapFirebaseErrors(err.code);
+                }
+            },
+            error: () => {
+                this.errorMessage = 'Une erreur est survenue. Veuillez réessayer.';
+            },
+        });
     }
 
     getErrorMessage(field: string): string {
@@ -155,39 +156,9 @@ export class LoginPageComponent {
         this.errorMessage = '';
     }
 
-    onFileSelected(event: Event) {
-        const file = (event.target as HTMLInputElement).files?.[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = () => {
-            const img = new Image();
-            img.onload = () => {
-                const MAX_WIDTH = 200;
-                const MAX_HEIGHT = 200;
-                let { width, height } = img;
-
-                if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-                    const scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
-                    width = width * scale;
-                    height = height * scale;
-                }
-
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-
-                const ctx = canvas.getContext('2d');
-                if (!ctx) return;
-                ctx.drawImage(img, 0, 0, width, height);
-
-                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
-
-                this.selectedAvatar = compressedDataUrl;
-                this.formGroup.get('avatar')?.setValue(compressedDataUrl);
-            };
-            img.src = reader.result as string;
-        };
-        reader.readAsDataURL(file);
+    avatarSelected(image: string | null) {
+        this.selectedAvatar = image;
+        this.formGroup.get('avatar')?.setValue(image);
+        this.formGroup.get('avatar')?.markAsTouched();
     }
 }

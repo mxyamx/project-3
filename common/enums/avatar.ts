@@ -12,3 +12,18 @@ export enum Avatar {
     Avatar11 = 'assets/avatars/wolf.png',
     Avatar12 = 'assets/avatars/eagle.png',
 }
+
+export enum ProfileAvatar {
+    Avatar1 = 'assets/profiles/bear-modified.png',
+    Avatar2 = 'assets/profiles/bull-modified.png',
+    Avatar3 = 'assets/profiles/deer-modified.png',
+    Avatar4 = 'assets/profiles/elephant-modified.png',
+    Avatar5 = 'assets/profiles/flamingo-modified.png',
+    Avatar6 = 'assets/profiles/hyena-modified.png',
+    Avatar7 = 'assets/profiles/giraffe-modified.png',
+    Avatar8 = 'assets/profiles/hippo-modified.png',
+    Avatar9 = 'assets/profiles/kangaroo-modified.png',
+    Avatar10 = 'assets/profiles/lion-modified.png',
+    Avatar11 = 'assets/profiles/wolf-modified.png',
+    Avatar12 = 'assets/profiles/eagle-modified.png',
+}
