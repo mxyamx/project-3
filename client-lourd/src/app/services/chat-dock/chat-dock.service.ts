@@ -5,7 +5,9 @@ import { Injectable, signal } from '@angular/core';
 })
 export class ChatDockService {
     private bus = new BroadcastChannel('chat');
+
     chatDetache = signal(false);
+    playerName = signal('');
 
     constructor() {
         this.bus.onmessage = (e) => {

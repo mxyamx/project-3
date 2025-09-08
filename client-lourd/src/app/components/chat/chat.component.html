@@ -1,5 +1,4 @@
-<div class="chat-container">
-    @if(isExpended()){
+<div class="chat-container" [class.expanded]="isPopup">
     <div class="chat-header">
         <h3>
             Clavardage -
@@ -24,20 +23,9 @@
             }
         </div>
     </div>
-    }
 
     <div class="chat-input">
-        <input
-            id="roomMessage"
-            [(ngModel)]="messageInput"
-            (keydown.enter)="sendToRoom()"
-            (focus)="onInputFocus()"
-            (blur)="onInputBlur()"
-            type="text"
-            required
-            minlength="1"
-            maxlength="200"
-        />
+        <input id="roomMessage" [(ngModel)]="messageInput" (keydown.enter)="sendToRoom()" type="text" required minlength="1" maxlength="200" />
         <button (click)="sendToRoom()">Envoyer</button>
     </div>
 </div>

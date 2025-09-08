@@ -273,7 +273,8 @@ $animation-delay-1: 0.2s;
     align-items: center;
     gap: 25px;
 
-    img {
+    img,
+    button {
         width: 3.5rem;
         height: 3.5rem;
         border-radius: 50%;
@@ -327,7 +328,7 @@ $animation-delay-1: 0.2s;
 .chat-container {
     position: fixed;
     right: 20px;
-    bottom: 20px;
+    top: 25%;
     z-index: 2000;
 
     width: 350px;

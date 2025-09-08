@@ -16,6 +16,10 @@ $background-color: #0f3320;
     box-sizing: border-box;
 }
 
+.chat-container.expanded {
+    max-height: 100%;
+}
+
 .chat-header {
     position: relative;
     padding: 10px;

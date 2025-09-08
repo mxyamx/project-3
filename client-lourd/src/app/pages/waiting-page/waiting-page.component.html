@@ -63,7 +63,7 @@
             </div>
             @if(!chatDockService.chatDetache()){
             <div class="chat-zone">
-                <app-chat></app-chat>
+                <app-chat [roomId]="gameSessionManager.gameId()"></app-chat>
             </div>
             }
         </div>
