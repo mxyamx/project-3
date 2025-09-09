@@ -108,7 +108,7 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
 }
 
 .header-section {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     padding: 0.5rem 1rem;
     width: 80%;
     border-radius: 25px;
@@ -168,7 +168,7 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
 }
 
 .form-group {
-    margin-top: 0.5rem;
+    margin-top: 0.2rem;
     color: $text-color;
     font-size: 1.2rem;
 }
@@ -195,3 +195,86 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
         outline: none;
     }
 }
+
+.toggle-avatar-mode-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    gap: 1rem;
+
+    i {
+        font-size: 1.5rem;
+        color: #85c1e976;
+        transition: color 0.3s ease;
+    }
+
+    .active-icon {
+        color: $second-color;
+    }
+
+    .toggle-switch-icon {
+        background: none;
+        border: none;
+        cursor: pointer;
+
+        i {
+            font-size: 2rem;
+            color: $second-color;
+            transition: transform 0.3s ease;
+        }
+
+        &:hover i {
+            transform: scale(1.1);
+        }
+    }
+}
+
+.custom-avatar-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1rem;
+
+    .upload-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 10px 20px;
+        background-color: $second-color;
+        color: $text-color;
+        font-size: 1rem;
+        font-weight: 500;
+        border: none;
+        border-radius: 1em;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+
+        i {
+            font-size: 1.2rem;
+        }
+
+        &:hover {
+            background-color: lighten($second-color, 10%);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+    }
+
+    .avatar-preview {
+        margin-top: 1rem;
+
+        img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+        }
+    }
+}
+
+

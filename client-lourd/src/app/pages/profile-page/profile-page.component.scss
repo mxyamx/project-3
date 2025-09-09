@@ -26,6 +26,50 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
     box-sizing: border-box;
 }
 
+.confirmation-bubble {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    width: 400px;
+    text-align: center;
+    animation: scaleIn $animation-delay-1 ease-in-out forwards;
+}
+
+.confirmation-bubble p {
+    margin-bottom: 20px;
+    font-size: 1.6rem;
+}
+
+.confirmation-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 20px;
+}
+
+.confirmation-buttons button {
+    background-color: #b09bf4;
+    color: #4a2a24;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1.3rem;
+    font-family: 'jaro';
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.confirmation-buttons button:hover {
+    background-color: #50287b;
+    color: white;
+}
+
 .profile-actions {
     display: flex;
     flex-direction: column;
