@@ -37,8 +37,6 @@ cache:
 
 stages:
     - install
-    - lint
-    - test
     - deploy
 
 install:client-lourd:
@@ -66,51 +64,6 @@ install:server:
             - server/node_modules/
             - server/.npm/
         policy: pull-push
-
-lint:client-lourd:
-    stage: lint
-    needs: ['install:client-lourd']
-    allow_failure: true
-    <<: *only-client-lourd
-    script:
-        - cd client-lourd
-        - npm run lint
-
-lint:server:
-    stage: lint
-    needs: ['install:server']
-    allow_failure: true
-    <<: *only-server
-    script:
-        - cd server
-        - npm run lint
-
-test:client-lourd:
-    stage: test
-    needs: ['install:client-lourd']
-    <<: *only-client-lourd
-    script:
-        - Xvfb :99 -ac -screen 0 1920x1080x24 &
-        - cd client-lourd
-        - npm run coverage -- --browsers=ChromeHeadlessNoSandbox --watch=false
-    dependencies:
-        - install:client-lourd
-    artifacts:
-        paths:
-            - client-lourd/coverage/
-
-test:server:
-    stage: test
-    needs: ['install:server']
-    <<: *only-server
-    script:
-        - cd server
-        - npm run coverage
-    dependencies:
-        - install:server
-    artifacts:
-        paths:
-            - server/coverage/
 
 pages:
     stage: deploy

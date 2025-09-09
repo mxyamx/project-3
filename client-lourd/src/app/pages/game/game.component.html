@@ -38,7 +38,7 @@
             </button>
         </div>
         <app-game-info [gameId]="gameSessionManager.gameId()"></app-game-info>
-        @if (showChat && !chatDockService.chatDetache()) {
+        @if (showChat && !chatDockService.chatDetache() && !showGameInterface) {
         <app-chat [roomId]="gameSessionManager.gameId()"></app-chat>
         } @else {
         <app-event-log></app-event-log>
@@ -59,7 +59,7 @@
         <div class="abandon-button">
             <button (click)="confirmAbandon()">Abandonner</button>
         </div>
-        @if (showChat) {
+        @if (showChat && !chatDockService.chatDetache()) {
         <app-chat [roomId]="gameSessionManager.gameId()"></app-chat>
         } @else {
         <app-event-log></app-event-log>
