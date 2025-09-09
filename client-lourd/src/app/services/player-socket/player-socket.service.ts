@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { ChatMessage } from '@common/chat-message';
 import { CurrentGame } from '@common/current-game';
+import { SocketEventNames } from '@common/enums/socket-events-names';
 import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { GameEvent } from '@common/game-event';
 import { Player } from '@common/player';
@@ -144,6 +145,12 @@ export class PlayerSocketService {
         });
     }
 
+    onChatHistory(callback: (chatHistory: ChatMessage[]) => void) {
+        this.clientSocketService.on<ChatMessage[]>(SocketEventNames.ChatHistory, (data: ChatMessage[]) => {
+            callback(data);
+        });
+    }
+
     emitAddVirtualPlayer(gameId: string, profile: VirtualPlayerProfile): void {
         this.clientSocketService.emit('add-virtual-player', { gameId, profile });
     }
@@ -176,5 +183,10 @@ export class PlayerSocketService {
         this.clientSocketService.on<GameEvent>('combat-log-sent', (data: GameEvent) => {
             callback(data);
         });
+    }
+
+    unsuscribeChat(): void {
+        this.clientSocketService.off('message-sent');
+        this.clientSocketService.off(SocketEventNames.ChatHistory);
     }
 }

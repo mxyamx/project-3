@@ -7,6 +7,7 @@ import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { AppComponent } from '@app/pages/app/app.component';
 import { AvatarPageComponent } from '@app/pages/avatar-page/avatar-page.component';
 import { BoardEditionPageComponent } from '@app/pages/board-edition-page/board-edition-page.component';
+import { ChatPageComponent } from '@app/pages/chat-page/chat-page/chat-page.component';
 import { CreationPageComponent } from '@app/pages/creation-page/creation-page.component';
 import { EnteringCurrentGamePageComponent } from '@app/pages/entering-current-game-page/entering-current-game-page';
 import { ErrorPageComponent } from '@app/pages/error-page/error-page.component';
@@ -37,6 +38,7 @@ const routes: Routes = [
     { path: 'editor', component: BoardEditionPageComponent },
     { path: 'editor/:id', component: BoardEditionPageComponent },
     { path: 'game', component: GameComponent },
+    { path: 'chat', component: ChatPageComponent },
     { path: 'game-code', component: EnteringCurrentGamePageComponent },
     { path: 'statistics', component: StatisticsPageComponent },
     { path: 'error-page', component: ErrorPageComponent },

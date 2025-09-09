@@ -16,6 +16,7 @@ import { Player } from '@common/player';
 import { AvatarManagement, RoomManagement } from '@common/socket-data-forms';
 import * as http from 'http';
 import * as io from 'socket.io';
+import { DatabaseService } from '../database/database.service';
 export class SocketManager {
     playerSocketMap = new Map<string, string>();
 
@@ -37,10 +38,11 @@ export class SocketManager {
     constructor(
         server: http.Server,
         private gameService: CurrentGamesService,
+        private databaseService: DatabaseService,
     ) {
         this.sio = new io.Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
         this.gameScheduler = new GameScheduler(this.sio, this.gameService);
-        this.socketGameCommunication = new SocketGameCommunication(this.sio);
+        this.socketGameCommunication = new SocketGameCommunication(this.sio, this.databaseService);
         const vpSocketAddingHandlerConfig: VpSocketAddingHandlerConfig = {
             sio: this.sio,
             gameService: this.gameService,

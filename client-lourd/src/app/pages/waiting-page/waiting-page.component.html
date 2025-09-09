@@ -5,12 +5,14 @@
                 <i class="fas fa-home"></i>Quitter
             </button>
             @if(isOrganizer()) {
-                <button class="virtual-player-generation" 
-                        [class.disabled]="isRoomFull()"
-                        [disabled]="isRoomFull()"
-                        (click)="onGenerateVirtualPlayerClick()">
-                    <i class="fas fa-robot"></i> {{ isRoomFull() ? 'Salle pleine' : 'Générer joueur virtuel' }}
-                </button>   
+            <button
+                class="virtual-player-generation"
+                [class.disabled]="isRoomFull()"
+                [disabled]="isRoomFull()"
+                (click)="onGenerateVirtualPlayerClick()"
+            >
+                <i class="fas fa-robot"></i> {{ isRoomFull() ? 'Salle pleine' : 'Générer joueur virtuel' }}
+            </button>
             }
         </div>
         <div class="blocked-section">
@@ -59,28 +61,28 @@
                     Lancer la partie
                 </button>
             </div>
+            @if(!chatDockService.chatDetache()){
             <div class="chat-zone">
-                <app-chat></app-chat>
+                <app-chat [roomId]="gameSessionManager.gameId()"></app-chat>
             </div>
+            }
         </div>
     </section>
 </div>
 
 @if (showVirtualPlayerProfile) {
-    <div class="confirmation-bubble">
-        <button class="close-button" (click)="hideVirtualPlayerProfilePopup()">
-            <i class="fas fa-times"></i>
-        </button>
+<div class="confirmation-bubble">
+    <button class="close-button" (click)="hideVirtualPlayerProfilePopup()">
+        <i class="fas fa-times"></i>
+    </button>
 
-        <p>Choisissez le profil du joueur virtuel</p>
-        <div class="confirmation-buttons">
-            <button (click)="selectProfile(virtualPlayerProfile.Agressive)">Agressif</button>
-            <button (click)="selectProfile(virtualPlayerProfile.Defensive)">Défensif</button>
-        </div>
+    <p>Choisissez le profil du joueur virtuel</p>
+    <div class="confirmation-buttons">
+        <button (click)="selectProfile(virtualPlayerProfile.Agressive)">Agressif</button>
+        <button (click)="selectProfile(virtualPlayerProfile.Defensive)">Défensif</button>
     </div>
-}
-
-@if(showPlayerAmountWarning) {
+</div>
+} @if(showPlayerAmountWarning) {
 <div class="modal-overlay" (click)="showPlayerAmountWarning = false">
     <div class="player-amount-warning" (click)="$event.stopPropagation()">
         <span>Le nombre de joueurs doit être pair pour commencer une partie en mode CTF.</span>
