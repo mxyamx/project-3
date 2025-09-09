@@ -33,8 +33,8 @@ export class SocketGameCommunication {
         });
 
         socket.on('room-message', async (data: RoomMessage) => {
-            const roomId = data.gameId;
-            const message = data.message;
+            const roomId: string = data.gameId;
+            const message: ChatMessage = data.message;
             //Converting to Mongo document
             const doc: Omit<ChatMessageDoc, '_id'> = {
                 ...message,
@@ -44,6 +44,12 @@ export class SocketGameCommunication {
             await this.collection.insertOne(doc as ChatMessageDoc);
             this.sio.to(roomId).emit('message-sent', message);
         });
+
+        // socket.on('create-channel', async () => {
+        //     console.log('create-channel');
+        // });
+
+        // socket.on('chan')
 
         socket.on('join-room-log', async (gameId: string) => {
             socket.join(gameId);
