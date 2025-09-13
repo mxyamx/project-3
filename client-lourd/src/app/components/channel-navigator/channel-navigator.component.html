@@ -1,0 +1,71 @@
+<div class="channel-navigator-container">
+    <div class="channel-header">
+        <h3>
+            Canaux de discussion
+            <span><button (click)="createChannel()">➕</button></span>
+        </h3>
+        @if(!isPopup){
+        <button class="open-btn" (click)="openChannelPopup()">
+            <img src="assets/icones/open_in_new.svg" alt="Open in new icon" />
+        </button>
+        }
+        <div class="tabs">
+            <button
+                class="tab"
+                [class.active]="selectedTab === 'joined'"
+                (click)="selectedTab = 'joined'"
+                type="button"
+                [attr.aria-controls]="'panel-joined'"
+                [attr.aria-selected]="selectedTab === 'joined'"
+            >
+                Mes canaux
+            </button>
+
+            <button
+                class="tab"
+                [class.active]="selectedTab === 'directory'"
+                (click)="selectedTab = 'directory'"
+                type="button"
+                [attr.aria-controls]="'panel-directory'"
+                [attr.aria-selected]="selectedTab === 'directory'"
+            >
+                Découvrir
+            </button>
+        </div>
+    </div>
+
+    <div class="search-input">
+        <i class="fa fa-search search-icon"></i>
+        <input
+            [(ngModel)]="searchInput"
+            (keydown.enter)="searchChannel()"
+            type="text"
+            required
+            minlength="1"
+            maxlength="200"
+            placeholder="Rechercher un canal..."
+        />
+        <button (click)="searchChannel()">Rechercher</button>
+    </div>
+
+    @if(selectedTab === 'joined'){
+    <div class="channels" id="panel-joined">
+        @for(channel of joinedChannels; track channel.id){
+        <div class="channel-item" (click)="openChannel(channel.id)">
+            <h3>{{ channel.name }}</h3>
+            @if(channel.isDeletable){
+            <i class="fa-solid fa-x delete-icon" (click)="deleteChannel(channel.id); $event.stopPropagation()"></i>
+            }
+        </div>
+        }
+    </div>
+    } @if(selectedTab === 'directory'){
+    <div class="channels" id="panel-directory">
+        @for(channel of directoryChannels; track channel.id){
+        <div class="channel-item" (click)="joinChannel(channel.id)">
+            <h3>{{ channel.name }}</h3>
+        </div>
+        }
+    </div>
+    }
+</div>

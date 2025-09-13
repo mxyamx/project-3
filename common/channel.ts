@@ -1,7 +1,4 @@
-import { ObjectId } from 'mongodb';
-
-export interface ChannelDoc {
-    _id: ObjectId;
+export interface Channel {
     id: string;
     name: string;
     adminId: string;
