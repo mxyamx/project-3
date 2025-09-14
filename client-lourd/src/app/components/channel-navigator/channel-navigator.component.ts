@@ -1,9 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output, signal, WritableSignal } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { ChannelTab } from '@app/enums/channel-tab';
-import { ChannelWithFlag } from '@app/interfaces/channel-with-flag';
-import { Channel } from '@common/channel';
+import { ChannelService } from '@app/services/channel/channel.service';
+import { Channel, ChannelSummary } from '@common/channel';
+import { firstValueFrom, take } from 'rxjs';
+import { CreateChannelDialogComponent } from '../create-channel-dialog/create-channel-dialog.component';
 import { LoadingComponent } from '../loading/loading.component';
 
 @Component({
@@ -14,36 +17,29 @@ import { LoadingComponent } from '../loading/loading.component';
     styleUrl: './channel-navigator.component.scss',
 })
 export class ChannelNavigatorComponent implements OnInit {
-    joinChannel(arg0: string) {
-        throw new Error('Method not implemented.');
-    }
-
     @Input() isPopup: boolean = false;
+    @Output() openChat: EventEmitter<string> = new EventEmitter<string>();
     selectedTab: WritableSignal<ChannelTab> = signal(ChannelTab.Joined);
     ChannelTab = ChannelTab;
     searchInput = '';
-    @Output() openChat: EventEmitter<string> = new EventEmitter<string>();
-
     isLoading: WritableSignal<boolean> = signal(false);
 
-    joinedChannels: ChannelWithFlag[] = [
-        { id: 'GENERAL', name: 'GENERAL', adminId: 'GENERAL', createdAt: new Date(), memberIds: [], isDeletable: false },
-        { id: '1', name: 'test1', adminId: '1', createdAt: new Date(), memberIds: [], isDeletable: true },
-        { id: '2', name: 'test2', adminId: '2', createdAt: new Date(), memberIds: [], isDeletable: true },
-        { id: '3', name: 'test4', adminId: '3', createdAt: new Date(), memberIds: [], isDeletable: true },
-        { id: '4', name: 'GENERAL', adminId: 'GENERAL', createdAt: new Date(), memberIds: [], isDeletable: true },
-        { id: '5', name: 'test1', adminId: '1', createdAt: new Date(), memberIds: [], isDeletable: true },
-        { id: '6', name: 'test2', adminId: '2', createdAt: new Date(), memberIds: [], isDeletable: true },
-        { id: '7', name: 'test4', adminId: '3', createdAt: new Date(), memberIds: [], isDeletable: true },
-        { id: '8', name: 'GENERAL', adminId: 'GENERAL', createdAt: new Date(), memberIds: [], isDeletable: true },
-        { id: '9', name: 'test1', adminId: '1', createdAt: new Date(), memberIds: [], isDeletable: true },
-        { id: '10', name: 'test2', adminId: '2', createdAt: new Date(), memberIds: [], isDeletable: true },
-        { id: '11', name: 'test4', adminId: '3', createdAt: new Date(), memberIds: [], isDeletable: true },
-    ];
-    filteredJoinedChannels: ChannelWithFlag[] = [];
+    joinedChannels: ChannelSummary[] = [];
+    filteredJoinedChannels: ChannelSummary[] = [];
     directoryChannels: Channel[] = [];
-    ngOnInit(): void {
-        this.filteredJoinedChannels = this.joinedChannels;
+
+    readonly dialog = inject(MatDialog);
+
+    private channelService = inject(ChannelService);
+    async ngOnInit(): Promise<void> {
+        this.isLoading.set(true);
+        try {
+            const channels = await firstValueFrom(this.channelService.getMyChannels());
+            this.joinedChannels = channels;
+            this.filteredJoinedChannels = [...channels];
+        } finally {
+            this.isLoading.set(false);
+        }
     }
     searchChannel() {
         if (!this.searchInput.trim()) {
@@ -52,9 +48,26 @@ export class ChannelNavigatorComponent implements OnInit {
         }
         if (this.selectedTab() === ChannelTab.Joined) {
             let regex = new RegExp(this.searchInput.trim());
-            this.filteredJoinedChannels = this.joinedChannels.filter((channel: ChannelWithFlag) => channel.name.match(regex));
+            this.filteredJoinedChannels = this.joinedChannels.filter((channel: ChannelSummary) => channel.name.match(regex));
         } else {
             console.log('search channel');
+        }
+    }
+
+    async openDialog(): Promise<void> {
+        const ref = this.dialog.open(CreateChannelDialogComponent, {
+            width: '420px',
+            panelClass: 'cc-panel',
+            backdropClass: 'cc-backdrop',
+            autoFocus: 'first-tabbable',
+            hasBackdrop: true,
+            disableClose: false,
+            closeOnNavigation: true,
+        });
+
+        const name = await firstValueFrom(ref.afterClosed().pipe(take(1)));
+        if (!name) {
+            console.log('Créer canal:', name);
         }
     }
 
@@ -72,5 +85,9 @@ export class ChannelNavigatorComponent implements OnInit {
 
     openChannel(channelId: string): void {
         this.openChat.emit(channelId);
+    }
+
+    joinChannel(arg0: string) {
+        throw new Error('Method not implemented.');
     }
 }

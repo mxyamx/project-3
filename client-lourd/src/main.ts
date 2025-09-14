@@ -1,9 +1,10 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { enableProdMode } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { Routes, provideRouter, withHashLocation } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
+import { authTokenInterceptor } from '@app/interceptors/auth-token.interceptor';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { AppComponent } from '@app/pages/app/app.component';
 import { AvatarPageComponent } from '@app/pages/avatar-page/avatar-page.component';
@@ -48,5 +49,5 @@ const routes: Routes = [
 ];
 
 bootstrapApplication(AppComponent, {
-    providers: [provideHttpClient(), provideRouter(routes, withHashLocation()), provideAnimations()],
+    providers: [provideHttpClient(withInterceptors([authTokenInterceptor])), provideRouter(routes, withHashLocation()), provideAnimations()],
 });

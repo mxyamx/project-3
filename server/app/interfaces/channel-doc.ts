@@ -1,10 +1,6 @@
+import { Channel } from '@common/channel';
 import { ObjectId } from 'mongodb';
 
-export interface ChannelDoc {
+export interface ChannelDoc extends Channel {
     _id: ObjectId;
-    id: string;
-    name: string;
-    adminId: string;
-    createdAt: Date;
-    memberIds: string[];
 }

@@ -2,7 +2,7 @@
     <div class="channel-header">
         <h3>
             Canaux de discussion
-            <span><button (click)="createChannel()">➕</button></span>
+            <span><button (click)="openDialog()">➕</button></span>
         </h3>
         @if(!isPopup){
         <button class="open-btn" (click)="openChannelPopup()">
@@ -56,7 +56,7 @@
         @for(channel of filteredJoinedChannels; track channel.id){
         <div class="channel-item" (click)="openChannel(channel.id)">
             <h3>{{ channel.name }}</h3>
-            @if(channel.isDeletable){
+            @if(channel.isManageable){
             <i class="fa-solid fa-x delete-icon" (click)="deleteChannel(channel.id); $event.stopPropagation()"></i>
             }
         </div>

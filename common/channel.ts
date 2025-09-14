@@ -1,7 +1,11 @@
 export interface Channel {
     id: string;
     name: string;
-    adminId: string;
     createdAt: Date;
-    memberIds: string[];
+}
+
+export interface ChannelSummary extends Channel {
+    isAdmin: boolean;
+    memberCount: number;
+    isManageable: boolean;
 }
