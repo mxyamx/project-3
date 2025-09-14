@@ -32,6 +32,30 @@ $background-color: #0f3320;
         font-weight: bold;
     }
 }
+.back-btn {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #51b9ff;
+    font-size: 1.2rem;
+    padding: 0;
+
+    &:hover {
+        opacity: 0.9;
+    }
+    &:active {
+        transform: scale(0.95);
+    }
+}
+
 .open-btn {
     position: absolute;
     top: 8px;

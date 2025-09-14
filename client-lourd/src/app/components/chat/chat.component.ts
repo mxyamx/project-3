@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, inject, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MAX_LENGTH_MESSAGE } from '@app/constants/objects-constants';
-import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
 import { ChatService } from '@app/services/chat/chat.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
@@ -21,6 +20,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     @Input() roomId: string;
     @Input() isPopup: boolean = false;
     @ViewChild('scroll') private chatMessagesContainer: ElementRef;
+    @Output() closeChat: EventEmitter<void> = new EventEmitter<void>();
     playerName: string = '';
     messageInput: string = '';
 
@@ -28,10 +28,12 @@ export class ChatComponent implements OnInit, OnDestroy {
     private playerSocketService = inject(PlayerSocketService);
     private userManager = inject(UserManagerService);
     private router = inject(Router);
-    private chatDockService = inject(ChatDockService);
+    // private chatDockService = inject(ChatDockService);
 
     ngOnInit() {
-        this.playerName = this.isPopup ? this.chatDockService.playerName() : this.userManager.getCurrentUser().username;
+        // this.playerName = this.isPopup ? this.chatDockService.playerName() : this.userManager.getCurrentUser().username;
+        this.playerName = this.userManager.getCurrentUser().username;
+
         if (!this.playerSocketService.isConnected()) {
             this.playerSocketService.connect();
         }

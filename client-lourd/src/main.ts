@@ -3,7 +3,7 @@ import { enableProdMode } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { Routes, provideRouter, withHashLocation } from '@angular/router';
-import { ChannelNavigatorComponent } from '@app/components/channel-navigator/channel-navigator.component';
+import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { AppComponent } from '@app/pages/app/app.component';
 import { AvatarPageComponent } from '@app/pages/avatar-page/avatar-page.component';
@@ -41,7 +41,7 @@ const routes: Routes = [
     { path: 'game', component: GameComponent },
     { path: 'chat', component: ChatPageComponent },
     { path: 'game-code', component: EnteringCurrentGamePageComponent },
-    { path: 'channel', component: ChannelNavigatorComponent },
+    { path: 'channel', component: ChatContainerComponent },
     { path: 'statistics', component: StatisticsPageComponent },
     { path: 'error-page', component: ErrorPageComponent },
     { path: '**', redirectTo: '/home' },

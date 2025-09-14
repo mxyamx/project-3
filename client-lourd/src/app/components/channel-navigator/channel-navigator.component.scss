@@ -25,6 +25,10 @@
     }
 }
 
+.channel-navigator-container.expanded {
+    max-height: 100%;
+}
+
 .open-btn {
     position: absolute;
     top: 8px;
@@ -196,4 +200,11 @@
             background: rgba(81, 185, 255, 0.12);
         }
     }
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+    font-size: 1rem;
+    color: #51b9ff;
 }

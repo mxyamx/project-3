@@ -1,4 +1,4 @@
-<div class="channel-navigator-container">
+<div class="channel-navigator-container" [class.expanded]="isPopup">
     <div class="channel-header">
         <h3>
             Canaux de discussion
@@ -12,22 +12,22 @@
         <div class="tabs">
             <button
                 class="tab"
-                [class.active]="selectedTab === 'joined'"
-                (click)="selectedTab = 'joined'"
+                [class.active]="selectedTab() === ChannelTab.Joined"
+                (click)="selectedTab.set(ChannelTab.Joined)"
                 type="button"
                 [attr.aria-controls]="'panel-joined'"
-                [attr.aria-selected]="selectedTab === 'joined'"
+                [attr.aria-selected]="selectedTab() === ChannelTab.Joined"
             >
                 Mes canaux
             </button>
 
             <button
                 class="tab"
-                [class.active]="selectedTab === 'directory'"
-                (click)="selectedTab = 'directory'"
+                [class.active]="selectedTab() === ChannelTab.Directory"
+                (click)="selectedTab.set(ChannelTab.Directory)"
                 type="button"
                 [attr.aria-controls]="'panel-directory'"
-                [attr.aria-selected]="selectedTab === 'directory'"
+                [attr.aria-selected]="selectedTab() === ChannelTab.Directory"
             >
                 Découvrir
             </button>
@@ -35,22 +35,25 @@
     </div>
 
     <div class="search-input">
+        @if(selectedTab() === ChannelTab.Joined){
+        <i class="fa-solid fa-filter search-icon"></i>
+        } @else{
         <i class="fa fa-search search-icon"></i>
+        }
         <input
             [(ngModel)]="searchInput"
             (keydown.enter)="searchChannel()"
             type="text"
-            required
             minlength="1"
             maxlength="200"
-            placeholder="Rechercher un canal..."
+            [placeholder]="selectedTab() === ChannelTab.Joined ? 'Filtrer canal...' : 'Rechercher un canal...'"
         />
-        <button (click)="searchChannel()">Rechercher</button>
+        <button (click)="searchChannel()">{{ selectedTab() === ChannelTab.Joined ? 'Filtrer' : 'Rechercher' }}</button>
     </div>
 
-    @if(selectedTab === 'joined'){
+    @if(selectedTab() === ChannelTab.Joined && !isLoading()){
     <div class="channels" id="panel-joined">
-        @for(channel of joinedChannels; track channel.id){
+        @for(channel of filteredJoinedChannels; track channel.id){
         <div class="channel-item" (click)="openChannel(channel.id)">
             <h3>{{ channel.name }}</h3>
             @if(channel.isDeletable){
@@ -59,7 +62,7 @@
         </div>
         }
     </div>
-    } @if(selectedTab === 'directory'){
+    } @if(selectedTab() === ChannelTab.Directory && !isLoading()){
     <div class="channels" id="panel-directory">
         @for(channel of directoryChannels; track channel.id){
         <div class="channel-item" (click)="joinChannel(channel.id)">
@@ -67,5 +70,7 @@
         </div>
         }
     </div>
+    } @if(isLoading()){
+    <app-loading></app-loading>
     }
 </div>
