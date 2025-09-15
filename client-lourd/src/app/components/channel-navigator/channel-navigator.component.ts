@@ -2,7 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, Input, OnInit, Output, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { JOIN_CHANNEL_CONFIRM_DIALOG_DATA } from '@app/constants/channel-constants';
+import {
+    DELETE_CHANNEL_CONFIRM_DIALOG_DATA,
+    JOIN_CHANNEL_CONFIRM_DIALOG_DATA,
+    LEAVE_CHANNEL_CONFIRM_DIALOG_DATA,
+} from '@app/constants/channel-constants';
 import { ChannelTab } from '@app/enums/channel-tab';
 import { ConfirmationDialogData } from '@app/interfaces/confirmation-dialog-date';
 import { ChannelService } from '@app/services/channel/channel.service';
@@ -21,8 +25,9 @@ import { LoadingComponent } from '../loading/loading.component';
 })
 export class ChannelNavigatorComponent implements OnInit {
     @Input() isPopup: boolean = false;
+    @Input() isExpended: boolean = false;
     @Input() gameChannel: ChannelSummary | null = null;
-    @Output() openChat: EventEmitter<string> = new EventEmitter<string>();
+    @Output() openChat: EventEmitter<ChannelSummary> = new EventEmitter<ChannelSummary>();
     selectedTab: WritableSignal<ChannelTab> = signal(ChannelTab.Joined);
     ChannelTab = ChannelTab;
     searchInput = '';
@@ -98,6 +103,10 @@ export class ChannelNavigatorComponent implements OnInit {
     }
 
     async deleteChannel(channelId: string): Promise<void> {
+        const confirmed = await this.openConfirm(DELETE_CHANNEL_CONFIRM_DIALOG_DATA);
+        if (!confirmed) {
+            return;
+        }
         try {
             this.isLoading.set(true);
             await firstValueFrom(this.channelService.deleteChannel(channelId));
@@ -108,6 +117,10 @@ export class ChannelNavigatorComponent implements OnInit {
         }
     }
     async leaveChannel(channelId: string): Promise<void> {
+        const confirmed = await this.openConfirm(LEAVE_CHANNEL_CONFIRM_DIALOG_DATA);
+        if (!confirmed) {
+            return;
+        }
         try {
             this.isLoading.set(true);
             await firstValueFrom(this.channelService.leaveChannel(channelId));
@@ -118,15 +131,14 @@ export class ChannelNavigatorComponent implements OnInit {
         }
     }
 
-    openChannel(channelId: string): void {
-        this.openChat.emit(channelId);
+    openChannel(channel: ChannelSummary): void {
+        this.openChat.emit(channel);
     }
 
     async joinChannel(channelId: string, channelName: string): Promise<void> {
         const data: ConfirmationDialogData = { ...JOIN_CHANNEL_CONFIRM_DIALOG_DATA, title: `Rejoindre « ${channelName} » ?` };
         const confirmed = await this.openConfirm(data);
         if (!confirmed) {
-            console.log('no');
             return;
         }
         try {

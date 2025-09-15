@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, signal, WritableSignal } from '@angular/core';
 import { ChannelSummary } from '@common/channel';
-import { ROOM_GAME_NAME, ROOM_GENERAL } from '@common/constants/chat.constants';
+import { ROOM_GAME_NAME, ROOM_GENERAL, ROOM_GENERAL_NAME } from '@common/constants/chat.constants';
 import { ChannelNavigatorComponent } from '../channel-navigator/channel-navigator.component';
 import { ChatComponent } from '../chat/chat.component';
 
@@ -13,15 +13,18 @@ import { ChatComponent } from '../chat/chat.component';
 })
 export class ChatContainerComponent implements OnInit {
     @Input() gameId: string | null = null;
+    @Input() isPopup: boolean = false;
+    @Input() isExpended: boolean = false;
     showChannelNavigator: WritableSignal<boolean> = signal(true);
     channelId: string = ROOM_GENERAL;
-    isPopup: boolean = true;
+    channelName: string = ROOM_GENERAL_NAME;
+
     gameChannel: ChannelSummary | null = null;
 
     ngOnInit(): void {
         if (this.gameId) {
             this.gameChannel = {
-                id: this.gameId,
+                id: `GAME-${this.gameId}`,
                 name: ROOM_GAME_NAME,
                 createdAt: new Date(),
                 isAdmin: false,
@@ -31,8 +34,9 @@ export class ChatContainerComponent implements OnInit {
         }
     }
 
-    openChat(channelId: string) {
-        this.channelId = channelId;
+    openChat(channel: ChannelSummary) {
+        this.channelId = channel.id;
+        this.channelName = channel.name;
         this.showChannelNavigator.set(false);
     }
 

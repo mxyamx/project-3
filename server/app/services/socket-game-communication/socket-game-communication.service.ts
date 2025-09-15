@@ -18,6 +18,7 @@ export class SocketGameCommunication {
     handleSockets(socket: io.Socket): void {
         socket.on('join-room-chat', async (roomId: string) => {
             socket.join(roomId);
+
             //Document stored in Mongo
             const lastDocs = await this.collection
                 .find({ roomId: roomId }, { projection: { _id: 0, text: 1, sender: 1, timestamp: 1 } })
@@ -44,12 +45,6 @@ export class SocketGameCommunication {
             await this.collection.insertOne(doc as ChatMessageDoc);
             this.sio.to(roomId).emit('message-sent', message);
         });
-
-        // socket.on('create-channel', async () => {
-        //     console.log('create-channel');
-        // });
-
-        // socket.on('chan')
 
         socket.on('join-room-log', async (gameId: string) => {
             socket.join(gameId);

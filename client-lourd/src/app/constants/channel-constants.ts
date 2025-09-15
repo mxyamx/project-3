@@ -13,3 +13,10 @@ export const JOIN_CHANNEL_CONFIRM_DIALOG_DATA: ConfirmationDialogData = {
     cancelButtonLabel: 'Annuler',
     confirmButtonLabel: 'Rejoindre',
 };
+
+export const LEAVE_CHANNEL_CONFIRM_DIALOG_DATA: ConfirmationDialogData = {
+    title: 'Quitter le canal ?',
+    text: `Vous allez quitter ce canal. Vous ne recevrez plus de messages, mais vous pourrez le rejoindre à nouveau.`,
+    cancelButtonLabel: 'Annuler',
+    confirmButtonLabel: 'Quitter',
+};

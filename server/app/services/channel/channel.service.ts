@@ -38,13 +38,10 @@ export class ChannelService {
             isManageable: false,
             memberCount: 0,
         };
-        console.log(`the user id : ${userId}`);
         const links = await this.memberCollection.find({ userId }).toArray();
-        console.log(`how many links ${links.length}`);
         if (links.length === 0) return [generalChannel];
 
         const channelIds = links.map((l) => {
-            console.log(l.channelId);
             return l.channelId;
         });
         const channels = await this.channelCollection.find({ id: { $in: channelIds } }).toArray();
@@ -61,7 +58,7 @@ export class ChannelService {
 
         const channelSummarys: ChannelSummary[] = channels.map((ch) => ({
             ...ch,
-            isAdmin: roleMap.get(ch.id) === 'admin',
+            isAdmin: roleMap.get(ch.id) === ChannelRole.Admin,
             memberCount: countMap.get(ch.id) ?? 0,
             isManageable: true,
         }));
@@ -78,6 +75,12 @@ export class ChannelService {
             name: payload.name.trim(),
             createdAt: payload.createdAt,
         };
+
+        const existingChannel = await this.channelCollection.findOne({ name: payload.name.trim() });
+
+        if (existingChannel) {
+            throw new Error('CHANNEL_ALREADY_EXISTS');
+        }
 
         try {
             await session.withTransaction(async () => {
@@ -100,6 +103,14 @@ export class ChannelService {
         }
     }
     async joinChannel(channelId: string, userId: string): Promise<void> {
+        const channel = await this.channelCollection.findOne({ id: channelId });
+        if (!channel) {
+            throw new Error('CHANNEL_NOT_FOUND');
+        }
+
+        const existing = await this.memberCollection.findOne({ channelId, userId });
+        if (existing) return;
+
         await this.memberCollection.updateOne(
             { channelId, userId },
             { $setOnInsert: { channelId, userId, role: ChannelRole.Member, joinedAt: new Date() } },

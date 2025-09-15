@@ -14,8 +14,12 @@ $animation-delay-1: 0.2s;
 $text-color: white;
 
 @keyframes backgroundScroll {
-    from { background-position: 0 0; }
-    to { background-position: -1000% 0; }
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: -1000% 0;
+    }
 }
 
 .statistics-container {
@@ -54,7 +58,7 @@ $text-color: white;
     justify-content: center;
 }
 
-app-chat {
+app-chat-container {
     height: 100%;
     width: 90%;
 }
@@ -135,7 +139,9 @@ app-chat {
     border: none;
     border-radius: $button-border-radius;
     cursor: pointer;
-    transition: transform $animation-delay-1 ease, background-color $animation-delay-1 ease;
+    transition:
+        transform $animation-delay-1 ease,
+        background-color $animation-delay-1 ease;
     box-shadow: 4px 4px 8px rgba(0, 0, 0, 1);
     border: 11px solid #162744;
 }

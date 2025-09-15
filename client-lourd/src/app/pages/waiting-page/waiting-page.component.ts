@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { ChatComponent } from '@app/components/chat/chat.component';
+import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { PlayersListComponent } from '@app/components/players-list/players-list';
 import { EMPTY_CODE } from '@app/constants/development-constants';
 import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
@@ -23,7 +23,7 @@ import * as socketDataForm from '@common/socket-data-forms';
 
 @Component({
     selector: 'app-waiting-page',
-    imports: [RouterLink, PlayersListComponent, CommonModule, ChatComponent],
+    imports: [RouterLink, PlayersListComponent, CommonModule, ChatContainerComponent],
     templateUrl: './waiting-page.component.html',
     styleUrl: './waiting-page.component.scss',
 })
