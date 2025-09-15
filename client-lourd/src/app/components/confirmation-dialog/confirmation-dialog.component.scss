@@ -14,57 +14,12 @@ mat-dialog-content {
     display: flow-root;
     padding: 16px 20px;
 
-    p {
-        margin: 0 0 0 0px;
+    .message {
+        margin: 0;
         color: rgba(255, 255, 255, 0.92);
-    }
-
-    .field-block {
-        margin-top: 10px;
-        color: rgba(255, 255, 255, 0.92);
-    }
-
-    mat-form-field {
-        width: 100%;
-    }
-
-    .mat-mdc-form-field-infix {
-        padding-top: 16px;
-        padding-bottom: 10px;
-    }
-
-    .mat-mdc-text-field-wrapper.mdc-text-field--filled {
-        background: rgba($accent, 0.16);
-        border: 1px solid rgba($accent, 0.6);
-        border-radius: 10px;
-    }
-
-    .mdc-text-field__input,
-    .mat-mdc-input-element {
-        color: #f4fbff;
-    }
-    .mdc-text-field__input::placeholder,
-    .mat-mdc-input-element::placeholder {
-        color: rgba(244, 251, 255, 0.75);
-    }
-
-    .mdc-floating-label {
-        color: #eaf6ff;
-    }
-    .mat-mdc-form-field.mat-focused .mdc-floating-label {
-        color: #ffffff;
-    }
-
-    .mdc-line-ripple {
-        background-color: rgba($accent, 0.5);
-    }
-    .mat-mdc-form-field.mat-focused .mdc-line-ripple--active {
-        background-color: $accent;
+        line-height: 1.45;
     }
 }
-
-$accent: #51b9ff;
-$dark: #143e5a;
 
 mat-dialog-actions {
     padding: 12px 20px 20px;
@@ -86,7 +41,7 @@ mat-dialog-actions {
             border-color 0.15s ease;
     }
 
-    .mat-mdc-outlined-button.nc-ghost {
+    .mat-mdc-outlined-button.cd-ghost {
         border-color: rgba($accent, 0.65);
         color: $accent;
         background: transparent;
@@ -105,7 +60,7 @@ mat-dialog-actions {
         }
     }
 
-    .mat-mdc-unelevated-button.nc-cta {
+    .mat-mdc-unelevated-button.cd-cta {
         background: linear-gradient(180deg, lighten($accent, 6%) 0%, $accent 100%);
         color: #0b2435;
         border: 1px solid rgba($accent, 0.35);

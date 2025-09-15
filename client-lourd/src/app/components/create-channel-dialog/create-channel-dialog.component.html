@@ -12,6 +12,6 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-    <button matButton (click)="onNoClick()">Annuler</button>
-    <button matButton [mat-dialog-close]="channelName()" cdkFocusInitial>Créer</button>
+    <button mat-stroked-button class="nc-ghost" (click)="onNoClick()">Annuler</button>
+    <button mat-flat-button class="nc-cta" [mat-dialog-close]="channelName()" cdkFocusInitial>Créer</button>
 </mat-dialog-actions>

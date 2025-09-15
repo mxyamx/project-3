@@ -42,27 +42,26 @@ export class ChannelController {
             }
         });
 
-        // GET /channel/search?pattern=...
-        // this.router.get('/search', async (req: Request, res: Response) => {
-        //     try {
-        //         const pattern = String(req.query.pattern ?? '');
+        this.router.get('/search', async (req: AuthedRequest, res: Response) => {
+            try {
+                const pattern = String(req.query.pattern ?? '');
+                const userId = req.user?.uid!;
+                const items = await this.channelService.searchChannelsByPattern(pattern, userId);
+                res.status(httpStatus.OK).json(items);
+            } catch (error: unknown) {
+                res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: (error as Error).message });
+            }
+        });
 
-        //         const items = await this.channelService.searchChannelsByPattern(pattern);
-        //         res.status(httpStatus.OK).json(items);
-        //     } catch (error: unknown) {
-        //         res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: (error as Error).message });
-        //     }
-        // });
-
-        // DELETE /channel/:id
-        // this.router.delete('/:id', async (req: Request, res: Response) => {
-        //     try {
-        //         await this.channelService.deleteChannel(req.params.id);
-        //         res.status(httpStatus.NO_CONTENT).send();
-        //     } catch (error: unknown) {
-        //         res.status(httpStatus.NOT_FOUND).json({ error: (error as Error).message });
-        //     }
-        // });
+        //DELETE /channel/:id
+        this.router.delete('/:id', async (req: AuthedRequest, res: Response) => {
+            try {
+                await this.channelService.deleteChannel(req.params.id);
+                res.status(httpStatus.NO_CONTENT).send();
+            } catch (error: unknown) {
+                res.status(httpStatus.NOT_FOUND).json({ error: (error as Error).message });
+            }
+        });
 
         // POST /channel/:id/join
         this.router.post('/:id/join', async (req: AuthedRequest, res: Response) => {

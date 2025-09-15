@@ -42,15 +42,13 @@ video {
 
 @import '@angular/cdk/overlay-prebuilt.css';
 
-/* 2) Backdrop et panel personnalisés — N’AFFECTENT QUE ce dialog via les classes passées à open() */
 .cc-backdrop {
-    /* arrière-plan assombri (clic dehors = close si disableClose:false) */
     background: rgba(10, 28, 41, 0.82);
     backdrop-filter: blur(3px);
 }
 
 .cdk-overlay-pane.cc-panel .mat-mdc-dialog-surface {
-    background: #0e2b3f; /* fond du dialog assombri */
+    background: #0e2b3f;
     color: #e8f6ff;
     border-radius: 16px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);

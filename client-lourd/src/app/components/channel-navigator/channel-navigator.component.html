@@ -2,7 +2,7 @@
     <div class="channel-header">
         <h3>
             Canaux de discussion
-            <span><button (click)="openDialog()">➕</button></span>
+            <span><button (click)="openCreateDialog()">➕</button></span>
         </h3>
         @if(!isPopup){
         <button class="open-btn" (click)="openChannelPopup()">
@@ -13,7 +13,7 @@
             <button
                 class="tab"
                 [class.active]="selectedTab() === ChannelTab.Joined"
-                (click)="selectedTab.set(ChannelTab.Joined)"
+                (click)="toggleTab(ChannelTab.Joined)"
                 type="button"
                 [attr.aria-controls]="'panel-joined'"
                 [attr.aria-selected]="selectedTab() === ChannelTab.Joined"
@@ -24,7 +24,7 @@
             <button
                 class="tab"
                 [class.active]="selectedTab() === ChannelTab.Directory"
-                (click)="selectedTab.set(ChannelTab.Directory)"
+                (click)="toggleTab(ChannelTab.Directory)"
                 type="button"
                 [attr.aria-controls]="'panel-directory'"
                 [attr.aria-selected]="selectedTab() === ChannelTab.Directory"
@@ -56,18 +56,24 @@
         @for(channel of filteredJoinedChannels; track channel.id){
         <div class="channel-item" (click)="openChannel(channel.id)">
             <h3>{{ channel.name }}</h3>
-            @if(channel.isManageable){
-            <i class="fa-solid fa-x delete-icon" (click)="deleteChannel(channel.id); $event.stopPropagation()"></i>
-            }
+            <div class="actions">
+                @if (channel.isManageable) {
+                <i class="fa-solid fa-x delete-icon" title="Quitter" (click)="leaveChannel(channel.id); $event.stopPropagation()"></i>
+                } @if (channel.isAdmin) {
+                <i class="fa-solid fa-trash delete-icon" title="Supprimer" (click)="deleteChannel(channel.id); $event.stopPropagation()"></i>
+                }
+            </div>
         </div>
         }
     </div>
     } @if(selectedTab() === ChannelTab.Directory && !isLoading()){
     <div class="channels" id="panel-directory">
         @for(channel of directoryChannels; track channel.id){
-        <div class="channel-item" (click)="joinChannel(channel.id)">
+        <div class="channel-item" (click)="joinChannel(channel.id, channel.name)">
             <h3>{{ channel.name }}</h3>
         </div>
+        } @empty{
+        <div class="empty-message">Pas de canaux trouvés</div>
         }
     </div>
     } @if(isLoading()){

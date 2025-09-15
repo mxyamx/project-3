@@ -87,6 +87,7 @@
     width: 100%;
     box-sizing: border-box;
     padding: 10px 15px;
+    padding-right: 72px; // <-- espace réservé pour les icônes
     margin-bottom: 8px;
     border: 2px solid #51b9ff;
     border-radius: 12px;
@@ -99,6 +100,7 @@
         font-size: 1rem;
         font-weight: 500;
         color: white;
+        line-height: 1.2; // évite le recouvrement vertical
     }
 
     &:hover {
@@ -112,18 +114,38 @@
         }
     }
 
-    .delete-icon {
+    .actions {
         position: absolute;
         top: 50%;
         right: 10px;
         transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 1;
+    }
+
+    .delete-icon {
         color: #ff6f59;
         font-size: 1rem;
         cursor: pointer;
-
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.2s ease;
+        transition:
+            opacity 0.2s ease,
+            transform 0.06s ease,
+            filter 0.15s ease,
+            background-color 0.15s ease;
+        padding: 4px;
+        border-radius: 8px;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.08);
+            filter: brightness(1.05);
+        }
+        &:active {
+            transform: translateY(1px);
+        }
     }
 }
 
@@ -202,7 +224,7 @@
     }
 }
 
-.loading-spinner {
+.empty-message {
     text-align: center;
     padding: 20px;
     font-size: 1rem;

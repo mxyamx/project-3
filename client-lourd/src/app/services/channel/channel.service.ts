@@ -15,8 +15,8 @@ export class ChannelService {
         return this.http.get<ChannelSummary[]>(`${this.apiUrl}/channel/my`).pipe(catchError((e) => this.handleError(e)));
     }
 
-    createChannel(channel: Channel): Observable<Channel> {
-        return this.http.post<Channel>(`${this.apiUrl}/channel`, channel).pipe(catchError((e) => this.handleError(e)));
+    createChannel(channel: Channel): Observable<ChannelSummary> {
+        return this.http.post<ChannelSummary>(`${this.apiUrl}/channel`, channel).pipe(catchError((e) => this.handleError(e)));
     }
 
     searchChannelsByPattern(pattern: string): Observable<Channel[]> {
