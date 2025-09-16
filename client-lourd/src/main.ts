@@ -1,8 +1,9 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { enableProdMode } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { Routes, provideRouter, withHashLocation } from '@angular/router';
+import { authTokenInterceptor } from '@app/interceptors/auth-token.interceptor';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { AppComponent } from '@app/pages/app/app.component';
 import { AvatarPageComponent } from '@app/pages/avatar-page/avatar-page.component';
@@ -15,10 +16,10 @@ import { GameOptionComponent } from '@app/pages/game-option/game-option.componen
 import { GameComponent } from '@app/pages/game/game.component';
 import { LoginPageComponent } from '@app/pages/login-page/login-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
+import { ProfilePageComponent } from '@app/pages/profile-page/profile-page.component';
 import { StatisticsPageComponent } from '@app/pages/statistics-page/statistics-page.component';
 import { WaitingPageComponent } from '@app/pages/waiting-page/waiting-page.component';
 import { environment } from './environments/environment';
-import { ProfilePageComponent } from '@app/pages/profile-page/profile-page.component';
 
 if (environment.production) {
     enableProdMode();
@@ -46,5 +47,5 @@ const routes: Routes = [
 ];
 
 bootstrapApplication(AppComponent, {
-    providers: [provideHttpClient(), provideRouter(routes, withHashLocation()), provideAnimations()],
+    providers: [provideHttpClient(withInterceptors([authTokenInterceptor])), provideRouter(routes, withHashLocation()), provideAnimations()],
 });
