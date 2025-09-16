@@ -70,7 +70,7 @@ export class AvatarPageComponent implements OnInit {
                 this.selectedAvatars = new Set(avatars);
             });
         } else {
-            this.router.navigate(['/']);
+            this.router.navigate(['/home']);
         }
 
         this.playerSocketService.onAvatarListUpdated((avatars) => {

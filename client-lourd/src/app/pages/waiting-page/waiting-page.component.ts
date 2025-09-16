@@ -45,11 +45,9 @@ export class WaitingPageComponent implements OnInit {
     private socketManager: SocketClientService = inject(SocketClientService);
     private playerSocketService = inject(PlayerSocketService);
     private statisticsManager: StatisticsManagerService = inject(StatisticsManagerService);
-    private router: Router;
     private gameEventService: GameEventService = inject(GameEventService);
 
-    constructor() {
-        this.router = new Router();
+    constructor(private router: Router) {
         this.configureSocketBase();
     }
 
@@ -141,8 +139,8 @@ export class WaitingPageComponent implements OnInit {
         if (this.gameId) {
             this.chatDockService.leftGame();
             this.playerSocketService.emitLeaveGame(this.gameId, player);
-            this.router.navigate([UrlPage.Home]);
         }
+        this.router.navigate([UrlPage.Home]);
     }
 
     playerlimit(): boolean {

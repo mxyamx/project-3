@@ -50,7 +50,7 @@ export class PlayersListComponent implements OnInit {
                     this.playerSocketService.disconnect();
                     this.playersList = [];
                     this.currentGameManager.reset();
-                    this.router.navigate(['/']);
+                    this.router.navigate(['/home']);
                 }
             });
 
@@ -83,7 +83,7 @@ export class PlayersListComponent implements OnInit {
     }
 
     hideAlert() {
-        this.router.navigate(['/']);
+        this.router.navigate(['/home']);
         this.showAlertConfirmation = false;
         this.showAlertOfAdminLeft = false;
     }
