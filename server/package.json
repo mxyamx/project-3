@@ -4,7 +4,7 @@
     "version": "1.3.0",
     "private": true,
     "scripts": {
-        "start": "nodemon",
+        "start": "cross-env GOOGLE_APPLICATION_CREDENTIALS=./secrets/log3900-85dd3-firebase-adminsdk-fbsvc-b46196399f.json nodemon",
         "build": "rimraf out && tsc --project tsconfig.app.json",
         "format": "prettier --config ../.prettierrc.yaml --write \"app/**/*\"",
         "lint": "eslint -c .eslintrc.json \"./app/**/*.ts\" --format stylish",
