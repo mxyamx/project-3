@@ -25,36 +25,51 @@
 
         <div class="profile-actions">
             <button class="button" (click)="editAccount()">Modifier le compte</button>
-            <button class="button" (click)="deleteAccount()">Supprimer le compte</button>
+            <button class="button" (click)="showDeletePopup()">Supprimer le compte</button>
         </div>
     </div>
 
     <div class="profile-right">
         <div class="tabs">
             <div class="tabs">
-                <button [class.active]="activeTab === 'socials'" (click)="activeTab = 'socials'"><i class="fa fa-users"></i> Résaux sociaux</button>
-                <button [class.active]="activeTab === 'inventory'" (click)="activeTab = 'inventory'"><i class="fa fa-box"></i> Inventaire</button>
-                <button [class.active]="activeTab === 'statistics'" (click)="activeTab = 'statistics'">
+                <button [class.active]="activeTab === ActiveTab.Socials" (click)="activeTab = ActiveTab.Socials"><i class="fa fa-users"></i> Résaux sociaux</button>
+                <button [class.active]="activeTab === ActiveTab.Inventory" (click)="activeTab = ActiveTab.Inventory"><i class="fa fa-box"></i> Inventaire</button>
+                <button [class.active]="activeTab === ActiveTab.Statistics" (click)="activeTab = ActiveTab.Statistics">
                     <i class="fa fa-chart-bar"></i> Statistiques
                 </button>
             </div>
         </div>
 
+        @if (deleteAccountWarning) {
+            <div class="confirmation-bubble">
+                <p>Êtes-vous sûr de vouloir supprimer votre compte? Cette action est irréversible</p>
+                <div class="confirmation-buttons">
+                    <button (click)="deleteAccount()">Oui</button>
+                    <button (click)="hideDeletePopup()">Non</button>
+                </div>
+            </div>
+            }
+
         <!-- TODO: Create component for each sub tab -->
 
-        <div [ngSwitch]="activeTab" class="tab-content">
-            @switch (activeTab) { @case ('socials') {
-            <p>Amis: {{ user.friends.length }}</p>
-            <p>Utilisateurs Bloqués: {{ user.blocked.length }}</p>
-            } @case ('inventory') {
-            <ul>
-                <li>Placeholder items</li>
-            </ul>
-            } @case ('statistics') {
-            <p>Victoires: {{ user.statistics.victoryAmount }}</p>
-            <p>Défaites: {{ user.statistics.defeatAmount }}</p>
-            <p>Combats: {{ user.statistics.combatAmount }}</p>
-            } }
+        <div class="tab-content">
+            @switch (activeTab) {
+                @case (ActiveTab.Socials) {
+                    <p>Amis: {{ user.friends.length }}</p>
+                    <p>Utilisateurs Bloqués: {{ user.blocked.length }}</p>
+                }
+                @case (ActiveTab.Inventory) {
+                    <ul>
+                        <li>Placeholder items</li>
+                    </ul>
+                }
+                @case (ActiveTab.Statistics) {
+                    <p>Victoires: {{ user.statistics.victoryAmount }}</p>
+                    <p>Défaites: {{ user.statistics.defeatAmount }}</p>
+                    <p>Combats: {{ user.statistics.combatAmount }}</p>
+                }
+            }
         </div>
+        
     </div>
 </div>
