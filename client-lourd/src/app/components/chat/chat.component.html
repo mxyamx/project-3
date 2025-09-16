@@ -1,8 +1,11 @@
-<div class="chat-container" [class.expanded]="isPopup">
+<div class="chat-container" [class.expanded]="isExpended">
     <div class="chat-header">
+        <button class="back-btn" (click)="closeChat.emit()">
+            <i class="fa fa-arrow-left"></i>
+        </button>
         <h3>
             Clavardage -
-            <span>{{ playerName }}</span>
+            <span>{{ chatName }}</span>
         </h3>
         @if(!isPopup){
         <button class="open-btn" (click)="openChatPopup()"><img src="assets/icones/open_in_new.svg" alt="Open in new icon" /></button>

@@ -18,6 +18,7 @@ export class SocketGameCommunication {
     handleSockets(socket: io.Socket): void {
         socket.on('join-room-chat', async (roomId: string) => {
             socket.join(roomId);
+
             //Document stored in Mongo
             const lastDocs = await this.collection
                 .find({ roomId: roomId }, { projection: { _id: 0, text: 1, sender: 1, timestamp: 1 } })
@@ -33,8 +34,8 @@ export class SocketGameCommunication {
         });
 
         socket.on('room-message', async (data: RoomMessage) => {
-            const roomId = data.gameId;
-            const message = data.message;
+            const roomId: string = data.gameId;
+            const message: ChatMessage = data.message;
             //Converting to Mongo document
             const doc: Omit<ChatMessageDoc, '_id'> = {
                 ...message,
