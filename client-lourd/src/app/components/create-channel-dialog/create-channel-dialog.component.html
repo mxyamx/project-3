@@ -1,0 +1,17 @@
+<h2 mat-dialog-title>Créer un canal</h2>
+
+<mat-dialog-content>
+    <p>Quel sera le nom de votre canal ?</p>
+
+    <div class="field-block">
+        <mat-form-field appearance="fill">
+            <mat-label>Nom du canal</mat-label>
+            <input matInput [(ngModel)]="channelName" />
+        </mat-form-field>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-stroked-button class="nc-ghost" (click)="onNoClick()">Annuler</button>
+    <button mat-flat-button class="nc-cta" [mat-dialog-close]="channelName()" cdkFocusInitial>Créer</button>
+</mat-dialog-actions>

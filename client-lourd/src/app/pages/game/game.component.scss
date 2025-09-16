@@ -1,8 +1,12 @@
 $animation-delay-1: 0.2s;
 
 @keyframes backgroundScroll {
-    from { background-position: 0 0; }
-    to { background-position: -1000% 0; }
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: -1000% 0;
+    }
 }
 
 .game {
@@ -212,7 +216,7 @@ $animation-delay-1: 0.2s;
     }
 
     app-event-log,
-    app-chat {
+    app-chat-container {
         max-height: 440px;
         margin-top: -1rem;
         display: flex;
@@ -290,7 +294,7 @@ $animation-delay-1: 0.2s;
     height: 100%;
     box-sizing: border-box;
 
-    app-chat,
+    app-chat-container,
     app-event-log {
         border-radius: 15px;
         overflow: auto;

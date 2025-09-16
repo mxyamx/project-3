@@ -1,0 +1,85 @@
+$accent: #51b9ff;
+$dark: #143e5a;
+
+h2[mat-dialog-title] {
+    margin: 0;
+    padding: 16px 20px;
+    color: #fff;
+    background: linear-gradient(180deg, $dark 0%, #0f2f45 100%);
+    border-bottom: 1px solid rgba($accent, 0.25);
+    font-weight: 600;
+}
+
+mat-dialog-content {
+    display: flow-root;
+    padding: 16px 20px;
+
+    .message {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.92);
+        line-height: 1.45;
+    }
+}
+
+mat-dialog-actions {
+    padding: 12px 20px 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+
+    .mat-mdc-button-base {
+        height: 40px;
+        min-width: 96px;
+        padding: 0 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition:
+            box-shadow 0.2s ease,
+            transform 0.06s ease,
+            filter 0.15s ease,
+            background-color 0.15s ease,
+            border-color 0.15s ease;
+    }
+
+    .mat-mdc-outlined-button.cd-ghost {
+        border-color: rgba($accent, 0.65);
+        color: $accent;
+        background: transparent;
+
+        &:hover {
+            background: rgba($accent, 0.1);
+            border-color: rgba($accent, 0.85);
+        }
+        &:active {
+            transform: translateY(1px);
+            filter: brightness(0.98);
+        }
+        &:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba($accent, 0.35);
+        }
+    }
+
+    .mat-mdc-unelevated-button.cd-cta {
+        background: linear-gradient(180deg, lighten($accent, 6%) 0%, $accent 100%);
+        color: #0b2435;
+        border: 1px solid rgba($accent, 0.35);
+        box-shadow: 0 6px 16px rgba($accent, 0.22);
+
+        &:hover {
+            filter: brightness(1.05);
+            box-shadow: 0 8px 20px rgba($accent, 0.28);
+        }
+        &:active {
+            transform: translateY(1px);
+            filter: brightness(0.98);
+            box-shadow: 0 4px 12px rgba($accent, 0.2);
+        }
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 6px 16px rgba($accent, 0.22),
+                0 0 0 3px rgba($accent, 0.35);
+        }
+    }
+}

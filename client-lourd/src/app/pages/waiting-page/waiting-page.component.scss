@@ -179,7 +179,7 @@ p {
     justify-content: center;
 }
 
-app-chat {
+app-chat-container {
     height: 100%;
     width: 90%;
 }
@@ -375,7 +375,7 @@ app-chat {
 
     button {
         background-color: #51b9ff;
-        color: #143E5A;
+        color: #143e5a;
         border: none;
         padding: 10px 20px;
         border-radius: 8px;
@@ -385,7 +385,7 @@ app-chat {
         transition: background-color 0.2s;
 
         &:hover {
-            background-color: #143E5A;
+            background-color: #143e5a;
             color: white;
         }
     }

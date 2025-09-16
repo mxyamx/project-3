@@ -7,7 +7,9 @@ import * as swaggerJSDoc from 'swagger-jsdoc';
 import * as swaggerUi from 'swagger-ui-express';
 import { Service } from 'typedi';
 import { HttpException } from './classes/http-exception/http.exception';
+import { ChannelController } from './controllers/channel/channel.controller';
 import { UsersController } from './controllers/users/users.controller';
+import { verifyFirebaseToken } from './middlewares/auth.middleware';
 
 @Service()
 export class Application {
@@ -18,6 +20,7 @@ export class Application {
     constructor(
         private readonly boardGameController: BoardGameController,
         private readonly usersController: UsersController,
+        private readonly channelController: ChannelController,
     ) {
         this.app = express();
 
@@ -41,6 +44,7 @@ export class Application {
         this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerJSDoc(this.swaggerOptions)));
         this.app.use('/api/board-game', this.boardGameController.router);
         this.app.use('/api/users', this.usersController.router);
+        this.app.use('/api/channel', verifyFirebaseToken, this.channelController.router);
         this.app.use('/', (req, res) => {
             res.redirect('/api/docs');
         });

@@ -1,3 +1,7 @@
+@use '@angular/cdk' as cdk;
+
+@include cdk.overlay();
+
 :root {
     font-size: 16px;
 }
@@ -34,4 +38,19 @@ img,
 video {
     max-width: 100%;
     height: auto;
+}
+
+@import '@angular/cdk/overlay-prebuilt.css';
+
+.cc-backdrop {
+    background: rgba(10, 28, 41, 0.82);
+    backdrop-filter: blur(3px);
+}
+
+.cdk-overlay-pane.cc-panel .mat-mdc-dialog-surface {
+    background: #0e2b3f;
+    color: #e8f6ff;
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(81, 185, 255, 0.25);
 }

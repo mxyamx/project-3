@@ -45,7 +45,6 @@ export class CurrentGamesService {
     }
 
     async deleteGame(id: string): Promise<void> {
-        await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ gameId: id });
         return this.collection
             .findOneAndDelete({ id })
             .then((res: WithId<CurrentGame>) => {

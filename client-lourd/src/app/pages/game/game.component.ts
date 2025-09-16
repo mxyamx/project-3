@@ -1,6 +1,6 @@
 import { Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { ChatComponent } from '@app/components/chat/chat.component';
+import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { CombatNotificationComponent } from '@app/components/combat-notification/combat-notification/combat-notification.component';
 import { CountdownComponent } from '@app/components/countdown/countdown.component';
 import { EventLogComponent } from '@app/components/event-log/event-log.component';
@@ -30,10 +30,10 @@ import { Subscription } from 'rxjs';
         GameInfoComponent,
         EventLogComponent,
         InventoryComponent,
-        ChatComponent,
         GameInterfaceComponent,
         PlayingBoardComponent,
         CombatNotificationComponent,
+        ChatContainerComponent,
     ],
     templateUrl: './game.component.html',
     styleUrl: './game.component.scss',

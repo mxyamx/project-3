@@ -7,14 +7,17 @@ import { VpBehaviorInGame } from '@app/classes/vp-behavior-in-game/vp-behavior-i
 import { VpGameSessionManager } from '@app/classes/vp-game-session/vp-game-session-manager';
 import { VpSocketAddingHandler } from '@app/classes/vp-socket-adding-handler/vp-socket-adding-handler';
 import { VpSocketManager } from '@app/classes/vp-socket-manager/vp-socket-manager';
+import { ChannelDoc } from '@app/interfaces/channel-doc';
 import { VpSocketAddingHandlerConfig } from '@app/interfaces/vp-socket-adding-handler-config';
 import { CurrentGamesService } from '@app/services/current-games/current-games.service';
 import { SocketGameCommunication } from '@app/services/socket-game-communication/socket-game-communication.service';
+import { ROOM_GENERAL } from '@common/constants/chat.constants';
 import { CurrentGame } from '@common/current-game';
 import { PlayerLimits } from '@common/enums/players-limit';
 import { Player } from '@common/player';
 import { AvatarManagement, RoomManagement } from '@common/socket-data-forms';
 import * as http from 'http';
+import { Collection } from 'mongodb';
 import * as io from 'socket.io';
 import { DatabaseService } from '../database/database.service';
 export class SocketManager {
@@ -34,6 +37,8 @@ export class SocketManager {
 
     private vpSocketAddingHandler: VpSocketAddingHandler;
     private socketGameCommunication: SocketGameCommunication;
+
+    private readonly GAME_ROOM_REGEX = /^GAME-\d{4}$/;
 
     constructor(
         server: http.Server,
@@ -292,6 +297,10 @@ export class SocketManager {
                 await this.gameService.deleteGame(gameId);
             });
 
+            socket.on('disconnecting', async () => {
+                await this.purgeChatHistoryIfRoomEmpty(socket);
+            });
+
             socket.on('disconnect', async () => {
                 await this.gameScheduler.disconnectPlayer(socket.id);
 
@@ -369,5 +378,31 @@ export class SocketManager {
 
             this.vpSocketAddingHandler.register(socket);
         });
+    }
+
+    private async purgeChatHistoryIfRoomEmpty(socket: io.Socket): Promise<void> {
+        try {
+            for (const room of socket.rooms) {
+                if (room === socket.id || room === ROOM_GENERAL) continue;
+
+                const sizeBeforeLeave = this.sio.sockets.adapter.rooms.get(room)?.size ?? 0;
+
+                if (sizeBeforeLeave !== 1) continue;
+
+                if (this.GAME_ROOM_REGEX.test(room)) {
+                    await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: room });
+                } else {
+                    const collection: Collection<ChannelDoc> = this.databaseService.database.collection(process.env.CHANNEL_COLLECTION_NAME);
+
+                    const channel = await collection.findOne({ id: room });
+
+                    if (!channel) {
+                        await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: room });
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('purgeChatHistoryIfRoomEmpty failed:', err);
+        }
     }
 }

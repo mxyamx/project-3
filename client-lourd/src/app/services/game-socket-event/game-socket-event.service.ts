@@ -129,6 +129,7 @@ export class GameSocketEventService {
             if (!data.successful) {
                 return;
             }
+            const gameId = this.gameSessionManager.gameId();
             const gapMsec = 100;
             const endGameNotificationStartingTime = 500;
             const endGameNotificationEndingTime = 2800;
@@ -158,7 +159,9 @@ export class GameSocketEventService {
             }, endGameNotificationEndingTime);
 
             setTimeout(() => {
-                this.router.navigate([UrlPage.Statistics]);
+                this.router.navigate([UrlPage.Statistics], {
+                    state: { data: gameId },
+                });
             }, ENDGAME_COOL_DOWN_MSEC);
         });
     }

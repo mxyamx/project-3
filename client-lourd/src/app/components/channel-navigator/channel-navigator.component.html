@@ -1,0 +1,85 @@
+<div class="channel-navigator-container" [class.expanded]="isExpended">
+    <div class="channel-header">
+        <h3>
+            Canaux de discussion
+            <span>
+                <button class="circle-plus" (click)="openCreateDialog()" aria-label="Créer un canal">
+                    <i class="fa-solid fa-plus"></i></button
+            ></span>
+        </h3>
+        @if(!isPopup){
+        <button class="open-btn" (click)="openChannelPopup()">
+            <img src="assets/icones/open_in_new.svg" alt="Open in new icon" />
+        </button>
+        }
+        <div class="tabs">
+            <button
+                class="tab"
+                [class.active]="selectedTab() === ChannelTab.Joined"
+                (click)="toggleTab(ChannelTab.Joined)"
+                type="button"
+                [attr.aria-controls]="'panel-joined'"
+                [attr.aria-selected]="selectedTab() === ChannelTab.Joined"
+            >
+                Mes canaux
+            </button>
+
+            <button
+                class="tab"
+                [class.active]="selectedTab() === ChannelTab.Directory"
+                (click)="toggleTab(ChannelTab.Directory)"
+                type="button"
+                [attr.aria-controls]="'panel-directory'"
+                [attr.aria-selected]="selectedTab() === ChannelTab.Directory"
+            >
+                Découvrir
+            </button>
+        </div>
+    </div>
+
+    <div class="search-input">
+        @if(selectedTab() === ChannelTab.Joined){
+        <i class="fa-solid fa-filter search-icon"></i>
+        } @else{
+        <i class="fa fa-search search-icon"></i>
+        }
+        <input
+            [(ngModel)]="searchInput"
+            (keydown.enter)="searchChannel()"
+            type="text"
+            minlength="1"
+            maxlength="200"
+            [placeholder]="selectedTab() === ChannelTab.Joined ? 'Filtrer canal...' : 'Rechercher un canal...'"
+        />
+        <button (click)="searchChannel()">{{ selectedTab() === ChannelTab.Joined ? 'Filtrer' : 'Rechercher' }}</button>
+    </div>
+
+    @if(selectedTab() === ChannelTab.Joined && !isLoading()){
+    <div class="channels" id="panel-joined">
+        @for(channel of filteredJoinedChannels; track channel.id){
+        <div class="channel-item" (click)="openChannel(channel)">
+            <h3>{{ channel.name }}</h3>
+            <div class="actions">
+                @if (channel.isManageable) {
+                <i class="fa-solid fa-x delete-icon" title="Quitter" (click)="leaveChannel(channel.id); $event.stopPropagation()"></i>
+                } @if (channel.isAdmin) {
+                <i class="fa-solid fa-trash delete-icon" title="Supprimer" (click)="deleteChannel(channel.id); $event.stopPropagation()"></i>
+                }
+            </div>
+        </div>
+        }
+    </div>
+    } @if(selectedTab() === ChannelTab.Directory && !isLoading()){
+    <div class="channels" id="panel-directory">
+        @for(channel of directoryChannels; track channel.id){
+        <div class="channel-item" (click)="joinChannel(channel.id, channel.name)">
+            <h3>{{ channel.name }}</h3>
+        </div>
+        } @empty{
+        <div class="empty-message">Pas de canaux trouvés</div>
+        }
+    </div>
+    } @if(isLoading()){
+    <app-loading></app-loading>
+    }
+</div>

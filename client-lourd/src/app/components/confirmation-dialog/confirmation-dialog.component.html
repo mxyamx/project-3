@@ -1,0 +1,14 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content>
+    <p class="message">{{ data.text }}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-stroked-button class="cd-ghost" [mat-dialog-close]="false" type="button">
+        {{ data.cancelButtonLabel }}
+    </button>
+    <button mat-flat-button class="cd-cta" [mat-dialog-close]="true" cdkFocusInitial type="button">
+        {{ data.confirmButtonLabel }}
+    </button>
+</mat-dialog-actions>
