@@ -25,6 +25,8 @@ et définir une variable d’environnement pour que le serveur sache où le trou
 **Ce fichier contient des informations sensibles → ne jamais le committer dans Git.**
 **Pour les commits, vous pouvez travailler normalement : le dossier secrets/ est déjà ignoré dans .gitignore.**
 
+# Déploiement en local
+
 # 1. Télécharger le fichier .json
 
 Récupérez le fichier log3900-85dd3-firebase-adminsdk-fbsvc-b46196399f.json dans le canal #secrets.
@@ -99,3 +101,67 @@ export default router;
 ```
 
 Côté client, si vous appelez /whoami avec un ID token valide, le serveur renverra vos infos Firebase (uid et email).
+
+# Déploiement d'un serveur distant (EC2)
+
+**A. Déploiement manuel**
+
+1. Envoyer le fichier JSON sur ton EC2
+
+Depuis ta machine locale :
+
+scp -i ~/.ssh/ec2-key.pem ./secrets/log3900-85dd3-firebase-adminsdk-fbsvc-b46196399f.json ec2-user@<dns-public-ec2>:/home/ec2-user/server/secrets/
+
+-i ~/.ssh/ec2-key.pem → ta clé privée EC2.
+
+./secrets/...json → chemin local du fichier (sur ton PC).
+
+ec2-user@<dns-public-ec2> → ton utilisateur + DNS public de l’instance.
+
+/home/ec2-user/server/secrets/ → dossier cible sur ton serveur (assure-toi que server/secrets/ existe sur EC2).
+
+2. Se connecter en SSH sur ton EC2
+
+ssh -i ~/.ssh/ec2-key.pem ec2-user@<dns-public-ec2>
+
+3. Aller dans ton projet serveur
+   cd ~/server
+
+4. Exporter la variable d’environnement
+
+export GOOGLE_APPLICATION_CREDENTIALS="./secrets/log3900-85dd3-firebase-adminsdk-fbsvc-b46196399f.json"
+
+5. Lancer ton serveur
+
+Toujours depuis /server :
+
+npm start
+
+**B. Déploiement automatique**
+Variables CI/CD à créer (GitLab → Settings > CI/CD > Variables)
+
+Crée ces variables (toutes Protected, Masked quand possible) :
+
+EC2_HOST → ec2-xxx.ca-central-1.compute.amazonaws.com
+
+EC2_USER → ec2-user
+
+SERVER_PORT → 3000 (ou ton port)
+
+EC2_PEM_FILE_CONTENT → contenu PEM
+
+GOOGLE_APPLICATION_CREDENTIALS (Type = File) → colle le contenu du JSON Firebase Admin Service Account
+
+En Type File, GitLab crée un fichier temporaire pendant le job et la variable contiendra le chemin vers ce fichier (ex: /tmp/…/file)
+
+On va ensuite copier ce fichier sur EC2 via scp et exporter l’ENV côté serveur.
+
+Patch .gitlab-ci.yml (ajouts clés)
+
+Intègre (ou adapte) ces lignes dans ta job deploy:server. L’idée :
+
+on copie la clé (fichier GitLab “File variable”) vers EC2,
+
+on exporte GOOGLE_APPLICATION_CREDENTIALS côté EC2,
+
+on lance le serveur sous forever avec cette ENV.
