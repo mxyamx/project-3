@@ -56,6 +56,4 @@ export class ProfilePageComponent {
         }
         this.router.navigate(['/']);
     }
-
-
 }

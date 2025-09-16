@@ -141,6 +141,7 @@ export class WaitingPageComponent implements OnInit {
         if (this.gameId) {
             this.chatDockService.leftGame();
             this.playerSocketService.emitLeaveGame(this.gameId, player);
+            this.router.navigate([UrlPage.Home]);
         }
     }
 
