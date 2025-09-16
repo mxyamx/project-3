@@ -46,7 +46,11 @@ LOG3900-206/
 │ ├── secrets/
 │ │ └── log3900-85dd3-firebase-adminsdk-fbsvc-b46196399f.json
 
-# 3. Configurer la variable d’environnement
+Bravo 🎉, votre serveur peut maintenant accèder au Firebase Admin du projet! Vous pouvez maintenant rouler le serveur local comme avant:`npm start`
+
+**N.B: Si vous supprimez votre dossier et que vous devez re-cloner le projet. Vous devez répéter les étapes précédentes.**
+
+# Configurer la variable d’environnement manuellement
 
 Avant de lancer le serveur, pointez GOOGLE_APPLICATION_CREDENTIALS vers ce fichier.
 
@@ -57,24 +61,7 @@ Linux / macOS (bash/zsh) -> **Ouvrir terminal et se déplacer dans le dossier `s
 Windows PowerShell -> **Ouvrir terminal et se déplacer dans le dossier `server` comme lorsque vous démarrez le serveur normalement** :
 `$env:GOOGLE_APPLICATION_CREDENTIALS=".\secrets\log3900-85dd3-firebase-adminsdk-fbsvc-b46196399f.json"`
 
-# 4. Lancer le serveur
-
-`npm start`
-
-# 5. Exemple concret (Linux)
-
-1. Ouvrir un terminal.
-
-2. Se déplacer dans le dossier server.
-
-3. Exécuter :
-
-hugod@hugod-ASUS-TUF-Gaming-A15-FA506IV-TUF506IV:~/Desktop/Polytechnique/LOG3900/LOG3900-206/server$ `export GOOGLE_APPLICATION_CREDENTIALS="./secrets/log3900-85dd3-firebase-adminsdk-fbsvc-b46196399f.json"`
-
-4. Puis lancer :
-   hugod@hugod-ASUS-TUF-Gaming-A15-FA506IV-TUF506IV:~/Desktop/Polytechnique/LOG3900/LOG3900-206/server$ `npm start`
-
-# 6 Exemple d’utilisation du middleware
+# Exemple d’utilisation du middleware
 
 Une fois la configuration faite, le middleware verifyFirebaseToken peut être utilisé pour protéger vos routes Express.
 Il lit le token JWT envoyé par le client (Authorization: Bearer ...), le vérifie avec Firebase, et ajoute req.user contenant l’UID et l’email.
@@ -127,11 +114,7 @@ ssh -i ~/.ssh/ec2-key.pem ec2-user@<dns-public-ec2>
 3. Aller dans ton projet serveur
    cd ~/server
 
-4. Exporter la variable d’environnement
-
-export GOOGLE_APPLICATION_CREDENTIALS="./secrets/log3900-85dd3-firebase-adminsdk-fbsvc-b46196399f.json"
-
-5. Lancer ton serveur
+4. Lancer ton serveur
 
 Toujours depuis /server :
 
