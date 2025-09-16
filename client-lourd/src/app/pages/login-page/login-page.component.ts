@@ -185,7 +185,7 @@ export class LoginPageComponent {
     onFileSelected(event: Event) {
         const file = (event.target as HTMLInputElement).files?.[0];
         if (!file) return;
-    
+
         const reader = new FileReader();
         reader.onload = () => {
             const img = new Image();
@@ -193,29 +193,29 @@ export class LoginPageComponent {
                 const MAX_WIDTH = 200;
                 const MAX_HEIGHT = 200;
                 let { width, height } = img;
-    
+
                 if (width > MAX_WIDTH || height > MAX_HEIGHT) {
                     const scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
                     width = width * scale;
                     height = height * scale;
                 }
-    
+
                 const canvas = document.createElement('canvas');
                 canvas.width = width;
                 canvas.height = height;
-    
+
                 const ctx = canvas.getContext('2d');
                 if (!ctx) return;
                 ctx.drawImage(img, 0, 0, width, height);
-    
+
                 const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
-    
+
                 this.selectedAvatar = compressedDataUrl;
-                this.uploadedAvatarPreview = compressedDataUrl;  // <-- Add this line!
+                this.uploadedAvatarPreview = compressedDataUrl;
                 this.formGroup.get('avatar')?.setValue(compressedDataUrl);
             };
             img.src = reader.result as string;
         };
         reader.readAsDataURL(file);
-    }    
+    }
 }
