@@ -35,7 +35,8 @@ export class SocketGameCommunication {
 
         socket.on('room-message', async (data: RoomMessage) => {
             const roomId: string = data.gameId;
-            const message: ChatMessage = data.message;
+            const now = new Date();
+            const message: ChatMessage = { ...data.message, timestamp: now };
             //Converting to Mongo document
             const doc: Omit<ChatMessageDoc, '_id'> = {
                 ...message,
