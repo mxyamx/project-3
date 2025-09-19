@@ -13,23 +13,23 @@ export class HttpBoardGameService {
     constructor(private http: HttpClient) {}
 
     getAllBoards(): Observable<BoardGame[]> {
-        return this.http.get<BoardGame[]>(`${this.apiUrl}/board-game/`).pipe(catchError(this.handleError));
+        return this.http.get<BoardGame[]>(`${this.apiUrl}/board-games/`).pipe(catchError(this.handleError));
     }
 
     getBoard(id: string): Observable<BoardGame> {
-        return this.http.get<BoardGame>(`${this.apiUrl}/board-game/${id}`).pipe(catchError(this.handleError));
+        return this.http.get<BoardGame>(`${this.apiUrl}/board-games/${id}`).pipe(catchError(this.handleError));
     }
 
     createBoard(board: BoardGame): Observable<BoardGame> {
-        return this.http.post<BoardGame>(`${this.apiUrl}/board-game/`, board).pipe(catchError(this.handleError));
+        return this.http.post<BoardGame>(`${this.apiUrl}/board-games/`, board).pipe(catchError(this.handleError));
     }
 
     deleteBoard(id: string): Observable<boolean> {
-        return this.http.delete<boolean>(`${this.apiUrl}/board-game/${id}`).pipe(catchError(this.handleError));
+        return this.http.delete<boolean>(`${this.apiUrl}/board-games/${id}`).pipe(catchError(this.handleError));
     }
 
     updateBoard(board: BoardGame): Observable<BoardGame> {
-        return this.http.put<BoardGame>(`${this.apiUrl}/board-game/${board.id}`, board).pipe(catchError(this.handleError));
+        return this.http.put<BoardGame>(`${this.apiUrl}/board-games/${board.id}`, board).pipe(catchError(this.handleError));
     }
 
     private handleError(error: HttpErrorResponse) {
