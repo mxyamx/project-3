@@ -183,6 +183,15 @@ deploy:server:
                 # Refresh amazon-cloudwatch-agent config
                 sudo amazon-cloudwatch-agent-ctl -a fetch-config -s -m ec2 -c file:../amazon-cloudwatch-agent-config.json
 
+                if test -f "./secrets/log3900-85dd3-firebase-adminsdk-fbsvc-b46196399f.json"
+                then
+                echo 'Firebase credentials file exists.'
+                else
+                echo 'Firebase credentials file is missing!'
+                fi
+
+                export GOOGLE_APPLICATION_CREDENTIALS="./secrets/log3900-85dd3-firebase-adminsdk-fbsvc-b46196399f.json"
+
                 # Launch the server in background and append output to /var/log/messages for CloudWatch
                 PORT=${SERVER_PORT} forever start -a -l /var/log/messages out/server/app/index.js
             "
