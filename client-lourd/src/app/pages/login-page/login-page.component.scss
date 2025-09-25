@@ -87,14 +87,18 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
 
 .auth-card {
     background-color: rgba(74, 74, 82, 0.6);
-    padding: 2rem;
     border-radius: 25px;
+    width: 100%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 2rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
-    max-width: 400px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    scrollbar-gutter: stable;
 }
 
 .auth-title {
