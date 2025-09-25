@@ -15,3 +15,10 @@ export interface User {
     statistics: PlayerStatistics;
     status: DeviceType;
 }
+
+export interface UserDTO {
+    id: string;
+    username: string;
+    email: string;
+    avatar: string;
+}

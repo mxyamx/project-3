@@ -215,7 +215,7 @@ export class BoardGameController {
         this.router.put('/:id', async (req: Request, res: Response) => {
             try {
                 await this.boardGameService.updateBoard(req.body);
-                res.status(httpStatus.OK).send();
+                res.status(httpStatus.NO_CONTENT).send();
             } catch (error) {
                 if (error instanceof HttpException) {
                     res.status(error.status).json({ error: error.message });

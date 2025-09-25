@@ -224,7 +224,7 @@ export class UsersController {
                     return;
                 }
                 await this.usersService.updateUser(user);
-                res.status(httpStatus.OK).send();
+                res.status(httpStatus.NO_CONTENT).send();
             } catch (error) {
                 if (error instanceof HttpException) {
                     res.status(error.status).json({ error: error.message });

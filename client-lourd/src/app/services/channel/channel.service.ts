@@ -12,28 +12,28 @@ export class ChannelService {
     private readonly apiUrl = environment.serverUrl;
     constructor(private http: HttpClient) {}
     getMyChannels(): Observable<ChannelSummary[]> {
-        return this.http.get<ChannelSummary[]>(`${this.apiUrl}/channel/my`).pipe(catchError((e) => this.handleError(e)));
+        return this.http.get<ChannelSummary[]>(`${this.apiUrl}/channels/my`).pipe(catchError((e) => this.handleError(e)));
     }
 
     createChannel(channel: Channel): Observable<ChannelSummary> {
-        return this.http.post<ChannelSummary>(`${this.apiUrl}/channel`, channel).pipe(catchError((e) => this.handleError(e)));
+        return this.http.post<ChannelSummary>(`${this.apiUrl}/channels`, channel).pipe(catchError((e) => this.handleError(e)));
     }
 
     searchChannelsByPattern(pattern: string): Observable<Channel[]> {
         let params = new HttpParams().set('pattern', pattern ?? '');
-        return this.http.get<Channel[]>(`${this.apiUrl}/channel/search`, { params }).pipe(catchError((e) => this.handleError(e)));
+        return this.http.get<Channel[]>(`${this.apiUrl}/channels/search`, { params }).pipe(catchError((e) => this.handleError(e)));
     }
 
     deleteChannel(channelId: string): Observable<void> {
-        return this.http.delete<void>(`${this.apiUrl}/channel/${channelId}`).pipe(catchError((e) => this.handleError(e)));
+        return this.http.delete<void>(`${this.apiUrl}/channels/${channelId}`).pipe(catchError((e) => this.handleError(e)));
     }
 
     joinChannel(channelId: string): Observable<void> {
-        return this.http.post<void>(`${this.apiUrl}/channel/${channelId}/join`, {}).pipe(catchError((e) => this.handleError(e)));
+        return this.http.post<void>(`${this.apiUrl}/channels/${channelId}/join`, {}).pipe(catchError((e) => this.handleError(e)));
     }
 
     leaveChannel(channelId: string): Observable<void> {
-        return this.http.delete<void>(`${this.apiUrl}/channel/${channelId}/leave`).pipe(catchError((e) => this.handleError(e)));
+        return this.http.delete<void>(`${this.apiUrl}/channels/${channelId}/leave`).pipe(catchError((e) => this.handleError(e)));
     }
 
     private handleError(error: HttpErrorResponse) {
