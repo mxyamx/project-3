@@ -15,7 +15,7 @@ export class ChannelController {
     }
 
     private configureRouter(): void {
-        // GET /channel/my
+        // GET /channels/my
         this.router.get('/my', async (req: AuthedRequest, res: Response) => {
             try {
                 const userId = req.user?.uid;
@@ -26,7 +26,7 @@ export class ChannelController {
             }
         });
 
-        // POST /channel
+        // POST /channels
         this.router.post('/', async (req: AuthedRequest, res: Response) => {
             try {
                 const userId = req.user?.uid;
@@ -53,7 +53,7 @@ export class ChannelController {
             }
         });
 
-        //DELETE /channel/:id
+        //DELETE /channels/:id
         this.router.delete('/:id', async (req: AuthedRequest, res: Response) => {
             try {
                 await this.channelService.deleteChannel(req.params.id);
@@ -63,7 +63,7 @@ export class ChannelController {
             }
         });
 
-        // POST /channel/:id/join
+        // POST /channels/:id/join
         this.router.post('/:id/join', async (req: AuthedRequest, res: Response) => {
             try {
                 const channelId = req.params.id;
@@ -76,7 +76,7 @@ export class ChannelController {
             }
         });
 
-        // DELETE /channel/:id/leave
+        // DELETE /channels/:id/leave
         this.router.delete('/:id/leave', async (req: AuthedRequest, res: Response) => {
             try {
                 const channelId: string = req.params.id;
