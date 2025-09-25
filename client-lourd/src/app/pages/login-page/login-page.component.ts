@@ -52,13 +52,26 @@ export class LoginPageComponent {
             usernameControl?.setValidators([Validators.required, Validators.minLength(MIN_LENGTH), Validators.maxLength(MAX_LENGTH)]);
             confirmPasswordControl?.setValidators([Validators.required]);
             avatarControl?.setValidators([Validators.required]);
-            usernameControl?.updateValueAndValidity();
-            confirmPasswordControl?.updateValueAndValidity();
-            avatarControl?.updateValueAndValidity();
+        } else {
+            usernameControl?.clearValidators();
+            confirmPasswordControl?.clearValidators();
+            avatarControl?.clearValidators();
         }
+
+        usernameControl?.updateValueAndValidity();
+        confirmPasswordControl?.updateValueAndValidity();
+        avatarControl?.updateValueAndValidity();
     }
 
     async onLogin(): Promise<void> {
+        const emailControl = this.formGroup.get('email');
+
+        if (emailControl?.hasError('email')) {
+            this.errorMessage = 'Le format du courriel est invalide.';
+            emailControl.markAsTouched();
+            return;
+        }
+
         if (this.formGroup.invalid) {
             this.errorMessage = 'Veuillez remplir tous les champs.';
             this.formGroup.markAllAsTouched();
@@ -101,6 +114,14 @@ export class LoginPageComponent {
     }
 
     async onSignup() {
+        const emailControl = this.formGroup.get('email');
+
+        if (emailControl?.hasError('email')) {
+            this.errorMessage = 'Le format du courriel est invalide.';
+            emailControl.markAsTouched();
+            return;
+        }
+
         if (this.formGroup.invalid) {
             this.errorMessage = 'Veuillez remplir tous les champs.';
             this.formGroup.markAllAsTouched();

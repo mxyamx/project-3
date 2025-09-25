@@ -29,10 +29,6 @@ export class AuthentificationService {
         return this.auth.signOut();
     }
 
-    getUsernameFromEmail(email: string): string {
-        return email.split('@')[0];
-    }
-
     getCurrentUserId(): string | undefined {
         const user = this.auth.currentUser;
         return user ? user.uid : undefined;
@@ -43,13 +39,15 @@ export class AuthentificationService {
             case 'auth/user-not-found':
                 return 'Utilisateur non trouvé';
             case 'auth/invalid-credential':
-                return "Informations d'identification invalides";
+                return "Informations d'authentification invalides";
             case 'auth/email-already-in-use':
                 return 'Le courriel est déjà utilisé';
             case 'auth/weak-password':
                 return 'Le mot de passe doit comporter au moins 6 caractères';
             case 'auth/invalid-email':
                 return 'Courriel invalide';
+            case 'auth/network-request-failed':
+                return 'Échec de la connexion réseau. Vérifiez votre Internet.';
             default:
                 return 'Une erreur est survenue, veuillez réessayer';
         }
