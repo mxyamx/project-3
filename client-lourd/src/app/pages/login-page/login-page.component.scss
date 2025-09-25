@@ -195,3 +195,9 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
         outline: none;
     }
 }
+
+.error-message {
+    color: #ff6161;
+    font-size: 1rem;
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
+}
