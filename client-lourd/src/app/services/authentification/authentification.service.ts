@@ -20,6 +20,11 @@ export class AuthentificationService {
         return signInWithEmailAndPassword(this.auth, email, password);
     }
 
+    deleteAccount() {
+        const user = this.auth.currentUser;
+        return user?.delete();
+    }
+
     logout() {
         return this.auth.signOut();
     }

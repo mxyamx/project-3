@@ -32,10 +32,33 @@
 
             @if (!isLogin) {
             <div class="form-group">
-                <label for="avatar">Avatar :</label>
-                <app-profile-avatar-img [formGroup]="formGroup" [selectedAvatars]="selectedAvatars" (imageSelected)="avatarSelected($event ?? '')">
-                </app-profile-avatar-img>
+                @if (!uploadAvatar) {
+                    <label for="avatar">Avatar :</label>
+                    <app-profile-avatar-img [formGroup]="formGroup" [selectedAvatars]="selectedAvatars" (imageSelected)="avatarSelected($event ?? '')">
+                    </app-profile-avatar-img>
+                } @else {
+                    <div class="custom-avatar-upload">
+                        <label class="upload-button">
+                            <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+                            <i class="fas fa-upload"></i> Choisir un fichier
+                        </label>
+                    
+                        @if(uploadedAvatarPreview) {
+                            <div class="avatar-preview">
+                                <img [src]="uploadedAvatarPreview" alt="Aperçu de l'avatar" />
+                            </div>
+                        }
+                    </div>
+                }
 
+                <div class="toggle-avatar-mode-icon">
+                    <i class="fas fa-image" [class.active-icon]="!uploadAvatar"></i>
+                    <button type="button" class="toggle-switch-icon" (click)="toggleAvatarMode()">
+                        <i class="fas" [ngClass]="uploadAvatar ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                    </button>
+                    <i class="fas fa-upload" [class.active-icon]="uploadAvatar"></i>
+                </div>
+                
                 @if (formGroup.get('avatar')?.invalid && formGroup.get('avatar')?.touched) {
                 <small class="error-message">Avatar requis</small>
                 }
