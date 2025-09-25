@@ -114,6 +114,14 @@ export class LoginPageComponent {
     }
 
     async onSignup() {
+        const emailControl = this.formGroup.get('email');
+
+        if (emailControl?.hasError('email')) {
+            this.errorMessage = 'Le format du courriel est invalide.';
+            emailControl.markAsTouched();
+            return;
+        }
+
         if (this.formGroup.invalid) {
             this.errorMessage = 'Veuillez remplir tous les champs.';
             this.formGroup.markAllAsTouched();
