@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, inject, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, inject, Input, OnDestroy, OnInit, Output, signal, ViewChild, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAX_LENGTH_MESSAGE } from '@app/constants/objects-constants';
 import { ChatService } from '@app/services/chat/chat.service';
@@ -23,6 +23,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     @Output() closeChat: EventEmitter<void> = new EventEmitter<void>();
     playerName: string = '';
     messageInput: string = '';
+    nCharacters: WritableSignal<number> = signal(0);
+    maxNCharacters: number = MAX_LENGTH_MESSAGE;
 
     chatService = inject(ChatService);
     private playerSocketService = inject(PlayerSocketService);
@@ -57,25 +59,26 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     configureBaseSocketFeatures() {
         this.playerSocketService.onNewMessage((roomMessage: ChatMessage) => {
+            console.log(`roomMessage -${roomMessage.text} ${roomMessage.timestamp}`);
             this.chatService.addMessage(roomMessage);
             setTimeout(() => this.scrollToBottom(), 0);
         });
     }
 
     sendToRoom() {
-        if (this.playerName && this.messageInput.trim().length !== 0) {
+        if (this.playerName && this.messageInput.trim().length !== 0 && this.messageInput.length <= MAX_LENGTH_MESSAGE) {
             this.messageInput = this.messageInput.trim();
-            if (this.messageInput.length > MAX_LENGTH_MESSAGE) {
-                this.messageInput = this.messageInput.substring(0, MAX_LENGTH_MESSAGE);
-            }
-
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            console.log(`chat message timestamp ${now}`);
             const chatMessage: ChatMessage = {
                 sender: this.playerName,
                 text: this.messageInput,
-                timestamp: new Date(),
+                timestamp: now,
             };
             this.playerSocketService.emitSendMessage(this.roomId, chatMessage);
             this.messageInput = '';
+            this.nCharacters.set(0);
         }
     }
     openChatPopup() {
@@ -93,5 +96,9 @@ export class ChatComponent implements OnInit, OnDestroy {
         } catch (err) {
             return;
         }
+    }
+
+    onModelChange(textValue: string): void {
+        this.nCharacters.set(textValue.length);
     }
 }

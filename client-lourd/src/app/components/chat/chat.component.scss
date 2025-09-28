@@ -117,22 +117,51 @@ $background-color: #0f3320;
     padding: 10px;
     gap: 10px;
     border-top: 2px solid #51b9ff;
+    margin-bottom: 1vh;
 
-    input {
-        flex: 1;
-        padding: 8px 12px;
-        border-radius: 20px;
-        border: 2px solid #51b9ff;
-        background-color: rgba(255, 255, 255, 0.1);
-        color: white;
+    .input-wrapper {
+        position: relative;
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
 
-        &::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+        input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 2px solid #51b9ff;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+
+            &::placeholder {
+                color: rgba(255, 255, 255, 0.6);
+            }
+
+            &:focus {
+                outline: none;
+                border-color: #a8d5ff;
+            }
+        }
+        .border-red {
+            border: 2px solid #e53935;
+            &:focus {
+                outline: none;
+                border-color: #e53935;
+            }
         }
 
-        &:focus {
-            outline: none;
-            border-color: #a8d5ff;
+        .max-character {
+            position: absolute;
+            bottom: -2vh;
+            right: -1vh;
+            font-size: 12px;
+            padding: 2px 6px;
+            color: white;
+            pointer-events: none;
+        }
+        .text-red {
+            color: #e53935;
+            font-weight: 600;
         }
     }
 
@@ -145,6 +174,7 @@ $background-color: #0f3320;
         cursor: pointer;
         font-family: 'Jaro', sans-serif;
         transition: all 0.2s ease;
+        flex-shrink: 0;
 
         &:hover {
             background-color: #51b9ff;

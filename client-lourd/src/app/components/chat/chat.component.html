@@ -17,7 +17,7 @@
             <div class="message" [ngClass]="{ 'my-message': message.sender === playerName }">
                 <div class="message-header">
                     <span class="sender">{{ message.sender }}</span>
-                    <span class="timestamp">{{ message.timestamp | date: 'HH:mm:ss' }}</span>
+                    <span class="timestamp"> {{ message.timestamp | date: 'HH:mm:ss' : 'America/Toronto' }}</span>
                 </div>
                 <div class="message-content">
                     {{ message.text }}
@@ -28,7 +28,20 @@
     </div>
 
     <div class="chat-input">
-        <input id="roomMessage" [(ngModel)]="messageInput" (keydown.enter)="sendToRoom()" type="text" required minlength="1" maxlength="200" />
+        <div class="input-wrapper">
+            <input
+                id="roomMessage"
+                [(ngModel)]="messageInput"
+                (keydown.enter)="sendToRoom()"
+                type="text"
+                required
+                minlength="1"
+                (ngModelChange)="onModelChange($event)"
+                [ngClass]="{ 'border-red': nCharacters() > maxNCharacters }"
+                placeholder="Envoyer un message"
+            />
+            <div class="max-character" [ngClass]="{ 'text-red': nCharacters() > maxNCharacters }">{{ nCharacters() }} / {{ maxNCharacters }}</div>
+        </div>
         <button (click)="sendToRoom()">Envoyer</button>
     </div>
 </div>
