@@ -27,7 +27,11 @@ export class SocketGameCommunication {
                 .toArray();
             //DTO send to client
             const history: ChatMessage[] = lastDocs.reverse().map((chatMessageDoc) => {
-                const chatMessage: ChatMessage = { text: chatMessageDoc.text, sender: chatMessageDoc.sender, timestamp: chatMessageDoc.timestamp };
+                const chatMessage: ChatMessage = {
+                    text: chatMessageDoc.text,
+                    sender: chatMessageDoc.sender,
+                    timestamp: chatMessageDoc.timestamp.toISOString(),
+                };
                 return chatMessage;
             });
             socket.emit(SocketEventNames.ChatHistory, history);
@@ -36,11 +40,12 @@ export class SocketGameCommunication {
         socket.on('room-message', async (data: RoomMessage) => {
             const roomId: string = data.gameId;
             const now = new Date();
-            const message: ChatMessage = { ...data.message, timestamp: now };
+            const message: ChatMessage = { ...data.message, timestamp: now.toISOString() };
             //Converting to Mongo document
             const doc: Omit<ChatMessageDoc, '_id'> = {
                 ...message,
                 roomId: roomId,
+                timestamp: now,
             };
 
             await this.collection.insertOne(doc as ChatMessageDoc);
