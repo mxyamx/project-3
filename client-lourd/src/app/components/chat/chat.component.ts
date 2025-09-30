@@ -68,13 +68,11 @@ export class ChatComponent implements OnInit, OnDestroy {
     sendToRoom() {
         if (this.playerName && this.messageInput.trim().length !== 0 && this.messageInput.length <= MAX_LENGTH_MESSAGE) {
             this.messageInput = this.messageInput.trim();
-            const now = new Date();
-            now.setHours(0, 0, 0, 0);
-            console.log(`chat message timestamp ${now}`);
+
             const chatMessage: ChatMessage = {
                 sender: this.playerName,
                 text: this.messageInput,
-                timestamp: now,
+                timestamp: '',
             };
             this.playerSocketService.emitSendMessage(this.roomId, chatMessage);
             this.messageInput = '';
