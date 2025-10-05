@@ -1,0 +1,18 @@
+<div id="dropdown-component">
+    <div class="selected" (click)="toggleMenu()">
+        <span>{{ selectedValue.viewValue }}</span>
+        <span [class.arrow-down]="menuOpen">&#x27A4;</span>
+    </div>
+
+    <div class="menu-wrapper" [class.show-menu]="menuOpen">
+        <ul #listElem>
+            @for (item of listElems; track item.value) {
+            <li>
+                <button type="button" class="menu-button" (click)="clickHandler(item)">
+                    {{ item.viewValue }}
+                </button>
+            </li>
+            }
+        </ul>
+    </div>
+</div>

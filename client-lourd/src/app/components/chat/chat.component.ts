@@ -59,7 +59,6 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     configureBaseSocketFeatures() {
         this.playerSocketService.onNewMessage((roomMessage: ChatMessage) => {
-            console.log(`roomMessage -${roomMessage.text} ${roomMessage.timestamp}`);
             this.chatService.addMessage(roomMessage);
             setTimeout(() => this.scrollToBottom(), 0);
         });

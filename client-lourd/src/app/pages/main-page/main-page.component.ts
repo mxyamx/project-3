@@ -52,4 +52,8 @@ export class MainPageComponent implements OnDestroy {
     openGeneralChat() {
         this.showChat.set(!this.showChat());
     }
+
+    openSettings(): void {
+        this.router.navigate(['/settings']);
+    }
 }

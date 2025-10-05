@@ -1,0 +1,22 @@
+<div class="settings-page-container">
+    <section class="navigation">
+        <button class="navigation-button" (click)="goHome()"><i class="fas fa-home"></i> Retour à l'accueil</button>
+    </section>
+
+    <div class="settings-container">
+        <h2 class="settings-title">Paramètres</h2>
+
+        <div class="main-content">
+            <div class="setting-item">
+                <span>Langage</span>
+                <app-dropdown [listElems]="languages" [(selectedValue)]="selectedLanguage">></app-dropdown>
+            </div>
+
+            <div class="setting-item">
+                <span>Thème</span>
+                <app-dropdown [listElems]="themes" [(selectedValue)]="selectedTheme">></app-dropdown>
+            </div>
+        </div>
+        <button class="apply-button navigation-button" (click)="applyChanges()">Appliquer les modifications</button>
+    </div>
+</div>
