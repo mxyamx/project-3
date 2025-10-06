@@ -1,8 +1,9 @@
+import { BoardGameGraph, BoardGameNode } from '@app/classes/board-game-graph/board-game-graph';
 import { getDirections, inBounds, isDefinedAndFinite } from '@app/classes/vp-path-board-game-helpers/vp-path-board-game-helpers';
 import { VpSocketManager } from '@app/classes/vp-socket-manager/vp-socket-manager';
 import { VpState } from '@app/classes/vp-state/vp-state';
 import { FROM_ITEM_NAME_TO_VP_PREFERENCE } from '@app/constants/objects-constants';
-import { BoardGameGraph, BoardGameNode } from '@app/classes/board-game-graph/board-game-graph';
+import { GameMode } from '@common/enums/game-mode';
 import { SocketServerEventNames } from '@common/enums/socket-events-names';
 import { TileType } from '@common/enums/tile-type';
 import { VpPreferenceItem } from '@common/enums/vp-preference-item';
@@ -267,7 +268,7 @@ export abstract class BaseVpBehaviorInGame {
                 const player = tile.containedPlayer;
 
                 if (player && player.name !== virtualPlayer.name) {
-                    if (this.gameState.boardGame.gameMode === 'CTF' && this.isInSameTeam(virtualPlayer, player)) {
+                    if (this.gameState.boardGame.gameMode === GameMode.CTF && this.isInSameTeam(virtualPlayer, player)) {
                         continue;
                     }
 
@@ -333,7 +334,7 @@ export abstract class BaseVpBehaviorInGame {
 
         if (!player || player.name === virtualPlayer.name) return null;
 
-        if (this.gameState.boardGame.gameMode === 'CTF' && this.isInSameTeam(virtualPlayer, player)) {
+        if (this.gameState.boardGame.gameMode === GameMode.CTF && this.isInSameTeam(virtualPlayer, player)) {
             return null;
         }
 

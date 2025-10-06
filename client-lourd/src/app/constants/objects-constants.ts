@@ -115,17 +115,15 @@ export const FROM_ITEM_NAME_TO_TYPE: { [key in string]: ItemType } = {
 };
 
 export const FROM_ITEM_NAME_TO_DESCRIPTION: { [key in string]: string } = {
-    [ITEM_NAMES.attributeEditor1]: "- Nom: Plume Du Faucon. \n - Type: Modificateur d'attributs. \n - Effet: Donne +1 Vitesse et +1 Attaque. \n",
-    [ITEM_NAMES.attributeEditor2]: "- Nom: Carapace Enchantee. \n - Type: Modificateur d'attributs. \n - Effet: Donne +2 Defense et -1 Vie. \n",
-    [ITEM_NAMES.conditionBased1]: '- Nom: Griffe De Survie. \n - Type: Utilisation conditionnée. \n - Effet: Si la Vie <= 2, donne +2 Defense. \n',
-    [ITEM_NAMES.conditionBased2]:
-        '- Nom: Racine De Vengeance. \n - Type: Utilisation conditionnée. \n - Effet: Si on a 2 victoires, donne -1 Attaque et +1 Defense. \n',
-    [ITEM_NAMES.gameEditor1]: "- Nom: Fruit De L'Invisible. \n - Type: Modificateur de jeu. \n - Effet: Donne la possibilité d'avoir 3 items. \n",
-    [ITEM_NAMES.gameEditor2]: '- Nom: Retourneur De Temps. \n - Type: Modificateur de jeu. \n - Effet: Donne 2 actions possibles par tour. \n',
-    [ITEM_NAMES.randomItem]: '- Nom: Item Aléatoire. \n - Type: Aléatoire. \n - Effet: Non spécifique. \n',
-    [ITEM_NAMES.startingPoint]: "- Nom: Point De Depart. \n C'est la position initiale de chaque joueur. \n",
-    [ITEM_NAMES.flag]:
-        '- Nom: Drapeau. \n Disponible uniquement en mode CTF. \n Ramenez-le à votre point de départ pour faire gagner votre équipe.\n',
+    [ITEM_NAMES.attributeEditor1]: 'attribute-editor-1',
+    [ITEM_NAMES.attributeEditor2]: 'attribute-editor-2',
+    [ITEM_NAMES.conditionBased1]: 'condition-based-1',
+    [ITEM_NAMES.conditionBased2]: 'condition-based-2',
+    [ITEM_NAMES.gameEditor1]: 'game-editor-1',
+    [ITEM_NAMES.gameEditor2]: 'game-editor-2',
+    [ITEM_NAMES.randomItem]: 'random-item',
+    [ITEM_NAMES.startingPoint]: 'starting-point',
+    [ITEM_NAMES.flag]: 'flag',
 };
 
 export const FROM_ITEM_NAME_TO_VP_PREFERENCE: { [key in string]: VpPreferenceItem } = {
@@ -139,12 +137,11 @@ export const FROM_ITEM_NAME_TO_VP_PREFERENCE: { [key in string]: VpPreferenceIte
 };
 
 export const FROM_TILE_TYPE_TO_DESCRIPTION: { [key in TileType]: string } = {
-    [TileType.Wall]: '- Nom: Mur. \n - Tuile de terrain? Non. \n Un mur bloque le passage.\n',
-    [TileType.Door]:
-        '- Nom: Porte. \n - Tuile de terrain? Non. \n - Coût du déplacement: 1. \n Une porte ne peut être traversee que si elle est ouverte.\n',
-    [TileType.Water]: "- Nom: Eau. \n - Tuile de terrain? Oui. \n - Coût du déplacement: 2. \n Les déplacements sont plus difficiles dans l'eau.\n",
-    [TileType.Ice]: "- Nom: Glace. \n - Tuile de terrain? Oui. \n - Coût du déplacement: Aucun. \n Il est facile d'avancer sur la glace.\n",
-    [TileType.Grass]: '- Nom: Gazon. \n - Tuile de terrain? Oui. \n - Coût du déplacement: 1. \n Une surface normale de terrain.\n',
+    [TileType.Wall]: 'wall',
+    [TileType.Door]: 'door',
+    [TileType.Water]: 'water',
+    [TileType.Ice]: 'ice',
+    [TileType.Grass]: 'grass',
 };
 
 export const NB_ITEM_SMALL_MAP = 2;
@@ -153,8 +150,8 @@ export const NB_ITEM_LARGE_MAP = 6;
 
 export const DEFAULT_BOARD: BoardGame = {
     id: '',
-    name: 'Jeu par défaut',
-    description: 'Ceci est une description par défaut du jeu',
+    name: '',
+    description: '',
     size: BoardGameSize.Medium,
     gameMode: GameMode.Normal,
     tiles: [],

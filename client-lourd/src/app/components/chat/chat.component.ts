@@ -6,11 +6,13 @@ import { ChatService } from '@app/services/chat/chat.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { ChatMessage } from '@common/chat-message';
+import { CHANNEL_GENERAL_ID, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-chat',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, TranslatePipe],
     templateUrl: './chat.component.html',
     styleUrl: './chat.component.scss',
 })
@@ -20,6 +22,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     @Input() isPopup: boolean = false;
     @Input() isExpended: boolean = false;
     @ViewChild('scroll') private chatMessagesContainer: ElementRef;
+    @ViewChild('input') input!: ElementRef;
     @Output() closeChat: EventEmitter<void> = new EventEmitter<void>();
     playerName: string = '';
     messageInput: string = '';
@@ -29,6 +32,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     chatService = inject(ChatService);
     private playerSocketService = inject(PlayerSocketService);
     private userManager = inject(UserManagerService);
+    readonly gameRoomRegex = GAME_ROOM_REGEX;
+    readonly channelGeneralId = CHANNEL_GENERAL_ID;
     // private router = inject(Router);
     // private chatDockService = inject(ChatDockService);
 
@@ -76,6 +81,7 @@ export class ChatComponent implements OnInit, OnDestroy {
             this.playerSocketService.emitSendMessage(this.roomId, chatMessage);
             this.messageInput = '';
             this.nCharacters.set(0);
+            this.input.nativeElement.focus();
         }
     }
     openChatPopup() {

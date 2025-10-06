@@ -1,97 +1,88 @@
 <div class="statistics-container">
     <header class="header-container">
-      <h1>Liste des joueurs</h1>
+        <h1>{{ 'player.list' | translate }}</h1>
     </header>
     <table>
         <thead>
             <tr>
                 <th (click)="sortBy(sortColumns.name)">
-                    Joueur
-                    @if (currentSort.column === sortColumns.name) {
-                        <i class="fas fa-sort-{{currentSort.direction === sortDirection.asc ? 'up' : 'down'}}"></i>
+                    {{ 'player.stats.player' | translate }} @if (currentSort.column === sortColumns.name) {
+                    <i class="fas fa-sort-{{ currentSort.direction === sortDirection.asc ? 'up' : 'down' }}"></i>
                     } @else {
-                        <i class="fas fa-sort unsorted-icon"></i>
+                    <i class="fas fa-sort unsorted-icon"></i>
                     }
                 </th>
                 <th (click)="sortBy(sortColumns.combatAmount)">
-                    Nombre de combats
-                    @if (currentSort.column === sortColumns.combatAmount) {
-                        <i class="fas fa-sort-{{currentSort.direction === sortDirection.asc ? 'up' : 'down'}}"></i>
+                    {{ 'player.stats.combats' | translate }} @if (currentSort.column === sortColumns.combatAmount) {
+                    <i class="fas fa-sort-{{ currentSort.direction === sortDirection.asc ? 'up' : 'down' }}"></i>
                     } @else {
-                        <i class="fas fa-sort unsorted-icon"></i>
+                    <i class="fas fa-sort unsorted-icon"></i>
                     }
                 </th>
                 <th (click)="sortBy(sortColumns.escapeAmount)">
-                    Nombre d'évasions
-                    @if (currentSort.column === sortColumns.escapeAmount) {
-                        <i class="fas fa-sort-{{currentSort.direction === sortDirection.asc ? 'up' : 'down'}}"></i>
+                    {{ 'player.stats.escapes' | translate }} @if (currentSort.column === sortColumns.escapeAmount) {
+                    <i class="fas fa-sort-{{ currentSort.direction === sortDirection.asc ? 'up' : 'down' }}"></i>
                     } @else {
-                        <i class="fas fa-sort unsorted-icon"></i>
+                    <i class="fas fa-sort unsorted-icon"></i>
                     }
                 </th>
                 <th (click)="sortBy(sortColumns.victoryAmount)">
-                    Nombre de victoires
-                    @if (currentSort.column === sortColumns.victoryAmount) {
-                        <i class="fas fa-sort-{{currentSort.direction === sortDirection.asc ? 'up' : 'down'}}"></i>
+                    {{ 'player.stats.victories' | translate }} @if (currentSort.column === sortColumns.victoryAmount) {
+                    <i class="fas fa-sort-{{ currentSort.direction === sortDirection.asc ? 'up' : 'down' }}"></i>
                     } @else {
-                        <i class="fas fa-sort unsorted-icon"></i>
+                    <i class="fas fa-sort unsorted-icon"></i>
                     }
                 </th>
                 <th (click)="sortBy(sortColumns.defeatAmount)">
-                    Nombre de défaites
-                    @if (currentSort.column === sortColumns.defeatAmount) {
-                        <i class="fas fa-sort-{{currentSort.direction === sortDirection.asc ? 'up' : 'down'}}"></i>
+                    {{ 'player.stats.defeats' | translate }} @if (currentSort.column === sortColumns.defeatAmount) {
+                    <i class="fas fa-sort-{{ currentSort.direction === sortDirection.asc ? 'up' : 'down' }}"></i>
                     } @else {
-                        <i class="fas fa-sort unsorted-icon"></i>
+                    <i class="fas fa-sort unsorted-icon"></i>
                     }
                 </th>
                 <th (click)="sortBy(sortColumns.lifePointsLost)">
-                    Points de vie perdus
-                    @if (currentSort.column === sortColumns.lifePointsLost) {
-                        <i class="fas fa-sort-{{currentSort.direction === sortDirection.asc ? 'up' : 'down'}}"></i>
+                    {{ 'player.stats.my-life-points' | translate }} @if (currentSort.column === sortColumns.lifePointsLost) {
+                    <i class="fas fa-sort-{{ currentSort.direction === sortDirection.asc ? 'up' : 'down' }}"></i>
                     } @else {
-                        <i class="fas fa-sort unsorted-icon"></i>
+                    <i class="fas fa-sort unsorted-icon"></i>
                     }
                 </th>
                 <th (click)="sortBy(sortColumns.lifePointsOpponentLost)">
-                    Points de vie enlevés aux adversaires
-                    @if (currentSort.column === sortColumns.lifePointsOpponentLost) {
-                        <i class="fas fa-sort-{{currentSort.direction === sortDirection.asc ? 'up' : 'down'}}"></i>
+                    {{ 'player.stats.opponent-life-points' | translate }} @if (currentSort.column === sortColumns.lifePointsOpponentLost) {
+                    <i class="fas fa-sort-{{ currentSort.direction === sortDirection.asc ? 'up' : 'down' }}"></i>
                     } @else {
-                        <i class="fas fa-sort unsorted-icon"></i>
+                    <i class="fas fa-sort unsorted-icon"></i>
                     }
                 </th>
                 <th (click)="sortBy(sortColumns.itemsCollected)">
-                    Nombre d'objects différents ramassés
-                    @if (currentSort.column === sortColumns.itemsCollected) {
-                        <i class="fas fa-sort-{{currentSort.direction === sortDirection.asc ? 'up' : 'down'}}"></i>
+                    {{ 'player.stats.items' | translate }} @if (currentSort.column === sortColumns.itemsCollected) {
+                    <i class="fas fa-sort-{{ currentSort.direction === sortDirection.asc ? 'up' : 'down' }}"></i>
                     } @else {
-                        <i class="fas fa-sort unsorted-icon"></i>
+                    <i class="fas fa-sort unsorted-icon"></i>
                     }
                 </th>
                 <th (click)="sortBy(sortColumns.tilePercentage)">
-                    Tuiles visitées
-                    @if (currentSort.column === sortColumns.tilePercentage) {
-                        <i class="fas fa-sort-{{currentSort.direction === sortDirection.asc ? 'up' : 'down'}}"></i>
+                    {{ 'player.stats.tiles' | translate }} @if (currentSort.column === sortColumns.tilePercentage) {
+                    <i class="fas fa-sort-{{ currentSort.direction === sortDirection.asc ? 'up' : 'down' }}"></i>
                     } @else {
-                        <i class="fas fa-sort unsorted-icon"></i>
+                    <i class="fas fa-sort unsorted-icon"></i>
                     }
                 </th>
             </tr>
         </thead>
         <tbody>
             @for (player of getPlayersStats(); track player.name) {
-                <tr>
-                    <td>{{ player.name }}</td>
-                    <td>{{ player.combatAmount }}</td>
-                    <td>{{ player.escapeAmount }}</td>
-                    <td>{{ player.victoryAmount }}</td>
-                    <td>{{ player.defeatAmount }}</td>
-                    <td>{{ player.lifePointsLost }}</td>
-                    <td>{{ player.lifePointsOpponentLost }}</td>
-                    <td>{{ player.itemsCollected }}</td>
-                    <td>{{ player.tilePercentage }}%</td>
-                </tr>
+            <tr>
+                <td>{{ player.name }}</td>
+                <td>{{ player.combatAmount }}</td>
+                <td>{{ player.escapeAmount }}</td>
+                <td>{{ player.victoryAmount }}</td>
+                <td>{{ player.defeatAmount }}</td>
+                <td>{{ player.lifePointsLost }}</td>
+                <td>{{ player.lifePointsOpponentLost }}</td>
+                <td>{{ player.itemsCollected }}</td>
+                <td>{{ player.tilePercentage }}%</td>
+            </tr>
             }
         </tbody>
     </table>

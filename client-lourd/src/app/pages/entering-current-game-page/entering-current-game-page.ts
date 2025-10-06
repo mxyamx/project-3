@@ -5,11 +5,12 @@ import { CodeInputComponent } from '@app/components/code-input-component/code-in
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { CurrentGame } from '@common/current-game';
 import { UrlPage } from '@common/enums/url-page';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-entering-current-game-page',
     standalone: true,
-    imports: [CommonModule, CodeInputComponent, RouterLink],
+    imports: [CommonModule, CodeInputComponent, RouterLink, TranslatePipe],
     templateUrl: './entering-current-game-page.html',
     styleUrls: ['./entering-current-game-page.scss'],
 })

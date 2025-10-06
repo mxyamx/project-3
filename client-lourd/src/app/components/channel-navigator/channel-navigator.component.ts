@@ -11,6 +11,8 @@ import { ChannelTab } from '@app/enums/channel-tab';
 import { ConfirmationDialogData } from '@app/interfaces/confirmation-dialog-date';
 import { ChannelService } from '@app/services/channel/channel.service';
 import { Channel, ChannelSummary } from '@common/channel';
+import { CHANNEL_GENERAL_ID, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
+import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom, take } from 'rxjs';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { CreateChannelDialogComponent } from '../create-channel-dialog/create-channel-dialog.component';
@@ -19,7 +21,7 @@ import { LoadingComponent } from '../loading/loading.component';
 @Component({
     selector: 'app-channel-navigator',
     standalone: true,
-    imports: [CommonModule, FormsModule, LoadingComponent],
+    imports: [CommonModule, FormsModule, LoadingComponent, TranslatePipe],
     templateUrl: './channel-navigator.component.html',
     styleUrl: './channel-navigator.component.scss',
 })
@@ -38,6 +40,8 @@ export class ChannelNavigatorComponent implements OnInit {
     directoryChannels: Channel[] = [];
 
     readonly dialog = inject(MatDialog);
+    readonly gameRoomRegex = GAME_ROOM_REGEX;
+    readonly channelGeneralId = CHANNEL_GENERAL_ID;
 
     private channelService = inject(ChannelService);
     async ngOnInit(): Promise<void> {

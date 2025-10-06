@@ -12,7 +12,8 @@
         "lint": "ng lint --format stylish",
         "lint:fix": "npm run lint -- --fix",
         "start:electron": "ng build --configuration=development --base-href ./ && electron .",
-        "build:electron": "ng build --base-href ./ && electron-packager . --asar --ignore=/node_modules --ignore=/.angular --ignore=/e2e --ignore=/src --overwrite --out=./build"
+        "build:electron": "ng build --base-href ./ && electron-packager . --asar --ignore=/node_modules --ignore=/.angular --ignore=/e2e --ignore=/src --overwrite --out=./build",
+        "i18n:android": "node scripts/translation/i18n-generate.js"
     },
     "private": true,
     "dependencies": {
@@ -26,6 +27,8 @@
         "@angular/platform-browser": "19.0.4",
         "@angular/platform-browser-dynamic": "19.0.4",
         "@angular/router": "19.0.4",
+        "@ngx-translate/core": "^17.0.0",
+        "@ngx-translate/http-loader": "^17.0.0",
         "canvas": "^3.1.0",
         "firebase": "^12.2.1",
         "rxjs": "7.8.1",

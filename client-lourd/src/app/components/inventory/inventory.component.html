@@ -1,14 +1,14 @@
 <div class="inventory-container">
     <div class="inventory-header">
-        <p>Inventaire</p>
+        <p>{{ 'game-page.inventory' | translate }}</p>
     </div>
 
     <div class="items-grid">
         @for (item of this.gameSessionManager.chosenPlayer().inventory; track $index) {
-        <div class="item-slot" [class.empty-slot]="!item" [title]="item ? item.description : ''">
+        <div class="item-slot" [class.empty-slot]="!item" [title]="item ? ('general.item-name.' + item.description | translate) : ''">
             @if (item) {
             <img [src]="getItemImageCorrespondance()[item.name]" [alt]="item.name" class="item-image" />
-            <span class="item-name">{{ item.name }}</span>
+            <span class="item-name">{{ 'general.item-name.' + item.name | translate }}</span>
             }
         </div>
         }

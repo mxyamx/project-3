@@ -4,11 +4,12 @@ import { STANDARD_PLAYERS } from '@app/constants/development-constants';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { DiceBonus } from '@common/enums/dice-bonus';
 import { Player } from '@common/player';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-player-info',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, TranslatePipe],
     templateUrl: './player-info.component.html',
     styleUrl: './player-info.component.scss',
 })

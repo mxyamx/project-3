@@ -1,14 +1,15 @@
 <div class="game-info-container">
     <div class="info-header">
         <p>
-            {{ gameName }} <span class="game-details">({{ boardSizeCorrespondance[boardSize] }} - {{ gameMode }})</span>
+            {{ gameName }}
+            <span class="game-details">({{ boardSizeCorrespondance[boardSize] }} - {{ 'general.game-mode.' + gameMode | translate }})</span>
         </p>
     </div>
 
     <div class="info-content">
         <div class="players-list">
             <p>
-                <span class="player-count">{{ players.length }}</span> Joueurs
+                <span class="player-count">{{ players.length }}</span> {{ 'game-page.players' | translate }}
             </p>
             <div class="players-container">
                 @for (player of players; track player.name) {
@@ -17,17 +18,16 @@
                     <span class="player-name" [ngClass]="{ 'active-player': player.name === activePlayerName, 'not-in-game': player.isNotInGame }">
                         {{ player.name }}
                         @if (player.virtualPlayer) {
-                            <i class="fas fa-robot robot-icon" [ngClass]="{'aggressive': isAggressive(player), 'defensive': !isAggressive(player)}"></i>
-                        }
-                        @if (player.organizer) {
-                            <i class="fas fa-star organizer-star"></i>
+                        <i class="fas fa-robot robot-icon" [ngClass]="{ aggressive: isAggressive(player), defensive: !isAggressive(player) }"></i>
+                        } @if (player.organizer) {
+                        <i class="fas fa-star organizer-star"></i>
                         }
                     </span>
                     <i class="fas fa-flag" [ngClass]="hasFlag(player) && !player.isNotInGame ? 'flag-visible' : 'flag-hidden'"></i>
                     @if (isCtfMode()) {
-                    <span class="player-team">Équipe: {{ player.ctfTeam }}</span>
+                    <span class="player-team">{{ 'game-page.team' | translate }}: {{ player.ctfTeam }}</span>
                     }@else {
-                    <span class="player-victories">Victoires: {{ player.victories || 0 }}</span
+                    <span class="player-victories">{{ 'game-page.victories' | translate }}: {{ player.victories || 0 }}</span
                     >}
                 </div>
                 }

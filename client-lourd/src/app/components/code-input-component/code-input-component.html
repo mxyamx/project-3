@@ -37,19 +37,19 @@
             [(ngModel)]="codeArray[3]"
         />
     </div>
-    <button class="join-button" (click)="validateCode()" [disabled]="!isCodeComplete() || hasBeenClicked">Rejoindre!</button>
+    <button class="join-button" (click)="validateCode()" [disabled]="!isCodeComplete() || hasBeenClicked">{{'join-game-page.join'|translate}}</button>
     @if (error()) {
     <div class="modal-overlay" (click)="retry()">
         <div class="error" (click)="$event.stopPropagation()">
-            <h2>Erreur</h2>
+            <h2>{{'general.error'|translate}}</h2>
             @if(codeError) {
-            <p>Code de partie invalide !</p>
+            <p>{{'join-game-page.invalid-code'|translate}}</p>
             } @if(lockedError || limitError) {
-            <p>Partie bloquée par l'administrateur !</p>
+            <p>{{'join-game-page.locked-game'|translate}}</p>
             }
             <div class="buttons">
-                <button class="option-button" (click)="retry()">Réessayer</button>
-                <button class="option-button" routerLink="/main-page">Retourner à l'acceuil</button>
+                <button class="option-button" (click)="retry()">{{'join-game-page.try-again'| translate }}</button>
+                <button class="option-button" routerLink="/main-page">{{ 'general.button.back-home' | translate }}</button>
             </div>
         </div>
     </div>

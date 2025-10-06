@@ -1,7 +1,7 @@
 export enum TileType {
-    Wall = 'mur',
-    Door = 'porte',
-    Water = 'eau',
-    Ice = 'glace',
-    Grass = 'gazon',
+    Wall = 'wall',
+    Door = 'door',
+    Water = 'water',
+    Ice = 'ice',
+    Grass = 'grass',
 }

@@ -23,8 +23,8 @@ import { Tile } from '@common/tile';
 export class BoardGameManagerService {
     editedBoardGame: WritableSignal<BoardGame> = signal({
         id: '',
-        name: 'Default Board Game',
-        description: 'This is a default description for the board game.',
+        name: '',
+        description: '',
         size: BoardGameSize.Medium,
         gameMode: GameMode.Normal,
         tiles: [],
@@ -36,8 +36,8 @@ export class BoardGameManagerService {
 
     loadedBoardGame: WritableSignal<BoardGame> = signal({
         id: '',
-        name: 'Default Board Game',
-        description: 'This is a default description for the board game.',
+        name: '',
+        description: '',
         size: BoardGameSize.Medium,
         gameMode: GameMode.Normal,
         tiles: [],
@@ -49,8 +49,8 @@ export class BoardGameManagerService {
 
     playingBoardGame: WritableSignal<BoardGame> = signal({
         id: '',
-        name: 'Default Board Game',
-        description: 'This is a default description for the board game.',
+        name: '',
+        description: '',
         size: BoardGameSize.Medium,
         gameMode: GameMode.Normal,
         tiles: [],
@@ -65,7 +65,10 @@ export class BoardGameManagerService {
         this.editedBoardGame.update((curr) => ({ ...curr, tiles: newTiles }));
         this.playingBoardGame.update((curr) => ({ ...curr, tiles: newTiles }));
 
-        const newItemInfos: ItemInfoContainer[] = this.itemInfoGenerator(this.editedBoardGame().size, this.editedBoardGame().gameMode === 'CTF');
+        const newItemInfos: ItemInfoContainer[] = this.itemInfoGenerator(
+            this.editedBoardGame().size,
+            this.editedBoardGame().gameMode === GameMode.CTF,
+        );
         this.editedBoardGame.update((curr) => ({
             ...curr,
             itemInfos: newItemInfos,

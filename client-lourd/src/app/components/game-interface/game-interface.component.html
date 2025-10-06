@@ -1,57 +1,70 @@
 <div class="game-interface">
-    <div class="remaining-attempts">
-        Tentatives d'évasion restantes : {{ currentPlayerEscapeAttempts }}
-    </div>
+    <div class="remaining-attempts">{{ 'game-page.combat.remaining-escape-attemps' | translate }} : {{ currentPlayerEscapeAttempts }}</div>
 
     <div class="interface-content">
         <div class="column-left" [class.active]="isPlayerTurnGetter">
-            
-            <app-player [player]="currentPlayer" [isAttacking]="isPlayerTurnGetter" [diceValue]="currentDiceValue" [remainingEscapeAttempts]="currentPlayerEscapeAttempts" [isCurrentPlayer]="true"></app-player>
+            <app-player
+                [player]="currentPlayer"
+                [isAttacking]="isPlayerTurnGetter"
+                [diceValue]="currentDiceValue"
+                [remainingEscapeAttempts]="currentPlayerEscapeAttempts"
+                [isCurrentPlayer]="true"
+            ></app-player>
         </div>
 
         <div class="column-center">
             <div class="dice-container">
                 <div class="dice-group">
-                    <div class="dice-label">Dé d'attaque</div>
+                    <div class="dice-label">{{ 'game-page.combat.attack-dice' | translate }}</div>
                     <app-dice [isAttackDice]="true"></app-dice>
                 </div>
 
                 <div class="dice-group">
-                    <div class="dice-label">Dé de défense</div>
+                    <div class="dice-label">{{ 'game-page.combat.defense-dice' | translate }}</div>
                     <app-dice [isAttackDice]="false"></app-dice>
                 </div>
             </div>
-            
+
             <app-countdown [isInCombat]="true"></app-countdown>
         </div>
 
         <div class="column-right" [class.active]="!isPlayerTurnGetter">
-            <app-player [player]="opponent" [isAttacking]="!isPlayerTurnGetter" [diceValue]="currentDiceValue" [remainingEscapeAttempts]="opponentEscapeAttempts" [isCurrentPlayer]="false"></app-player>
+            <app-player
+                [player]="opponent"
+                [isAttacking]="!isPlayerTurnGetter"
+                [diceValue]="currentDiceValue"
+                [remainingEscapeAttempts]="opponentEscapeAttempts"
+                [isCurrentPlayer]="false"
+            ></app-player>
         </div>
     </div>
 
     <div class="action-buttons">
-        <button class="attack" 
-                (click)="onAttack()" 
-                [class.disabled]="isAttackButtonDisabled()"
-                [attr.disabled]="isAttackButtonDisabled() ? 'disabled' : null">
-            {{ getAttackButtonText() }}
+        <button
+            class="attack"
+            (click)="onAttack()"
+            [class.disabled]="isAttackButtonDisabled()"
+            [attr.disabled]="isAttackButtonDisabled() ? 'disabled' : null"
+        >
+            {{ getAttackButtonText() | translate }}
         </button>
-        <button class="escape" 
-                (click)="onEscape()" 
-                [class.disabled]="isEscapeButtonDisabled()"
-                [attr.disabled]="isEscapeButtonDisabled() ? 'disabled' : null">
-            S'évader
+        <button
+            class="escape"
+            (click)="onEscape()"
+            [class.disabled]="isEscapeButtonDisabled()"
+            [attr.disabled]="isEscapeButtonDisabled() ? 'disabled' : null"
+        >
+            {{ 'game-page.combat.escape' | translate }}
         </button>
     </div>
-    
+
     @if (showEscapeConfirmation) {
-        <div class="confirmation-bubble">
-            <p>Êtes-vous sûr de vouloir tenter une évasion ? Il vous reste {{ currentPlayerEscapeAttempts }} tentative(s).</p>
-            <div class="confirmation-buttons">
-                <button (click)="confirmEscape()">Oui, tenter l'évasion</button>
-                <button (click)="cancelEscape()">Non, continuer le combat</button>
-            </div>
+    <div class="confirmation-bubble">
+        <p>{{ 'game-page.combat.escape-confirmation-modal.title' | translate: { nAttempts: currentPlayerEscapeAttempts } }}</p>
+        <div class="confirmation-buttons">
+            <button (click)="confirmEscape()">{{ 'game-page.combat.escape-confirmation-modal.yes' | translate }}</button>
+            <button (click)="cancelEscape()">{{ 'game-page.combat.escape-confirmation-modal.no' | translate }}</button>
         </div>
+    </div>
     }
 </div>

@@ -1,0 +1,400 @@
+{
+    "general": {
+        "button": {
+            "back-home": "Retour à l'accueil",
+            "yes": "Oui",
+            "no": "Non",
+            "ok": "OK",
+            "confirm": "Confirmer",
+            "close": "Fermer"
+        },
+        "error": "Erreur",
+        "success": "Succès",
+        "item-name": {
+            "condition-based-1": "Griffe de Survie",
+            "condition-based-2": "Racine de Vengeance",
+            "attribute-editor-1": "Plume du Faucon",
+            "attribute-editor-2": "Carapace Enchantée",
+            "game-editor-1": "Fruit de l'Invisible",
+            "game-editor-2": "Retourneur de Temps",
+            "random-item": "Pierre de Résurrection",
+            "starting-point": "Point de Départ",
+            "flag": "Drapeau"
+        },
+        "tile-type": {
+            "wall": "mur",
+            "door": "porte",
+            "water": "eau",
+            "ice": "glace",
+            "grass": "gazon"
+        },
+        "item-description": {
+            "attribute-editor-1": "- Nom: Plume Du Faucon.\n - Type: Modificateur d'attributs.\n - Effet: Donne +1 Vitesse et +1 Attaque.\n",
+            "attribute-editor-2": "- Nom: Carapace Enchantée.\n - Type: Modificateur d'attributs.\n - Effet: Donne +2 Défense et -1 Vie.\n",
+            "condition-based-1": "- Nom: Griffe De Survie.\n - Type: Utilisation conditionnée.\n - Effet: Si la Vie ≤ 2, donne +2 Défense.\n",
+            "condition-based-2": "- Nom: Racine De Vengeance.\n - Type: Utilisation conditionnée.\n - Effet: Si on a 2 victoires, donne -1 Attaque et +1 Défense.\n",
+            "game-editor-1": "- Nom: Fruit De L'Invisible.\n - Type: Modificateur de jeu.\n - Effet: Donne la possibilité d'avoir 3 items.\n",
+            "game-editor-2": "- Nom: Retourneur De Temps.\n - Type: Modificateur de jeu.\n - Effet: Donne 2 actions possibles par tour.\n",
+            "random-item": "- Nom: Item Aléatoire.\n - Type: Aléatoire.\n - Effet: Non spécifique.\n",
+            "starting-point": "- Nom: Point De Départ.\n C'est la position initiale de chaque joueur.\n",
+            "flag": "- Nom: Drapeau.\n Disponible uniquement en mode CTF.\n Ramenez-le à votre point de départ pour faire gagner votre équipe.\n"
+        },
+
+        "tile-description": {
+            "wall": "- Nom: Mur.\n - Tuile de terrain ? Non.\n Un mur bloque le passage.\n",
+            "door": "- Nom: Porte.\n - Tuile de terrain ? Non.\n - Coût du déplacement: 1.\n Une porte ne peut être traversée que si elle est ouverte.\n",
+            "water": "- Nom: Eau.\n - Tuile de terrain ? Oui.\n - Coût du déplacement: 2.\n Les déplacements sont plus difficiles dans l'eau.\n",
+            "ice": "- Nom: Glace.\n - Tuile de terrain ? Oui.\n - Coût du déplacement: Aucun.\n Il est facile d'avancer sur la glace.\n",
+            "grass": "- Nom: Gazon.\n - Tuile de terrain ? Oui.\n - Coût du déplacement: 1.\n Une surface normale de terrain.\n"
+        },
+        "game-mode": {
+            "normal": "Normal",
+            "ctf": "CTF"
+        },
+        "server-error": "'Une erreur serveur est survenue.",
+        "dice-bonus": {
+            "four-side-bonus": "Dé à 4 faces",
+            "six-side-bonus": "Dé à 6 faces"
+        },
+        "languages": {
+            "fr": "Français",
+            "en": "English"
+        },
+        "themes": {
+            "dark": "Sombre",
+            "light": "Clair"
+        },
+        "loading": "Chargement",
+        "vp": {
+            "agressive": "Agressif",
+            "defensive": "Défensif"
+        },
+        "action-type": {
+            "open-door": "Ouvrir la porte",
+            "close-door": "Fermer la porte",
+            "attack-player": "Attaquer le joueur"
+        }
+    },
+    "settings-page": {
+        "apply": "Appliquer les modifications",
+        "title": "Paramètres",
+        "lang": "Langage",
+        "theme": "Thème"
+    },
+    "main-page": {
+        "join-game": "Joindre une partie",
+        "create-game": "Créer une partie",
+        "admin-boardgame": "Administrer les jeux",
+        "team-name": "Équipe 206"
+    },
+    "avatar-page": {
+        "title": "Crée ton personnage",
+        "confirm-modal": {
+            "title": "Vous ne pourrez plus modifier le personnage après la confirmation. Voulez-vous confirmer?"
+        },
+        "error-modal": {
+            "title": "Erreur",
+            "locked": "Partie bloquée par l'administrateur !",
+            "not-existing": "La partie n'existe plus !",
+            "retry": "Réessayer",
+            "back-home": "Retourner à l'accueil"
+        },
+        "name": "Nom",
+        "name-required": "required",
+        "next": "Suivant"
+    },
+    "board-edition-page": {
+        "title": "Edition de jeu",
+        "name": "Nom du jeu",
+        "name-placeholder": "Entrez le nom du jeu",
+        "description": "Description du jeu",
+        "description-placeholder": "Entrez la description du jeu",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "reset": "Réinitialiser",
+        "creation-tool": "Outils de création",
+        "tool-applier": "Applicateur de tuiles",
+        "item-applier": "Applicateur d'items",
+        "item-limit-warning": "vous ne pouvez placer que {{nItems}} items"
+    },
+    "chat": {
+        "channel-header": "Canaux de discussion",
+        "my-channels": "Mes canaux",
+        "discover": "Découvrir",
+        "no-channel": "Pas de canaux trouvés",
+        "filter": "Filtrer",
+        "search": "Rechercher",
+        "filter-placeholder": "Filtrer canal...",
+        "search-placeholder": "Rechercher un canal...",
+        "general": "Général",
+        "game": "Chat de jeu",
+        "send": "Envoyer"
+    },
+    "creation-page": {
+        "title": "Crée une nouvelle partie",
+        "boardgame-deleted-modal": "Attention!! Ce jeu a déjà été supprimé. Veuillez rafraichir la page.",
+        "visibility-modal": "Attention!! Ce jeu a changé de visibilité. Veuillez rafraichir la page.",
+        "create": "Créer une nouvelle partie"
+    },
+    "game-list": {
+        "title": "Liste des Jeux",
+        "empty": "Aucun jeu n'est dans la liste, veuillez en créer un",
+        "details": {
+            "name": "Nom",
+            "size": "Taille",
+            "mode": "Mode",
+            "last-modified": "Modifié le"
+        }
+    },
+    "admin-page": {
+        "title": "Administrer les jeux",
+        "delete-confirmation-modal": "Voulez-vous vraiment supprimer ce jeu ?",
+        "boardgame-deleted-modal": "Ce jeu a déjà été supprimé. Veuillez rafraichir la page.",
+        "create": "Créer un nouveau jeu",
+        "edit": "Éditer le jeu",
+        "delete": "Supprimer le jeu",
+        "visibility": "Changer la visibilité"
+    },
+    "join-game-page": {
+        "title": "Joindre une partie",
+        "enter-code": "Entrez le code d'accès vers la partie",
+        "join": "Rejoindre!",
+        "invalid-code": "Code de partie invalide !",
+        "locked-game": "Partie bloquée par l'administrateur !",
+        "try-again": "Réessayer"
+    },
+    "error-page": {
+        "title": "Oups ! Une erreur est survenue. Veuillez réessayer."
+    },
+    "game-page": {
+        "action": "Faire une action",
+        "end-turn": "Finir le tour",
+        "give-up": "Abandonner",
+        "debug-mode": "Mode débogage",
+        "normal-mode": "Mode normal",
+        "chat": "Chat",
+        "log": "Journal",
+        "give-up-confirmation-modal": "Êtes-vous sûr de vouloir abandonner la partie ?",
+        "end-turn-confirmation-modal": "Êtes-vous sûr de vouloir finir votre tour ?",
+        "players": "Joueurs",
+        "team": "Équipe",
+        "victories": "Victoires",
+        "combat": {
+            "remaining-escape-attemps": "Tentatives d'évasion restantes",
+            "attack-dice": "Dé d'attaque",
+            "defense-dice": "Dé de défense",
+            "opponent-attacking": "Adversaire attaque",
+            "attack": "Attaquer",
+            "escape": "S'évader",
+            "escape-confirmation-modal": {
+                "title": "Êtes-vous sûr de vouloir tenter une évasion ? Il vous reste {{ nAttempts }} tentative(s).",
+                "yes": "Oui, tenter l'évasion",
+                "no": "Non, continuer le combat"
+            }
+        },
+        "inventory": "Inventaire",
+        "playing-board": {
+            "type": "type",
+            "cost": "coût",
+            "vp": "Joueur virtuel",
+            "item-info": {
+                "name": "Nom",
+                "type": "Type",
+                "effect": "Effet",
+                "warning-defensive-vp": "Attention, les joueurs virtuels défensifs ont une préférence pour cet item",
+                "warning-agressive-vp": "Attention, les joueurs virtuels agressifs ont une préférence pour cet item"
+            },
+            "ok": "ok",
+            "drop-item": "déposer un item"
+        }
+    },
+    "game-option-page": {
+        "title": "Créer un nouveau jeu",
+        "mode": "Mode de jeu",
+        "size": "Taille de la carte",
+        "create": "Créer"
+    },
+    "login-page": {
+        "login": {
+            "title": "Connexion",
+            "switch": "Pas encore inscrit ?",
+            "button": "Se connecter"
+        },
+        "create": {
+            "title": "Créer un compte",
+            "username": {
+                "title": "Pseudonyme",
+                "required": "Pseudonyme requis",
+                "taken": "Ce pseudonyme est déjà utilisé ou non autorisé."
+            },
+            "avatar": {
+                "title": "Avatar",
+                "choose-file": "Choisir un fichier",
+                "required": "Avatar requis"
+            },
+            "switch": "Déjà inscrit ?",
+            "button": "Créer un compte"
+        },
+        "email": {
+            "title": "Courriel",
+            "invalid": "Le format du courriel est invalide."
+        },
+        "password": {
+            "title": "Mot de passe",
+            "confirm": "Confirmer le mot de passe",
+            "identical": "Le mot de passe et sa confirmation doivent être identiques."
+        },
+        "required": "Champ requis",
+        "min-length": "Minimum {{min}} caractères",
+        "max-length": "Maximum {{max}} caractères",
+        "error": {
+            "general": "Une erreur est survenue. Veuillez réessayer.",
+            "user-id": "Impossible de récupérer l'ID utilisateur.",
+            "missing-fields": "Veuillez remplir tous les champs.",
+            "connection": "Erreur lors de la connexion",
+            "already-online": "Cet utilisateur est déjà en ligne.",
+            "user": "Impossible de récupérer l'utilisateur.",
+            "firebase": {
+                "user-not-found": "Utilisateur non trouvé",
+                "invalid-credential": "Informations d'authentification invalides",
+                "email-already-in-use": "Le courriel est déjà utilisé",
+                "weak-password": "Le mot de passe doit comporter au moins 6 caractères",
+                "invalid-email": "Courriel invalide",
+                "network-request-failed": "Échec de la connexion réseau. Vérifiez votre Internet."
+            }
+        }
+    },
+    "profil-page": {
+        "email": "Courriel",
+        "money": "Argent",
+        "modify": "Modifier le compte",
+        "delete": "Supprimer le compte",
+        "socials": "Résaux sociaux",
+        "inventory": "Inventaire",
+        "stats": "Statistiques",
+        "delete-account-modal": "Êtes-vous sûr de vouloir supprimer votre compte? Cette action est irréversible",
+        "friends": "Amis",
+        "blocked-users": "Utilisateurs Bloqués",
+        "victories": "Victoires",
+        "defeats": "Défaites",
+        "combats": "Combats"
+    },
+    "statistics-page": {
+        "title": "Statistiques de partie",
+        "sub-title": "Statistiques globales",
+        "game-duration": "Durée de la partie",
+        "turns": "Tours de jeu",
+        "visited-tiles": "Tuiles totales visitées",
+        "doors": "Portes totales manipulées",
+        "flags": "Détentions du drapeau"
+    },
+    "waiting-page": {
+        "leave": "Quitter",
+        "full-room": "Salle pleine",
+        "lock-room": "Bloquer la salle",
+        "unlock-room": "Débloquer la salle",
+        "locked-room": "Salle bloquée! Personne ne peut plus entrer.",
+        "unlocked-room": "Salle débloquée! La partie est encore ouverte.",
+        "code": "Code d'accès",
+        "waiting": "En attente de joueurs ...",
+        "start-game": "Lancer la partie",
+        "vp": {
+            "button": "Générer joueur virtuel",
+            "title": "Choisissez le profil du joueur virtuel",
+            "agressive": "Agressif",
+            "defensive": "Défensif"
+        },
+        "player-amount-modal": "Le nombre de joueurs doit être pair pour commencer une partie en mode CTF."
+    },
+    "attribute-form": {
+        "physical": "Attributs physiques",
+        "health": {
+            "title": "Vie",
+            "description": "Le nombre de points de vie du personnage"
+        },
+        "speed": {
+            "title": "Rapidité",
+            "description": "Les points de mouvement par \ntour et determine l'ordre des tours"
+        },
+        "combat": "Attributs de combat",
+        "attack": {
+            "title": "Attaque",
+            "description": "La force avec laquelle une attaque est faite sur l'adversaire"
+        },
+        "defense": {
+            "title": "Défense",
+            "description": "La capacité à bloquer \nl'attaque d'un adversaire"
+        }
+    },
+    "avatar-img": {
+        "title": "Choisis ton avatar"
+    },
+    "dialog": {
+        "delete-channel": {
+            "title": "Supprimer le canal ?",
+            "text": "Cette action est irréversible. Voulez-vous continuer ?",
+            "cancel-button-label": "Annuler",
+            "confirm-button-label": "Supprimer"
+        },
+        "join-channel": {
+            "title": "Rejoindre ?",
+            "text": "Vous allez rejoindre ce canal. Vos nouveaux messages seront visibles par tous les membres.",
+            "cancel-button-label": "Annuler",
+            "confirm-button-label": "Rejoindre"
+        },
+        "leave-channel": {
+            "title": "Quitter le canal ?",
+            "text": "Vous allez quitter ce canal. Vous ne recevrez plus de messages, mais vous pourrez le rejoindre à nouveau.",
+            "cancel-button-label": "Annuler",
+            "confirm-button-label": "Quitter"
+        },
+        "create-channel": {
+            "title": "Créer un canal",
+            "text": "Quel sera le nom de votre canal ?",
+            "label": "Nom du canal",
+            "cancel-button-label": "Annuler",
+            "create-button-label": "Créer"
+        }
+    },
+    "event-log": {
+        "title": "Journal d'événements",
+        "my-logs": "Mes entrées seulement",
+        "all-logs": "Toutes les entrées"
+    },
+    "player": {
+        "health": "Points de vie",
+        "attack": "Attaque",
+        "defense": "Défense",
+        "attack-bonus": "Bonus d'attaque",
+        "defense-bonus": "Bonus de défense",
+        "movements": "Points de mouvement",
+        "actions": "Actions restantes",
+        "list": "Liste des joueurs",
+        "stats": {
+            "player": "Joueur",
+            "combats": "Nombre de combats",
+            "escapes": "Nombre d'évasions",
+            "victories": "Nombre de victoires",
+            "defeats": "Nombre de défaites",
+            "my-life-points": "Points de vie perdus",
+            "opponent-life-points": "Points de vie enlevés aux adversaires",
+            "items": "Nombre d'objects différents ramassés",
+            "tiles": "Tuiles visitées"
+        },
+        "delete": "Supprimer le joueur",
+        "alert-modal": {
+            "kicked": "Vous avez été retiré du jeu par l'organisateur.",
+            "admin-left": "L'organisateur a quitté la partie."
+        }
+    },
+    "validation-errors": {
+        "absent-name": "Le jeu doit avoir un nom",
+        "absent-description": "Le jeu doit avoir une description",
+        "existing-name": "Il existe déjà un jeu avec le même nom: utilisez un nom différent",
+        "invalid-terrain-tiles": "Plus de 50% de la surface totale de la zone de jeu doit être occupée par des tuiles de terrain",
+        "inaccessible-tiles": "Une tuile de terrain ne doit pas être inaccessible à cause d'un agencement de murs",
+        "incorrectly-placed-door": "Chaque tuile de porte doit se trouver entre deux tuiles de mur sur un même axe et ne peut pas être placée sur les bords de la zone de jeu",
+        "missing-entry-points": "Tous les points de départ doivent être placés",
+        "missing-flag": "Le drapeau doit être placé"
+    }
+}

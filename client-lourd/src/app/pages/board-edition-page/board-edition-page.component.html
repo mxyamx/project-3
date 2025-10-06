@@ -6,51 +6,57 @@
     (mouseleave)="onMouseLeavePage()"
 >
     <section class="navigation">
-        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> Retour à l'accueil</button>
+        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}</button>
     </section>
     <div class="title-section">
-        <h1>Edition de jeu</h1>
+        <h1>{{ 'board-edition-page.title' | translate }}</h1>
     </div>
     <section>
         <section class="box">
             <div class="game-info-section">
                 <h2 id="section-title"><i class="fas fa-file-alt"></i> Informations du Jeu</h2>
                 <div class="name-edition-area justified-column">
-                    <label><b> Nom du jeu :</b></label>
+                    <label
+                        ><b> {{ 'board-edition-page.name' | translate }} :</b></label
+                    >
                     <textarea
                         [value]="boardManager.editedBoardGame().name"
                         (input)="onInputName($event)"
                         rows="2"
                         cols="40"
-                        placeholder="Entrez le nom du jeu"
+                        [attr.placeholder]="'board-edition-page.name-placeholder' | translate"
                         maxlength="50"
                     ></textarea>
                 </div>
                 <div class="description-edition-area justified-column">
-                    <label><b> Description du jeu :</b></label>
+                    <label
+                        ><b> {{ 'board-edition-page.description' | translate }} :</b></label
+                    >
                     <textarea
                         [value]="boardManager.editedBoardGame().description"
                         (input)="onInputDescription($event)"
                         rows="10"
                         cols="40"
-                        placeholder="Entrez la description du jeu"
+                        [attr.placeholder]="'board-edition-page.description-placeholder' | translate"
                         maxlength="200"
                     ></textarea>
                 </div>
             </div>
             <div class="boutons">
                 <div>
-                    <button type="submit" class="annuler-button action-button" routerLink="/admin-page"><i class="fas fa-times"></i> Annuler</button>
+                    <button type="submit" class="annuler-button action-button" routerLink="/admin-page">
+                        <i class="fas fa-times"></i> {{ 'board-edition-page.cancel' | translate }}
+                    </button>
                 </div>
                 <div>
                     <button type="submit" class="enregistre-button action-button" (click)="saveBoard()">
-                        <i class="fas fa-save"></i> Enregistrer
+                        <i class="fas fa-save"></i> {{ 'board-edition-page.save' | translate }}
                     </button>
                 </div>
                 <div>
                     <button class="reinitialise-button action-button" (click)="reinitialize()">
                         <i class="fas fa-redo"></i>
-                        Réinitialiser
+                        {{ 'board-edition-page.reset' | translate }}
                     </button>
                 </div>
             </div>
@@ -60,9 +66,9 @@
         </section>
         <section class="box">
             <div class="tool-container">
-                <h2 id="section-title"><i class="fas fa-tools"></i> Outils de création</h2>
+                <h2 id="section-title"><i class="fas fa-tools"></i> {{ 'board-edition-page.creation-tool' | translate }}</h2>
                 <section class="justified-column">
-                    <h3>Applicateur de tuiles</h3>
+                    <h3>{{ 'board-edition-page.tool-applier' | translate }}</h3>
                     <div class="tile-tool-container">
                         @for (tile of tiles; track tile.type) {
                         <div
@@ -82,18 +88,16 @@
                             >
                                 <img [src]="tile.image" [alt]="tile.type" />
                             </div>
-                            <p>{{ tile.type }}</p>
+                            <p>{{ 'general.tile-type.' + tile.type | translate }}</p>
                             @if (hoveredTile === tile) {
-                            <div class="tooltip">
-                                {{ tile.description }}
-                            </div>
+                            <div class="tooltip">{{ 'general.tile-description.' + tile.description | translate }}</div>
                             }
                         </div>
                         }
                     </div>
                 </section>
                 <section class="justified-column">
-                    <h3>Applicateur d'items</h3>
+                    <h3>{{ 'board-edition-page.item-applier' | translate }}</h3>
                     <div class="items-tool-container">
                         @for(itemInfoContainer of boardManager.getBoardGame().itemInfos; track $index){
                         <div
@@ -129,9 +133,7 @@
                             @if(itemInfoContainer.available > 1 ){
                             <div class="amount-item-container">{{ itemInfoContainer.available }}</div>
                             } @if (hoveredItem?.name === itemInfoContainer.item.name) {
-                            <div class="tooltip">
-                                {{ itemDescription[itemInfoContainer.item.name] }}
-                            </div>
+                            <div class="tooltip">{{ 'general.item-description.' + itemDescription[itemInfoContainer.item.name] | translate }}</div>
                             }
                         </div>
                         }

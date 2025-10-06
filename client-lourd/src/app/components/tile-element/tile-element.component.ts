@@ -10,10 +10,11 @@ import { ItemType } from '@common/enums/item-type';
 import { TileType } from '@common/enums/tile-type';
 import { Item } from '@common/item';
 import { Tile } from '@common/tile';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-tile-element',
-    imports: [ItemElementComponent],
+    imports: [ItemElementComponent, TranslatePipe],
     templateUrl: './tile-element.component.html',
     styleUrl: './tile-element.component.scss',
 })

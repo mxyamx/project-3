@@ -18,9 +18,10 @@ import { Player } from '@common/player';
 import { Position } from '@common/position';
 import { Tile } from '@common/tile';
 import { VirtualPlayer } from '@common/virtual-player';
+import { TranslatePipe } from '@ngx-translate/core';
 @Component({
     selector: 'app-playing-board',
-    imports: [CommonModule, PlayingTileComponent, PlayingBoardCanvasComponent],
+    imports: [CommonModule, PlayingTileComponent, PlayingBoardCanvasComponent, TranslatePipe],
     templateUrl: './playing-board.component.html',
     styleUrl: './playing-board.component.scss',
 })
@@ -143,13 +144,13 @@ export class PlayingBoardComponent {
         }
         return false;
     }
-
+    //TODO: THIS IS DEFINATLY GOING TO BREAK AFTER i18n CHANGES, we need to see where this is shown
     protected transformItemDescription(item: Item): string {
         const sections = item.description.substring(this.descriptionPrefixLength).split(' - ');
         const effectSection = sections.find((section) => section.startsWith('Effet:'));
         return effectSection ? effectSection.substring(this.effectPrefixLength).trim() : '';
     }
-
+    //TODO: THIS IS DEFINATLY GOING TO BREAK AFTER i18n CHANGES we need to see where this is shown
     protected transformItemType(item: Item): string {
         const sections = item.description.substring(this.descriptionPrefixLength).split(' - ');
         const typeSection = sections.find((section) => section.startsWith('Type:'));

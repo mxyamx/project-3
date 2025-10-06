@@ -8,11 +8,12 @@ import { CurrentGame } from '@common/current-game';
 import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { Player } from '@common/player';
 import { VirtualPlayer } from '@common/virtual-player';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-players-list',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, TranslatePipe],
     templateUrl: './players-list.html',
     styleUrls: ['./players-list.scss'],
 })

@@ -1,5 +1,5 @@
 <section class="players-list">
-    <h2>Liste des joueurs:</h2>
+    <h2>{{ 'player.list' | translate }}:</h2>
     <div class="player-card-list">
         @for(player of playersList; track player.name){
         <div class="players-list-element" [ngClass]="{'organizer': player.organizer}" (click)="!player.organizer && openPlayerModal(player)">
@@ -9,9 +9,8 @@
             <div class="player-info">
                 <p>
                     @if (player.virtualPlayer) {
-                        <i class="fas fa-robot" [ngClass]="{'aggressive': isAggressive(player), 'defensive': !isAggressive(player)}"></i>
-                    }
-                    {{player.name}}
+                    <i class="fas fa-robot" [ngClass]="{'aggressive': isAggressive(player), 'defensive': !isAggressive(player)}"></i>
+                    } {{player.name}}
                 </p>
             </div>
         </div>
@@ -25,7 +24,7 @@
         <button (click)="closePlayerModal()" class="button-red close-button">X</button>
         <h2>{{ selectedPlayer.name }}</h2>
         <img [src]="selectedPlayer.character" [alt]="selectedPlayer.character" />
-        <button (click)="kickPlayer(selectedPlayer)" class="button-red">Supprimer le joueur</button>
+        <button (click)="kickPlayer(selectedPlayer)" class="button-red">{{ 'player.delete' | translate }}</button>
     </div>
 </div>
 } @if (showAlert()) {
@@ -33,13 +32,13 @@
     <div class="confirmation-bubble" (click)="$event.stopPropagation()">
         <div>
             @if (showAlertConfirmation) {
-            <p>Vous avez été retiré du jeu par l'organisateur.</p>
+            <p>{{ 'player.alert-modal.kicked' | translate }}</p>
             } @if (showAlertOfAdminLeft) {
-            <p>L'organisateur a quitté la partie.</p>
+            <p>{{ 'player.alert-modal.admin-left' | translate }}</p>
             }
         </div>
         <div>
-            <button class="confirmation-buttons" (click)="hideAlert()">Confirmer</button>
+            <button class="confirmation-buttons" (click)="hideAlert()">{{'general.button.confirm'|translate}}</button>
         </div>
     </div>
 </div>

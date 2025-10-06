@@ -1,8 +1,8 @@
 <div class="event-log-container">
     <div class="event-log-header">
-        <p>Journal d'événements</p>
+        <p>{{ 'event-log.title' | translate }}</p>
         <button (click)="filteredEventsButton()">
-            {{ isFiltered ? 'Mes entrées seulement' : 'Toutes les entrées' }}
+            {{ (isFiltered ? 'event-log.my-logs' : 'event-log.all-logs') | translate }}
         </button>
     </div>
 

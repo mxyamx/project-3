@@ -1,10 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { CURRENT_SORT, SORTABLE_STATISTICS_COLUMNS, SORT_DIRECTION } from '@app/constants/objects-constants';
 import { StatisticsManagerService } from '@app/services/statistics-manager/statistics-manager.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-player-statistics',
-    imports: [],
+    imports: [TranslatePipe],
     templateUrl: './player-statistics.component.html',
     styleUrl: './player-statistics.component.scss',
 })

@@ -1,4 +1,4 @@
 export enum GameMode {
-    Normal = 'Normal',
-    CTF = 'CTF',
+    Normal = 'normal',
+    CTF = 'ctf',
 }

@@ -1,14 +1,14 @@
-<h2 mat-dialog-title>{{ data.title }}</h2>
+<h2 mat-dialog-title>{{ data.title | translate }}</h2>
 
 <mat-dialog-content>
-    <p class="message">{{ data.text }}</p>
+    <p class="message">{{ data.text | translate }}</p>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
     <button mat-stroked-button class="cd-ghost" [mat-dialog-close]="false" type="button">
-        {{ data.cancelButtonLabel }}
+        {{ data.cancelButtonLabel | translate }}
     </button>
     <button mat-flat-button class="cd-cta" [mat-dialog-close]="true" cdkFocusInitial type="button">
-        {{ data.confirmButtonLabel }}
+        {{ data.confirmButtonLabel | translate }}
     </button>
 </mat-dialog-actions>

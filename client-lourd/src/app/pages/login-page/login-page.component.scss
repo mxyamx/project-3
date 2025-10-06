@@ -39,6 +39,7 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
     padding: 20px;
     box-sizing: border-box;
     overflow: hidden;
+    overflow-y: auto;
 }
 
 .main-content {
@@ -286,4 +287,8 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
     color: #ff6161;
     font-size: 1rem;
     text-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
+}
+
+.lang {
+    margin-top: 1em;
 }

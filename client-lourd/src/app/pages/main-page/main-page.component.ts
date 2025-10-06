@@ -6,11 +6,12 @@ import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { DeviceType } from '@common/enums/deviceType';
+import { TranslatePipe } from '@ngx-translate/core';
 @Component({
     selector: 'app-main-page',
     templateUrl: './main-page.component.html',
     styleUrls: ['./main-page.component.scss'],
-    imports: [RouterLink, ChatContainerComponent],
+    imports: [RouterLink, ChatContainerComponent, TranslatePipe],
 })
 export class MainPageComponent implements OnDestroy {
     chatDockService: ChatDockService = inject(ChatDockService);

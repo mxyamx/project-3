@@ -6,11 +6,12 @@ import { CurrentGameManagerService } from '@app/services/current-game-manager/cu
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { CurrentGame } from '@common/current-game';
 import { PlayerLimits } from '@common/enums/players-limit';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-code-input-component',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink],
+    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
     templateUrl: './code-input-component.html',
     styleUrls: ['./code-input-component.scss'],
 })

@@ -12,12 +12,12 @@
 
 @if(showItemLimitWarning){
 <div class="item-limit-warning">
-    <h2 class="item-limit-warning-title">Erreur</h2>
+    <h2 class="item-limit-warning-title">{{ 'general.error' | translate }}</h2>
     <div class="item-limit-warning-content">
-        <p>vous ne pouvez placer que {{ this.getItemLimit() }} items</p>
+        <p>{{ 'board-edition-page.item-limit-warning' | translate: { nItems: this.getItemLimit() } }}</p>
     </div>
     <div class="item-limit-warning-actions">
-        <button class="item-limit-warning-button" (click)="clickOnOk()">OK</button>
+        <button class="item-limit-warning-button" (click)="clickOnOk()">{{ 'general.button.ok' | translate }}</button>
     </div>
 </div>
 }

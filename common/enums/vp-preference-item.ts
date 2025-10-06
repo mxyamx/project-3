@@ -1,4 +1,4 @@
 export enum VpPreferenceItem {
-    Aggressive = 'agressif',
-    Defensive = 'defensif',
+    Aggressive = 'agressive',
+    Defensive = 'defensive',
 }

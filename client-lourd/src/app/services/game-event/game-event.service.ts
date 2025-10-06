@@ -6,6 +6,9 @@ import { GameEvent } from '@common/game-event';
 import { Player } from '@common/player';
 import * as dataForm from '@common/socket-data-forms';
 
+//TODO:ADD KEY VALUE IN i18n JSON FILES FOR TRANSLATION!!! Whe should create an enum containing the all the logs key, so we add the key attribute
+//to the GameEvent interface, when the user receives it he translates depending on the key, with that we send a string array containing
+//the data like names, door state
 @Injectable({
     providedIn: 'root',
 })

@@ -6,10 +6,11 @@ import { PlayerStatisticsComponent } from '@app/components/player-statistics/pla
 import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-statistics-page',
-    imports: [RouterLink, ChatContainerComponent, GlobalStatisticsComponent, PlayerStatisticsComponent, ChatContainerComponent],
+    imports: [RouterLink, ChatContainerComponent, GlobalStatisticsComponent, PlayerStatisticsComponent, ChatContainerComponent, TranslatePipe],
     standalone: true,
     templateUrl: './statistics-page.component.html',
     styleUrl: './statistics-page.component.scss',

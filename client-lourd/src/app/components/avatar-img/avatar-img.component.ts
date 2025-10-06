@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Avatar } from '@common/enums/avatar';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-avatar-img',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, TranslatePipe],
     templateUrl: './avatar-img.component.html',
     styleUrls: ['./avatar-img.component.scss'],
 })

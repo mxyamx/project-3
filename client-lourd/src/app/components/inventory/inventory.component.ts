@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FROM_ITEM_TO_IMAGE_ON_BOARD } from '@app/constants/objects-constants';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-inventory',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, TranslatePipe],
     templateUrl: './inventory.component.html',
     styleUrl: './inventory.component.scss',
 })

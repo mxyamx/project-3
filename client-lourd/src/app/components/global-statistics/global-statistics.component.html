@@ -1,27 +1,27 @@
 <div class="statistics-container">
     <header class="header-container">
-      <h1>Statistiques globales</h1>
-      <span>(Durée de la partie:&nbsp; {{ globalStats.gameDuration }}&nbsp;)</span>
+        <h1>{{ 'statistics-page.sub-title' | translate }}</h1>
+        <span>({{ 'statistics-page.game-duration' | translate }}:&nbsp; {{ globalStats.gameDuration }}&nbsp;)</span>
     </header>
-  
+
     <div class="global-stats">
-      <div>
-        <span>Tours de jeu:&nbsp;</span>
-        <span> {{ globalStats.numberTurns }}</span>
-      </div>
-      <div>
-        <span>Tuiles totales visitées:&nbsp;</span>
-        <span> {{ globalStats.tilePercentage }}%</span>
-      </div>
-      <div>
-        <span>Portes totales manipulées:&nbsp;</span>
-        <span> {{ globalStats.doorPercentage }}%</span>
-      </div>
-      @if (currentBoardGame.gameMode === gameMode.CTF) {
         <div>
-          <span>Détentions du drapeau:&nbsp;</span>
-          <span> {{ globalStats.flagsDetained }}</span>
+            <span>{{ 'statistics-page.turns' | translate }}:&nbsp;</span>
+            <span> {{ globalStats.numberTurns }}</span>
         </div>
-      }
+        <div>
+            <span>{{ 'statistics-page.visited-tiles' | translate }}:&nbsp;</span>
+            <span> {{ globalStats.tilePercentage }}%</span>
+        </div>
+        <div>
+            <span>{{ 'statistics-page.doors' | translate }}:&nbsp;</span>
+            <span> {{ globalStats.doorPercentage }}%</span>
+        </div>
+        @if (currentBoardGame.gameMode === gameMode.CTF) {
+        <div>
+            <span>{{ 'statistics-page.flags' | translate }}:&nbsp;</span>
+            <span> {{ globalStats.flagsDetained }}</span>
+        </div>
+        }
     </div>
-  </div>
+</div>

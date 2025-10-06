@@ -15,6 +15,8 @@ export class ActionDetectorService {
 
     private boardGameManager: BoardGameManagerService = inject(BoardGameManagerService);
 
+    private readonly i18nActionRootKey: string = 'general.action-type.';
+
     activateAction(): void {
         this.actionActivated.set(true);
     }
@@ -39,13 +41,21 @@ export class ActionDetectorService {
                     tile.availableAction = {
                         type: ActionType.AttackPlayer,
                         target: tile.position ?? { x: 0, y: 0 },
-                        description: 'Attaquer le joueur',
+                        description: this.i18nActionRootKey + ActionType.AttackPlayer,
                     };
             } else if (tile.type === TileType.Door) {
                 if (tile.doorState) {
-                    tile.availableAction = { type: ActionType.CloseDoor, target: tile.position ?? { x: 0, y: 0 }, description: 'Fermer la porte' };
+                    tile.availableAction = {
+                        type: ActionType.CloseDoor,
+                        target: tile.position ?? { x: 0, y: 0 },
+                        description: this.i18nActionRootKey + ActionType.CloseDoor,
+                    };
                 } else {
-                    tile.availableAction = { type: ActionType.OpenDoor, target: tile.position ?? { x: 0, y: 0 }, description: 'Ouvrir la porte' };
+                    tile.availableAction = {
+                        type: ActionType.OpenDoor,
+                        target: tile.position ?? { x: 0, y: 0 },
+                        description: this.i18nActionRootKey + ActionType.OpenDoor,
+                    };
                 }
             }
         });

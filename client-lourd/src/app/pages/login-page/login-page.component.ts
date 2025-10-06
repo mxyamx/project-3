@@ -1,30 +1,38 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { DropdownComponent } from '@app/components/dropdown/dropdown.component';
 import { ProfileAvatarImgComponent } from '@app/components/profile-avatar-img/profile-avatar-img.component';
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
+import { LanguageService } from '@app/services/language/language.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { DeviceType } from '@common/enums/deviceType';
+import { Language } from '@common/enums/language';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 const MIN_LENGTH = 3;
 const MAX_LENGTH = 14;
 
 @Component({
     selector: 'app-login-page',
-    imports: [ReactiveFormsModule, ProfileAvatarImgComponent, CommonModule],
+    imports: [ReactiveFormsModule, ProfileAvatarImgComponent, CommonModule, TranslatePipe, DropdownComponent],
     templateUrl: './login-page.component.html',
     styleUrl: './login-page.component.scss',
 })
-export class LoginPageComponent {
+export class LoginPageComponent implements OnInit {
     isLogin = true;
 
     private authService: AuthentificationService = inject(AuthentificationService);
     private httpUserService: HttpUserService = inject(HttpUserService);
     private userManager: UserManagerService = inject(UserManagerService);
+    private translateService: TranslateService = inject(TranslateService);
+    private languageService = inject(LanguageService);
     constructor(private router: Router) {}
+
     selectedAvatars: Set<string> = new Set();
+    readonly languages = [Language.french, Language.english];
 
     formGroup = new FormGroup({
         username: new FormControl('', []),
@@ -38,6 +46,12 @@ export class LoginPageComponent {
     selectedAvatar: string | null = null;
     uploadAvatar = false;
     uploadedAvatarPreview: string | null = null;
+    selectedLanguage: Language = Language.french;
+
+    ngOnInit(): void {
+        const langCode = this.languageService.initTranslate();
+        this.selectedLanguage = this.languages.find((lang) => lang === langCode) || Language.french;
+    }
 
     toggleAuth(event: Event) {
         event.preventDefault();
@@ -67,13 +81,13 @@ export class LoginPageComponent {
         const emailControl = this.formGroup.get('email');
 
         if (emailControl?.hasError('email')) {
-            this.errorMessage = 'Le format du courriel est invalide.';
+            this.errorMessage = this.translateService.instant('login-page.email.invalid');
             emailControl.markAsTouched();
             return;
         }
 
         if (this.formGroup.invalid) {
-            this.errorMessage = 'Veuillez remplir tous les champs.';
+            this.errorMessage = this.translateService.instant('login-page.error.missing-fields');
             this.formGroup.markAllAsTouched();
             return;
         }
@@ -84,14 +98,14 @@ export class LoginPageComponent {
             await this.authService.login(email!, password!);
             const userId = this.authService.getCurrentUserId();
             if (!userId) {
-                this.errorMessage = "Impossible de récupérer l'utilisateur.";
+                this.errorMessage = this.translateService.instant('login-page.error.user');
                 return;
             }
 
             this.httpUserService.getUser(userId).subscribe({
                 next: (user) => {
                     if (user.status !== 'offline') {
-                        this.errorMessage = 'Cet utilisateur est déjà en ligne.';
+                        this.errorMessage = this.translateService.instant('login-page.error.already-online');
                         return;
                     }
 
@@ -99,17 +113,18 @@ export class LoginPageComponent {
                     this.httpUserService.updateUser(updatedUser).subscribe({
                         next: () => {
                             this.userManager.currentUser.set(updatedUser);
+                            this.languageService.setTranslate(updatedUser.parameters.language);
                             this.router.navigate(['/home']);
                         },
                         error: (err) => {
-                            this.errorMessage = err.message || 'Erreur lors de la connexion';
+                            this.errorMessage = err.message || this.translateService.instant('login-page.error.connection');
                         },
                     });
                 },
                 error: (err) => (this.errorMessage = err.message),
             });
         } catch (err: any) {
-            this.errorMessage = this.authService.mapFirebaseErrors(err.code);
+            this.errorMessage = this.translateService.instant(this.authService.mapFirebaseErrors(err.code));
         }
     }
 
@@ -117,13 +132,13 @@ export class LoginPageComponent {
         const emailControl = this.formGroup.get('email');
 
         if (emailControl?.hasError('email')) {
-            this.errorMessage = 'Le format du courriel est invalide.';
+            this.errorMessage = this.translateService.instant('login-page.email.invalid');
             emailControl.markAsTouched();
             return;
         }
 
         if (this.formGroup.invalid) {
-            this.errorMessage = 'Veuillez remplir tous les champs.';
+            this.errorMessage = this.translateService.instant('login-page.error.missing-fields');
             this.formGroup.markAllAsTouched();
             return;
         }
@@ -131,7 +146,7 @@ export class LoginPageComponent {
         const { username, email, password, confirmPassword, avatar } = this.formGroup.value;
 
         if (password !== confirmPassword) {
-            this.errorMessage = 'Le mot de passe et sa confirmation doivent être identiques.';
+            this.errorMessage = this.translateService.instant('login-page.password.identical');
             return;
         }
 
@@ -139,7 +154,7 @@ export class LoginPageComponent {
             next: async (users) => {
                 const usernameTaken = users.some((user) => user.username === username) || username === '[supprimé]';
                 if (usernameTaken) {
-                    this.errorMessage = 'Ce pseudonyme est déjà utilisé ou non autorisé.';
+                    this.errorMessage = this.translateService.instant('login-page.create.username.taken');
                     return;
                 }
 
@@ -148,7 +163,7 @@ export class LoginPageComponent {
 
                     const userId = this.authService.getCurrentUserId();
                     if (!userId) {
-                        this.errorMessage = "Impossible de récupérer l'ID utilisateur.";
+                        this.errorMessage = this.translateService.instant('login-page.error.user-id');
                         return;
                     }
 
@@ -156,20 +171,21 @@ export class LoginPageComponent {
                     this.userManager.setUsername(username!);
                     this.userManager.setEmail(email!);
                     this.userManager.setAvatar(avatar!);
+                    this.userManager.setParameters({ language: this.selectedLanguage });
                     console.log(this.userManager.getCurrentUser());
 
                     this.httpUserService.createUser(this.userManager.getCurrentUser()).subscribe({
                         next: () => this.router.navigate(['/home']),
                         error: (err) => {
-                            this.errorMessage = err.message || 'Une erreur serveur est survenue.';
+                            this.errorMessage = err.message || this.translateService.instant('general.server-error');
                         },
                     });
                 } catch (err: any) {
-                    this.errorMessage = this.authService.mapFirebaseErrors(err.code);
+                    this.errorMessage = this.translateService.instant(this.authService.mapFirebaseErrors(err.code));
                 }
             },
             error: () => {
-                this.errorMessage = 'Une erreur est survenue. Veuillez réessayer.';
+                this.errorMessage = this.translateService.instant('login-page.error.general');
             },
         });
     }
@@ -179,10 +195,11 @@ export class LoginPageComponent {
         if (!control || !control.errors) return '';
 
         if (control.errors['required']) {
-            return field === 'username' ? 'Pseudonyme requis' : 'Champ requis';
+            const key = field === 'username' ? 'login-page.create.username.required' : 'login-page.required';
+            return this.translateService.instant(key);
         }
-        if (control.errors['minlength']) return `Minimum ${MIN_LENGTH} caractères`;
-        if (control.errors['maxlength']) return `Maximum ${MAX_LENGTH} caractères`;
+        if (control.errors['minlength']) return this.translateService.instant('login-page.min-length', { min: MIN_LENGTH });
+        if (control.errors['maxlength']) return this.translateService.instant('login-page.max-length', { max: MAX_LENGTH });
         return '';
     }
 
@@ -238,5 +255,8 @@ export class LoginPageComponent {
             img.src = reader.result as string;
         };
         reader.readAsDataURL(file);
+    }
+    onLanguageChange() {
+        this.languageService.setTranslate(this.selectedLanguage);
     }
 }

@@ -8,12 +8,13 @@ import { GameInterfaceService } from '@app/services/game-interface/game-interfac
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { PlayerState } from '@common/enums/player-state';
 import { Player } from '@common/player';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-game-interface',
     standalone: true,
-    imports: [CommonModule, PlayerComponent, DiceComponent, CountdownComponent],
+    imports: [CommonModule, PlayerComponent, DiceComponent, CountdownComponent, TranslatePipe],
     templateUrl: './game-interface.component.html',
     styleUrls: ['./game-interface.component.scss'],
 })
@@ -102,7 +103,7 @@ export class GameInterfaceComponent implements OnInit, OnDestroy {
     }
 
     getAttackButtonText(): string {
-        return this.gameSessionManager.playerState() !== PlayerState.Attacking ? 'Adversaire attaque' : 'Attaquer';
+        return this.gameSessionManager.playerState() !== PlayerState.Attacking ? 'game-page.combat.opponent-attacking' : 'game-page.combat.attack';
     }
 
     isAttackButtonDisabled(): boolean {

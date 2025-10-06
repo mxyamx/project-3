@@ -6,10 +6,11 @@ import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { DeviceType } from '@common/enums/deviceType';
 import { ActiveTab } from '@common/enums/profile-tabs';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-profile-page',
-    imports: [CommonModule],
+    imports: [CommonModule, TranslatePipe],
     templateUrl: './profile-page.component.html',
     styleUrl: './profile-page.component.scss',
 })

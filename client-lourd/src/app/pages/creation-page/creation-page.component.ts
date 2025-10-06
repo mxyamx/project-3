@@ -8,11 +8,13 @@ import { HttpBoardGameService } from '@app/services/http-manager/http-board-game
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { BoardGame } from '@common/board-game';
 import { CurrentGame } from '@common/current-game';
+import { GameMode } from '@common/enums/game-mode';
 import { UrlPage } from '@common/enums/url-page';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-creation-page',
-    imports: [RouterLink, CommonModule, GameListComponent],
+    imports: [RouterLink, CommonModule, GameListComponent, TranslatePipe],
     templateUrl: './creation-page.component.html',
     styleUrl: './creation-page.component.scss',
 })
@@ -24,6 +26,7 @@ export class CreationPageComponent implements OnInit {
     hasBeenClicked: boolean = false;
     gameManager: GameSessionManagerService = inject(GameSessionManagerService);
     httpBoardGameService = inject(HttpBoardGameService);
+    gameMode: typeof GameMode = GameMode;
     private currentGameService = inject(CurrentGameManagerService);
     private playerSocketService = inject(PlayerSocketService);
     constructor(private router: Router) {}

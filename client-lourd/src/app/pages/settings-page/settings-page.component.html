@@ -1,22 +1,29 @@
 <div class="settings-page-container">
     <section class="navigation">
-        <button class="navigation-button" (click)="goHome()"><i class="fas fa-home"></i> Retour à l'accueil</button>
+        <button class="navigation-button" (click)="goHome()"><i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}</button>
     </section>
 
     <div class="settings-container">
-        <h2 class="settings-title">Paramètres</h2>
+        <h2 class="settings-title">{{ 'settings-page.title' | translate }}</h2>
 
         <div class="main-content">
             <div class="setting-item">
-                <span>Langage</span>
-                <app-dropdown [listElems]="languages" [(selectedValue)]="selectedLanguage">></app-dropdown>
+                <span>{{ 'settings-page.lang' | translate }}</span>
+                <app-dropdown [i18nKey]="'general.languages.'" [(selectedValue)]="selectedLanguage" [listElems]="languages">></app-dropdown>
             </div>
 
             <div class="setting-item">
-                <span>Thème</span>
-                <app-dropdown [listElems]="themes" [(selectedValue)]="selectedTheme">></app-dropdown>
+                <span>{{ 'settings-page.theme' | translate }}</span>
+                <app-dropdown [i18nKey]="'general.themes.'" [(selectedValue)]="selectedTheme" [listElems]="themes">></app-dropdown>
             </div>
         </div>
-        <button class="apply-button navigation-button" (click)="applyChanges()">Appliquer les modifications</button>
+        <button
+            type="button"
+            class="apply-button navigation-button"
+            [disabled]="initialLanguage === selectedLanguage && initialTheme === selectedTheme"
+            (click)="applyChanges()"
+        >
+            {{ 'settings-page.apply' | translate }}
+        </button>
     </div>
 </div>

@@ -20,13 +20,14 @@ import { PreviewImageGenerationService } from '@app/services/preview-image-gener
 import { restrictEvent } from '@app/utils/functions/dom-related-functions';
 import { BoardGame } from '@common/board-game';
 import { TileType } from '@common/enums/tile-type';
+import { UrlPage } from '@common/enums/url-page';
 import { Item } from '@common/item';
 import { Tile } from '@common/tile';
-import { UrlPage } from '@common/enums/url-page';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-board-edition-page',
-    imports: [BoardgameContainerComponent, MatDialogModule, MatButtonModule, RouterLink],
+    imports: [BoardgameContainerComponent, MatDialogModule, MatButtonModule, RouterLink, TranslatePipe],
     templateUrl: './board-edition-page.component.html',
     styleUrl: './board-edition-page.component.scss',
 })

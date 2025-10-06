@@ -1,10 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { FROM_ITEM_NAME_TO_DESCRIPTION, FROM_ITEM_TO_IMAGE_ON_BOARD } from '@app/constants/objects-constants';
 import { Item } from '@common/item';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-item-element',
-    imports: [],
+    imports: [TranslatePipe],
     templateUrl: './item-element.component.html',
     styleUrl: './item-element.component.scss',
 })

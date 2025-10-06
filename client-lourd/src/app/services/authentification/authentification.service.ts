@@ -37,19 +37,19 @@ export class AuthentificationService {
     mapFirebaseErrors(errorCode: string): string {
         switch (errorCode) {
             case 'auth/user-not-found':
-                return 'Utilisateur non trouvé';
+                return 'login-page.error.firebase.user-not-found';
             case 'auth/invalid-credential':
-                return "Informations d'authentification invalides";
+                return 'login-page.error.firebase.invalid-credential';
             case 'auth/email-already-in-use':
-                return 'Le courriel est déjà utilisé';
+                return 'login-page.error.firebase.email-already-in-use';
             case 'auth/weak-password':
-                return 'Le mot de passe doit comporter au moins 6 caractères';
+                return 'login-page.error.firebase.weak-password';
             case 'auth/invalid-email':
-                return 'Courriel invalide';
+                return 'login-page.error.firebase.invalid-email';
             case 'auth/network-request-failed':
-                return 'Échec de la connexion réseau. Vérifiez votre Internet.';
+                return 'login-page.error.firebase.network-request-failed';
             default:
-                return 'Une erreur est survenue, veuillez réessayer';
+                return 'login-page.error.general';
         }
     }
 }

@@ -1,26 +1,30 @@
 <div class="game-option-container" (submit)="onSubmit()">
     <section class="navigation">
-        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> Retour à l'acceuil</button>
+        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}</button>
     </section>
     <div class="page-title">
-        <h1>Créer un nouveau jeu</h1>
+        <h1>{{ 'game-option-page.title' | translate }}</h1>
     </div>
     <form [formGroup]="settingsForm">
         <div>
-            <b><label for="game-mode"> Mode de jeu : </label></b>
+            <b
+                ><label for="game-mode"> {{ 'game-option-page.mode' | translate }} : </label></b
+            >
             <select id="game-mode" formControlName="gameMode">
-                <option [value]="gameModes[0]">Normal</option>
-                <option [value]="gameModes[1]">CTF</option>
+                <option [value]="gameModes[0]">{{ 'general.game-mode.normal' | translate }}</option>
+                <option [value]="gameModes[1]">{{ 'general.game-mode.ctf' | translate }}</option>
             </select>
         </div>
         <div>
-            <b><label for="board-size"> Taille de la carte : </label></b>
+            <b
+                ><label for="board-size"> {{ 'game-option-page.size' | translate }} : </label></b
+            >
             <select id="board-size" formControlName="boardSize">
                 <option value="10x10">10x10</option>
                 <option value="15x15">15x15</option>
                 <option value="20x20">20x20</option>
             </select>
         </div>
-        <button type="submit" class="primary" [disabled]="settingsForm.invalid">Créer</button>
+        <button type="submit" class="primary" [disabled]="settingsForm.invalid">{{ 'game-option-page.create' | translate }}</button>
     </form>
 </div>

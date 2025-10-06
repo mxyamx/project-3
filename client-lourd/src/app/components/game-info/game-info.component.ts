@@ -12,12 +12,13 @@ import { ItemName } from '@common/enums/item-name';
 import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { Player } from '@common/player';
 import { VirtualPlayer } from '@common/virtual-player';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-game-info',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, TranslatePipe],
     templateUrl: './game-info.component.html',
     styleUrl: './game-info.component.scss',
 })

@@ -1,6 +1,7 @@
 import { Component, HostListener, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
+import { LanguageService } from '@app/services/language/language.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { DeviceType } from '@common/enums/deviceType';
 import { environment } from 'src/environments/environment';
@@ -15,6 +16,11 @@ import { environment } from 'src/environments/environment';
 export class AppComponent {
     private authService: AuthentificationService = inject(AuthentificationService);
     private userManager: UserManagerService = inject(UserManagerService);
+    private languageService = inject(LanguageService);
+
+    constructor() {
+        this.languageService.initTranslate();
+    }
 
     @HostListener('window:unload')
     onUnload() {

@@ -15,9 +15,10 @@ import { DiceBonus } from '@common/enums/dice-bonus';
 import { PlayerLimits } from '@common/enums/players-limit';
 import { UrlPage } from '@common/enums/url-page';
 import { Player } from '@common/player';
+import { TranslatePipe } from '@ngx-translate/core';
 @Component({
     selector: 'app-avatar-page',
-    imports: [ReactiveFormsModule, AvatarImgComponent, AttributeFormComponent, RouterLink],
+    imports: [ReactiveFormsModule, AvatarImgComponent, AttributeFormComponent, RouterLink, TranslatePipe],
     templateUrl: './avatar-page.component.html',
     styleUrls: ['./avatar-page.component.scss'],
 })

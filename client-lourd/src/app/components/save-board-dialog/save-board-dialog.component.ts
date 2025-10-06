@@ -1,11 +1,12 @@
 import { Component, Inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-save-board-dialog',
     standalone: true,
-    imports: [MatDialogModule, MatButtonModule],
+    imports: [MatDialogModule, MatButtonModule, TranslatePipe],
     templateUrl: './save-board-dialog.component.html',
     styleUrl: './save-board-dialog.component.scss',
 })
@@ -17,6 +18,7 @@ export class SaveBoardDialogComponent {
         @Inject(MAT_DIALOG_DATA) public data: { message: string; success: boolean },
     ) {
         this.errorMessages = data.message.split('.').filter((error) => error.trim() !== '');
+        this.errorMessages = this.errorMessages.map((error) => error.trim());
     }
 
     close(): void {
