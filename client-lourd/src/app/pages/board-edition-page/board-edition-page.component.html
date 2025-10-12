@@ -14,7 +14,7 @@
     <section>
         <section class="box">
             <div class="game-info-section">
-                <h2 id="section-title"><i class="fas fa-file-alt"></i> Informations du Jeu</h2>
+                <h2 id="section-title"><i class="fas fa-file-alt"></i> {{ 'board-edition-page.game-info' | translate }}</h2>
                 <div class="name-edition-area justified-column">
                     <label
                         ><b> {{ 'board-edition-page.name' | translate }} :</b></label
@@ -133,7 +133,7 @@
                             @if(itemInfoContainer.available > 1 ){
                             <div class="amount-item-container">{{ itemInfoContainer.available }}</div>
                             } @if (hoveredItem?.name === itemInfoContainer.item.name) {
-                            <div class="tooltip">{{ 'general.item-description.' + itemDescription[itemInfoContainer.item.name] | translate }}</div>
+                            <div class="tooltip"><app-item-description [item]="itemInfoContainer.item"></app-item-description></div>
                             }
                         </div>
                         }

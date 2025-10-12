@@ -5,10 +5,10 @@
 
     <div class="items-grid">
         @for (item of this.gameSessionManager.chosenPlayer().inventory; track $index) {
-        <div class="item-slot" [class.empty-slot]="!item" [title]="item ? ('general.item-name.' + item.description | translate) : ''">
+        <div class="item-slot" [class.empty-slot]="!item" [title]="item ? ('general.item.name.' + item.name | translate) : ''">
             @if (item) {
             <img [src]="getItemImageCorrespondance()[item.name]" [alt]="item.name" class="item-image" />
-            <span class="item-name">{{ 'general.item-name.' + item.name | translate }}</span>
+            <span class="item-name">{{ 'general.item.name.' + item.name | translate }}</span>
             }
         </div>
         }

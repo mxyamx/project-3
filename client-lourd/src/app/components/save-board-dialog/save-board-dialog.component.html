@@ -2,7 +2,7 @@
     <h2 mat-dialog-title class="dialog-title">{{ (data.success ? 'general.success' : 'general.error') | translate }}</h2>
     <mat-dialog-content class="dialog-content">
         @for( error of errorMessages; track error) {
-        <p>{{ 'validation-errors.' + error | translate }}</p>
+        <p>{{ 'save-board-dialog.' + error | translate }}</p>
         }
     </mat-dialog-content>
     <mat-dialog-actions class="dialog-actions">

@@ -17,7 +17,9 @@
                 <label for="username">{{ 'login-page.create.username.title' | translate }} :</label>
                 <input type="text" id="username" class="form-control" formControlName="username" (input)="clearError()" />
                 @if (formGroup.get('username')?.invalid && formGroup.get('username')?.touched) {
-                <small class="error-message">{{ getErrorMessage('username') }}</small>
+                <small class="error-message" *ngIf="getErrorMessage('username') as error">
+                    {{ error.key | translate: error.params }}
+                </small>
                 }
             </div>
             }
@@ -26,7 +28,9 @@
                 <label for="email">{{ 'login-page.email.title' | translate }} :</label>
                 <input type="email" id="email" class="form-control" formControlName="email" (input)="clearError()" />
                 @if (formGroup.get('email')?.invalid && formGroup.get('email')?.touched) {
-                <small class="error-message">{{ getErrorMessage('email') }}</small>
+                <small class="error-message" *ngIf="getErrorMessage('email') as error">
+                    {{ error.key | translate: error.params }}
+                </small>
                 }
             </div>
 
@@ -69,7 +73,9 @@
                 <label for="password">{{ 'login-page.password.title' | translate }} :</label>
                 <input type="password" id="password" class="form-control" formControlName="password" (input)="clearError()" />
                 @if (formGroup.get('password')?.invalid && formGroup.get('password')?.touched) {
-                <small class="error-message">{{ getErrorMessage('password') }}</small>
+                <small class="error-message" *ngIf="getErrorMessage('password') as error">
+                    {{ error.key | translate: error.params }}
+                </small>
                 }
             </div>
 
@@ -78,11 +84,13 @@
                 <label for="confirmPassword">{{ 'login-page.password.confirm' | translate }} :</label>
                 <input type="password" id="confirmPassword" class="form-control" formControlName="confirmPassword" (input)="clearError()" />
                 @if (formGroup.get('confirmPassword')?.invalid && formGroup.get('confirmPassword')?.touched) {
-                <small class="error-message">{{ getErrorMessage('confirmPassword') }}</small>
+                <small class="error-message" *ngIf="getErrorMessage('confirmPassword') as error">
+                    {{ error.key | translate: error.params }}
+                </small>
                 }
             </div>
             } @if (errorMessage) {
-            <div class="error-message">{{ errorMessage }}</div>
+            <div class="error-message">{{ errorMessage | translate }}</div>
             }
 
             <button type="submit" class="connection-button">

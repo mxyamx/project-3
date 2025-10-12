@@ -38,7 +38,7 @@
                 minlength="1"
                 (ngModelChange)="onModelChange($event)"
                 [ngClass]="{ 'border-red': nCharacters() > maxNCharacters }"
-                placeholder="Envoyer un message"
+                [placeholder]="'chat.send-placeholder' | translate"
                 #input
             />
             <div class="max-character" [ngClass]="{ 'text-red': nCharacters() > maxNCharacters }">{{ nCharacters() }} / {{ maxNCharacters }}</div>

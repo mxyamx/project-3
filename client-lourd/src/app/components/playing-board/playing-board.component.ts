@@ -35,9 +35,6 @@ export class PlayingBoardComponent {
     private gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     private canvasManager: CanvasManagerService = inject(CanvasManagerService);
     private itemImageCorrespondance: { [key: string]: string } = FROM_ITEM_TO_IMAGE_ON_BOARD;
-    private readonly effectPrefixLength = 6;
-    private readonly descriptionPrefixLength = 2;
-    private readonly typePrefixLength = 6;
 
     constructor() {
         this.boardgame = this.boardManager.playingBoardGame.asReadonly();
@@ -143,18 +140,6 @@ export class PlayingBoardComponent {
             return (player as VirtualPlayer).profile === VirtualPlayerProfile.Agressive;
         }
         return false;
-    }
-    //TODO: THIS IS DEFINATLY GOING TO BREAK AFTER i18n CHANGES, we need to see where this is shown
-    protected transformItemDescription(item: Item): string {
-        const sections = item.description.substring(this.descriptionPrefixLength).split(' - ');
-        const effectSection = sections.find((section) => section.startsWith('Effet:'));
-        return effectSection ? effectSection.substring(this.effectPrefixLength).trim() : '';
-    }
-    //TODO: THIS IS DEFINATLY GOING TO BREAK AFTER i18n CHANGES we need to see where this is shown
-    protected transformItemType(item: Item): string {
-        const sections = item.description.substring(this.descriptionPrefixLength).split(' - ');
-        const typeSection = sections.find((section) => section.startsWith('Type:'));
-        return typeSection ? typeSection.substring(this.typePrefixLength).trim() : '';
     }
 
     private weightFunction(tile: Tile): number {

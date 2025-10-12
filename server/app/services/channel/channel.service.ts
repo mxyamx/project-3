@@ -185,6 +185,7 @@ export class ChannelService {
     }
 
     async deleteChannel(channelId: string): Promise<void> {
+        if (channelId === CHANNEL_GENERAL_ID) throw new Error('Le canal général ne peut pas être supprimé.');
         const session = this.databaseService.mongo.startSession();
         try {
             await session.withTransaction(async () => {

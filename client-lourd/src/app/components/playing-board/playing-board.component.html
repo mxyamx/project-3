@@ -19,7 +19,7 @@
 </div>
 @if(showInfoNotification && selectedTile){
 <div class="tile-info-notification" (contextmenu)="contextMenuOnInfoPopUp($event)">
-    <div>{{ 'game-page.playing-board.type' | translate }} : {{ selectedTile.type }}</div>
+    <div>{{ 'game-page.playing-board.type' | translate }} : {{ 'general.tile-type.' + selectedTile.type | translate }}</div>
     <div>{{ 'game-page.playing-board.cost' | translate }} : {{ tileCostInfo(selectedTile) }}</div>
     @if(selectedTile.containedPlayer){
     <div class="player-info-container">
@@ -46,15 +46,15 @@
         <div>
             <div>
                 <span style="color: red; font-weight: bold">{{ 'game-page.playing-board.item-info.name' | translate }}:</span>
-                {{ selectedTile.containedItem.name }}
+                {{ 'general.item.name.' + selectedTile.containedItem.name | translate }}
             </div>
             <div>
                 <span style="color: red; font-weight: bold">{{ 'game-page.playing-board.item-info.type' | translate }}:</span>
-                {{ this.transformItemType(selectedTile.containedItem) }}
+                {{ 'general.item.type.' + selectedTile.containedItem.name | translate }}
             </div>
             <div>
                 <span style="color: red; font-weight: bold">{{ 'game-page.playing-board.item-info.effect' | translate }}:</span>
-                {{ this.transformItemDescription(selectedTile.containedItem) }}
+                {{ 'general.item.effect.' + selectedTile.containedItem.name | translate }}
             </div>
             @if(getItemPreference(selectedTile.containedItem) === vpPreferenceItem.Defensive && hasVirtualPlayers()) {
             <div class="warning-message" style="color: orange; font-weight: bold; margin-top: 5px">

@@ -10,23 +10,16 @@ import { LocalStorageService } from '../local-storage/local-storage.service';
 export class LanguageService {
     private readonly baseLang: Language = Language.french;
     private readonly langs: Language[] = [Language.french, Language.english];
-    currentLanguage: Language = this.baseLang;
 
     constructor(
         private localStorageService: LocalStorageService,
         private translate: TranslateService,
     ) {
-        const langCode = this.translate.getCurrentLang();
-        this.currentLanguage = this.langs.find((lang) => lang === langCode) || this.baseLang;
-
-        this.translate.onLangChange.subscribe((event) => {
-            this.currentLanguage = this.langs.find((lang) => lang === event.lang) || this.baseLang;
-        });
+        this.translate.addLangs(this.langs);
+        this.translate.setFallbackLang(this.baseLang);
     }
 
     initTranslate(): Language {
-        this.translate.addLangs(this.langs);
-        this.translate.setFallbackLang(this.baseLang);
         const lang: Language = this.getLocalPreferredLanguage();
         this.translate.use(lang);
         this.localStorageService.setItem(LANGUAGE_STORAGE_KEY, lang);
@@ -37,14 +30,15 @@ export class LanguageService {
         this.translate.addLangs(this.langs);
         this.translate.setFallbackLang(this.baseLang);
 
-        const storageLang: Language | null = this.localStorageService.getItem<Language>(LANGUAGE_STORAGE_KEY);
+        const storageLangCode = this.localStorageService.getItem<string>(LANGUAGE_STORAGE_KEY);
+        const storageLang = this.coerceSupported(storageLangCode);
 
         const browserLangRaw: string = navigator.languages?.[0] || navigator.language || '';
         const browserLangCode = browserLangRaw.split('-')[0].toLowerCase();
 
-        const browserLang = this.langs.find((lang) => lang === browserLangCode) || null;
+        const browserLang = this.coerceSupported(browserLangCode);
 
-        const lang: Language = storageLang && this.langs.includes(storageLang) ? storageLang : browserLang ? browserLang : this.baseLang;
+        const lang: Language = storageLang ? storageLang : browserLang ? browserLang : this.baseLang;
 
         return lang;
     }
@@ -52,5 +46,24 @@ export class LanguageService {
     setTranslate(lang: Language): void {
         this.translate.use(lang);
         this.localStorageService.setItem(LANGUAGE_STORAGE_KEY, lang);
+    }
+
+    async resolveOnLogin(serverLang: Language, updateServerLang: (lang: Language) => Promise<void>): Promise<Language> {
+        const local = this.coerceSupported(this.localStorageService.getItem<string>(LANGUAGE_STORAGE_KEY));
+
+        if (local && local !== serverLang) {
+            this.translate.use(local);
+            await updateServerLang(local);
+            this.localStorageService.setItem(LANGUAGE_STORAGE_KEY, local);
+            return local;
+        }
+        this.translate.use(serverLang);
+        this.localStorageService.setItem(LANGUAGE_STORAGE_KEY, serverLang);
+        return serverLang;
+    }
+
+    private coerceSupported(code: string | null): Language | null {
+        if (!code) return null;
+        return this.langs.find((lang) => lang === code) || null;
     }
 }

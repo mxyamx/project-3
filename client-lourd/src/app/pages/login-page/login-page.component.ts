@@ -10,7 +10,8 @@ import { LanguageService } from '@app/services/language/language.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { DeviceType } from '@common/enums/deviceType';
 import { Language } from '@common/enums/language';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 
 const MIN_LENGTH = 3;
 const MAX_LENGTH = 14;
@@ -27,7 +28,6 @@ export class LoginPageComponent implements OnInit {
     private authService: AuthentificationService = inject(AuthentificationService);
     private httpUserService: HttpUserService = inject(HttpUserService);
     private userManager: UserManagerService = inject(UserManagerService);
-    private translateService: TranslateService = inject(TranslateService);
     private languageService = inject(LanguageService);
     constructor(private router: Router) {}
 
@@ -81,13 +81,13 @@ export class LoginPageComponent implements OnInit {
         const emailControl = this.formGroup.get('email');
 
         if (emailControl?.hasError('email')) {
-            this.errorMessage = this.translateService.instant('login-page.email.invalid');
+            this.errorMessage = 'login-page.email.invalid';
             emailControl.markAsTouched();
             return;
         }
 
         if (this.formGroup.invalid) {
-            this.errorMessage = this.translateService.instant('login-page.error.missing-fields');
+            this.errorMessage = 'login-page.error.missing-fields';
             this.formGroup.markAllAsTouched();
             return;
         }
@@ -96,35 +96,41 @@ export class LoginPageComponent implements OnInit {
 
         try {
             await this.authService.login(email!, password!);
+
             const userId = this.authService.getCurrentUserId();
             if (!userId) {
-                this.errorMessage = this.translateService.instant('login-page.error.user');
+                this.errorMessage = 'login-page.error.user';
                 return;
             }
 
-            this.httpUserService.getUser(userId).subscribe({
-                next: (user) => {
-                    if (user.status !== 'offline') {
-                        this.errorMessage = this.translateService.instant('login-page.error.already-online');
-                        return;
-                    }
+            const user = await firstValueFrom(this.httpUserService.getUser(userId));
 
-                    const updatedUser = { ...user, status: DeviceType.web };
-                    this.httpUserService.updateUser(updatedUser).subscribe({
-                        next: () => {
-                            this.userManager.currentUser.set(updatedUser);
-                            this.languageService.setTranslate(updatedUser.parameters.language);
-                            this.router.navigate(['/home']);
-                        },
-                        error: (err) => {
-                            this.errorMessage = err.message || this.translateService.instant('login-page.error.connection');
-                        },
-                    });
-                },
-                error: (err) => (this.errorMessage = err.message),
+            if (user.status !== 'offline') {
+                this.errorMessage = 'login-page.error.already-online';
+                return;
+            }
+            let updatedUser = { ...user, status: DeviceType.web };
+            await firstValueFrom(this.httpUserService.updateUser(updatedUser));
+            this.userManager.currentUser.set(updatedUser);
+            await this.languageService.resolveOnLogin(updatedUser.parameters.language, async (lang) => {
+                updatedUser = {
+                    ...updatedUser,
+                    parameters: {
+                        ...updatedUser.parameters,
+                        language: lang,
+                    },
+                };
+                await firstValueFrom(this.httpUserService.updateUser(updatedUser));
+                this.userManager.currentUser.set(updatedUser);
             });
+            this.router.navigate(['/home']);
         } catch (err: any) {
-            this.errorMessage = this.translateService.instant(this.authService.mapFirebaseErrors(err.code));
+            const fbCode = err?.code as string | undefined;
+            if (fbCode) {
+                this.errorMessage = this.authService.mapFirebaseErrors(fbCode);
+            } else {
+                this.errorMessage = err?.message || 'login-page.error.connection';
+            }
         }
     }
 
@@ -132,13 +138,13 @@ export class LoginPageComponent implements OnInit {
         const emailControl = this.formGroup.get('email');
 
         if (emailControl?.hasError('email')) {
-            this.errorMessage = this.translateService.instant('login-page.email.invalid');
+            this.errorMessage = 'login-page.email.invalid';
             emailControl.markAsTouched();
             return;
         }
 
         if (this.formGroup.invalid) {
-            this.errorMessage = this.translateService.instant('login-page.error.missing-fields');
+            this.errorMessage = 'login-page.error.missing-fields';
             this.formGroup.markAllAsTouched();
             return;
         }
@@ -146,7 +152,7 @@ export class LoginPageComponent implements OnInit {
         const { username, email, password, confirmPassword, avatar } = this.formGroup.value;
 
         if (password !== confirmPassword) {
-            this.errorMessage = this.translateService.instant('login-page.password.identical');
+            this.errorMessage = 'login-page.password.identical';
             return;
         }
 
@@ -154,7 +160,7 @@ export class LoginPageComponent implements OnInit {
             next: async (users) => {
                 const usernameTaken = users.some((user) => user.username === username) || username === '[supprimé]';
                 if (usernameTaken) {
-                    this.errorMessage = this.translateService.instant('login-page.create.username.taken');
+                    this.errorMessage = 'login-page.create.username.taken';
                     return;
                 }
 
@@ -163,7 +169,7 @@ export class LoginPageComponent implements OnInit {
 
                     const userId = this.authService.getCurrentUserId();
                     if (!userId) {
-                        this.errorMessage = this.translateService.instant('login-page.error.user-id');
+                        this.errorMessage = 'login-page.error.user-id';
                         return;
                     }
 
@@ -177,30 +183,37 @@ export class LoginPageComponent implements OnInit {
                     this.httpUserService.createUser(this.userManager.getCurrentUser()).subscribe({
                         next: () => this.router.navigate(['/home']),
                         error: (err) => {
-                            this.errorMessage = err.message || this.translateService.instant('general.server-error');
+                            this.errorMessage = err.message || 'general.server-error';
                         },
                     });
                 } catch (err: any) {
-                    this.errorMessage = this.translateService.instant(this.authService.mapFirebaseErrors(err.code));
+                    this.errorMessage = this.authService.mapFirebaseErrors(err.code);
                 }
             },
             error: () => {
-                this.errorMessage = this.translateService.instant('login-page.error.general');
+                this.errorMessage = 'login-page.error.general';
             },
         });
     }
 
-    getErrorMessage(field: string): string {
+    getErrorMessage(field: string): { key: string; params?: Record<string, unknown> } | null {
         const control = this.formGroup.get(field);
-        if (!control || !control.errors) return '';
+        if (!control || !control.errors) return null;
 
         if (control.errors['required']) {
             const key = field === 'username' ? 'login-page.create.username.required' : 'login-page.required';
-            return this.translateService.instant(key);
+            return { key };
         }
-        if (control.errors['minlength']) return this.translateService.instant('login-page.min-length', { min: MIN_LENGTH });
-        if (control.errors['maxlength']) return this.translateService.instant('login-page.max-length', { max: MAX_LENGTH });
-        return '';
+
+        if (control.errors['minlength']) {
+            return { key: 'login-page.min-length', params: { min: MIN_LENGTH } };
+        }
+
+        if (control.errors['maxlength']) {
+            return { key: 'login-page.max-length', params: { max: MAX_LENGTH } };
+        }
+
+        return null;
     }
 
     clearError() {

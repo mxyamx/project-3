@@ -10,17 +10,7 @@
         },
         "error": "Error",
         "success": "Success",
-        "item-name": {
-            "condition-based-1": "Claw of Survival",
-            "condition-based-2": "Root of Vengeance",
-            "attribute-editor-1": "Hawk Feather",
-            "attribute-editor-2": "Enchanted Shell",
-            "game-editor-1": "Fruit of Invisibility",
-            "game-editor-2": "Time Reverser",
-            "random-item": "Resurrection Stone",
-            "starting-point": "Starting Point",
-            "flag": "Flag"
-        },
+
         "tile-type": {
             "wall": "wall",
             "door": "door",
@@ -28,17 +18,42 @@
             "ice": "ice",
             "grass": "grass"
         },
-        "item-description": {
-            "attribute-editor-1": "- Name: Hawk Feather.\n - Type: Attribute Modifier.\n - Effect: Gives +1 Speed and +1 Attack.\n",
-            "attribute-editor-2": "- Name: Enchanted Shell.\n - Type: Attribute Modifier.\n - Effect: Gives +2 Defense and -1 Health.\n",
-            "condition-based-1": "- Name: Claw of Survival.\n - Type: Conditional Use.\n - Effect: If Health ≤ 2, grants +2 Defense.\n",
-            "condition-based-2": "- Name: Root of Vengeance.\n - Type: Conditional Use.\n - Effect: If you have 2 victories, gives -1 Attack and +1 Defense.\n",
-            "game-editor-1": "- Name: Fruit of Invisibility.\n - Type: Game Modifier.\n - Effect: Allows up to 3 items.\n",
-            "game-editor-2": "- Name: Time Reverser.\n - Type: Game Modifier.\n - Effect: Grants 2 possible actions per turn.\n",
-            "random-item": "- Name: Random Item.\n - Type: Random.\n - Effect: Non-specific.\n",
-            "starting-point": "- Name: Starting Point.\n This is each player's initial position.\n",
-            "flag": "- Name: Flag.\n Available only in CTF mode.\n Bring it back to your starting point to make your team win.\n"
+        "item": {
+            "name": {
+                "condition-based-1": "Claw of Survival",
+                "condition-based-2": "Root of Vengeance",
+                "attribute-editor-1": "Hawk Feather",
+                "attribute-editor-2": "Enchanted Shell",
+                "game-editor-1": "Fruit of Invisibility",
+                "game-editor-2": "Time Reverser",
+                "random-item": "Resurrection Stone",
+                "starting-point": "Starting Point",
+                "flag": "Flag"
+            },
+            "type": {
+                "attribute-editor-1": "Attribute Modifier",
+                "attribute-editor-2": "Attribute Modifier",
+                "condition-based-1": "Conditional Use",
+                "condition-based-2": "Conditional Use",
+                "game-editor-1": "Game Modifier",
+                "game-editor-2": "Game Modifier",
+                "random-item": "Random",
+                "starting-point": "This is each player's initial position",
+                "flag": "Available only in CTF mode"
+            },
+            "effect": {
+                "attribute-editor-1": "Gives +1 Speed and +1 Attack",
+                "attribute-editor-2": "Gives +2 Defense and -1 Health",
+                "condition-based-1": "If Health ≤ 2, grants +2 Defense",
+                "condition-based-2": "If you have 2 victories, gives -1 Attack and +1 Defense",
+                "game-editor-1": "Allows up to 3 items",
+                "game-editor-2": "Grants 2 possible actions per turn",
+                "random-item": "Non-specific",
+                "starting-point": "",
+                "flag": "Bring it back to your starting point to make your team win"
+            }
         },
+
         "tile-description": {
             "wall": "- Name: Wall.\n - Terrain tile? No.\n A wall blocks movement.\n",
             "door": "- Name: Door.\n - Terrain tile? No.\n - Movement cost: 1.\n A door can only be crossed if it's open.\n",
@@ -114,7 +129,8 @@
         "creation-tool": "Creation Tools",
         "tool-applier": "Tile Applicator",
         "item-applier": "Item Applicator",
-        "item-limit-warning": "you can only place {{nItems}} items"
+        "item-limit-warning": "you can only place {{nItems}} items",
+        "game-info": "Game Information"
     },
     "chat": {
         "channel-header": "Chat Channels",
@@ -127,7 +143,8 @@
         "search-placeholder": "Search a channel...",
         "general": "General",
         "game": "Game Chat",
-        "send": "Send"
+        "send": "Send",
+        "send-placeholder": "Send a message"
     },
     "creation-page": {
         "title": "Create a New Game",
@@ -386,7 +403,7 @@
             "admin-left": "The organizer has left the game."
         }
     },
-    "validation-errors": {
+    "save-board-dialog": {
         "absent-name": "The game must have a name",
         "absent-description": "The game must have a description",
         "existing-name": "A game with the same name already exists: please use a different name",
@@ -394,6 +411,7 @@
         "inaccessible-tiles": "A terrain tile must not be inaccessible due to a wall arrangement",
         "incorrectly-placed-door": "Each door tile must be placed between two wall tiles on the same axis and cannot be placed on the edges of the game area",
         "missing-entry-points": "All starting points must be placed",
-        "missing-flag": "The flag must be placed"
+        "missing-flag": "The flag must be placed",
+        "success": "Registration successful!"
     }
 }

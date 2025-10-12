@@ -10,6 +10,7 @@
         @for (event of gameEventService.filteredEvents; track event.timestamp) {
         <div class="event-item" [ngClass]="event.type">
             <span class="event-icon">{{ event.type }}</span>
+            <!-- TODO add log translation -->
             <span class="event-message"><p [innerHTML]="replaceNewlines(event.message)"></p></span>
             <span class="event-time">{{ event.timestamp | date: 'HH:mm:ss' }}</span>
         </div>

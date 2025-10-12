@@ -1,12 +1,11 @@
 <div class="notification-container">
-    @for (notification of notifications; track notification.id) {
-        @if (notification.isVisible) {
-            <div class="notification-item" [ngClass]="notification.position || 'top'">
-                <div class="notification-content" [ngClass]="notification.type">
-                    <i [class]="notification.icon"></i>
-                    <p>{{ notification.message }}</p>
-                </div>
-            </div>
-        }
-    }
+    @for (notification of notifications; track notification.id) { @if (notification.isVisible) {
+    <div class="notification-item" [ngClass]="notification.position || 'top'">
+        <div class="notification-content" [ngClass]="notification.type">
+            <i [class]="notification.icon"></i>
+            <!-- TODO add translation -->
+            <p>{{ notification.message }}</p>
+        </div>
+    </div>
+    } }
 </div>

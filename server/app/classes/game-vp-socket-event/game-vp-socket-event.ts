@@ -170,6 +170,7 @@ export class GameVpSocketEvent extends BaseVpSocketEvent {
     }
 
     private showLogTurnNotification(vpSocket: VpSocketManager) {
+        //TODO: add translation for message
         const gameEvent: GameEvent = {
             message: `C'est le tour de : ${this.activePlayer.name}`,
             timestamp: new Date(),

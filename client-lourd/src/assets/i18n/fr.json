@@ -10,17 +10,6 @@
         },
         "error": "Erreur",
         "success": "Succès",
-        "item-name": {
-            "condition-based-1": "Griffe de Survie",
-            "condition-based-2": "Racine de Vengeance",
-            "attribute-editor-1": "Plume du Faucon",
-            "attribute-editor-2": "Carapace Enchantée",
-            "game-editor-1": "Fruit de l'Invisible",
-            "game-editor-2": "Retourneur de Temps",
-            "random-item": "Pierre de Résurrection",
-            "starting-point": "Point de Départ",
-            "flag": "Drapeau"
-        },
         "tile-type": {
             "wall": "mur",
             "door": "porte",
@@ -28,16 +17,41 @@
             "ice": "glace",
             "grass": "gazon"
         },
-        "item-description": {
-            "attribute-editor-1": "- Nom: Plume Du Faucon.\n - Type: Modificateur d'attributs.\n - Effet: Donne +1 Vitesse et +1 Attaque.\n",
-            "attribute-editor-2": "- Nom: Carapace Enchantée.\n - Type: Modificateur d'attributs.\n - Effet: Donne +2 Défense et -1 Vie.\n",
-            "condition-based-1": "- Nom: Griffe De Survie.\n - Type: Utilisation conditionnée.\n - Effet: Si la Vie ≤ 2, donne +2 Défense.\n",
-            "condition-based-2": "- Nom: Racine De Vengeance.\n - Type: Utilisation conditionnée.\n - Effet: Si on a 2 victoires, donne -1 Attaque et +1 Défense.\n",
-            "game-editor-1": "- Nom: Fruit De L'Invisible.\n - Type: Modificateur de jeu.\n - Effet: Donne la possibilité d'avoir 3 items.\n",
-            "game-editor-2": "- Nom: Retourneur De Temps.\n - Type: Modificateur de jeu.\n - Effet: Donne 2 actions possibles par tour.\n",
-            "random-item": "- Nom: Item Aléatoire.\n - Type: Aléatoire.\n - Effet: Non spécifique.\n",
-            "starting-point": "- Nom: Point De Départ.\n C'est la position initiale de chaque joueur.\n",
-            "flag": "- Nom: Drapeau.\n Disponible uniquement en mode CTF.\n Ramenez-le à votre point de départ pour faire gagner votre équipe.\n"
+
+        "item": {
+            "name": {
+                "attribute-editor-1": "Plume du Faucon",
+                "attribute-editor-2": "Carapace Enchantée",
+                "condition-based-1": "Griffe de Survie",
+                "condition-based-2": "Racine de Vengeance",
+                "game-editor-1": "Fruit de l'Invisible",
+                "game-editor-2": "Retourneur de Temps",
+                "random-item": "Pierre de Résurrection",
+                "starting-point": "Point de Départ",
+                "flag": "Drapeau"
+            },
+            "type": {
+                "attribute-editor-1": "Modificateur d'attributs",
+                "attribute-editor-2": "Modificateur d'attributs",
+                "condition-based-1": "Utilisation conditionnée",
+                "condition-based-2": "Utilisation conditionnée",
+                "game-editor-1": "Modificateur de jeu",
+                "game-editor-2": "Modificateur de jeu",
+                "random-item": "Aléatoire",
+                "starting-point": "C'est la position initiale de chaque joueur",
+                "flag": "Disponible uniquement en mode CTF"
+            },
+            "effect": {
+                "attribute-editor-1": "Donne +1 Vitesse et +1 Attaque",
+                "attribute-editor-2": "Donne +2 Défense et -1 Vie",
+                "condition-based-1": "Si la Vie ≤ 2, donne +2 Défense",
+                "condition-based-2": "Si on a 2 victoires, donne -1 Attaque et +1 Défense",
+                "game-editor-1": "Donne la possibilité d'avoir 3 items",
+                "game-editor-2": "Donne 2 actions possibles par tour",
+                "random-item": "Non spécifique",
+                "starting-point": "",
+                "flag": "Ramenez-le à votre point de départ pour faire gagner votre équipe"
+            }
         },
 
         "tile-description": {
@@ -115,7 +129,8 @@
         "creation-tool": "Outils de création",
         "tool-applier": "Applicateur de tuiles",
         "item-applier": "Applicateur d'items",
-        "item-limit-warning": "vous ne pouvez placer que {{nItems}} items"
+        "item-limit-warning": "vous ne pouvez placer que {{nItems}} items",
+        "game-info": "Informations du Jeu"
     },
     "chat": {
         "channel-header": "Canaux de discussion",
@@ -128,7 +143,8 @@
         "search-placeholder": "Rechercher un canal...",
         "general": "Général",
         "game": "Chat de jeu",
-        "send": "Envoyer"
+        "send": "Envoyer",
+        "send-placeholder": "Envoyer un message"
     },
     "creation-page": {
         "title": "Crée une nouvelle partie",
@@ -387,7 +403,7 @@
             "admin-left": "L'organisateur a quitté la partie."
         }
     },
-    "validation-errors": {
+    "save-board-dialog": {
         "absent-name": "Le jeu doit avoir un nom",
         "absent-description": "Le jeu doit avoir une description",
         "existing-name": "Il existe déjà un jeu avec le même nom: utilisez un nom différent",
@@ -395,6 +411,7 @@
         "inaccessible-tiles": "Une tuile de terrain ne doit pas être inaccessible à cause d'un agencement de murs",
         "incorrectly-placed-door": "Chaque tuile de porte doit se trouver entre deux tuiles de mur sur un même axe et ne peut pas être placée sur les bords de la zone de jeu",
         "missing-entry-points": "Tous les points de départ doivent être placés",
-        "missing-flag": "Le drapeau doit être placé"
+        "missing-flag": "Le drapeau doit être placé",
+        "success": "Enregistrement réussi!"
     }
 }
