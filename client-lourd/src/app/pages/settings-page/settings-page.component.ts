@@ -54,8 +54,8 @@ export class SettingsPageComponent implements OnInit {
             const updatedUser: User = { ...user, parameters };
             this.httpUserService.updateUser(updatedUser).subscribe({
                 next: () => {
-                    this.initialLanguage = this.selectedLanguage;
-                    this.initialTheme = this.selectedTheme;
+                    this.initialLanguage = updatedUser.parameters.language;
+                    this.initialTheme = updatedUser.parameters.theme;
                     this.userManager.currentUser.set(updatedUser);
                     this.languageService.setTranslate(updatedUser.parameters.language);
                 },
