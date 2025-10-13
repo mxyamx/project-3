@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export interface CreateChannelData {
     title?: string;
@@ -14,7 +15,17 @@ export interface CreateChannelData {
     standalone: true,
     templateUrl: './create-channel-dialog.component.html',
     styleUrls: ['./create-channel-dialog.component.scss'],
-    imports: [FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose],
+    imports: [
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatDialogTitle,
+        MatDialogContent,
+        MatDialogActions,
+        MatDialogClose,
+        TranslatePipe,
+    ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateChannelDialogComponent {

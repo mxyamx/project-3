@@ -17,8 +17,11 @@ import { GameComponent } from '@app/pages/game/game.component';
 import { LoginPageComponent } from '@app/pages/login-page/login-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { ProfilePageComponent } from '@app/pages/profile-page/profile-page.component';
+import { SettingsPageComponent } from '@app/pages/settings-page/settings-page.component';
 import { StatisticsPageComponent } from '@app/pages/statistics-page/statistics-page.component';
 import { WaitingPageComponent } from '@app/pages/waiting-page/waiting-page.component';
+import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { environment } from './environments/environment';
 
 if (environment.production) {
@@ -29,6 +32,7 @@ const routes: Routes = [
     { path: '', redirectTo: '/login', pathMatch: 'full' },
     { path: 'login', component: LoginPageComponent },
     { path: 'profile', component: ProfilePageComponent },
+    { path: 'settings', component: SettingsPageComponent },
     { path: 'home', component: MainPageComponent },
     { path: 'admin-page', component: AdminPageComponent },
     { path: 'admin', component: AdminPageComponent },
@@ -47,5 +51,17 @@ const routes: Routes = [
 ];
 
 bootstrapApplication(AppComponent, {
-    providers: [provideHttpClient(withInterceptors([authTokenInterceptor])), provideRouter(routes, withHashLocation()), provideAnimations()],
+    providers: [
+        provideHttpClient(withInterceptors([authTokenInterceptor])),
+        provideTranslateService({
+            loader: provideTranslateHttpLoader({
+                prefix: '/assets/i18n/',
+                suffix: '.json',
+            }),
+            fallbackLang: 'fr',
+            lang: 'fr',
+        }),
+        provideRouter(routes, withHashLocation()),
+        provideAnimations(),
+    ],
 });

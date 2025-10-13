@@ -18,9 +18,10 @@ import { Player } from '@common/player';
 import { Position } from '@common/position';
 import { Tile } from '@common/tile';
 import { VirtualPlayer } from '@common/virtual-player';
+import { TranslatePipe } from '@ngx-translate/core';
 @Component({
     selector: 'app-playing-board',
-    imports: [CommonModule, PlayingTileComponent, PlayingBoardCanvasComponent],
+    imports: [CommonModule, PlayingTileComponent, PlayingBoardCanvasComponent, TranslatePipe],
     templateUrl: './playing-board.component.html',
     styleUrl: './playing-board.component.scss',
 })
@@ -34,9 +35,6 @@ export class PlayingBoardComponent {
     private gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     private canvasManager: CanvasManagerService = inject(CanvasManagerService);
     private itemImageCorrespondance: { [key: string]: string } = FROM_ITEM_TO_IMAGE_ON_BOARD;
-    private readonly effectPrefixLength = 6;
-    private readonly descriptionPrefixLength = 2;
-    private readonly typePrefixLength = 6;
 
     constructor() {
         this.boardgame = this.boardManager.playingBoardGame.asReadonly();
@@ -142,18 +140,6 @@ export class PlayingBoardComponent {
             return (player as VirtualPlayer).profile === VirtualPlayerProfile.Agressive;
         }
         return false;
-    }
-
-    protected transformItemDescription(item: Item): string {
-        const sections = item.description.substring(this.descriptionPrefixLength).split(' - ');
-        const effectSection = sections.find((section) => section.startsWith('Effet:'));
-        return effectSection ? effectSection.substring(this.effectPrefixLength).trim() : '';
-    }
-
-    protected transformItemType(item: Item): string {
-        const sections = item.description.substring(this.descriptionPrefixLength).split(' - ');
-        const typeSection = sections.find((section) => section.startsWith('Type:'));
-        return typeSection ? typeSection.substring(this.typePrefixLength).trim() : '';
     }
 
     private weightFunction(tile: Tile): number {

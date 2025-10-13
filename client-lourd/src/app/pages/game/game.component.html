@@ -13,28 +13,28 @@
                 [class.disabled]="isActionButtonDisabled()"
                 [attr.disabled]="isActionButtonDisabled() ? 'disabled' : null"
             >
-                Faire une action
+                {{ 'game-page.action' | translate }}
             </button>
             <button
                 (click)="confirmEndTurn()"
                 [class.disabled]="isEndTurnButtonDisabled()"
                 [attr.disabled]="isEndTurnButtonDisabled() ? 'disabled' : null"
             >
-                Finir le tour
+                {{ 'game-page.end-turn' | translate }}
             </button>
         </div>
     </div>
 
     <div class="column-right">
         <div class="abandon-button">
-            <button (click)="confirmAbandon()">Abandonner</button>
+            <button (click)="confirmAbandon()">{{ 'game-page.give-up' | translate }}</button>
             <button
                 (click)="gameSessionManager.toggleDebugMode()"
                 (keydown)="onKeydown($event)"
                 [class.disabled]="!this.gameSessionManager.chosenPlayer().organizer"
                 [disabled]="!this.gameSessionManager.chosenPlayer().organizer"
             >
-                Mode {{ gameSessionManager.debugModeStatus() ? 'débogage' : 'normal' }}
+                {{ (gameSessionManager.debugModeStatus() ? 'game-page.debug-mode' : 'game-page.normal-mode') | translate }}
             </button>
         </div>
         <app-game-info [gameId]="gameSessionManager.gameId()"></app-game-info>
@@ -44,8 +44,8 @@
         <app-event-log></app-event-log>
         }
         <div class="nav-buttons">
-            <button (click)="toggleView(true)" [class.active]="showChat">Chat <i class="fas fa-comments"></i></button>
-            <button (click)="toggleView(false)" [class.active]="!showChat"><i class="fas fa-tasks"></i> Journal</button>
+            <button (click)="toggleView(true)" [class.active]="showChat">{{ 'game-page.chat' | translate }} <i class="fas fa-comments"></i></button>
+            <button (click)="toggleView(false)" [class.active]="!showChat"><i class="fas fa-tasks"></i> {{ 'game-page.log' | translate }}</button>
         </div>
     </div>
 </div>
@@ -57,7 +57,7 @@
     </div>
     <div class="chat-log-area">
         <div class="abandon-button">
-            <button (click)="confirmAbandon()">Abandonner</button>
+            <button (click)="confirmAbandon()">{{ 'game-page.give-up' | translate }}</button>
         </div>
         @if (showChat && !chatDockService.chatDetache()) {
         <app-chat-container [gameId]="gameSessionManager.gameId()"></app-chat-container>
@@ -76,18 +76,18 @@
 </div>
 } @if (showAbandonConfirmation) {
 <div class="confirmation-bubble">
-    <p>Êtes-vous sûr de vouloir abandonner la partie ?</p>
+    <p>{{ 'game-page.give-up-confirmation-modal' | translate }}</p>
     <div class="confirmation-buttons">
-        <button (click)="abandonGame()">Oui</button>
-        <button (click)="cancelAbandon()">Non</button>
+        <button (click)="abandonGame()">{{ 'general.button.yes' | translate }}</button>
+        <button (click)="cancelAbandon()">{{ 'general.button.no' | translate }}</button>
     </div>
 </div>
 } @if (showEndTurnConfirmation) {
 <div class="confirmation-bubble">
-    <p>Êtes-vous sûr de vouloir finir votre tour ?</p>
+    <p>{{ 'game-page.end-turn-confirmation-modal' | translate }}</p>
     <div class="confirmation-buttons">
-        <button (click)="onCLickEndTurn()">Oui</button>
-        <button (click)="cancelEndTurn()">Non</button>
+        <button (click)="onCLickEndTurn()">{{ 'general.button.yes' | translate }}</button>
+        <button (click)="cancelEndTurn()">{{ 'general.button.no' | translate }}</button>
     </div>
 </div>
 }

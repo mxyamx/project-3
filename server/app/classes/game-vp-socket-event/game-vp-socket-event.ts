@@ -3,7 +3,7 @@ import { VpBehaviorInGame } from '@app/classes/vp-behavior-in-game/vp-behavior-i
 import { VpGameSessionManager } from '@app/classes/vp-game-session/vp-game-session-manager';
 import { VpSocketManager } from '@app/classes/vp-socket-manager/vp-socket-manager';
 import { VpState } from '@app/classes/vp-state/vp-state';
-import { FROM_ITEM_NAME_TO_VP_PREFERENCE, ITEM_NAMES } from '@app/constants/objects-constants';
+import { FROM_ITEM_NAME_TO_VP_PREFERENCE } from '@app/constants/objects-constants';
 import { GameEventType } from '@common/enums/game-event-type';
 import { ItemName } from '@common/enums/item-name';
 import { ItemType } from '@common/enums/item-type';
@@ -170,6 +170,7 @@ export class GameVpSocketEvent extends BaseVpSocketEvent {
     }
 
     private showLogTurnNotification(vpSocket: VpSocketManager) {
+        //TODO: add translation for message
         const gameEvent: GameEvent = {
             message: `C'est le tour de : ${this.activePlayer.name}`,
             timestamp: new Date(),
@@ -217,7 +218,7 @@ export class GameVpSocketEvent extends BaseVpSocketEvent {
                     currentTile.containedItem &&
                     (FROM_ITEM_NAME_TO_VP_PREFERENCE[currentTile.containedItem.name] === VpPreferenceItem.Defensive ||
                         FROM_ITEM_NAME_TO_VP_PREFERENCE[currentTile.containedItem.name] === VpPreferenceItem.Aggressive ||
-                        currentTile.containedItem.name === ITEM_NAMES.flag)
+                        currentTile.containedItem.name === ItemName.Flag)
                 ) {
                     const pickUpData: dataForm.PickUpItemReq = {
                         gameCode: this.gameId,

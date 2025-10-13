@@ -7,6 +7,7 @@
             <div class="user-actions">
                 <i class="fa-solid fa-message logout-button" aria-hidden="true" (click)="openGeneralChat()"></i>
                 <img [src]="avatar().avatar" alt="Avatar" class="avatar-icon" (click)="openProfile()" />
+                <i class="fa-solid fa-gear logout-button" aria-hidden="true" (click)="openSettings()"></i>
                 <i class="fa fa-sign-out-alt logout-button" aria-hidden="true" (click)="logout()"></i>
             </div>
         </div>
@@ -14,14 +15,14 @@
         <img src="./assets/mainLogo/MP logo.svg" alt="Logo Méchante Patte" id="main-logo" />
 
         <div class="button-container">
-            <button class="button" routerLink="/game-code">Joindre une partie</button>
-            <button class="button" routerLink="/creation">Créer une partie</button>
-            <button class="button" routerLink="/admin-page">Administrer les jeux</button>
+            <button class="button" routerLink="/game-code">{{ 'main-page.join-game' | translate }}</button>
+            <button class="button" routerLink="/creation">{{ 'main-page.create-game' | translate }}</button>
+            <button class="button" routerLink="/admin-page">{{ 'main-page.admin-boardgame' | translate }}</button>
         </div>
     </div>
 
     <footer class="footer-item">
-        <h4 class="team-name">Équipe 206</h4>
+        <h4 class="team-name">{{ 'main-page.team-name' | translate }}</h4>
         <p>
             <span>Maya Ait Djebara</span>, <span>Nada Douihi</span>, <span>Hubert Godin</span>, <span>Cristina Maria Goia</span>,
             <span>Maryam Mehdaoui</span>, <span>Nadine Rzig</span>

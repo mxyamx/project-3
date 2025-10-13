@@ -1,11 +1,11 @@
 <div class="mat-dialog-container">
-    <h2 mat-dialog-title class="dialog-title">{{ data.success ? 'Succès' : 'Erreur' }}</h2>
+    <h2 mat-dialog-title class="dialog-title">{{ (data.success ? 'general.success' : 'general.error') | translate }}</h2>
     <mat-dialog-content class="dialog-content">
         @for( error of errorMessages; track error) {
-        <p>{{ error }}</p>
+        <p>{{ 'save-board-dialog.' + error | translate }}</p>
         }
     </mat-dialog-content>
     <mat-dialog-actions class="dialog-actions">
-        <button mat-button class="dialog-button" (click)="close()">OK</button>
+        <button mat-button class="dialog-button" (click)="close()">{{ 'general.button.ok' | translate }}</button>
     </mat-dialog-actions>
 </div>

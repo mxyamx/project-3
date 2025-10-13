@@ -1,0 +1,20 @@
+<div id="dropdown-component">
+    <div class="selected" (click)="toggleMenu()">
+        <span>{{ i18nKey + selectedValue | translate }}</span>
+        <span [class.arrow-down]="menuOpen">&#x27A4;</span>
+    </div>
+
+    <div class="menu-wrapper" [class.show-menu]="menuOpen">
+        <ul #listElem>
+            @for (item of listElems; track item) {
+            <li>
+                <button type="button" class="menu-button" (click)="clickHandler(item)">
+                    {{ i18nKey + item | translate }} @if(item ===selectedValue){
+                    <i class="fa-solid fa-check"></i>
+                    }
+                </button>
+            </li>
+            }
+        </ul>
+    </div>
+</div>

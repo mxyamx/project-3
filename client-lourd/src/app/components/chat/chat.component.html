@@ -3,11 +3,11 @@
         <button class="back-btn" (click)="closeChat.emit()">
             <i class="fa fa-arrow-left"></i>
         </button>
-        <h3>
-            Clavardage -
-            <span>{{ chatName }}</span>
-        </h3>
-        @if(!isPopup){
+        @if(roomId === channelGeneralId || gameRoomRegex.test(roomId)){
+        <h3>{{ 'chat.' + chatName | translate }}</h3>
+        } @else{
+        <h3>{{ chatName }}</h3>
+        } @if(!isPopup){
         <button class="open-btn" (click)="openChatPopup()"><img src="assets/icones/open_in_new.svg" alt="Open in new icon" /></button>
         }
     </div>
@@ -38,10 +38,11 @@
                 minlength="1"
                 (ngModelChange)="onModelChange($event)"
                 [ngClass]="{ 'border-red': nCharacters() > maxNCharacters }"
-                placeholder="Envoyer un message"
+                [placeholder]="'chat.send-placeholder' | translate"
+                #input
             />
             <div class="max-character" [ngClass]="{ 'text-red': nCharacters() > maxNCharacters }">{{ nCharacters() }} / {{ maxNCharacters }}</div>
         </div>
-        <button (click)="sendToRoom()">Envoyer</button>
+        <button (click)="sendToRoom()">{{ 'chat.send' | translate }}</button>
     </div>
 </div>

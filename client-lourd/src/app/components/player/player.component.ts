@@ -4,13 +4,15 @@ import { MAX_ESCAPE_ATTEMPTS } from '@app/constants/development-constants';
 import { DiceService } from '@app/services/dice/dice.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { OpponentService } from '@app/services/opponent/opponent.service';
+import { DiceBonus } from '@common/enums/dice-bonus';
 import { Player } from '@common/player';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-player',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, TranslatePipe],
     templateUrl: './player.component.html',
     styleUrl: './player.component.scss',
 })
@@ -21,6 +23,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
     @Input() remainingEscapeAttempts: number = MAX_ESCAPE_ATTEMPTS;
     @Input() isCurrentPlayer: boolean = true;
     playerMaxHealth: number = 0;
+    diceBonus = DiceBonus;
     private subscriptions: Subscription[] = [];
 
     private diceService: DiceService = inject(DiceService);

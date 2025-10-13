@@ -3,7 +3,7 @@ import { ChannelMemberDoc } from '@app/interfaces/channel-member-doc';
 import { ChatMessageDoc } from '@app/interfaces/chat-message-doc';
 import { DatabaseService } from '@app/services/database/database.service';
 import { Channel, ChannelSummary } from '@common/channel';
-import { ROOM_GENERAL, ROOM_GENERAL_NAME } from '@common/constants/chat.constants';
+import { CHANNEL_GENERAL_ID, CHANNEL_GENERAL_NAME, FORBIDDEN_CHANNEL_NAMES } from '@common/constants/chat.constants';
 import { ChannelRole } from '@common/enums/channel-role';
 import { Collection, Filter, ObjectId } from 'mongodb';
 import { Service } from 'typedi';
@@ -31,8 +31,8 @@ export class ChannelService {
 
     async getChannelsByUserId(userId: string): Promise<ChannelSummary[]> {
         const generalChannel: ChannelSummary = {
-            id: ROOM_GENERAL,
-            name: ROOM_GENERAL_NAME,
+            id: CHANNEL_GENERAL_ID,
+            name: CHANNEL_GENERAL_NAME,
             createdAt: this.generalChatCreationDate,
             isAdmin: false,
             isManageable: false,
@@ -75,6 +75,10 @@ export class ChannelService {
             name: payload.name.trim(),
             createdAt: payload.createdAt,
         };
+
+        if (channelDoc.name in FORBIDDEN_CHANNEL_NAMES) {
+            throw new Error('CHANNEL_ALREADY_EXISTS');
+        }
 
         const existingChannel = await this.channelCollection.findOne({ name: payload.name.trim() });
 
@@ -119,7 +123,7 @@ export class ChannelService {
     }
 
     async leaveChannel(channelId: string, userId: string): Promise<void> {
-        if (channelId === ROOM_GENERAL) throw new Error('Le canal général ne peut pas être supprimé.');
+        if (channelId === CHANNEL_GENERAL_ID) throw new Error('Le canal général ne peut pas être supprimé.');
         const session = this.databaseService.mongo.startSession();
         try {
             await session.withTransaction(async () => {
@@ -181,6 +185,7 @@ export class ChannelService {
     }
 
     async deleteChannel(channelId: string): Promise<void> {
+        if (channelId === CHANNEL_GENERAL_ID) throw new Error('Le canal général ne peut pas être supprimé.');
         const session = this.databaseService.mongo.startSession();
         try {
             await session.withTransaction(async () => {

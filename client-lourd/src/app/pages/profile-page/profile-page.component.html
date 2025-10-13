@@ -1,6 +1,6 @@
 <div class="profile-page-container">
     <section class="navigation">
-        <button class="navigation-button" (click)="goHome()"><i class="fas fa-home"></i> Retour à l'accueil</button>
+        <button class="navigation-button" (click)="goHome()"><i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}</button>
     </section>
 
     <div class="profile-left">
@@ -19,57 +19,60 @@
                     } }
                 </span>
             </p>
-            <p><strong>Courriel:</strong> {{ user.email }}</p>
-            <p><strong>Argent:</strong> {{ user.money }} $</p>
+            <p>
+                <strong>{{ 'profil-page.email' | translate }}:</strong> {{ user.email }}
+            </p>
+            <p>
+                <strong>{{ 'profil-page.money' | translate }}:</strong> {{ user.money }} $
+            </p>
         </div>
 
         <div class="profile-actions">
-            <button class="button" (click)="editAccount()">Modifier le compte</button>
-            <button class="button" (click)="showDeletePopup()">Supprimer le compte</button>
+            <button class="button" (click)="editAccount()">{{ 'profil-page.modify' | translate }}</button>
+            <button class="button" (click)="showDeletePopup()">{{ 'profil-page.delete' | translate }}</button>
         </div>
     </div>
 
     <div class="profile-right">
         <div class="tabs">
             <div class="tabs">
-                <button [class.active]="activeTab === ActiveTab.Socials" (click)="activeTab = ActiveTab.Socials"><i class="fa fa-users"></i> Résaux sociaux</button>
-                <button [class.active]="activeTab === ActiveTab.Inventory" (click)="activeTab = ActiveTab.Inventory"><i class="fa fa-box"></i> Inventaire</button>
+                <button [class.active]="activeTab === ActiveTab.Socials" (click)="activeTab = ActiveTab.Socials">
+                    <i class="fa fa-users"></i> {{ 'profil-page.socials' | translate }}
+                </button>
+                <button [class.active]="activeTab === ActiveTab.Inventory" (click)="activeTab = ActiveTab.Inventory">
+                    <i class="fa fa-box"></i> {{ 'profil-page.inventory' | translate }}
+                </button>
                 <button [class.active]="activeTab === ActiveTab.Statistics" (click)="activeTab = ActiveTab.Statistics">
-                    <i class="fa fa-chart-bar"></i> Statistiques
+                    <i class="fa fa-chart-bar"></i> {{ 'profil-page.stats' | translate }}
                 </button>
             </div>
         </div>
 
         @if (deleteAccountWarning) {
-            <div class="confirmation-bubble">
-                <p>Êtes-vous sûr de vouloir supprimer votre compte? Cette action est irréversible</p>
-                <div class="confirmation-buttons">
-                    <button (click)="deleteAccount()">Oui</button>
-                    <button (click)="hideDeletePopup()">Non</button>
-                </div>
+        <div class="confirmation-bubble">
+            <p>{{ 'profil-page.delete-account-modal' | translate }}</p>
+            <div class="confirmation-buttons">
+                <button (click)="deleteAccount()">{{ 'general.button.yes' | translate }}</button>
+                <button (click)="hideDeletePopup()">{{ 'general.button.no' | translate }}</button>
             </div>
-            }
+        </div>
+        }
 
         <!-- TODO: Create component for each sub tab -->
 
         <div class="tab-content">
-            @switch (activeTab) {
-                @case (ActiveTab.Socials) {
-                    <p>Amis: {{ user.friends.length }}</p>
-                    <p>Utilisateurs Bloqués: {{ user.blocked.length }}</p>
-                }
-                @case (ActiveTab.Inventory) {
-                    <ul>
-                        <li>Placeholder items</li>
-                    </ul>
-                }
-                @case (ActiveTab.Statistics) {
-                    <p>Victoires: {{ user.statistics.victoryAmount }}</p>
-                    <p>Défaites: {{ user.statistics.defeatAmount }}</p>
-                    <p>Combats: {{ user.statistics.combatAmount }}</p>
-                }
-            }
+            @switch (activeTab) { @case (ActiveTab.Socials) {
+            <p>{{ 'profil-page.friends' | translate }}: {{ user.friends.length }}</p>
+            <p>{{ 'profil-page.blocked-users' | translate }}: {{ user.blocked.length }}</p>
+            } @case (ActiveTab.Inventory) {
+            <ul>
+                <li>Placeholder items</li>
+            </ul>
+            } @case (ActiveTab.Statistics) {
+            <p>{{ 'profil-page.victories' | translate }}: {{ user.statistics.victoryAmount }}</p>
+            <p>{{ 'profil-page.defeats' | translate }}: {{ user.statistics.defeatAmount }}</p>
+            <p>{{ 'profil-page.combats' | translate }}: {{ user.statistics.combatAmount }}</p>
+            } }
         </div>
-        
     </div>
 </div>

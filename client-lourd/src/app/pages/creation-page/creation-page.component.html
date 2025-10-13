@@ -1,24 +1,24 @@
 <div class="creation-container justified">
     <section class="navigation">
-        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> Retour à l'accueil</button>
+        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}</button>
     </section>
 
     <section class="header-item">
-        <h1>Crée une nouvelle partie</h1>
+        <h1>{{ 'creation-page.title' | translate }}</h1>
     </section>
 
     @if(showAlertConfirmation) {
     <div class="confirmation-bubble">
-        <p>Attention!! Ce jeu a déjà été supprimé. Veuillez rafraichir la page.</p>
+        <p>{{ 'creation-page.boardgame-deleted-modal' | translate }}</p>
         <div class="confirmation-buttons">
-            <button (click)="hideAlert()">Confirmer</button>
+            <button (click)="hideAlert()">{{ 'general.button.confirm' | translate }}</button>
         </div>
     </div>
     } @if(showVisibilityAlert) {
     <div class="confirmation-bubble">
-        <p>Attention!! Ce jeu a changé de visibilité. Veuillez rafraichir la page.</p>
+        <p>{{ 'creation-page.visibility-modal' }}</p>
         <div class="confirmation-buttons">
-            <button (click)="hideAlert()">Confirmer</button>
+            <button (click)="hideAlert()">{{ 'general.button.confirm' | translate }}</button>
         </div>
     </div>
     }
@@ -43,12 +43,12 @@
                 <div class="game-icons">
                     @if (displayedObject.visibility) {
                     <img src="assets/icones/eye icon white.svg" alt="Visible" />
-                    } @if (displayedObject.gameMode === 'CTF') {
+                    } @if (displayedObject.gameMode === gameMode.CTF) {
                     <img src="assets/icones/flag white.svg" alt="CTF Mode" />
                     }
                 </div>
             </div>
-            <button (click)="createNewGame()" [disabled]="hasBeenClicked">Créer une nouvelle partie</button>
+            <button (click)="createNewGame()" [disabled]="hasBeenClicked">{{ 'creation-page.create' | translate }}</button>
         </section>
         }
     </div>

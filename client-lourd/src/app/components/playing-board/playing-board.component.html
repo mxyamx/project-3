@@ -19,40 +19,51 @@
 </div>
 @if(showInfoNotification && selectedTile){
 <div class="tile-info-notification" (contextmenu)="contextMenuOnInfoPopUp($event)">
-    <div>type : {{ selectedTile.type }}</div>
-    <div>coût : {{ tileCostInfo(selectedTile) }}</div>
+    <div>{{ 'game-page.playing-board.type' | translate }} : {{ 'general.tile-type.' + selectedTile.type | translate }}</div>
+    <div>{{ 'game-page.playing-board.cost' | translate }} : {{ tileCostInfo(selectedTile) }}</div>
     @if(selectedTile.containedPlayer){
     <div class="player-info-container">
         <img [src]="selectedTile.containedPlayer.character" [alt]="selectedTile.containedPlayer.name" />
         @if(selectedTile.containedPlayer.virtualPlayer){
         <div>
-                @if (selectedTile.containedPlayer.virtualPlayer) {
-                    <i class="fas fa-robot" [ngClass]="{'aggressive': isAggressive(selectedTile.containedPlayer), 'defensive': !isAggressive(selectedTile.containedPlayer)}"></i>
-                }
-                <span [style.color]="'red'">{{ selectedTile.containedPlayer.name }}</span>
-                <div class="virtual-player-profile">
-                    <span class="profile-label">Joueur virtuel :</span>
-                    <span class="profile-value">{{ getVirtualPlayerProfile(selectedTile.containedPlayer) }}</span>
-                </div>
+            @if (selectedTile.containedPlayer.virtualPlayer) {
+            <i
+                class="fas fa-robot"
+                [ngClass]="{ aggressive: isAggressive(selectedTile.containedPlayer), defensive: !isAggressive(selectedTile.containedPlayer) }"
+            ></i>
+            }
+            <span [style.color]="'red'">{{ selectedTile.containedPlayer.name }}</span>
+            <div class="virtual-player-profile">
+                <span class="profile-label">{{ 'game-page.playing-board.vp' | translate }} :</span>
+                <span class="profile-value">{{ getVirtualPlayerProfile(selectedTile.containedPlayer) }}</span>
             </div>
+        </div>
         }
     </div>
     } @if(selectedTile.containedItem && !selectedTile.containedItem.disabled){
     <div class="item-info-container">
         <img [src]="imageCorrespondance[selectedTile.containedItem.name]" [alt]="selectedTile.containedItem.name" class="item-image" />
         <div>
-            <div><span style="color: red; font-weight: bold">Nom:</span> {{ selectedTile.containedItem.name }}</div>
-            <div><span style="color: red; font-weight: bold">Type:</span> {{ this.transformItemType(selectedTile.containedItem) }}</div>
-            <div><span style="color: red; font-weight: bold">Effet:</span> {{ this.transformItemDescription(selectedTile.containedItem) }}</div>
+            <div>
+                <span style="color: red; font-weight: bold">{{ 'game-page.playing-board.item-info.name' | translate }}:</span>
+                {{ 'general.item.name.' + selectedTile.containedItem.name | translate }}
+            </div>
+            <div>
+                <span style="color: red; font-weight: bold">{{ 'game-page.playing-board.item-info.type' | translate }}:</span>
+                {{ 'general.item.type.' + selectedTile.containedItem.name | translate }}
+            </div>
+            <div>
+                <span style="color: red; font-weight: bold">{{ 'game-page.playing-board.item-info.effect' | translate }}:</span>
+                {{ 'general.item.effect.' + selectedTile.containedItem.name | translate }}
+            </div>
             @if(getItemPreference(selectedTile.containedItem) === vpPreferenceItem.Defensive && hasVirtualPlayers()) {
-                <div class="warning-message" style="color: orange; font-weight: bold; margin-top: 5px;">
-                    Attention, les joueurs virtuels défensifs ont une préférence pour cet item
-                </div>
-            }
-            @if(getItemPreference(selectedTile.containedItem) === vpPreferenceItem.Aggressive && hasVirtualPlayers()) {
-                <div class="warning-message" style="color: orange; font-weight: bold; margin-top: 5px;">
-                    Attention, les joueurs virtuels agressifs ont une préférence pour cet item
-                </div>
+            <div class="warning-message" style="color: orange; font-weight: bold; margin-top: 5px">
+                {{ 'game-page.playing-board.item-info.warning-defensive-vp' | translate }}
+            </div>
+            } @if(getItemPreference(selectedTile.containedItem) === vpPreferenceItem.Aggressive && hasVirtualPlayers()) {
+            <div class="warning-message" style="color: orange; font-weight: bold; margin-top: 5px">
+                {{ 'game-page.playing-board.item-info.warning-agressive-vp' | translate }}
+            </div>
             }
         </div>
     </div>

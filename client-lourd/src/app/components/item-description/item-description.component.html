@@ -1,0 +1,21 @@
+<div class="line">
+    - {{ 'game-page.playing-board.item-info.name' | translate }}:
+    {{ 'general.item.name.' + item.name | translate }}
+</div>
+@if(item.name === 'starting-point' || item.name ==='flag'){
+<div class="line">
+    {{ 'general.item.type.' + item.name | translate }}
+</div>
+<div class="line">
+    {{ 'general.item.effect.' + item.name | translate }}
+</div>
+} @else{
+<div class="line">
+    - {{ 'game-page.playing-board.item-info.type' | translate }}:
+    {{ 'general.item.type.' + item.name | translate }}
+</div>
+<div class="line">
+    - {{ 'game-page.playing-board.item-info.effect' | translate }}:
+    {{ 'general.item.effect.' + item.name | translate }}
+</div>
+}

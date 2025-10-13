@@ -11,7 +11,7 @@ import { ChannelDoc } from '@app/interfaces/channel-doc';
 import { VpSocketAddingHandlerConfig } from '@app/interfaces/vp-socket-adding-handler-config';
 import { CurrentGamesService } from '@app/services/current-games/current-games.service';
 import { SocketGameCommunication } from '@app/services/socket-game-communication/socket-game-communication.service';
-import { ROOM_GENERAL } from '@common/constants/chat.constants';
+import { CHANNEL_GENERAL_ID, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
 import { CurrentGame } from '@common/current-game';
 import { PlayerLimits } from '@common/enums/players-limit';
 import { Player } from '@common/player';
@@ -37,8 +37,6 @@ export class SocketManager {
 
     private vpSocketAddingHandler: VpSocketAddingHandler;
     private socketGameCommunication: SocketGameCommunication;
-
-    private readonly GAME_ROOM_REGEX = /^GAME-\d{4}$/;
 
     constructor(
         server: http.Server,
@@ -383,13 +381,13 @@ export class SocketManager {
     private async purgeChatHistoryIfRoomEmpty(socket: io.Socket): Promise<void> {
         try {
             for (const room of socket.rooms) {
-                if (room === socket.id || room === ROOM_GENERAL) continue;
+                if (room === socket.id || room === CHANNEL_GENERAL_ID) continue;
 
                 const sizeBeforeLeave = this.sio.sockets.adapter.rooms.get(room)?.size ?? 0;
 
                 if (sizeBeforeLeave !== 1) continue;
 
-                if (this.GAME_ROOM_REGEX.test(room)) {
+                if (GAME_ROOM_REGEX.test(room)) {
                     await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: room });
                 } else {
                     const collection: Collection<ChannelDoc> = this.databaseService.database.collection(process.env.CHANNEL_COLLECTION_NAME);

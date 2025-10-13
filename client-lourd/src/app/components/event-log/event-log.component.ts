@@ -6,11 +6,12 @@ import { PlayerSocketService } from '@app/services/player-socket/player-socket.s
 import { GameEventType } from '@common/enums/game-event-type';
 import { GameEvent } from '@common/game-event';
 import { Player } from '@common/player';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-event-log',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, TranslatePipe],
     templateUrl: './event-log.component.html',
     styleUrl: './event-log.component.scss',
 })

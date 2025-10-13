@@ -4,10 +4,11 @@ import { DEFAULT_ATTRIBUTES_POINT } from '@app/constants/objects-constants';
 import { AdminModule } from '@app/modules/admin/admin.module';
 import { CharacterAttributes } from '@common/character-attributes';
 import { DiceBonus } from '@common/enums/dice-bonus';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-attribute-form',
-    imports: [AdminModule],
+    imports: [AdminModule, TranslatePipe],
     templateUrl: './attribute-form.component.html',
     styleUrl: './attribute-form.component.scss',
 })

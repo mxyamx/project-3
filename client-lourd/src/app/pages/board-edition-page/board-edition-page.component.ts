@@ -9,6 +9,7 @@ import { HttpBoardGameService } from '@app/services/http-manager/http-board-game
 import { ItemApplicatorService } from '@app/services/item-applicator/item-applicator.service';
 import { TileApplicatorService } from '@app/services/tile-applicator/tile-applicator.service';
 
+import { ItemDescriptionComponent } from '@app/components/item-description/item-description.component';
 import {
     followerData,
     FROM_ITEM_NAME_TO_DESCRIPTION,
@@ -20,13 +21,14 @@ import { PreviewImageGenerationService } from '@app/services/preview-image-gener
 import { restrictEvent } from '@app/utils/functions/dom-related-functions';
 import { BoardGame } from '@common/board-game';
 import { TileType } from '@common/enums/tile-type';
+import { UrlPage } from '@common/enums/url-page';
 import { Item } from '@common/item';
 import { Tile } from '@common/tile';
-import { UrlPage } from '@common/enums/url-page';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-board-edition-page',
-    imports: [BoardgameContainerComponent, MatDialogModule, MatButtonModule, RouterLink],
+    imports: [BoardgameContainerComponent, MatDialogModule, MatButtonModule, RouterLink, TranslatePipe, ItemDescriptionComponent],
     templateUrl: './board-edition-page.component.html',
     styleUrl: './board-edition-page.component.scss',
 })
@@ -145,7 +147,7 @@ export class BoardEditionPageComponent {
             next: () => {
                 this.httpBoardGameService.updateBoard(newBoard).subscribe({
                     next: () => {
-                        this.openDialog('Enregistrement reussit!', true);
+                        this.openDialog('success', true);
                     },
                     error: (error) => this.openDialog(error.message, false),
                 });
@@ -153,7 +155,7 @@ export class BoardEditionPageComponent {
             error: () => {
                 this.httpBoardGameService.createBoard(newBoard).subscribe({
                     next: () => {
-                        this.openDialog('Enregistrement reussit!', true);
+                        this.openDialog('success', true);
                     },
                     error: (error) => this.openDialog(error.message, false),
                 });

@@ -6,10 +6,11 @@ import { GameSessionManagerService } from '@app/services/game-session-manager/ga
 import { TileType } from '@common/enums/tile-type';
 import { Position } from '@common/position';
 import { Tile } from '@common/tile';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-playing-tile',
-    imports: [PlayingItemComponent, PlayerElementComponent],
+    imports: [PlayingItemComponent, PlayerElementComponent, TranslatePipe],
     templateUrl: './playing-tile.component.html',
     styleUrl: './playing-tile.component.scss',
 })

@@ -2,7 +2,7 @@
     <section class="navigation">
         <div class="action-buttons">
             <button class="navigation-button" routerLink="/main-page" (click)="deletePlayer(gameSessionManager.chosenPlayer())">
-                <i class="fas fa-home"></i>Quitter
+                <i class="fas fa-home"></i>{{ 'waiting-page.leave' | translate }}
             </button>
             @if(isOrganizer()) {
             <button
@@ -11,7 +11,7 @@
                 [disabled]="isRoomFull()"
                 (click)="onGenerateVirtualPlayerClick()"
             >
-                <i class="fas fa-robot"></i> {{ isRoomFull() ? 'Salle pleine' : 'Générer joueur virtuel' }}
+                <i class="fas fa-robot"></i> {{ (isRoomFull() ? 'waiting-page.full-room' : 'waiting-page.vp.button') | translate }}
             </button>
             }
         </div>
@@ -28,19 +28,19 @@
                 [disabled]="!isOrganizer() || hasToggleState"
                 (click)="toggleRoomState()"
             >
-                {{ roomLockedState ? 'Débloquer la salle' : 'Bloquer la salle' }}
+                {{ (roomLockedState ? 'waiting-page.unlock-room' : 'waiting-page.lock-room') | translate }}
             </button>
             @if(showTooltip) { @if(currentGame.locked) {
-            <div class="tooltip">Salle bloquée! Personne ne peut plus entrer.</div>
+            <div class="tooltip">{{ 'waiting-page.locked-room' | translate }}</div>
             } @else {
-            <div class="tooltip">Salle débloquée! La partie est encore ouverte.</div>
+            <div class="tooltip">{{ 'waiting-page.locked-room' | translate }}</div>
             } }
         </div>
     </section>
     <section>
         <div class="access-code-section">
             <div>
-                <h1><i class="fa fa-key"></i>Code d'accès:</h1>
+                <h1><i class="fa fa-key"></i>{{ 'waiting-page.code' | translate }}:</h1>
             </div>
             <div>
                 <p class="game-code">{{ gameId }}</p>
@@ -48,7 +48,7 @@
         </div>
         <div class="second-section">
             <div class="left-zone">
-                <div class="text">En attente de joueurs ...</div>
+                <div class="text">{{ 'waiting-page.waiting' | translate }}</div>
                 <div class="players-list">
                     <app-players-list [gameId]="gameId"></app-players-list>
                 </div>
@@ -58,7 +58,7 @@
                     class="button-gold"
                     (click)="startGame()"
                 >
-                    Lancer la partie
+                    {{ 'waiting-page.start-game' | translate }}
                 </button>
             </div>
             @if(!chatDockService.chatDetache()){
@@ -76,17 +76,17 @@
         <i class="fas fa-times"></i>
     </button>
 
-    <p>Choisissez le profil du joueur virtuel</p>
+    <p>{{ 'waiting-page.vp.title' | translate }}</p>
     <div class="confirmation-buttons">
-        <button (click)="selectProfile(virtualPlayerProfile.Agressive)">Agressif</button>
-        <button (click)="selectProfile(virtualPlayerProfile.Defensive)">Défensif</button>
+        <button (click)="selectProfile(virtualPlayerProfile.Agressive)">{{ 'waiting-page.vp.agressive' | translate }}</button>
+        <button (click)="selectProfile(virtualPlayerProfile.Defensive)">{{ 'waiting-page.vp.defensive' | translate }}</button>
     </div>
 </div>
 } @if(showPlayerAmountWarning) {
 <div class="modal-overlay" (click)="showPlayerAmountWarning = false">
     <div class="player-amount-warning" (click)="$event.stopPropagation()">
-        <span>Le nombre de joueurs doit être pair pour commencer une partie en mode CTF.</span>
-        <button class="close-btn" (click)="showPlayerAmountWarning = false">Fermer</button>
+        <span>{{ 'waiting-page.player-amount-modal' | translate }}</span>
+        <button class="close-btn" (click)="showPlayerAmountWarning = false">{{ 'general.button.close' | translate }}</button>
     </div>
 </div>
 }

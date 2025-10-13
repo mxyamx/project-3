@@ -1,9 +1,9 @@
 <section class="games-list" [ngClass]="theme === 'green' ? 'green-theme' : 'brown-theme'">
-    <p class="subtitle-element"><i class="fas fa-list-alt -"></i> Liste des Jeux</p>
+    <p class="subtitle-element"><i class="fas fa-list-alt -"></i> {{ 'game-list.title' | translate }}</p>
     <div class="map-container">
         <ng-container>
             @if (filteredGames.length === 0) {
-            <p class="no-game-list">Aucun jeu n'est dans la liste, veuillez en créer un</p>
+            <p class="no-game-list">{{ 'game-list.empty' | translate }}</p>
             } @else { @for (object of filteredGames; track object.id) {
             <div class="game-card-list-1" (click)="selectGame(object)" (mouseenter)="hoveredObject = object" (mouseleave)="hoveredObject = null">
                 <div class="game-element-list">
@@ -14,17 +14,20 @@
                     <div class="game-icons">
                         @if (object.visibility) {
                         <img src="assets/icones/eye icon white.svg" alt="Visibility Icon" />
-                        } @if (object.gameMode === 'CTF') {
+                        } @if (object.gameMode === gameMode.CTF) {
                         <img src="assets/icones/flag white.svg" alt="Mode Icon" />
                         }
                     </div>
                 </div>
 
                 <div class="game-details">
-                    <p><i class="fas fa-gamepad"></i> Nom : {{ object.name }}</p>
-                    <p><i class="fas fa-ruler"></i> Taille : {{ object.size }} x {{ object.size }}</p>
-                    <p><i class="fas fa-flag"></i> Mode : {{ object.gameMode }}</p>
-                    <p><i class="fas fa-calendar-alt"></i> Modifié le : {{ object.lastModified | date: 'short' }}</p>
+                    <p><i class="fas fa-gamepad"></i> {{ 'game-list.details.name' | translate }} : {{ object.name }}</p>
+                    <p><i class="fas fa-ruler"></i> {{ 'game-list.details.size' | translate }} : {{ object.size }} x {{ object.size }}</p>
+                    <p><i class="fas fa-flag"></i> {{ 'game-list.details.mode' | translate }} : {{ object.gameMode }}</p>
+                    <p>
+                        <i class="fas fa-calendar-alt"></i> {{ 'game-list.details.last-modified' | translate }} :
+                        {{ object.lastModified | date: 'short' }}
+                    </p>
                 </div>
 
                 @if (hoveredObject === object) {

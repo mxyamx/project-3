@@ -6,12 +6,12 @@
 
     <div class="player-stats">
         <div class="stat-row">
-            <span class="stat-label">Points de vie:</span>
+            <span class="stat-label">{{ 'player.health' | translate }}:</span>
             <span class="stat-value">{{ health() }}</span>
         </div>
 
         <div class="stat-row">
-            <span class="stat-label">Attaque:</span>
+            <span class="stat-label">{{ 'player.attack' | translate }}:</span>
             <span class="stat-value">
                 {{ attack() }}
                 <span class="dice-bonus">({{ getDiceBonusLabel(currentPlayer.attributes.bonusAttack) }})</span>
@@ -19,7 +19,7 @@
         </div>
 
         <div class="stat-row">
-            <span class="stat-label">Défense:</span>
+            <span class="stat-label">{{ 'player.defense' | translate }}:</span>
             <span class="stat-value">
                 {{ defense() }}
                 <span class="dice-bonus">({{ getDiceBonusLabel(currentPlayer.attributes.bonusDefense) }})</span>
@@ -27,12 +27,12 @@
         </div>
 
         <div class="stat-row">
-            <span class="stat-label">Points de mouvement:</span>
+            <span class="stat-label">{{ 'player.movements' | translate }}:</span>
             <span class="stat-value">{{ remainingMovements }}</span>
         </div>
 
         <div class="stat-row">
-            <span class="stat-label">Actions restantes:</span>
+            <span class="stat-label">{{ 'player.actions' | translate }}:</span>
             <span class="stat-value">{{ remainingActions }}</span>
         </div>
     </div>

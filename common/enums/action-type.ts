@@ -1,5 +1,5 @@
 export enum ActionType {
-    OpenDoor = 'Ouvrir la porte',
-    CloseDoor = 'Fermer la porte',
-    AttackPlayer = 'Attaquer le joueur',
+    OpenDoor = 'open-door',
+    CloseDoor = 'close-door',
+    AttackPlayer = 'attack-player',
 }

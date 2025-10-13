@@ -1,7 +1,7 @@
 <div class="channel-navigator-container" [class.expanded]="isExpended">
     <div class="channel-header">
         <h3>
-            Canaux de discussion
+            {{ 'chat.channel-header' | translate }}
             <span>
                 <button class="circle-plus" (click)="openCreateDialog()" aria-label="Créer un canal">
                     <i class="fa-solid fa-plus"></i></button
@@ -21,7 +21,7 @@
                 [attr.aria-controls]="'panel-joined'"
                 [attr.aria-selected]="selectedTab() === ChannelTab.Joined"
             >
-                Mes canaux
+                {{ 'chat.my-channels' | translate }}
             </button>
 
             <button
@@ -32,7 +32,7 @@
                 [attr.aria-controls]="'panel-directory'"
                 [attr.aria-selected]="selectedTab() === ChannelTab.Directory"
             >
-                Découvrir
+                {{ 'chat.discover' | translate }}
             </button>
         </div>
     </div>
@@ -49,16 +49,20 @@
             type="text"
             minlength="1"
             maxlength="200"
-            [placeholder]="selectedTab() === ChannelTab.Joined ? 'Filtrer canal...' : 'Rechercher un canal...'"
+            [placeholder]="(selectedTab() === ChannelTab.Joined ? 'chat.filter-placeholder' : 'chat.search-placeholder') | translate"
         />
-        <button (click)="searchChannel()">{{ selectedTab() === ChannelTab.Joined ? 'Filtrer' : 'Rechercher' }}</button>
+        <button (click)="searchChannel()">{{ (selectedTab() === ChannelTab.Joined ? 'chat.filter' : 'chat.search') | translate }}</button>
     </div>
 
     @if(selectedTab() === ChannelTab.Joined && !isLoading()){
     <div class="channels" id="panel-joined">
         @for(channel of filteredJoinedChannels; track channel.id){
         <div class="channel-item" (click)="openChannel(channel)">
+            @if(channel.id === channelGeneralId || gameRoomRegex.test(channel.id)){
+            <h3>{{ 'chat.' + channel.name | translate }}</h3>
+            } @else{
             <h3>{{ channel.name }}</h3>
+            }
             <div class="actions">
                 @if (channel.isManageable) {
                 <i class="fa-solid fa-x delete-icon" title="Quitter" (click)="leaveChannel(channel.id); $event.stopPropagation()"></i>
@@ -76,7 +80,7 @@
             <h3>{{ channel.name }}</h3>
         </div>
         } @empty{
-        <div class="empty-message">Pas de canaux trouvés</div>
+        <div class="empty-message">{{ 'chat.no-channel' | translate }}</div>
         }
     </div>
     } @if(isLoading()){

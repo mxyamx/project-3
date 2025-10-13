@@ -1,4 +1,4 @@
 export enum VirtualPlayerProfile {
-    Agressive = 'agressif',
-    Defensive = 'defensif',
+    Agressive = 'agressive',
+    Defensive = 'defensive',
 }

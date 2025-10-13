@@ -20,10 +20,11 @@ import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { GameEvent } from '@common/game-event';
 import { Player } from '@common/player';
 import * as socketDataForm from '@common/socket-data-forms';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-waiting-page',
-    imports: [RouterLink, PlayersListComponent, CommonModule, ChatContainerComponent],
+    imports: [RouterLink, PlayersListComponent, CommonModule, ChatContainerComponent, TranslatePipe],
     templateUrl: './waiting-page.component.html',
     styleUrl: './waiting-page.component.scss',
 })

@@ -18,6 +18,7 @@ import { PlayerSocketService } from '@app/services/player-socket/player-socket.s
 import { PlayerState } from '@common/enums/player-state';
 import { UrlPage } from '@common/enums/url-page';
 import { Player } from '@common/player';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -34,6 +35,7 @@ import { Subscription } from 'rxjs';
         PlayingBoardComponent,
         CombatNotificationComponent,
         ChatContainerComponent,
+        TranslatePipe,
     ],
     templateUrl: './game.component.html',
     styleUrl: './game.component.scss',

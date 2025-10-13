@@ -1,5 +1,9 @@
-export const ROOM_GENERAL = 'GENERAL';
+export const CHANNEL_GENERAL_ID = 'GENERAL';
 
-export const ROOM_GENERAL_NAME = 'Général';
+export const CHANNEL_GENERAL_NAME = 'general';
 
-export const ROOM_GAME_NAME = 'Chat de jeu';
+export const CHANNEL_GAME_NAME = 'game';
+
+export const FORBIDDEN_CHANNEL_NAMES: string[] = ['Général', 'General', 'Chat de jeu', 'Game chat'];
+
+export const GAME_ROOM_REGEX = /^GAME-\d{4}$/;

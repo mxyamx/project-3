@@ -8,47 +8,51 @@
 
     <div class="auth-card">
         <div class="header-section">
-            <h1 class="auth-title">{{ isLogin ? 'Connexion' : 'Créer un compte' }}</h1>
+            <h1 class="auth-title">{{ (isLogin ? 'login-page.login.title' : 'login-page.create.title') | translate }}</h1>
         </div>
 
         <form [formGroup]="formGroup" (ngSubmit)="isLogin ? onLogin() : onSignup()">
             @if (!isLogin) {
             <div class="form-group">
-                <label for="username">Pseudonyme :</label>
+                <label for="username">{{ 'login-page.create.username.title' | translate }} :</label>
                 <input type="text" id="username" class="form-control" formControlName="username" (input)="clearError()" />
                 @if (formGroup.get('username')?.invalid && formGroup.get('username')?.touched) {
-                <small class="error-message">{{ getErrorMessage('username') }}</small>
+                <small class="error-message" *ngIf="getErrorMessage('username') as error">
+                    {{ error.key | translate: error.params }}
+                </small>
                 }
             </div>
             }
 
             <div class="form-group">
-                <label for="email">Courriel :</label>
+                <label for="email">{{ 'login-page.email.title' | translate }} :</label>
                 <input type="email" id="email" class="form-control" formControlName="email" (input)="clearError()" />
                 @if (formGroup.get('email')?.invalid && formGroup.get('email')?.touched) {
-                <small class="error-message">{{ getErrorMessage('email') }}</small>
+                <small class="error-message" *ngIf="getErrorMessage('email') as error">
+                    {{ error.key | translate: error.params }}
+                </small>
                 }
             </div>
 
             @if (!isLogin) {
             <div class="form-group">
                 @if (!uploadAvatar) {
-                    <label for="avatar">Avatar :</label>
-                    <app-profile-avatar-img [formGroup]="formGroup" [selectedAvatars]="selectedAvatars" (imageSelected)="avatarSelected($event ?? '')">
-                    </app-profile-avatar-img>
+                <label for="avatar">{{ 'login-page.create.avatar.title' | translate }} :</label>
+                <app-profile-avatar-img [formGroup]="formGroup" [selectedAvatars]="selectedAvatars" (imageSelected)="avatarSelected($event ?? '')">
+                </app-profile-avatar-img>
                 } @else {
-                    <div class="custom-avatar-upload">
-                        <label class="upload-button">
-                            <input type="file" accept="image/*" (change)="onFileSelected($event)" />
-                            <i class="fas fa-upload"></i> Choisir un fichier
-                        </label>
-                    
-                        @if(uploadedAvatarPreview) {
-                            <div class="avatar-preview">
-                                <img [src]="uploadedAvatarPreview" alt="Aperçu de l'avatar" />
-                            </div>
-                        }
+                <div class="custom-avatar-upload">
+                    <label class="upload-button">
+                        <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+                        <i class="fas fa-upload"></i> {{ 'login-page.create.avatar.choose-file' | translate }}
+                    </label>
+
+                    @if(uploadedAvatarPreview) {
+                    <div class="avatar-preview">
+                        <img [src]="uploadedAvatarPreview" alt="Aperçu de l'avatar" />
                     </div>
+                    }
+                </div>
                 }
 
                 <div class="toggle-avatar-mode-icon">
@@ -58,41 +62,53 @@
                     </button>
                     <i class="fas fa-upload" [class.active-icon]="uploadAvatar"></i>
                 </div>
-                
+
                 @if (formGroup.get('avatar')?.invalid && formGroup.get('avatar')?.touched) {
-                <small class="error-message">Avatar requis</small>
+                <small class="error-message">{{ 'login-page.create.avatar.required' | translate }}</small>
                 }
             </div>
             }
 
             <div class="form-group">
-                <label for="password">Mot de passe :</label>
+                <label for="password">{{ 'login-page.password.title' | translate }} :</label>
                 <input type="password" id="password" class="form-control" formControlName="password" (input)="clearError()" />
                 @if (formGroup.get('password')?.invalid && formGroup.get('password')?.touched) {
-                <small class="error-message">{{ getErrorMessage('password') }}</small>
+                <small class="error-message" *ngIf="getErrorMessage('password') as error">
+                    {{ error.key | translate: error.params }}
+                </small>
                 }
             </div>
 
             @if (!isLogin) {
             <div class="form-group">
-                <label for="confirmPassword">Confirmer le mot de passe :</label>
+                <label for="confirmPassword">{{ 'login-page.password.confirm' | translate }} :</label>
                 <input type="password" id="confirmPassword" class="form-control" formControlName="confirmPassword" (input)="clearError()" />
                 @if (formGroup.get('confirmPassword')?.invalid && formGroup.get('confirmPassword')?.touched) {
-                <small class="error-message">{{ getErrorMessage('confirmPassword') }}</small>
+                <small class="error-message" *ngIf="getErrorMessage('confirmPassword') as error">
+                    {{ error.key | translate: error.params }}
+                </small>
                 }
             </div>
             } @if (errorMessage) {
-            <div class="error-message">{{ errorMessage }}</div>
+            <div class="error-message">{{ errorMessage | translate }}</div>
             }
 
             <button type="submit" class="connection-button">
-                {{ isLogin ? 'Se connecter' : 'Créer un compte' }}
+                {{ (isLogin ? 'login-page.login.button' : 'login-page.create.button') | translate }}
             </button>
         </form>
 
         <p class="auth-switch">
-            {{ isLogin ? 'Pas encore inscrit ?' : 'Déjà inscrit ?' }}
-            <a (click)="toggleAuth($event)">{{ isLogin ? 'Créer un compte' : 'Se connecter' }}</a>
+            {{ (isLogin ? 'login-page.login.switch' : 'login-page.create.switch') | translate }}
+            <a (click)="toggleAuth($event)">{{ (isLogin ? 'login-page.create.button' : 'login-page.login.button') | translate }}</a>
         </p>
     </div>
+    <app-dropdown
+        class="lang"
+        [i18nKey]="'general.languages.'"
+        [(selectedValue)]="selectedLanguage"
+        [listElems]="languages"
+        (selectedValueChange)="onLanguageChange()"
+        >></app-dropdown
+    >
 </div>

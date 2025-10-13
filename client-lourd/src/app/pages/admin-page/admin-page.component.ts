@@ -5,16 +5,19 @@ import { RouterLink } from '@angular/router';
 import { GameListComponent } from '@app/components/game-list/game-list.component';
 import { AdminPageManagerService } from '@app/services/admin-page-manager/admin-page-manager.service';
 import { BoardGame } from '@common/board-game';
+import { GameMode } from '@common/enums/game-mode';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-admin-page',
-    imports: [RouterLink, CommonModule, FormsModule, GameListComponent],
+    imports: [RouterLink, CommonModule, FormsModule, GameListComponent, TranslatePipe],
     templateUrl: './admin-page.component.html',
     styleUrl: './admin-page.component.scss',
 })
 export class AdminPageComponent implements OnInit {
     showDeleteConfirmation: boolean = false;
     showAlertConfirmation: boolean = false;
+    gameMode: typeof GameMode = GameMode;
     private adminPageManagerService: AdminPageManagerService = inject(AdminPageManagerService);
 
     get gamesList(): BoardGame[] {

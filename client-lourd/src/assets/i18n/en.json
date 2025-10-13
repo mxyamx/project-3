@@ -1,0 +1,417 @@
+{
+    "general": {
+        "button": {
+            "back-home": "Back to Home",
+            "yes": "Yes",
+            "no": "No",
+            "ok": "OK",
+            "confirm": "Confirm",
+            "close": "Close"
+        },
+        "error": "Error",
+        "success": "Success",
+
+        "tile-type": {
+            "wall": "wall",
+            "door": "door",
+            "water": "water",
+            "ice": "ice",
+            "grass": "grass"
+        },
+        "item": {
+            "name": {
+                "condition-based-1": "Claw of Survival",
+                "condition-based-2": "Root of Vengeance",
+                "attribute-editor-1": "Hawk Feather",
+                "attribute-editor-2": "Enchanted Shell",
+                "game-editor-1": "Fruit of Invisibility",
+                "game-editor-2": "Time Reverser",
+                "random-item": "Resurrection Stone",
+                "starting-point": "Starting Point",
+                "flag": "Flag"
+            },
+            "type": {
+                "attribute-editor-1": "Attribute Modifier",
+                "attribute-editor-2": "Attribute Modifier",
+                "condition-based-1": "Conditional Use",
+                "condition-based-2": "Conditional Use",
+                "game-editor-1": "Game Modifier",
+                "game-editor-2": "Game Modifier",
+                "random-item": "Random",
+                "starting-point": "This is each player's initial position",
+                "flag": "Available only in CTF mode"
+            },
+            "effect": {
+                "attribute-editor-1": "Gives +1 Speed and +1 Attack",
+                "attribute-editor-2": "Gives +2 Defense and -1 Health",
+                "condition-based-1": "If Health ≤ 2, grants +2 Defense",
+                "condition-based-2": "If you have 2 victories, gives -1 Attack and +1 Defense",
+                "game-editor-1": "Allows up to 3 items",
+                "game-editor-2": "Grants 2 possible actions per turn",
+                "random-item": "Non-specific",
+                "starting-point": "",
+                "flag": "Bring it back to your starting point to make your team win"
+            }
+        },
+
+        "tile-description": {
+            "wall": "- Name: Wall.\n - Terrain tile? No.\n A wall blocks movement.\n",
+            "door": "- Name: Door.\n - Terrain tile? No.\n - Movement cost: 1.\n A door can only be crossed if it's open.\n",
+            "water": "- Name: Water.\n - Terrain tile? Yes.\n - Movement cost: 2.\n Movement is harder in water.\n",
+            "ice": "- Name: Ice.\n - Terrain tile? Yes.\n - Movement cost: None.\n Easy to move on ice.\n",
+            "grass": "- Name: Grass.\n - Terrain tile? Yes.\n - Movement cost: 1.\n A normal terrain surface.\n"
+        },
+        "game-mode": {
+            "normal": "Normal",
+            "ctf": "CTF"
+        },
+        "server-error": "A server error occurred.",
+        "dice-bonus": {
+            "four-side-bonus": "4-sided Die",
+            "six-side-bonus": "6-sided Die"
+        },
+        "languages": {
+            "fr": "Français",
+            "en": "English"
+        },
+        "themes": {
+            "dark": "Dark",
+            "light": "Light"
+        },
+        "loading": "Loading",
+        "vp": {
+            "agressive": "Aggressive",
+            "defensive": "Defensive"
+        },
+        "action-type": {
+            "open-door": "Open the door",
+            "close-door": "Close the door",
+            "attack-player": "Attack the player"
+        }
+    },
+    "settings-page": {
+        "apply": "Apply Changes",
+        "title": "Settings",
+        "lang": "Language",
+        "theme": "Theme"
+    },
+    "main-page": {
+        "join-game": "Join a Game",
+        "create-game": "Create a Game",
+        "admin-boardgame": "Manage Games",
+        "team-name": "Team 206"
+    },
+    "avatar-page": {
+        "title": "Create Your Character",
+        "confirm-modal": {
+            "title": "You won't be able to modify your character after confirming. Do you want to proceed?"
+        },
+        "error-modal": {
+            "title": "Error",
+            "locked": "Game locked by the administrator!",
+            "not-existing": "The game no longer exists!",
+            "retry": "Retry",
+            "back-home": "Return to Home"
+        },
+        "name": "Name",
+        "name-required": "required",
+        "next": "Next"
+    },
+    "board-edition-page": {
+        "title": "Game Editing",
+        "name": "Game Name",
+        "name-placeholder": "Enter the game name",
+        "description": "Game Description",
+        "description-placeholder": "Enter the game description",
+        "cancel": "Cancel",
+        "save": "Save",
+        "reset": "Reset",
+        "creation-tool": "Creation Tools",
+        "tool-applier": "Tile Applicator",
+        "item-applier": "Item Applicator",
+        "item-limit-warning": "you can only place {{nItems}} items",
+        "game-info": "Game Information"
+    },
+    "chat": {
+        "channel-header": "Chat Channels",
+        "my-channels": "My Channels",
+        "discover": "Discover",
+        "no-channel": "No channels found",
+        "filter": "Filter",
+        "search": "Search",
+        "filter-placeholder": "Filter channel...",
+        "search-placeholder": "Search a channel...",
+        "general": "General",
+        "game": "Game Chat",
+        "send": "Send",
+        "send-placeholder": "Send a message"
+    },
+    "creation-page": {
+        "title": "Create a New Game",
+        "boardgame-deleted-modal": "Warning!! This game has already been deleted. Please refresh the page.",
+        "visibility-modal": "Warning!! This game's visibility has changed. Please refresh the page.",
+        "create": "Create New Game"
+    },
+    "game-list": {
+        "title": "Game List",
+        "empty": "No games in the list, please create one",
+        "details": {
+            "name": "Name",
+            "size": "Size",
+            "mode": "Mode",
+            "last-modified": "Last Modified"
+        }
+    },
+    "admin-page": {
+        "title": "Manage Games",
+        "delete-confirmation-modal": "Are you sure you want to delete this game?",
+        "boardgame-deleted-modal": "This game has already been deleted. Please refresh the page.",
+        "create": "Create New Game",
+        "edit": "Edit Game",
+        "delete": "Delete Game",
+        "visibility": "Change Visibility"
+    },
+    "join-game-page": {
+        "title": "Join a Game",
+        "enter-code": "Enter the access code for the game",
+        "join": "Join!",
+        "invalid-code": "Invalid game code!",
+        "locked-game": "Game locked by the administrator!",
+        "try-again": "Try Again"
+    },
+    "error-page": {
+        "title": "Oops! An error occurred. Please try again."
+    },
+    "game-page": {
+        "action": "Perform an Action",
+        "end-turn": "End Turn",
+        "give-up": "Give Up",
+        "debug-mode": "Debug Mode",
+        "normal-mode": "Normal Mode",
+        "chat": "Chat",
+        "log": "Log",
+        "give-up-confirmation-modal": "Are you sure you want to give up the game?",
+        "end-turn-confirmation-modal": "Are you sure you want to end your turn?",
+        "players": "Players",
+        "team": "Team",
+        "victories": "Victories",
+        "combat": {
+            "remaining-escape-attemps": "Remaining escape attempts",
+            "attack-dice": "Attack Die",
+            "defense-dice": "Defense Die",
+            "opponent-attacking": "Opponent Attacking",
+            "attack": "Attack",
+            "escape": "Escape",
+            "escape-confirmation-modal": {
+                "title": "Are you sure you want to try escaping? You have {{ nAttempts }} attempt(s) left.",
+                "yes": "Yes, try to escape",
+                "no": "No, continue the fight"
+            }
+        },
+        "inventory": "Inventory",
+        "playing-board": {
+            "type": "type",
+            "cost": "cost",
+            "vp": "Virtual Player",
+            "item-info": {
+                "name": "Name",
+                "type": "Type",
+                "effect": "Effect",
+                "warning-defensive-vp": "Warning, defensive virtual players prefer this item",
+                "warning-agressive-vp": "Warning, aggressive virtual players prefer this item"
+            },
+            "ok": "ok",
+            "drop-item": "drop an item"
+        }
+    },
+    "game-option-page": {
+        "title": "Create a New Game",
+        "mode": "Game Mode",
+        "size": "Map Size",
+        "create": "Create"
+    },
+    "login-page": {
+        "login": {
+            "title": "Login",
+            "switch": "Not registered yet?",
+            "button": "Log In"
+        },
+        "create": {
+            "title": "Create an Account",
+            "username": {
+                "title": "Username",
+                "required": "Username required",
+                "taken": "This username is already taken or not allowed."
+            },
+            "avatar": {
+                "title": "Avatar",
+                "choose-file": "Choose File",
+                "required": "Avatar required"
+            },
+            "switch": "Already registered?",
+            "button": "Create Account"
+        },
+        "email": {
+            "title": "Email",
+            "invalid": "Invalid email format."
+        },
+        "password": {
+            "title": "Password",
+            "confirm": "Confirm Password",
+            "identical": "Password and confirmation must match."
+        },
+        "required": "Required field",
+        "min-length": "Minimum {{min}} characters",
+        "max-length": "Maximum {{max}} characters",
+        "error": {
+            "general": "An error occurred. Please try again.",
+            "user-id": "Unable to retrieve user ID.",
+            "missing-fields": "Please fill all fields.",
+            "connection": "Connection error",
+            "already-online": "This user is already online.",
+            "user": "Unable to retrieve user.",
+            "firebase": {
+                "user-not-found": "User not found",
+                "invalid-credential": "Invalid credentials",
+                "email-already-in-use": "Email already in use",
+                "weak-password": "Password must contain at least 6 characters",
+                "invalid-email": "Invalid email",
+                "network-request-failed": "Network connection failed. Check your Internet."
+            }
+        }
+    },
+    "profil-page": {
+        "email": "Email",
+        "money": "Money",
+        "modify": "Edit Account",
+        "delete": "Delete Account",
+        "socials": "Social Networks",
+        "inventory": "Inventory",
+        "stats": "Statistics",
+        "delete-account-modal": "Are you sure you want to delete your account? This action is irreversible.",
+        "friends": "Friends",
+        "blocked-users": "Blocked Users",
+        "victories": "Victories",
+        "defeats": "Defeats",
+        "combats": "Combats"
+    },
+    "statistics-page": {
+        "title": "Game Statistics",
+        "sub-title": "Global Statistics",
+        "game-duration": "Game Duration",
+        "turns": "Game Turns",
+        "visited-tiles": "Total Visited Tiles",
+        "doors": "Total Doors Manipulated",
+        "flags": "Flag Possessions"
+    },
+    "waiting-page": {
+        "leave": "Leave",
+        "full-room": "Room Full",
+        "lock-room": "Lock Room",
+        "unlock-room": "Unlock Room",
+        "locked-room": "Room locked! No one can enter.",
+        "unlocked-room": "Room unlocked! The game is still open.",
+        "code": "Access Code",
+        "waiting": "Waiting for players...",
+        "start-game": "Start Game",
+        "vp": {
+            "button": "Generate Virtual Player",
+            "title": "Choose the virtual player profile",
+            "agressive": "Aggressive",
+            "defensive": "Defensive"
+        },
+        "player-amount-modal": "The number of players must be even to start a game in CTF mode."
+    },
+    "attribute-form": {
+        "physical": "Physical Attributes",
+        "health": {
+            "title": "Health",
+            "description": "The number of health points of the character"
+        },
+        "speed": {
+            "title": "Speed",
+            "description": "Movement points per turn and determines the turn order"
+        },
+        "combat": "Combat Attributes",
+        "attack": {
+            "title": "Attack",
+            "description": "The strength of an attack against an opponent"
+        },
+        "defense": {
+            "title": "Defense",
+            "description": "The ability to block an opponent's attack"
+        }
+    },
+    "avatar-img": {
+        "title": "Choose your avatar"
+    },
+    "dialog": {
+        "delete-channel": {
+            "title": "Delete Channel?",
+            "text": "This action is irreversible. Do you want to continue?",
+            "cancel-button-label": "Cancel",
+            "confirm-button-label": "Delete"
+        },
+        "join-channel": {
+            "title": "Join?",
+            "text": "You will join this channel. Your new messages will be visible to all members.",
+            "cancel-button-label": "Cancel",
+            "confirm-button-label": "Join"
+        },
+        "leave-channel": {
+            "title": "Leave Channel?",
+            "text": "You will leave this channel. You will no longer receive messages, but you can join again later.",
+            "cancel-button-label": "Cancel",
+            "confirm-button-label": "Leave"
+        },
+        "create-channel": {
+            "title": "Create Channel",
+            "text": "What will your channel's name be?",
+            "label": "Channel Name",
+            "cancel-button-label": "Cancel",
+            "create-button-label": "Create"
+        }
+    },
+    "event-log": {
+        "title": "Event Log",
+        "my-logs": "My Entries Only",
+        "all-logs": "All Entries"
+    },
+    "player": {
+        "health": "Health Points",
+        "attack": "Attack",
+        "defense": "Defense",
+        "attack-bonus": "Attack Bonus",
+        "defense-bonus": "Defense Bonus",
+        "movements": "Movement Points",
+        "actions": "Remaining Actions",
+        "list": "Player List",
+        "stats": {
+            "player": "Player",
+            "combats": "Number of Combats",
+            "escapes": "Number of Escapes",
+            "victories": "Number of Victories",
+            "defeats": "Number of Defeats",
+            "my-life-points": "Health Points Lost",
+            "opponent-life-points": "Opponent Health Points Removed",
+            "items": "Number of Different Items Collected",
+            "tiles": "Visited Tiles"
+        },
+        "delete": "Delete Player",
+        "alert-modal": {
+            "kicked": "You have been removed from the game by the organizer.",
+            "admin-left": "The organizer has left the game."
+        }
+    },
+    "save-board-dialog": {
+        "absent-name": "The game must have a name",
+        "absent-description": "The game must have a description",
+        "existing-name": "A game with the same name already exists: please use a different name",
+        "invalid-terrain-tiles": "More than 50% of the total game area must be occupied by terrain tiles",
+        "inaccessible-tiles": "A terrain tile must not be inaccessible due to a wall arrangement",
+        "incorrectly-placed-door": "Each door tile must be placed between two wall tiles on the same axis and cannot be placed on the edges of the game area",
+        "missing-entry-points": "All starting points must be placed",
+        "missing-flag": "The flag must be placed",
+        "success": "Registration successful!"
+    }
+}

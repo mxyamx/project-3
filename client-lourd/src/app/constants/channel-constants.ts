@@ -1,22 +1,22 @@
 import { ConfirmationDialogData } from '@app/interfaces/confirmation-dialog-date';
 
 export const DELETE_CHANNEL_CONFIRM_DIALOG_DATA: ConfirmationDialogData = {
-    title: 'Supprimer le canal ?',
-    text: 'Cette action est irréversible. Voulez-vous continuer ?',
-    cancelButtonLabel: 'Annuler',
-    confirmButtonLabel: 'Supprimer',
+    title: 'dialog.delete-channel.title',
+    text: 'dialog.delete-channel.text',
+    cancelButtonLabel: 'dialog.delete-channel.cancel-button-label',
+    confirmButtonLabel: 'dialog.delete-channel.confirm-button-label',
 };
 
 export const JOIN_CHANNEL_CONFIRM_DIALOG_DATA: ConfirmationDialogData = {
-    title: 'Rejoindre?',
-    text: `Vous allez rejoindre ce canal. Vos nouveaux messages seront visibles par tous les membres.`,
-    cancelButtonLabel: 'Annuler',
-    confirmButtonLabel: 'Rejoindre',
+    title: 'dialog.join-channel.title',
+    text: 'dialog.join-channel.text',
+    cancelButtonLabel: 'dialog.join-channel.cancel-button-label',
+    confirmButtonLabel: 'dialog.join-channel.confirm-button-label',
 };
 
 export const LEAVE_CHANNEL_CONFIRM_DIALOG_DATA: ConfirmationDialogData = {
-    title: 'Quitter le canal ?',
-    text: `Vous allez quitter ce canal. Vous ne recevrez plus de messages, mais vous pourrez le rejoindre à nouveau.`,
-    cancelButtonLabel: 'Annuler',
-    confirmButtonLabel: 'Quitter',
+    title: 'dialog.leave-channel.title',
+    text: 'dialog.leave-channel.text',
+    cancelButtonLabel: 'dialog.leave-channel.cancel-button-label',
+    confirmButtonLabel: 'dialog.leave-channel.confirm-button-label',
 };

@@ -1,33 +1,31 @@
 <div class="admin-container justified">
     <section class="navigation">
-        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> Retour à l'accueil</button>
+        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}</button>
     </section>
 
     <section class="header-item">
-        <h1>Administrer les jeux</h1>
+        <h1>{{ 'admin-page.title' | translate }}</h1>
     </section>
 
     @if (showDeleteConfirmation) {
     <div class="confirmation-bubble">
-        <p>Voulez-vous vraiment supprimer ce jeu ?</p>
+        <p>{{ 'admin-page.delete-confirmation-modal' | translate }}</p>
         <div class="confirmation-buttons">
-            <button (click)="deleteGame()">Oui</button>
-            <button (click)="cancelDelete()">Non</button>
+            <button (click)="deleteGame()">{{ 'general.button.yes' | translate }}</button>
+            <button (click)="cancelDelete()">{{ 'general.button.no' | translate }}</button>
+        </div>
+    </div>
+    } @if (showAlertConfirmation) {
+    <div class="confirmation-bubble">
+        <p>{{ 'admin-page.boardgame-deleted-modal' | translate }}</p>
+        <div class="confirmation-buttons">
+            <button (click)="hideAlert()">{{ 'general.button.confirm' | translate }}</button>
         </div>
     </div>
     }
 
-    @if (showAlertConfirmation) {
-        <div class="confirmation-bubble">
-            <p>Ce jeu a déjà été supprimé. Veuillez rafraichir la page.</p>
-            <div class="confirmation-buttons">
-                <button (click)="hideAlert()">Confirmer</button>
-            </div>
-        </div>
-        }
-
     <div class="creation-button-container">
-        <button routerLink="/option">Créer un nouveau jeu</button>
+        <button routerLink="/option">{{ 'admin-page.create' | translate }}</button>
     </div>
 
     <div class="admin-content" [ngClass]="{ 'no-game-selected': !displayedObject, 'game-selected': displayedObject }">
@@ -48,22 +46,22 @@
                 <div class="game-icons">
                     @if (displayedObject.visibility) {
                     <img src="assets/icones/eye icon white.svg" alt="Visible" />
-                    } @if (displayedObject.gameMode === 'CTF') {
+                    } @if (displayedObject.gameMode === gameMode.CTF) {
                     <img src="assets/icones/flag white.svg" alt="CTF Mode" />
                     }
                 </div>
             </div>
 
             <div class="admin-option-container">
-                <button routerLink="/editor" (click)="editGame()">Éditer le jeu</button>
-                <button (click)="confirmDelete()">Supprimer le jeu</button>
+                <button routerLink="/editor" (click)="editGame()">{{ 'admin-page.edit' | translate }}</button>
+                <button (click)="confirmDelete()">{{ 'admin-page.delete' | translate }}</button>
 
                 <div class="visibility-toggle">
                     <label class="switch">
                         <input type="checkbox" [(ngModel)]="displayedObject.visibility" (change)="updateDisplayedObjectVisibility()" />=
                         <span class="slider"></span>
                     </label>
-                    <span class="visibility-text">Changer la visibilité</span>
+                    <span class="visibility-text">{{ 'admin-page.visibility' | translate }}</span>
                 </div>
             </div>
         </section>

@@ -1,46 +1,45 @@
 <div class="player-combat-info" [ngClass]="{ opponent: !isCurrentPlayer }">
     <div class="player-header">
-        <img [src]="player?.character" [alt]="player?.name" class="player-avatar">
+        <img [src]="player?.character" [alt]="player?.name" class="player-avatar" />
         <p>
             {{ player?.name }}
             @if (player?.virtualPlayer) {
-                <i class="fas fa-robot robot-icon" [ngClass]="{'aggressive': isAggressive(player), 'defensive': !isAggressive(player)}"></i>
+            <i class="fas fa-robot robot-icon" [ngClass]="{ aggressive: isAggressive(player), defensive: !isAggressive(player) }"></i>
             }
         </p>
     </div>
 
     <div class="player-stats">
         <div class="stat-row">
-            <span class="stat-label">Points de vie:</span>
+            <span class="stat-label">{{ 'player.health' | translate }}:</span>
             <div class="health-bar">
-                <div class="health-fill" [style.width.%]="((player?.attributes?.healthValue || 0) / playerMaxHealth) * 100">
-                </div>
+                <div class="health-fill" [style.width.%]="((player?.attributes?.healthValue || 0) / playerMaxHealth) * 100"></div>
                 <span class="health-text">{{ player?.attributes?.healthValue || 0 }} / {{ playerMaxHealth }}</span>
             </div>
         </div>
 
         <div class="stat-row">
-            <span class="stat-label">Attaque:</span>
+            <span class="stat-label">{{ 'player.attack' | translate }}:</span>
             <span class="stat-value">{{ player?.attributes?.attackValue || 0 }}</span>
         </div>
 
         <div class="stat-row">
-            <span class="stat-label">Défense:</span>
+            <span class="stat-label">{{ 'player.defense' | translate }}:</span>
             <span class="stat-value">{{ player?.attributes?.defenseValue || 0 }}</span>
         </div>
 
         <div class="fight-info">
             <div class="bonus-info">
                 <div class="attack-line">
-                    <span class="bonus-label">Bonus d'attaque</span>
+                    <span class="bonus-label">{{ 'player.attack-bonus' | translate }}</span>
                     <span class="bonus-value">
-                        {{ player?.attributes?.bonusAttack === 'Dé à 4 faces' ? 'D4' : 'D6' }}
+                        {{ player?.attributes?.bonusAttack === diceBonus.FourSideBonus ? 'D4' : 'D6' }}
                     </span>
                 </div>
                 <div class="defense-line">
-                    <span class="bonus-label">Bonus de défense</span>
+                    <span class="bonus-label">{{ 'player.defense-bonus' | translate }}</span>
                     <span class="bonus-value">
-                        {{ player?.attributes?.bonusDefense === 'Dé à 4 faces' ? 'D4' : 'D6' }}
+                        {{ player?.attributes?.bonusDefense === diceBonus.FourSideBonus ? 'D4' : 'D6' }}
                     </span>
                 </div>
             </div>

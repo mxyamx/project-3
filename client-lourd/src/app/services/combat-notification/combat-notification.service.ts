@@ -71,7 +71,7 @@ export class CombatNotificationService {
         }
 
         const playerName = this.gameSessionManagerService.activePlayer().name;
-
+        //TODO: add translation for message
         this.addNotification({
             id: TURN_NOTIFICATION_ID,
             message: `C'est le tour de : ${playerName}`,

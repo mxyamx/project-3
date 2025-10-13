@@ -16,7 +16,7 @@ export class ChatPageComponent implements OnInit {
 
     gameId: string;
     ngOnInit(): void {
-        // this.gameId = this.route.snapshot.queryParamMap.get('gameId') || ROOM_GENERAL;
+        // this.gameId = this.route.snapshot.queryParamMap.get('gameId') || CHANNEL_GENERAL_ID;
         // this.chatDockService.playerName.set(this.route.snapshot.queryParamMap.get('playerName') || this.userManager.currentUser().username);
         // this.bus.postMessage({ type: 'POPUP_OPENED' });
         // window.addEventListener('beforeunload', () => {
