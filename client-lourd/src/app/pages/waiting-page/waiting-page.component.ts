@@ -141,12 +141,12 @@ export class WaitingPageComponent implements OnInit {
             this.chatDockService.leftGame();
             this.playerSocketService.emitLeaveGame(this.gameId, player);
 
-            const isAdminLeaving = this.isOrganizer();
-            const isLastPlayerLeaving = this.currentGame.players.length === 1;
+            // const isAdminLeaving = this.isOrganizer();
+            // const isLastPlayerLeaving = this.currentGame.players.length === 1;
 
-            if (isAdminLeaving || isLastPlayerLeaving) {
-                this.playerSocketService.emitDeleteGame(this.gameId);
-            }
+            // if (isAdminLeaving || isLastPlayerLeaving) {
+            //     this.playerSocketService.emitDeleteGame(this.gameId);
+            // }
         }
         this.router.navigate([UrlPage.Home]);
     }
