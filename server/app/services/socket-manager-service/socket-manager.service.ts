@@ -211,6 +211,7 @@ export class SocketManager {
                 const playerToRemove = game.players.find((playerToRemoveFound) => playerToRemoveFound.socketId === player.socketId);
                 if (playerToRemove) {
                     await this.gameService.removePlayer(playerToRemove, gameId);
+                    this.gameScheduler.disconnectPlayer(player.socketId);
 
                     this.sio.to(gameId).emit('player-left', playerToRemove);
 
@@ -250,6 +251,7 @@ export class SocketManager {
             socket.on('kick-player', async (data: RoomManagement) => {
                 const { gameId, player } = data;
                 await this.gameService.removePlayer(player, gameId);
+                this.gameScheduler.disconnectPlayer(player.socketId);
                 this.sio.to(gameId).emit('kicked', player);
 
                 if (this.games[gameId]) {
