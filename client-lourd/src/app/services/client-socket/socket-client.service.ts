@@ -12,9 +12,15 @@ export class SocketClientService {
         return this.socket && this.socket.connected;
     }
 
-    connect(): void {
+    connect(firebaseId: string): void {
         if (this.isSocketAlive()) this.disconnect();
-        this.socket = io(environment.socketUrl, { transports: ['websocket'], upgrade: false });
+        this.socket = io(environment.socketUrl, {
+            transports: ['websocket'],
+            upgrade: false,
+            auth: {
+                userId: firebaseId,
+            },
+        });
     }
 
     disconnect(): void {

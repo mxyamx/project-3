@@ -190,7 +190,6 @@ export class WaitingPageComponent implements OnInit {
 
         this.socketManager.on(SocketClientEventNames.ServerError, () => {
             this.gameSessionManager.updateGameId(EMPTY_CODE);
-            this.socketManager.disconnect();
             this.router.navigate([UrlPage.Error]);
         });
     }

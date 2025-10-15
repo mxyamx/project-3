@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
@@ -15,7 +15,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     templateUrl: './code-input-component.html',
     styleUrls: ['./code-input-component.scss'],
 })
-export class CodeInputComponent implements OnInit {
+export class CodeInputComponent {
     @Output() canEnterGame: EventEmitter<boolean> = new EventEmitter();
     @Output() accessCode: EventEmitter<string> = new EventEmitter<string>();
     codeArray: string[] = ['', '', '', ''];
@@ -25,10 +25,6 @@ export class CodeInputComponent implements OnInit {
     hasBeenClicked: boolean = false;
     private playerSocketService = inject(PlayerSocketService);
     private currentGameManager = inject(CurrentGameManagerService);
-
-    ngOnInit() {
-        this.playerSocketService.connect();
-    }
 
     moveToNext(nextInput: HTMLInputElement, index: number): void {
         if (this.codeArray[index] && nextInput) {

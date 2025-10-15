@@ -299,6 +299,11 @@ export class SocketManager {
                 await this.purgeChatHistoryIfRoomEmpty(socket);
             });
 
+            socket.on('leave-active-game', async (data: { player: Player }) => {
+                const { player } = data;
+                await this.gameScheduler.disconnectPlayer(player.socketId);
+            });
+
             socket.on('disconnect', async () => {
                 await this.gameScheduler.disconnectPlayer(socket.id);
 

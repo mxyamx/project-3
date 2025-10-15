@@ -6,15 +6,18 @@ import { SocketEventNames } from '@common/enums/socket-events-names';
 import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { GameEvent } from '@common/game-event';
 import { Player } from '@common/player';
+import { AuthentificationService } from '../authentification/authentification.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class PlayerSocketService {
     private clientSocketService: SocketClientService = inject(SocketClientService);
+    private authentificationService: AuthentificationService = inject(AuthentificationService);
 
     connect(): void {
-        this.clientSocketService.connect();
+        const firebaseId = this.authentificationService.getCurrentUserId();
+        if (firebaseId) this.clientSocketService.connect(firebaseId);
     }
 
     disconnect(): void {
@@ -188,5 +191,9 @@ export class PlayerSocketService {
     unsuscribeChat(): void {
         this.clientSocketService.off('message-sent');
         this.clientSocketService.off(SocketEventNames.ChatHistory);
+    }
+
+    leaveActiveGame(player: Player): void {
+        this.clientSocketService.send('leave-active-game', { player });
     }
 }
