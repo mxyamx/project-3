@@ -48,7 +48,6 @@ export class PlayersListComponent implements OnInit {
                 this.currentGameManager.removePlayer(player);
 
                 if (this.gameSessionManager.isCurrentPlayer(player)) {
-                    this.playerSocketService.disconnect();
                     this.playersList = [];
                     this.currentGameManager.reset();
                     this.router.navigate(['/home']);
@@ -60,7 +59,6 @@ export class PlayersListComponent implements OnInit {
                 this.currentGameManager.removePlayer(player);
 
                 if (this.gameSessionManager.isCurrentPlayer(player)) {
-                    this.playerSocketService.disconnect();
                     this.playersList = [];
                     this.currentGameManager.reset();
                     this.showAlertConfirmation = true;

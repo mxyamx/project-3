@@ -348,8 +348,6 @@ export class GameSessionManagerService {
         this.resetSignals();
         this._leavingGame.set(true);
         this.gameId.set(EMPTY_CODE);
-
-        if (this.socketManager.isSocketAlive()) this.socketManager.disconnect();
     }
 
     updateDisplayedList(newList: Player[]): void {

@@ -33,7 +33,6 @@ export class CreationPageComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadGames();
-        this.playerSocketService.connect();
     }
 
     loadGames(): void {

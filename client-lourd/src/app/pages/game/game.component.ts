@@ -132,6 +132,10 @@ export class GameComponent implements OnInit, OnDestroy {
         const timeToHideNotifications = 800;
         const timeToChangePage = 1000;
         this.showAbandonConfirmation = false;
+        const player = this.gameSessionManager.chosenPlayer();
+        if (player) {
+            this.playerSocketService.leaveActiveGame(player);
+        }
         this.gameSessionManager.leaveGame();
         setTimeout(() => {
             this.hideNotifications();

@@ -211,6 +211,7 @@ export class SocketManager {
                 const playerToRemove = game.players.find((playerToRemoveFound) => playerToRemoveFound.socketId === player.socketId);
                 if (playerToRemove) {
                     await this.gameService.removePlayer(playerToRemove, gameId);
+                    this.gameScheduler.disconnectPlayer(player.socketId);
 
                     this.sio.to(gameId).emit('player-left', playerToRemove);
 
@@ -250,6 +251,7 @@ export class SocketManager {
             socket.on('kick-player', async (data: RoomManagement) => {
                 const { gameId, player } = data;
                 await this.gameService.removePlayer(player, gameId);
+                this.gameScheduler.disconnectPlayer(player.socketId);
                 this.sio.to(gameId).emit('kicked', player);
 
                 if (this.games[gameId]) {
@@ -296,7 +298,19 @@ export class SocketManager {
             });
 
             socket.on('disconnecting', async () => {
-                await this.purgeChatHistoryIfRoomEmpty(socket);
+                const rooms: Set<string> = socket.rooms;
+                const roomsWithSize: Map<string, number> = new Map();
+
+                rooms.forEach((room) => roomsWithSize.set(room, this.sio.sockets.adapter.rooms.get(room)?.size ?? 0));
+
+                const socketId = socket.id;
+                await this.purgeChatHistoryIfRoomEmpty(socketId, roomsWithSize);
+                await this.purgeCurrentGames(socketId, roomsWithSize);
+            });
+
+            socket.on('leave-active-game', async (data: { player: Player }) => {
+                const { player } = data;
+                await this.gameScheduler.disconnectPlayer(player.socketId);
             });
 
             socket.on('disconnect', async () => {
@@ -378,29 +392,47 @@ export class SocketManager {
         });
     }
 
-    private async purgeChatHistoryIfRoomEmpty(socket: io.Socket): Promise<void> {
+    private async purgeChatHistoryIfRoomEmpty(socketID: string, rooms: Map<string, number>): Promise<void> {
         try {
-            for (const room of socket.rooms) {
-                if (room === socket.id || room === CHANNEL_GENERAL_ID) continue;
+            for (const room of rooms) {
+                if (room[0] === socketID || room[0] === CHANNEL_GENERAL_ID) continue;
 
-                const sizeBeforeLeave = this.sio.sockets.adapter.rooms.get(room)?.size ?? 0;
+                const sizeBeforeLeave = room[1];
 
-                if (sizeBeforeLeave !== 1) continue;
+                if (sizeBeforeLeave > 1) continue;
 
-                if (GAME_ROOM_REGEX.test(room)) {
-                    await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: room });
+                if (GAME_ROOM_REGEX.test(room[0])) {
+                    await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: room[0] });
                 } else {
                     const collection: Collection<ChannelDoc> = this.databaseService.database.collection(process.env.CHANNEL_COLLECTION_NAME);
 
-                    const channel = await collection.findOne({ id: room });
+                    const channel = await collection.findOne({ id: room[0] });
 
                     if (!channel) {
-                        await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: room });
+                        await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: room[0] });
                     }
                 }
             }
         } catch (err) {
             console.error('purgeChatHistoryIfRoomEmpty failed:', err);
+        }
+    }
+    private async purgeCurrentGames(socketID: string, rooms: Map<string, number>): Promise<void> {
+        try {
+            for (const room of rooms) {
+                if (room[0] === socketID || room[0] === CHANNEL_GENERAL_ID) continue;
+
+                const sizeBeforeLeave = room[1];
+
+                if (sizeBeforeLeave > 1) continue;
+
+                const regex = /^\d{4}$/;
+                if (!regex.test(room[0])) continue;
+
+                await this.gameService.deleteGame(room[0]);
+            }
+        } catch (err) {
+            console.error('purgeCurrentGames failed:', err);
         }
     }
 }

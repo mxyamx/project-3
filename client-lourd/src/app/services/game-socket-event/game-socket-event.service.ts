@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import {
     ATTACK_LARGE_TIME_LIMIT_SEC,
     ATTACK_SMALL_TIME_LIMIT_SEC,
+    EMPTY_CODE,
     ENDGAME_COOL_DOWN_MSEC,
     INITIAL_AMOUNT_OF_ACTION,
     INITIAL_AMOUNT_OF_EVASION,
@@ -129,7 +130,11 @@ export class GameSocketEventService {
             if (!data.successful) {
                 return;
             }
+
             const gameId = this.gameSessionManager.gameId();
+            if (gameId === EMPTY_CODE) {
+                return;
+            }
             const gapMsec = 100;
             const endGameNotificationStartingTime = 500;
             const endGameNotificationEndingTime = 2800;

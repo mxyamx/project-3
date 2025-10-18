@@ -140,6 +140,13 @@ export class WaitingPageComponent implements OnInit {
         if (this.gameId) {
             this.chatDockService.leftGame();
             this.playerSocketService.emitLeaveGame(this.gameId, player);
+
+            // const isAdminLeaving = this.isOrganizer();
+            // const isLastPlayerLeaving = this.currentGame.players.length === 1;
+
+            // if (isAdminLeaving || isLastPlayerLeaving) {
+            //     this.playerSocketService.emitDeleteGame(this.gameId);
+            // }
         }
         this.router.navigate([UrlPage.Home]);
     }
@@ -190,7 +197,6 @@ export class WaitingPageComponent implements OnInit {
 
         this.socketManager.on(SocketClientEventNames.ServerError, () => {
             this.gameSessionManager.updateGameId(EMPTY_CODE);
-            this.socketManager.disconnect();
             this.router.navigate([UrlPage.Error]);
         });
     }

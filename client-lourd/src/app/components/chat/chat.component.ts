@@ -40,9 +40,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.playerName = this.userManager.getCurrentUser().username;
 
-        if (!this.playerSocketService.isConnected()) {
-            this.playerSocketService.connect();
-        }
         this.playerSocketService.onChatHistory((msgs) => {
             this.chatService.roomMessages = msgs;
             setTimeout(() => this.scrollToBottom(), 0);

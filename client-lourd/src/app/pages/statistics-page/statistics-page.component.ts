@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { GlobalStatisticsComponent } from '@app/components/global-statistics/global-statistics.component';
@@ -15,7 +15,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     templateUrl: './statistics-page.component.html',
     styleUrl: './statistics-page.component.scss',
 })
-export class StatisticsPageComponent implements OnDestroy {
+export class StatisticsPageComponent {
     socketService = inject(SocketClientService);
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     chatDockService: ChatDockService = inject(ChatDockService);
@@ -27,9 +27,5 @@ export class StatisticsPageComponent implements OnDestroy {
         if (state) {
             this.gameId = state.data;
         }
-    }
-
-    ngOnDestroy(): void {
-        this.socketService.disconnect();
     }
 }
