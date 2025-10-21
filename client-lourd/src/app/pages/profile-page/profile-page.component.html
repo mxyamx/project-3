@@ -64,78 +64,48 @@
     </div>
 
     <!-- ===================== EDIT MODAL ===================== -->
-    @if (isEditing) {
-    <div class="edit-modal-backdrop" (click)="closeEdit()"></div>
-    <div class="edit-modal" (click)="$event.stopPropagation()">
-        <h2>Modifier le compte</h2>
+    <div class="edit-modal-backdrop" *ngIf="isEditing" (click)="closeEdit()"></div>
 
-        <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
-            <div class="form-row">
-                <label for="username">Nom d'utilisateur</label>
-                <input
-                    id="username"
-                    type="text"
-                    formControlName="username"
-                    [class.invalid]="editForm.get('username')?.invalid && editForm.get('username')?.touched"
-                    placeholder="Votre pseudonyme"
-                    autocomplete="username"
-                />
-                @if (editForm.get('username')?.invalid && editForm.get('username')?.touched) {
-                <small class="error">3–32 caractères.</small>
-                }
-            </div>
+    <div class="edit-modal" *ngIf="isEditing">
+        <div class="edit-modal__surface">
+            <h2>Modifier le compte</h2>
 
-            <div class="form-row">
-                <label for="email">Courriel</label>
-                <input
-                    id="email"
-                    type="email"
-                    formControlName="email"
-                    [class.invalid]="editForm.get('email')?.invalid && editForm.get('email')?.touched"
-                    placeholder="vous@exemple.com"
-                    autocomplete="email"
-                />
-                @if (editForm.get('email')?.invalid && editForm.get('email')?.touched) {
-                <small class="error">Courriel invalide.</small>
-                }
-            </div>
-
-            <!-- Avatar preset picker -->
-            <div class="form-row">
-                <label>Choisir un avatar</label>
-                <div class="avatar-grid" role="listbox" aria-label="Avatars prédéfinis">
-                    <button
-                        type="button"
-                        class="avatar-chip"
-                        *ngFor="let a of PRESET_AVATARS; let i = index"
-                        [class.selected]="selectedAvatarIndex() === i"
-                        (click)="chooseAvatar(i)"
-                        role="option"
-                        [attr.aria-selected]="selectedAvatarIndex() === i"
-                    >
-                        <img [src]="a" alt="Avatar {{ i + 1 }}" />
-                    </button>
+            <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+                <div class="form-row">
+                    <label for="username">Nom d'utilisateur</label>
+                    <input id="username" type="text" formControlName="username" />
                 </div>
-                @if (editForm.get('avatar')?.invalid && editForm.get('avatar')?.touched) {
-                <small class="error">Sélectionnez un avatar.</small>
-                }
-            </div>
 
-            @if (avatarPreview()) {
-            <div class="avatar-preview">
-                <img [src]="avatarPreview()" alt="Prévisualisation avatar" />
-            </div>
-            } @if (editError) {
-            <div class="edit-error">{{ editError }}</div>
-            }
+                <div class="form-row">
+                    <label for="email">Courriel</label>
+                    <input id="email" type="email" formControlName="email" />
+                </div>
 
-            <div class="modal-actions">
-                <button type="button" class="button ghost" (click)="closeEdit()" [disabled]="saving">Annuler</button>
-                <button type="submit" class="button primary" [disabled]="saving || editForm.invalid">
-                    {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
-                </button>
-            </div>
-        </form>
+                <div class="form-row">
+                    <label>Choisir un avatar</label>
+                    <div class="avatar-grid">
+                        <div
+                            class="avatar-chip"
+                            *ngFor="let avatar of PRESET_AVATARS; let i = index"
+                            [class.selected]="selectedAvatarIndex() === i"
+                            (click)="chooseAvatar(i)"
+                        >
+                            <img [src]="avatar" alt="Avatar" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="avatar-preview" *ngIf="avatarPreview()">
+                    <img [src]="avatarPreview()" alt="Avatar sélectionné" />
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="button ghost" (click)="closeEdit()">Annuler</button>
+                    <button type="submit" class="button primary" [disabled]="saving">Enregistrer</button>
+                </div>
+
+                <small *ngIf="editError" class="error">{{ editError }}</small>
+            </form>
+        </div>
     </div>
-    }
 </div>

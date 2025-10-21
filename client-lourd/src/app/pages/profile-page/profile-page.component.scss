@@ -15,6 +15,8 @@ $text-color: white;
 $border-color: #85c1e9;
 $background-color: #682974;
 $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
+$animation-delay-1: 0.25s;
+@use 'sass:color';
 
 .profile-page-container {
     display: flex;
@@ -207,32 +209,55 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
 }
 
 /* ======= Edit modal ======= */
+
 .edit-modal-backdrop {
     position: fixed;
     inset: 0;
     background: rgba(10, 10, 10, 0.6);
     z-index: 1000;
 }
+
 .edit-modal {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.98);
-    background: rgba(0, 0, 0, 0.92);
-    color: white;
-    width: 560px;
-    max-width: calc(100vw - 2rem);
-    padding: 22px 26px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    width: min(680px, calc(100vw - 2rem));
+    max-height: 85vh;
+    padding: 0;
+    border-radius: 18px;
+    overflow: hidden;
     z-index: 1001;
     animation: scaleIn $animation-delay-1 ease-out forwards;
+    background: url('/assets/background/profileBackground.png') no-repeat center top;
+    background-size: cover;
+}
+
+.edit-modal__surface {
+    position: relative;
+    z-index: 1;
+    margin: 12px;
+    padding: 22px 26px;
+    border-radius: 16px;
+
+    /* Light frosted-glass style like mobile */
+    background: rgba(255, 255, 255, 0.35);
+
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    box-shadow:
+        0 12px 24px rgba(0, 0, 0, 0.3),
+        inset 0 0 0 2px rgba(255, 255, 255, 0.15);
+    color: #1a1023;
+    max-height: calc(85vh - 24px);
+    overflow-y: auto;
 
     h2 {
-        margin: 0 0 12px 0;
+        margin: 0 0 16px;
         font-family: $font-primary;
-        font-size: 1.6rem;
+        font-size: 1.7rem;
+        text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
     }
+
     form {
         display: grid;
         grid-template-columns: 1fr;
@@ -243,29 +268,79 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
         display: flex;
         flex-direction: column;
         gap: 6px;
+
         label {
             font-weight: 600;
             font-family: $font-primary;
         }
+
         input[type='text'],
         input[type='email'] {
-            padding: 10px 12px;
-            border-radius: 10px;
+            padding: 12px 14px;
+            border-radius: 12px;
             border: 2px solid #8350bd;
-            background: #1a1023;
-            color: #fff;
-            font-size: 1rem;
+            background: #fff; // <-- white background
+            color: #1a1023; // dark purple text to fit your theme
+            font-size: 1.05rem;
             outline: none;
+            font-family: $font-primary;
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+
+            &::placeholder {
+                color: rgba(0, 0, 0, 0.4);
+            }
+
             &:focus {
                 border-color: #c6adf3;
+                box-shadow: 0 0 0 3px rgba(198, 173, 243, 0.25);
+                background: #fffdfc; // subtle warm white highlight
             }
+
             &.invalid {
                 border-color: #e57373;
+                background: #fff0f0;
             }
         }
-        small.error {
-            color: #ff9e9e;
-            font-size: 0.9rem;
+    }
+
+    .avatar-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(64px, 1fr));
+        gap: 14px;
+        margin-top: 6px;
+    }
+
+    .avatar-chip {
+        border: 3px solid #7f62c5;
+        border-radius: 16px;
+        padding: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        cursor: pointer;
+        transition:
+            transform 120ms ease,
+            box-shadow 120ms ease,
+            border-color 120ms ease;
+
+        img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        &.selected {
+            border-color: #c6adf3;
+            box-shadow:
+                0 0 0 3px rgba(198, 173, 243, 0.35),
+                0 6px 16px rgba(0, 0, 0, 0.25);
+            transform: translateY(-1px);
         }
     }
 
@@ -273,6 +348,7 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
         display: flex;
         justify-content: center;
         margin-top: 8px;
+
         img {
             width: 120px;
             height: 120px;
@@ -288,8 +364,15 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
     .modal-actions {
         display: flex;
         justify-content: flex-end;
-        gap: 10px;
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    small.error {
+        color: #ff9e9e;
+        font-size: 0.9rem;
         margin-top: 8px;
+        display: block;
     }
 }
 
@@ -297,56 +380,47 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
     border-radius: 66px;
     border: 11px solid #270053;
     background: linear-gradient(284deg, #c985e9 30.46%, #c44ae2 67.39%);
-    min-width: 150px;
-    min-height: 48px;
+    min-width: 160px;
+    min-height: 52px;
     font-family: 'Jaro', sans-serif;
-    cursor: pointer;
-}
-.button.ghost {
-    background: transparent;
-    border-radius: 66px;
-    border: 2px solid #8350bd;
+    font-size: 1.25rem;
     color: #fff;
-    min-width: 120px;
-    min-height: 48px;
-    font-family: 'Jaro', sans-serif;
     cursor: pointer;
-}
-
-/* ======= Avatar picker grid ======= */
-.avatar-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
-    gap: 12px;
-    margin-top: 6px;
-}
-
-.avatar-chip {
-    background: transparent;
-    border: 2px solid #8350bd;
-    border-radius: 14px;
-    padding: 6px;
-    cursor: pointer;
+    box-shadow:
+        0 6px 0 #0c0620,
+        0 12px 24px rgba(0, 0, 0, 0.35);
     transition:
-        transform 120ms ease,
-        box-shadow 120ms ease,
-        border-color 120ms ease;
-
-    img {
-        display: block;
-        width: 100%;
-        aspect-ratio: 1 / 1;
-        object-fit: cover;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.8);
-    }
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
 
     &:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        box-shadow:
+            0 7px 0 #0c0620,
+            0 16px 28px rgba(0, 0, 0, 0.4);
     }
-    &.selected {
-        border-color: #c6adf3;
-        box-shadow: 0 0 0 2px rgba(198, 173, 243, 0.35) inset;
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+.button.ghost {
+    border-radius: 66px;
+    border: 11px solid #0f1733;
+    background: linear-gradient(284deg, #aba8d5 0%, #967fb5 100%);
+    color: #fff;
+    min-width: 150px;
+    min-height: 52px;
+    font-family: 'Jaro', sans-serif;
+    font-size: 1.25rem;
+    cursor: pointer;
+    box-shadow:
+        0 6px 0 #0a0f24,
+        0 12px 24px rgba(0, 0, 0, 0.35);
+
+    &:hover {
+        transform: translateY(-1px);
     }
 }
