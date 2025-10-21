@@ -115,19 +115,13 @@ export class ProfilePageComponent {
             return;
         }
 
-        const { username, email, avatar } = this.editForm.value as {
-            username: string;
-            email: string;
-            avatar: string;
-        };
-
+        const { username, email, avatar } = this.editForm.value as { username: string; email: string; avatar: string };
         if (!this.PRESET_AVATARS.includes(avatar)) {
             this.editError = 'Veuillez choisir un avatar valide.';
             return;
         }
 
         const nothingChanged = username === this.user.username && email === this.user.email && avatar === (this.user.avatar || '');
-
         if (nothingChanged) {
             this.isEditing = false;
             return;
@@ -137,12 +131,19 @@ export class ProfilePageComponent {
         this.editError = '';
 
         try {
+            // keep Firebase in sync (optional)
             if (email !== this.user.email) await this.authService.updateCurrentUserEmail(email);
             await this.authService.updateCurrentUserProfile(username, avatar);
 
-            const saved = await this.httpUserService.updateUserProfile(this.user.id, { username, email, avatar }).toPromise();
+            // Build FULL payload (what your server expects)
+            const payload = { ...this.user, username, email, avatar };
 
-            if (saved) Object.assign(this.user, saved);
+            // PUT /api/users/:id → 204 No Content
+            await this.httpUserService.updateUser(payload).toPromise();
+
+            // Update local user since server returned no body
+            Object.assign(this.user, payload);
+
             this.isEditing = false;
         } catch (err: any) {
             if (err?.code === 'auth/requires-recent-login') {

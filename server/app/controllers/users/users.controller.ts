@@ -219,22 +219,18 @@ export class UsersController {
          */
         this.router.put('/:id', async (req: Request, res: Response) => {
             try {
-                console.log('PUT /api/users/:id', req.params.id, 'body.id', req.body?.id);
-                const id = req.params.id;
-                if (!id) {
-                    res.status(httpStatus.BAD_REQUEST).json({ error: 'ID invalide.' });
+                const user: User = req.body;
+                if (!user || user.id !== req.params.id) {
+                    res.status(httpStatus.BAD_REQUEST).json({ error: 'ID invalide ou corps de requête manquant.' });
                     return;
                 }
-
-                const { username, email, avatar } = req.body as Partial<User>;
-                const updated = await this.usersService.updateUserProfile(id, { username, email, avatar });
-
-                res.status(httpStatus.OK).json(updated);
+                await this.usersService.updateUser(user);
+                res.status(httpStatus.NO_CONTENT).send();
             } catch (error) {
                 if (error instanceof HttpException) {
                     res.status(error.status).json({ error: error.message });
                 } else {
-                    res.status(httpStatus.BAD_REQUEST).json({ error: (error as Error).message || 'Une erreur serveur est survenue.' });
+                    res.status(httpStatus.BAD_REQUEST).json({ error: 'Une erreur serveur est survenue.' });
                 }
             }
         });

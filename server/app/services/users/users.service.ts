@@ -87,28 +87,4 @@ export class UsersService {
             throw new Error("Échec lors de la mise à jour de l'utilisateur.");
         }
     }
-
-    async updateUserProfile(id: string, dto: UserUpdateDTO): Promise<User> {
-        const { username, email, avatar } = dto;
-
-        if (username && username !== '[supprimé]') {
-            const existing = await this.collection.findOne({ username, id: { $ne: id } });
-            if (existing) throw new HttpException('Le pseudonyme est déjà utilisé', httpStatus.BAD_REQUEST);
-        }
-
-        const $set: Partial<User> = {};
-        if (typeof username !== 'undefined') $set.username = username;
-        if (typeof email !== 'undefined') $set.email = email;
-        if (typeof avatar !== 'undefined') $set.avatar = avatar;
-
-        if (Object.keys($set).length === 0) {
-            return this.getUser(id);
-        }
-
-        const result = await this.collection.findOneAndUpdate({ id }, { $set }, { returnDocument: 'after' });
-
-        const updated = (result as unknown as { value: User | null }).value;
-        if (!updated) throw new Error("Échec lors de la mise à jour de l'utilisateur."); // id truly not found
-        return updated;
-    }
 }
