@@ -1,3 +1,6 @@
+/* eslint-disable no-console */
+/* eslint-disable no-dupe-keys */
+/* eslint-disable no-undef */
 import { HttpException } from '@app/classes/http-exception/http.exception';
 import { USER_COLLECTION } from '@app/constants/development-constants';
 import { DatabaseService } from '@app/services/database/database.service';
@@ -8,6 +11,7 @@ import httpStatus from 'http-status-codes';
 import { Collection } from 'mongodb';
 import { Service } from 'typedi';
 
+export type UserUpdateDTO = Partial<Pick<User, 'username' | 'email' | 'avatar'>>;
 @Service()
 export class UsersService {
     constructor(private databaseService: DatabaseService) {}
@@ -77,8 +81,34 @@ export class UsersService {
             },
         );
 
+        console.log('update result:', result);
+
         if (result.matchedCount === 0 || result.modifiedCount === 0) {
             throw new Error("Échec lors de la mise à jour de l'utilisateur.");
         }
+    }
+
+    async updateUserProfile(id: string, dto: UserUpdateDTO): Promise<User> {
+        const { username, email, avatar } = dto;
+
+        if (username && username !== '[supprimé]') {
+            const existing = await this.collection.findOne({ username, id: { $ne: id } });
+            if (existing) throw new HttpException('Le pseudonyme est déjà utilisé', httpStatus.BAD_REQUEST);
+        }
+
+        const $set: Partial<User> = {};
+        if (typeof username !== 'undefined') $set.username = username;
+        if (typeof email !== 'undefined') $set.email = email;
+        if (typeof avatar !== 'undefined') $set.avatar = avatar;
+
+        if (Object.keys($set).length === 0) {
+            return this.getUser(id);
+        }
+
+        const result = await this.collection.findOneAndUpdate({ id }, { $set }, { returnDocument: 'after' });
+
+        const updated = (result as unknown as { value: User | null }).value;
+        if (!updated) throw new Error("Échec lors de la mise à jour de l'utilisateur."); // id truly not found
+        return updated;
     }
 }

@@ -33,6 +33,10 @@ export class HttpUserService {
         return this.http.delete<void>(`${this.apiUrl}/users/${id}`).pipe(catchError(this.handleError));
     }
 
+    updateUserProfile(id: string, dto: { username?: string; email?: string; avatar?: string }) {
+        return this.http.put<User>(`${this.apiUrl}/users/${encodeURIComponent(id)}`, dto);
+    }
+
     private handleError(error: HttpErrorResponse) {
         console.error('HTTP Error Details:', error);
         let errorMessage = 'Une erreur inconnue est survenue.';
