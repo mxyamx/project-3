@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable no-restricted-imports */
 import { ChatMessageDoc } from '@app/interfaces/chat-message-doc';
 import { ChatMessage } from '@common/chat-message';
 import { SocketEventNames } from '@common/enums/socket-events-names';
@@ -19,17 +21,16 @@ export class SocketGameCommunication {
         socket.on('join-room-chat', async (roomId: string) => {
             socket.join(roomId);
 
-            //Document stored in Mongo
             const lastDocs = await this.collection
-                .find({ roomId: roomId }, { projection: { _id: 0, text: 1, sender: 1, timestamp: 1 } })
+                .find({ roomId }, { projection: { _id: 0, text: 1, sender: 1, senderId: 1, timestamp: 1 } })
                 .sort({ timestamp: -1 })
                 .limit(100)
                 .toArray();
-            //DTO send to client
             const history: ChatMessage[] = lastDocs.reverse().map((chatMessageDoc) => {
                 const chatMessage: ChatMessage = {
                     text: chatMessageDoc.text,
                     sender: chatMessageDoc.sender,
+                    senderId: chatMessageDoc.senderId,
                     timestamp: chatMessageDoc.timestamp.toISOString(),
                 };
                 return chatMessage;
@@ -41,10 +42,10 @@ export class SocketGameCommunication {
             const roomId: string = data.gameId;
             const now = new Date();
             const message: ChatMessage = { ...data.message, timestamp: now.toISOString() };
-            //Converting to Mongo document
+            // Converting to Mongo document
             const doc: Omit<ChatMessageDoc, '_id'> = {
                 ...message,
-                roomId: roomId,
+                roomId,
                 timestamp: now,
             };
 

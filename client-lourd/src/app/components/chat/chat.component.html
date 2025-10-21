@@ -3,22 +3,33 @@
         <button class="back-btn" (click)="closeChat.emit()">
             <i class="fa fa-arrow-left"></i>
         </button>
-        @if(roomId === channelGeneralId || gameRoomRegex.test(roomId)){
+
+        @if (roomId === channelGeneralId || gameRoomRegex.test(roomId)) {
         <h3>{{ 'chat.' + chatName | translate }}</h3>
-        } @else{
+        } @else {
         <h3>{{ chatName }}</h3>
-        } @if(!isPopup){
-        <button class="open-btn" (click)="openChatPopup()"><img src="assets/icones/open_in_new.svg" alt="Open in new icon" /></button>
+        } @if (!isPopup) {
+        <button class="open-btn" (click)="openChatPopup()">
+            <img src="assets/icones/open_in_new.svg" alt="Open in new icon" />
+        </button>
         }
     </div>
+
     <div class="chat-messages" #scroll>
         <div class="message-list">
-            @for (message of chatService.roomMessages; track message.timestamp) {
-            <div class="message" [ngClass]="{ 'my-message': message.sender === playerName }">
+            @for (message of chatService.roomMessages; track message.timestamp + '-' + message.senderId) {
+            <div
+                class="message"
+                [ngClass]="{ 'my-message': isMine(message), 'other-message': !isMine(message) }"
+                [attr.data-sender-id]="message.senderId"
+            >
                 <div class="message-header">
                     <span class="sender">{{ message.sender }}</span>
-                    <span class="timestamp"> {{ message.timestamp | date: 'HH:mm:ss' : 'America/Toronto' }}</span>
+                    <span class="timestamp">
+                        {{ message.timestamp | date: 'HH:mm:ss' : 'America/Toronto' }}
+                    </span>
                 </div>
+
                 <div class="message-content">
                     {{ message.text }}
                 </div>
