@@ -7,6 +7,12 @@ import { CombatLog, GameEventLog, RoomMessage } from '@common/socket-data-forms'
 import { Collection } from 'mongodb';
 import * as io from 'socket.io';
 import { DatabaseService } from '../database/database.service';
+
+interface UserDoc {
+    _id: string; // if you use ObjectId, change to ObjectId and cast senderIds accordingly
+    isDeleted?: boolean;
+    username?: string;
+}
 export class SocketGameCommunication {
     constructor(
         private sio: io.Server,
@@ -15,6 +21,10 @@ export class SocketGameCommunication {
 
     get collection(): Collection<ChatMessageDoc> {
         return this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME);
+    }
+
+    get usersCollection(): Collection<UserDoc> {
+        return this.databaseService.database.collection(process.env.USER_COLLECTION_NAME ?? 'users');
     }
 
     handleSockets(socket: io.Socket): void {
@@ -26,10 +36,13 @@ export class SocketGameCommunication {
                 .sort({ timestamp: -1 })
                 .limit(100)
                 .toArray();
+            const senderIds = [...new Set(lastDocs.map((d) => d.senderId).filter(Boolean))];
+            const users = await this.usersCollection.find({ _id: { $in: senderIds } }, { projection: { _id: 1, isDeleted: 1 } }).toArray();
+            const deleted = new Set(users.filter((u) => u.isDeleted).map((u) => String(u._id)));
             const history: ChatMessage[] = lastDocs.reverse().map((chatMessageDoc) => {
                 const chatMessage: ChatMessage = {
                     text: chatMessageDoc.text,
-                    sender: chatMessageDoc.sender,
+                    sender: chatMessageDoc.senderId && deleted.has(String(chatMessageDoc.senderId)) ? '[supprimé]' : chatMessageDoc.sender,
                     senderId: chatMessageDoc.senderId,
                     timestamp: chatMessageDoc.timestamp.toISOString(),
                 };
@@ -41,7 +54,13 @@ export class SocketGameCommunication {
         socket.on('room-message', async (data: RoomMessage) => {
             const roomId: string = data.gameId;
             const now = new Date();
-            const message: ChatMessage = { ...data.message, timestamp: now.toISOString() };
+            const u = await this.usersCollection.findOne({ _id: data.message.senderId }, { projection: { isDeleted: 1 } });
+            const message: ChatMessage = {
+                text: data.message.text,
+                senderId: data.message.senderId,
+                sender: u?.isDeleted ? '[supprimé]' : data.message.sender,
+                timestamp: now.toISOString(),
+            };
             // Converting to Mongo document
             const doc: Omit<ChatMessageDoc, '_id'> = {
                 ...message,
