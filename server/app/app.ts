@@ -42,7 +42,7 @@ export class Application {
 
     bindRoutes(): void {
         this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerJSDoc(this.swaggerOptions)));
-        this.app.use('/api/board-games', this.boardGameController.router);
+        this.app.use('/api/board-games', verifyFirebaseToken, this.boardGameController.router);
         this.app.use('/api/users', this.usersController.router);
         this.app.use('/api/channels', verifyFirebaseToken, this.channelController.router);
         this.app.use('/', (req, res) => {

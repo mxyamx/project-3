@@ -34,7 +34,6 @@ export class HttpUserService {
     }
 
     private handleError(error: HttpErrorResponse) {
-        console.error('HTTP Error Details:', error);
         let errorMessage = 'Une erreur inconnue est survenue.';
         switch (error.status) {
             case HttpStatus.BadRequest:
