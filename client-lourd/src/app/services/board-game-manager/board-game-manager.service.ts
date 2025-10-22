@@ -11,6 +11,7 @@ import {
 import { BoardGame } from '@common/board-game';
 import { BoardGameSize } from '@common/enums/board-game-size';
 import { GameMode } from '@common/enums/game-mode';
+import { GamePrivacy } from '@common/enums/game-visibility';
 import { ItemType } from '@common/enums/item-type';
 import { TileType } from '@common/enums/tile-type';
 import { Item } from '@common/item';
@@ -27,11 +28,13 @@ export class BoardGameManagerService {
         description: '',
         size: BoardGameSize.Medium,
         gameMode: GameMode.Normal,
+        privacy: GamePrivacy.Private,
         tiles: [],
         previewImage: 'assets/preview.png',
         visibility: true,
         lastModified: new Date(),
         itemInfos: [],
+        ownerId: '',
     });
 
     loadedBoardGame: WritableSignal<BoardGame> = signal({
@@ -40,11 +43,13 @@ export class BoardGameManagerService {
         description: '',
         size: BoardGameSize.Medium,
         gameMode: GameMode.Normal,
+        privacy: GamePrivacy.Private,
         tiles: [],
         previewImage: 'assets/preview.png',
         visibility: true,
         lastModified: new Date(),
         itemInfos: [],
+        ownerId: '',
     });
 
     playingBoardGame: WritableSignal<BoardGame> = signal({
@@ -53,11 +58,13 @@ export class BoardGameManagerService {
         description: '',
         size: BoardGameSize.Medium,
         gameMode: GameMode.Normal,
+        privacy: GamePrivacy.Private,
         tiles: [],
         previewImage: 'assets/preview.png',
         visibility: true,
         lastModified: new Date(),
         itemInfos: [],
+        ownerId: '',
     });
 
     constructor() {

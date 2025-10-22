@@ -1,4 +1,4 @@
-<div id="dropdown-component">
+<div id="dropdown-component" clickOutside (clickOutside)="clickedOutside()">
     <div class="selected" (click)="toggleMenu()">
         <span>{{ i18nKey + selectedValue | translate }}</span>
         <span [class.arrow-down]="menuOpen">&#x27A4;</span>

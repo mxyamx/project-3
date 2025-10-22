@@ -29,11 +29,20 @@
     </div>
 
     <div class="admin-content" [ngClass]="{ 'no-game-selected': !displayedObject, 'game-selected': displayedObject }">
-        <app-game-list [gamesList]="gamesList" [showOnlyVisible]="false" (gameSelected)="setDisplayedObject($event)" [theme]="'brown'">
+        <app-game-list
+            [gamesList]="gamesList"
+            [isAdminPage]="true"
+            (gameSelected)="setDisplayedObject($event)"
+            (duplicateGame)="onDuplicateGame($event)"
+            [theme]="'brown'"
+            [isLoading]="adminPageManagerService.isLoading()"
+        >
         </app-game-list>
 
-        @if (displayedObject) {
         <section class="game-state-changer">
+            @if(adminPageManagerService.isLoading()){
+            <app-loading [color]="'white'"></app-loading>
+            } @else{ @if (displayedObject) {
             <div class="game-name-header">
                 <h2><i class="fas fa-gamepad"></i> {{ displayedObject.name }}</h2>
             </div>
@@ -44,9 +53,7 @@
                 </div>
 
                 <div class="game-icons">
-                    @if (displayedObject.visibility) {
-                    <img src="assets/icones/eye icon white.svg" alt="Visible" />
-                    } @if (displayedObject.gameMode === gameMode.CTF) {
+                    @if (displayedObject.gameMode === gameMode.CTF) {
                     <img src="assets/icones/flag white.svg" alt="CTF Mode" />
                     }
                 </div>
@@ -55,16 +62,20 @@
             <div class="admin-option-container">
                 <button routerLink="/editor" (click)="editGame()">{{ 'admin-page.edit' | translate }}</button>
                 <button (click)="confirmDelete()">{{ 'admin-page.delete' | translate }}</button>
-
+                @if(userManager.currentUser().id === displayedObject.ownerId){
                 <div class="visibility-toggle">
-                    <label class="switch">
-                        <input type="checkbox" [(ngModel)]="displayedObject.visibility" (change)="updateDisplayedObjectVisibility()" />=
-                        <span class="slider"></span>
-                    </label>
-                    <span class="visibility-text">{{ 'admin-page.visibility' | translate }}</span>
+                    <span class="visibility-text">{{ 'admin-page.privacy' | translate }}</span>
+                    <app-dropdown
+                        [i18nKey]="'general.game-privacy.'"
+                        [selectedValue]="displayedObject.privacy"
+                        [listElems]="gamePrivacies"
+                        (selectedValueChange)="updateDisplayedObjectPrivacy($event)"
+                        >></app-dropdown
+                    >
                 </div>
+                }
             </div>
+            } }
         </section>
-        }
     </div>
 </div>

@@ -1,30 +1,36 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { BoardGame } from '@common/board-game';
+import { BoardGameDTO } from '@common/board-game';
 import { GameMode } from '@common/enums/game-mode';
 import { TranslatePipe } from '@ngx-translate/core';
+import { LoadingComponent } from '../loading/loading.component';
 
 @Component({
     selector: 'app-game-list',
     standalone: true,
-    imports: [CommonModule, TranslatePipe],
+    imports: [CommonModule, TranslatePipe, LoadingComponent],
     templateUrl: './game-list.component.html',
     styleUrls: ['./game-list.component.scss'],
 })
 export class GameListComponent {
-    @Input() gamesList: BoardGame[] = [];
-    @Input() showOnlyVisible: boolean = false;
+    @Input() gamesList: BoardGameDTO[] = [];
     @Input() theme: 'green' | 'brown' = 'brown';
-    @Output() gameSelected = new EventEmitter<BoardGame>();
+    @Output() gameSelected = new EventEmitter<BoardGameDTO>();
+    @Output() duplicateGame = new EventEmitter<BoardGameDTO>();
+    @Input() isAdminPage: boolean = false;
+    @Input() isLoading: boolean = false;
 
-    hoveredObject: BoardGame | null = null;
+    hoveredObject: BoardGameDTO | null = null;
     gameMode: typeof GameMode = GameMode;
 
-    get filteredGames(): BoardGame[] {
-        return this.showOnlyVisible ? this.gamesList.filter((game) => game.visibility) : this.gamesList;
+    get filteredGames(): BoardGameDTO[] {
+        return this.gamesList;
     }
 
-    selectGame(game: BoardGame) {
+    selectGame(game: BoardGameDTO) {
         this.gameSelected.emit(game);
+    }
+    onDuplicateGame(game: BoardGameDTO) {
+        this.duplicateGame.emit(game);
     }
 }
