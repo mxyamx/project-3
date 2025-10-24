@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
@@ -8,4 +8,6 @@ import { TranslatePipe } from '@ngx-translate/core';
     templateUrl: './loading.component.html',
     styleUrl: './loading.component.scss',
 })
-export class LoadingComponent {}
+export class LoadingComponent {
+    @Input() color: string = '#51b9ff';
+}

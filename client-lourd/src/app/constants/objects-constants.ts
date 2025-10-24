@@ -1,6 +1,7 @@
 import { BoardGame } from '@common/board-game';
 import { BoardGameSize } from '@common/enums/board-game-size';
 import { GameMode } from '@common/enums/game-mode';
+import { GamePrivacy } from '@common/enums/game-visibility';
 import { ItemName } from '@common/enums/item-name';
 import { ItemType } from '@common/enums/item-type';
 import { TileType } from '@common/enums/tile-type';
@@ -154,9 +155,10 @@ export const DEFAULT_BOARD: BoardGame = {
     description: '',
     size: BoardGameSize.Medium,
     gameMode: GameMode.Normal,
+    privacy: GamePrivacy.Private,
     tiles: [],
     previewImage: 'assets/preview.png',
-    visibility: true,
     lastModified: new Date(),
     itemInfos: [],
+    ownerId: '',
 };

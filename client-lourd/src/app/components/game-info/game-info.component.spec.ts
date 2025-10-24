@@ -12,6 +12,7 @@ import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { Player } from '@common/player';
 import { VirtualPlayer } from '@common/virtual-player';
 import { GameInfoComponent } from './game-info.component';
+import { GamePrivacy } from '@common/enums/game-visibility';
 
 interface GameInfoComponentTestInterface {
     getGameData(): void;
@@ -36,8 +37,9 @@ const MOCK_CURRENT_GAME: CurrentGame = {
         gameMode: GameMode.Normal,
         tiles: [],
         previewImage: '',
-        visibility: true,
         lastModified: new Date(),
+        privacy: GamePrivacy.Public,
+        ownerId: ''
     },
     players: [...STANDARD_PLAYERS],
     locked: false,

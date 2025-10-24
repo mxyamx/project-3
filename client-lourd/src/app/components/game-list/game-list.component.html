@@ -1,6 +1,9 @@
 <section class="games-list" [ngClass]="theme === 'green' ? 'green-theme' : 'brown-theme'">
     <p class="subtitle-element"><i class="fas fa-list-alt -"></i> {{ 'game-list.title' | translate }}</p>
     <div class="map-container">
+        @if(isLoading){
+        <app-loading class="loading" [color]="'white'"></app-loading>
+        } @else{
         <ng-container>
             @if (filteredGames.length === 0) {
             <p class="no-game-list">{{ 'game-list.empty' | translate }}</p>
@@ -12,9 +15,10 @@
                     </div>
 
                     <div class="game-icons">
-                        @if (object.visibility) {
+                        <!-- @if (object.visibility) {
                         <img src="assets/icones/eye icon white.svg" alt="Visibility Icon" />
-                        } @if (object.gameMode === gameMode.CTF) {
+                        }  -->
+                        @if (object.gameMode === gameMode.CTF) {
                         <img src="assets/icones/flag white.svg" alt="Mode Icon" />
                         }
                     </div>
@@ -23,20 +27,33 @@
                 <div class="game-details">
                     <p><i class="fas fa-gamepad"></i> {{ 'game-list.details.name' | translate }} : {{ object.name }}</p>
                     <p><i class="fas fa-ruler"></i> {{ 'game-list.details.size' | translate }} : {{ object.size }} x {{ object.size }}</p>
-                    <p><i class="fas fa-flag"></i> {{ 'game-list.details.mode' | translate }} : {{ object.gameMode }}</p>
+                    <p>
+                        <i class="fas fa-flag"></i> {{ 'game-list.details.mode' | translate }} :
+                        {{ 'general.game-mode.' + object.gameMode | translate }}
+                    </p>
                     <p>
                         <i class="fas fa-calendar-alt"></i> {{ 'game-list.details.last-modified' | translate }} :
                         {{ object.lastModified | date: 'short' }}
                     </p>
+                    <p>
+                        <i class="fas fa-lock"></i> {{ 'game-list.details.privacy' | translate }} :
+                        {{ 'general.game-privacy.' + object.privacy | translate }}
+                    </p>
+                    <p><i class="fas fa-user"></i> {{ 'game-list.details.owner' | translate }} : {{ object.ownerName }}</p>
                 </div>
 
                 @if (hoveredObject === object) {
                 <div class="tooltip">
                     {{ object.description }}
                 </div>
+                } @if(isAdminPage){
+                <div class="duplicate" (click)="onDuplicateGame(object)">
+                    <i class="fas fa-clone"></i>
+                </div>
                 }
             </div>
             } }
         </ng-container>
+        }
     </div>
 </section>

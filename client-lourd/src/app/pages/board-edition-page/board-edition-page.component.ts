@@ -225,7 +225,6 @@ export class BoardEditionPageComponent {
         return {
             ...this.boardgameManager.editedBoardGame(),
             previewImage,
-            visibility: false,
             name: this.boardgameManager.editedBoardGame().name.trim().replace(/\s+/g, ' '),
             description: this.boardgameManager.editedBoardGame().description.trim().replace(/\s+/g, ' '),
         };

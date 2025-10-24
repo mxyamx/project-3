@@ -87,6 +87,11 @@
             "open-door": "Ouvrir la porte",
             "close-door": "Fermer la porte",
             "attack-player": "Attaquer le joueur"
+        },
+        "game-privacy": {
+            "public": "Public",
+            "private": "Privé",
+            "private-shared": "Privé-partagé"
         }
     },
     "settings-page": {
@@ -159,7 +164,9 @@
             "name": "Nom",
             "size": "Taille",
             "mode": "Mode",
-            "last-modified": "Modifié le"
+            "last-modified": "Modifié le",
+            "privacy": "Confidentialité",
+            "owner": "Propriétaire"
         }
     },
     "admin-page": {
@@ -169,7 +176,7 @@
         "create": "Créer un nouveau jeu",
         "edit": "Éditer le jeu",
         "delete": "Supprimer le jeu",
-        "visibility": "Changer la visibilité"
+        "privacy": "Changer la confidentialité"
     },
     "join-game-page": {
         "title": "Joindre une partie",
@@ -228,7 +235,8 @@
         "title": "Créer un nouveau jeu",
         "mode": "Mode de jeu",
         "size": "Taille de la carte",
-        "create": "Créer"
+        "create": "Créer",
+        "select-privacy": "Sélectionner la confidentialité"
     },
     "login-page": {
         "login": {

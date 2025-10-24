@@ -3,6 +3,7 @@ import { BoardGame } from '@common/board-game';
 import { CurrentGame } from '@common/current-game';
 import { BoardGameSize } from '@common/enums/board-game-size';
 import { GameMode } from '@common/enums/game-mode';
+import { GamePrivacy } from '@common/enums/game-visibility';
 import { Player } from '@common/player';
 
 @Injectable({
@@ -15,11 +16,12 @@ export class CurrentGameManagerService {
         description: 'This is a default description for the board game.',
         size: BoardGameSize.Medium,
         gameMode: GameMode.Normal,
+        privacy: GamePrivacy.Private,
         tiles: [],
         previewImage: 'assets/preview.png',
-        visibility: true,
         lastModified: new Date(),
         itemInfos: [],
+        ownerId: '',
     };
 
     displayedCurrentGame: WritableSignal<CurrentGame> = signal({

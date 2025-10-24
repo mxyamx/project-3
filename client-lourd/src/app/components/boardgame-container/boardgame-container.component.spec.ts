@@ -11,6 +11,7 @@ import { ItemType } from '@common/enums/item-type';
 import { TileType } from '@common/enums/tile-type';
 import { BoardgameContainerComponent } from './boardgame-container.component';
 import SpyObj = jasmine.SpyObj;
+import { GamePrivacy } from '@common/enums/game-visibility';
 
 @Component({
     selector: 'app-tile-element',
@@ -72,9 +73,10 @@ describe('BoardgameContainerComponent', () => {
                 ],
             ],
             previewImage: 'assets/preview.png',
-            visibility: true,
             lastModified: new Date(),
             itemInfos: [],
+            privacy: GamePrivacy.Public,
+            ownerId: ''
         });
 
         boardGameManagerServiceSpy.editedBoardGame = spyBoardGame;

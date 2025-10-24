@@ -87,6 +87,11 @@
             "open-door": "Open the door",
             "close-door": "Close the door",
             "attack-player": "Attack the player"
+        },
+        "game-privacy": {
+            "public": "Public",
+            "private": "Private",
+            "private-shared": "Private shared"
         }
     },
     "settings-page": {
@@ -159,7 +164,9 @@
             "name": "Name",
             "size": "Size",
             "mode": "Mode",
-            "last-modified": "Last Modified"
+            "last-modified": "Last Modified",
+            "privacy": "Privacy",
+            "owner": "Owner"
         }
     },
     "admin-page": {
@@ -169,7 +176,7 @@
         "create": "Create New Game",
         "edit": "Edit Game",
         "delete": "Delete Game",
-        "visibility": "Change Visibility"
+        "visibility": "Change Privacy"
     },
     "join-game-page": {
         "title": "Join a Game",
@@ -228,7 +235,8 @@
         "title": "Create a New Game",
         "mode": "Game Mode",
         "size": "Map Size",
-        "create": "Create"
+        "create": "Create",
+        "select-privacy": "Select game privacy"
     },
     "login-page": {
         "login": {
