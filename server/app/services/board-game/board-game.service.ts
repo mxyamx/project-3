@@ -145,9 +145,7 @@ export class BoardGameService {
         if (!validation.valid) {
             throw new HttpException(validation.errors.join(' '), httpStatus.BAD_REQUEST);
         }
-
-        const isManageable = board.privacy === GamePrivacy.Public || board.ownerId === userId;
-
+        const isManageable = existingBoard.privacy === GamePrivacy.Public || existingBoard.ownerId === userId;
         if (!isManageable) {
             throw new Error("Vous n'avez pas le droit de modifier ce jeu");
         }
