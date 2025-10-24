@@ -139,15 +139,11 @@ export class BoardGameService {
             });
     }
 
-    async updateBoard(userId: string, board: BoardGame): Promise<void> {
+    async updateBoard(board: BoardGame): Promise<void> {
         const existingBoard = await this.collection.findOne({ name: board.name });
         const validation = BoardGameValidation.validateBoard(board, existingBoard);
         if (!validation.valid) {
             throw new HttpException(validation.errors.join(' '), httpStatus.BAD_REQUEST);
-        }
-        const isManageable = existingBoard.privacy === GamePrivacy.Public || existingBoard.ownerId === userId;
-        if (!isManageable) {
-            throw new Error("Vous n'avez pas le droit de modifier ce jeu");
         }
         const result = await this.collection.updateOne(
             { id: board.id },

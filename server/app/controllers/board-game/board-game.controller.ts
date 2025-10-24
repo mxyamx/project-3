@@ -248,10 +248,9 @@ export class BoardGameController {
          *         schema:
          *           $ref: '#/definitions/BoardGame'
          */
-        this.router.put('/:id', async (req: AuthedRequest, res: Response) => {
+        this.router.put('/:id', async (req: Request, res: Response) => {
             try {
-                const userId = req.user?.uid;
-                await this.boardGameService.updateBoard(userId, req.body);
+                await this.boardGameService.updateBoard(req.body);
                 res.status(httpStatus.NO_CONTENT).send();
             } catch (error) {
                 if (error instanceof HttpException) {
