@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { PlayersListComponent } from '@app/components/players-list/players-list';
 import { EMPTY_CODE } from '@app/constants/development-constants';
@@ -24,11 +24,11 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-waiting-page',
-    imports: [RouterLink, PlayersListComponent, CommonModule, ChatContainerComponent, TranslatePipe],
+    imports: [PlayersListComponent, CommonModule, ChatContainerComponent, TranslatePipe],
     templateUrl: './waiting-page.component.html',
     styleUrl: './waiting-page.component.scss',
 })
-export class WaitingPageComponent implements OnInit {
+export class WaitingPageComponent implements OnInit, OnDestroy {
     gameId: string | null;
     currentGame: CurrentGame;
     showTooltip: boolean = false;
@@ -39,6 +39,7 @@ export class WaitingPageComponent implements OnInit {
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     showPlayerAmountWarning = false;
     chatDockService: ChatDockService = inject(ChatDockService);
+    isStartingGame: boolean = false;
     protected showVirtualPlayerProfile: boolean = false;
     protected virtualPlayerProfile = VirtualPlayerProfile;
 
@@ -92,6 +93,12 @@ export class WaitingPageComponent implements OnInit {
         });
     }
 
+    ngOnDestroy(): void {
+        if (!this.isStartingGame) {
+            this.playerSocketService.unsubscribeGameEvents();
+        }
+    }
+
     toggleRoomState() {
         if (this.gameId) {
             const maxPlayers = PlayerLimits[this.currentGame.boardGame.size].maxPlayers;
@@ -140,13 +147,7 @@ export class WaitingPageComponent implements OnInit {
         if (this.gameId) {
             this.chatDockService.leftGame();
             this.playerSocketService.emitLeaveGame(this.gameId, player);
-
-            // const isAdminLeaving = this.isOrganizer();
-            // const isLastPlayerLeaving = this.currentGame.players.length === 1;
-
-            // if (isAdminLeaving || isLastPlayerLeaving) {
-            //     this.playerSocketService.emitDeleteGame(this.gameId);
-            // }
+            this.playerSocketService.unsubscribeGameEvents();
         }
         this.router.navigate([UrlPage.Home]);
     }
@@ -177,6 +178,7 @@ export class WaitingPageComponent implements OnInit {
                 this.statisticsManager.reset();
                 this.statisticsManager.setStartTime();
                 this.statisticsManager.updateNumberTurns();
+                this.isStartingGame = true;
 
                 this.router.navigate([UrlPage.Game]);
 

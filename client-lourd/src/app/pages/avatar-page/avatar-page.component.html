@@ -33,17 +33,6 @@
             </div>
         </div>
         }
-        <section class="name">
-            <div class="form-field">
-                <h2>{{ 'avatar-page.name' | translate }}:</h2>
-                <div id="input-name">
-                    <input id="name" name="name" type="text" formControlName="name" required minlength="4" maxlength="10" />
-                    @if (isFieldValid('name')) {
-                    <div class="error">{{ 'avatar-page.name-required' | translate }}</div>
-                    }
-                </div>
-            </div>
-        </section>
         <section class="character">
             <app-avatar-img
                 id="list-avatar"

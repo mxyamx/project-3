@@ -7,7 +7,14 @@
     </section>
 
     <section class="code-section">
+        <div class="tab-container">
+            <button [ngClass]="{'active':showEnterCodeTab()}" (click)="showEnterCodeTab.set(true)">Enter code</button>
+            <button [ngClass]="{'active':!showEnterCodeTab()}" (click)="showEnterCodeTab.set(false)">Find game</button>
+        </div>
+        @if(showEnterCodeTab()){
         <h2>{{'join-game-page.enter-code' | translate}} :</h2>
+
         <app-code-input-component (canEnterGame)="canJoinGame($event)" (accessCode)="gameId = $event">></app-code-input-component>
+        }
     </section>
 </section>

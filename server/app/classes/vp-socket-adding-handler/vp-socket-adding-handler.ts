@@ -3,8 +3,8 @@ import { GameScheduler } from '@app/classes/game-scheduler/game-scheduler';
 import { GameVpSocketEvent } from '@app/classes/game-vp-socket-event/game-vp-socket-event';
 import { VirtualPlayerManager } from '@app/classes/virtual-player-manager/virtual-player-manager';
 import { VpBehaviorInFight } from '@app/classes/vp-behavior-in-fight/vp-behavior-in-fight';
-import { VpGameSessionManager } from '@app/classes/vp-game-session/vp-game-session-manager';
 import { VpBehaviorInGame } from '@app/classes/vp-behavior-in-game/vp-behavior-in-game';
+import { VpGameSessionManager } from '@app/classes/vp-game-session/vp-game-session-manager';
 import { VpSocketManager } from '@app/classes/vp-socket-manager/vp-socket-manager';
 import { VpState } from '@app/classes/vp-state/vp-state';
 import { VpSocketAddingHandlerConfig } from '@app/interfaces/vp-socket-adding-handler-config';
@@ -52,7 +52,7 @@ export class VpSocketAddingHandler {
             if (!validation) return;
             const { game, vpManager } = validation;
 
-            const vpCtx = this.createVpContext(profile, gameId, game, vpManager);
+            const vpCtx = await this.createVpContext(profile, gameId, game, vpManager);
             if (!vpCtx) return;
             const { virtualPlayer, vpSocketManager, vpState, vpGameSessionManager } = vpCtx;
             const vpSocketId = vpSocketManager.clientSocket.id;
@@ -95,7 +95,7 @@ export class VpSocketAddingHandler {
         return { game, vpManager };
     }
 
-    private createVpContext(profile: VirtualPlayerProfile, gameId: string, game: CurrentGame, vpManager: VirtualPlayerManager) {
+    private async createVpContext(profile: VirtualPlayerProfile, gameId: string, game: CurrentGame, vpManager: VirtualPlayerManager) {
         const virtualPlayer = vpManager.createVirtualPlayer(profile);
         if (!virtualPlayer) return null;
 
@@ -117,6 +117,7 @@ export class VpSocketAddingHandler {
         this.sio.to(gameId).emit('avatar-list-updated', Array.from(this.games[gameId]));
 
         const vpSocketManager = new VpSocketManager();
+        await vpSocketManager.connect();
         const vpState = new VpState();
         const vpGameSessionManager = new VpGameSessionManager(vpSocketManager, vpState, {
             initialPlayer: virtualPlayer,
@@ -146,10 +147,16 @@ export class VpSocketAddingHandler {
         this.gameVpSocketEvents.set(vpSocketId, gameEvent);
         this.fightVpSocketEvents.set(vpSocketId, fightEvent);
 
-        vpSocketManager.clientSocket.once('connect', () => {
+        const doConfigure = () => {
             gameEvent.configure(vpSocketManager);
             fightEvent.configure(vpSocketManager);
-        });
+        };
+
+        if (vpSocketManager.clientSocket.connected) {
+            doConfigure();
+        } else {
+            vpSocketManager.clientSocket.once('connect', doConfigure);
+        }
     }
 
     private async notifyVpAdded(gameId: string, virtualPlayer: VirtualPlayer, maxPlayers: number) {

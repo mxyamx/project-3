@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input } from '@angular/core';
+import { Component, inject, Input, signal, WritableSignal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CodeInputComponent } from '@app/components/code-input-component/code-input-component';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
@@ -17,6 +17,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 export class EnteringCurrentGamePageComponent {
     @Input() gameId: string = '';
     currentGame: CurrentGame;
+    showEnterCodeTab: WritableSignal<boolean> = signal(true);
     private playerSocketService: PlayerSocketService = inject(PlayerSocketService);
 
     constructor(private router: Router) {}

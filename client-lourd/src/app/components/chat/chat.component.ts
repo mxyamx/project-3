@@ -50,7 +50,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.playerSocketService.unsuscribeChat();
+        this.playerSocketService.unsubscribeChat();
     }
 
     joinRoom() {

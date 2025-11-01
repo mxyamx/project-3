@@ -9,8 +9,12 @@ $text-color: white;
 $background-frame: linear-gradient(15deg, #1a4d2e 0%, $background-color 100%);
 
 @keyframes backgroundScroll {
-    from { background-position: 0 0; }
-    to { background-position: -1000% 0; }
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: -1000% 0;
+    }
 }
 
 h1 {
@@ -24,7 +28,7 @@ h1 {
     justify-content: flex-start;
     align-items: center;
     min-height: 100vh;
-    gap: 1em;
+    gap: 7em;
     box-sizing: border-box;
     overflow: hidden;
 }

@@ -9,6 +9,7 @@ import { CurrentGameManagerService } from '@app/services/current-game-manager/cu
 import { GameEventService } from '@app/services/game-event/game-event.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
+import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { CharacterAttributes } from '@common/character-attributes';
 import { CurrentGame } from '@common/current-game';
 import { DiceBonus } from '@common/enums/dice-bonus';
@@ -24,7 +25,6 @@ import { TranslatePipe } from '@ngx-translate/core';
 })
 export class AvatarPageComponent implements OnInit {
     formGroup = new FormGroup({
-        name: new FormControl('', [Validators.required]),
         avatar: new FormControl<string | null>(null, [Validators.required]),
         attributes: new FormControl<CharacterAttributes | null>(null, [Validators.required]),
         bonus: new FormControl('', [Validators.required]),
@@ -47,17 +47,13 @@ export class AvatarPageComponent implements OnInit {
     private gameEventService = inject(GameEventService);
     private gameId: string = '';
     private currentGame: CurrentGame;
+    userManager = inject(UserManagerService);
 
     constructor(private router: Router) {}
 
     ngOnInit() {
         this.formGroup.valueChanges.subscribe(() => {
             this.updateButtonState();
-        });
-        this.formGroup.get('name')?.valueChanges.subscribe((value) => {
-            if (value && value.trim() !== value) {
-                this.formGroup.get('name')?.setValue(value.trim(), { emitEvent: false });
-            }
         });
         const idGame = this.currentGameManager.displayedCurrentGame().id;
         if (idGame) {
@@ -178,7 +174,7 @@ export class AvatarPageComponent implements OnInit {
         };
 
         const player: Player = {
-            name: this.formGroup.value.name || '',
+            name: this.userManager.currentUser().username || '',
             character: this.formGroup.value.avatar || '',
             attributes,
             organizer: this.currentGame.players.length === 0,
@@ -202,7 +198,6 @@ export class AvatarPageComponent implements OnInit {
                 this.limitError = true;
                 return;
             }
-            player.name = this.currentGameManager.verifyUniquePlayerName(player.name, this.currentGame.players);
 
             this.gameSessionManager.updateChosenPlayer(player);
 

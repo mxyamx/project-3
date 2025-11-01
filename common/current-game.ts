@@ -10,3 +10,12 @@ export interface CurrentGame {
     adminId?: string;
     started?: boolean;
 }
+
+export interface CurrentGamePreview {
+    id: string;
+    playerCount: number;
+    maxPlayerCount: number;
+    boardgameSize: number;
+    started: boolean;
+    previewImage: string;
+}

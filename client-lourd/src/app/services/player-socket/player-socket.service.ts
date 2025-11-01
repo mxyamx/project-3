@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { ChatMessage } from '@common/chat-message';
 import { CurrentGame } from '@common/current-game';
-import { SocketEventNames } from '@common/enums/socket-events-names';
+import { SocketClientEventNames, SocketEventNames } from '@common/enums/socket-events-names';
 import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { GameEvent } from '@common/game-event';
 import { Player } from '@common/player';
@@ -188,12 +188,47 @@ export class PlayerSocketService {
         });
     }
 
-    unsuscribeChat(): void {
+    unsubscribeChat(): void {
         this.clientSocketService.off('message-sent');
         this.clientSocketService.off(SocketEventNames.ChatHistory);
     }
 
     leaveActiveGame(player: Player): void {
         this.clientSocketService.send('leave-active-game', { player });
+    }
+    unsubscribeGameEvents(): void {
+        this.unsubscribeChat();
+        this.clientSocketService.off('admin-left');
+        this.clientSocketService.off('lock-updated');
+        this.clientSocketService.off('player-joined');
+        this.clientSocketService.off('player-left');
+        this.clientSocketService.off('kicked');
+        this.clientSocketService.off('avatar-list-updated');
+        this.clientSocketService.off('avatar-room-joined');
+        this.clientSocketService.off('avatar-room-left');
+        this.clientSocketService.off('change-turn-log-sent');
+        this.clientSocketService.off('combat-log-sent');
+        this.clientSocketService.off(SocketClientEventNames.StartGame);
+        this.clientSocketService.off(SocketClientEventNames.ServerError);
+        this.clientSocketService.off(SocketClientEventNames.StartFight);
+        this.clientSocketService.off(SocketClientEventNames.ProcessAttack);
+        this.clientSocketService.off(SocketClientEventNames.SwitchTurn);
+        this.clientSocketService.off(SocketClientEventNames.ProcessEscapeAttempt);
+        this.clientSocketService.off(SocketClientEventNames.EndFight);
+        this.clientSocketService.off(SocketClientEventNames.EndTurn);
+        this.clientSocketService.off(SocketClientEventNames.StartTurn);
+        this.clientSocketService.off(SocketClientEventNames.Clock);
+        this.clientSocketService.off(SocketClientEventNames.EndGame);
+        this.clientSocketService.off(SocketClientEventNames.UpdateGame);
+        this.clientSocketService.off(SocketClientEventNames.ShowEndFightNotification);
+        this.clientSocketService.off(SocketClientEventNames.ProcessEscapeAttempt);
+        this.clientSocketService.off(SocketClientEventNames.ToggleDebugMode);
+        this.clientSocketService.off(SocketClientEventNames.DeactivateDebugMode);
+        this.clientSocketService.off(SocketClientEventNames.PickUpItem);
+        this.clientSocketService.off(SocketClientEventNames.DropItem);
+        this.clientSocketService.off(SocketClientEventNames.MovePlayer);
+        this.clientSocketService.off(SocketClientEventNames.MovementOver);
+        this.clientSocketService.off(SocketClientEventNames.ToggleDoorState);
+        this.clientSocketService.off(SocketClientEventNames.Teleport);
     }
 }

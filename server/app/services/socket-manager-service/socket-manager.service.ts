@@ -68,12 +68,12 @@ export class SocketManager {
             this.socketGameCommunication.handleSockets(socket);
 
             socket.on('create-game', async (game: CurrentGame, callback) => {
-                game.adminId = socket.id;
+                game.adminId = socket.id; //TODO IMPORTANT LOGIC RIGHT HERE
                 const createdGame = await this.gameService.createGame(game);
-                this.gameScheduler.createGame(game);
+                this.gameScheduler.createGame(createdGame);
                 socket.join(createdGame.id);
                 this.vpManagers.set(createdGame.id, new VirtualPlayerManager());
-                callback(game);
+                callback(createdGame);
             });
 
             socket.on('toggle-lock', async (gameId: string, callback) => {
@@ -236,7 +236,6 @@ export class SocketManager {
                 }
 
                 socket.leave(gameId);
-
                 const updatedGame = await this.gameService.getGame(gameId);
                 if (updatedGame) {
                     const maxPlayers = PlayerLimits[updatedGame.boardGame.size].maxPlayers;
@@ -276,7 +275,6 @@ export class SocketManager {
                         this.vpBehaviorsInFight.delete(player.socketId);
                     }
                 }
-
                 const updatedGame = await this.gameService.getGame(gameId);
                 if (updatedGame) {
                     const maxPlayers = PlayerLimits[updatedGame.boardGame.size].maxPlayers;
@@ -305,7 +303,7 @@ export class SocketManager {
 
                 const socketId = socket.id;
                 await this.purgeChatHistoryIfRoomEmpty(socketId, roomsWithSize);
-                await this.purgeCurrentGames(socketId, roomsWithSize);
+                // await this.purgeCurrentGames(socketId, roomsWithSize);
             });
 
             socket.on('leave-active-game', async (data: { player: Player }) => {
@@ -338,7 +336,6 @@ export class SocketManager {
 
                         await this.gameService.removePlayer(player, game.id);
                         this.sio.to(game.id).emit('player-left', player);
-
                         const updatedGame = await this.gameService.getGame(game.id);
                         if (!updatedGame) {
                             socket.leave(game.id);
@@ -417,22 +414,22 @@ export class SocketManager {
             console.error('purgeChatHistoryIfRoomEmpty failed:', err);
         }
     }
-    private async purgeCurrentGames(socketID: string, rooms: Map<string, number>): Promise<void> {
-        try {
-            for (const room of rooms) {
-                if (room[0] === socketID || room[0] === CHANNEL_GENERAL_ID) continue;
+    // private async purgeCurrentGames(socketID: string, rooms: Map<string, number>): Promise<void> {
+    //     try {
+    //         for (const room of rooms) {
+    //             if (room[0] === socketID || room[0] === CHANNEL_GENERAL_ID) continue;
 
-                const sizeBeforeLeave = room[1];
+    //             const sizeBeforeLeave = room[1];
 
-                if (sizeBeforeLeave > 1) continue;
+    //             if (sizeBeforeLeave > 1) continue;
 
-                const regex = /^\d{4}$/;
-                if (!regex.test(room[0])) continue;
+    //             const regex = /^\d{4}$/;
+    //             if (!regex.test(room[0])) continue;
 
-                await this.gameService.deleteGame(room[0]);
-            }
-        } catch (err) {
-            console.error('purgeCurrentGames failed:', err);
-        }
-    }
+    //             await this.gameService.deleteGame(room[0]);
+    //         }
+    //     } catch (err) {
+    //         console.error('purgeCurrentGames failed:', err);
+    //     }
+    // }
 }
