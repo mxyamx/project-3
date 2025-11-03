@@ -10,6 +10,7 @@ import { DatabaseService } from '../database/database.service';
 
 interface UserDoc {
     _id: string; // if you use ObjectId, change to ObjectId and cast senderIds accordingly
+    id: string;
     isDeleted?: boolean;
     username?: string;
 }
@@ -42,8 +43,18 @@ export class SocketGameCommunication {
             const users = await this.usersCollection.find({}).toArray();
 
             const returnProperSenderForMessage = (message: WithId<ChatMessageDoc>) => {
-                const shouldDelete = users.some((user) => message.sender === user.username);
-                return !shouldDelete ? { ...message, sender: '[supprimé]' } : message;
+                // find the user that corresponds to the message senderId (check both _id and id)
+                const user = users.find((u) => u._id === message.senderId || u.id === message.senderId);
+
+                // if no user found, keep original sender (could be a system message)
+                if (!user) return message;
+
+                // if the user is marked deleted or their username is '[supprimé]', sanitize sender
+                if (user && user.username === '[supprimé]') {
+                    return { ...message, sender: '[supprimé]' };
+                }
+
+                return message;
             };
 
             // Sanitize sender to just display the user

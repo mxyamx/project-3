@@ -76,9 +76,7 @@ export class ProfilePageComponent {
         this.router.navigate(['/']);
     }
 
-    // ========= Edit flow =========
     editAccount() {
-        // preload form with current values
         this.editForm.reset({
             username: this.user.username,
             email: this.user.email,
@@ -131,22 +129,23 @@ export class ProfilePageComponent {
         this.editError = '';
 
         try {
-            // keep Firebase in sync (optional)
             if (email !== this.user.email) await this.authService.updateCurrentUserEmail(email);
             await this.authService.updateCurrentUserProfile(username, avatar);
 
-            // Build FULL payload (what your server expects)
             const payload = { ...this.user, username, email, avatar };
 
             // PUT /api/users/:id → 204 No Content
             await this.httpUserService.updateUser(payload).toPromise();
 
-            // Update local user since server returned no body
             Object.assign(this.user, payload);
 
             this.isEditing = false;
         } catch (err: any) {
-            if (err?.code === 'auth/requires-recent-login') {
+            const msg = err?.error?.error?.toString()?.toLowerCase?.() || err?.message?.toLowerCase?.() || '';
+
+            if (err?.status === 400 || (msg.includes('username') && msg.includes('exist')) || err?.error?.code === 'USERNAME_TAKEN') {
+                this.editError = 'Pseudonyme déjà utilisé';
+            } else if (err?.code === 'auth/requires-recent-login') {
                 this.editError = 'Pour modifier votre courriel, reconnectez-vous puis réessayez.';
             } else {
                 this.editError = err?.error?.error || err?.message || 'Échec de la modification du compte.';

@@ -104,7 +104,7 @@
                     <button type="submit" class="button primary" [disabled]="saving">Enregistrer</button>
                 </div>
 
-                <small *ngIf="editError" class="error">{{ editError }}</small>
+                <p *ngIf="editError" class="error-message">{{ editError }}</p>
             </form>
         </div>
     </div>
