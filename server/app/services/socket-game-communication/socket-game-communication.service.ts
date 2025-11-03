@@ -13,6 +13,9 @@ interface UserDoc {
     isDeleted?: boolean;
     username?: string;
 }
+
+const INVISIBLE_SEPARATOR = '\u2063'; // from kotlin
+
 export class SocketGameCommunication {
     constructor(
         private sio: io.Server,
@@ -39,10 +42,18 @@ export class SocketGameCommunication {
             const senderIds = [...new Set(lastDocs.map((d) => d.senderId).filter(Boolean))];
             const users = await this.usersCollection.find({ _id: { $in: senderIds } }, { projection: { _id: 1, isDeleted: 1 } }).toArray();
             const deleted = new Set(users.filter((u) => u.isDeleted).map((u) => String(u._id)));
+
+            // Sanitize sender to just display the user
             const history: ChatMessage[] = lastDocs.reverse().map((chatMessageDoc) => {
+                const sender = chatMessageDoc.sender.split(INVISIBLE_SEPARATOR)[0];
+
+                const sanitizedMessage = {
+                    ...chatMessageDoc,
+                    sender,
+                };
                 const chatMessage: ChatMessage = {
                     text: chatMessageDoc.text,
-                    sender: chatMessageDoc.senderId && deleted.has(String(chatMessageDoc.senderId)) ? '[supprimé]' : chatMessageDoc.sender,
+                    sender: sanitizedMessage.sender && deleted.has(String(chatMessageDoc.senderId)) ? '[supprimé]' : sanitizedMessage.sender,
                     senderId: chatMessageDoc.senderId,
                     timestamp: chatMessageDoc.timestamp.toISOString(),
                 };
