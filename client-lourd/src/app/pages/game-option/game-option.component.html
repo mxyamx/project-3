@@ -25,6 +25,17 @@
                 <option value="20x20">20x20</option>
             </select>
         </div>
+
+        <div>
+            <b
+                ><label for="game-privacy"> {{ 'game-option-page.select-privacy' | translate }} : </label></b
+            >
+            <select id="game-privacy" formControlName="gamePrivacy">
+                @for(privacy of gamePrivacies; track privacy){
+                <option [value]="privacy">{{ 'general.game-privacy.' + privacy | translate }}</option>
+                }
+            </select>
+        </div>
         <button type="submit" class="primary" [disabled]="settingsForm.invalid">{{ 'game-option-page.create' | translate }}</button>
     </form>
 </div>

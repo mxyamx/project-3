@@ -25,12 +25,14 @@
 
     <div class="creation-button-container"></div>
 
-    <div class="creation-content" [ngClass]="{ 'no-game-selected': !displayedObject?.visibility, 'game-selected': displayedObject?.visibility }">
-        <app-game-list [gamesList]="gamesList" [showOnlyVisible]="true" (gameSelected)="setDisplayedObject($event)" [theme]="'green'">
+    <div class="creation-content" [ngClass]="{ 'no-game-selected': true, 'game-selected': true }">
+        <app-game-list [gamesList]="gamesList" (gameSelected)="setDisplayedObject($event)" [theme]="'green'" [isLoading]="isLoading()">
         </app-game-list>
 
-        @if (displayedObject && displayedObject.visibility) {
         <section class="game-state-changer">
+            @if(isLoading()){
+            <app-loading [color]="'white'"></app-loading>
+            } @else{ @if (displayedObject) {
             <div class="game-name-header">
                 <h2>{{ displayedObject.name }}</h2>
             </div>
@@ -41,15 +43,16 @@
                 </div>
 
                 <div class="game-icons">
-                    @if (displayedObject.visibility) {
+                    <!-- @if (displayedObject.visibility) {
                     <img src="assets/icones/eye icon white.svg" alt="Visible" />
-                    } @if (displayedObject.gameMode === gameMode.CTF) {
+                    }  -->
+                    @if (displayedObject.gameMode === gameMode.CTF) {
                     <img src="assets/icones/flag white.svg" alt="CTF Mode" />
                     }
                 </div>
             </div>
             <button (click)="createNewGame()" [disabled]="hasBeenClicked">{{ 'creation-page.create' | translate }}</button>
+            }}
         </section>
-        }
     </div>
 </div>

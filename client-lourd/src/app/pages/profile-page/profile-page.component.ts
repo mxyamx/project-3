@@ -115,7 +115,7 @@ export class ProfilePageComponent {
 
         const { username, email, avatar } = this.editForm.value as { username: string; email: string; avatar: string };
         if (!this.PRESET_AVATARS.includes(avatar)) {
-            this.editError = 'Veuillez choisir un avatar valide.';
+            this.editError = 'profil-page.edit-modal.error.required-avatar';
             return;
         }
 
@@ -144,11 +144,11 @@ export class ProfilePageComponent {
             const msg = err?.error?.error?.toString()?.toLowerCase?.() || err?.message?.toLowerCase?.() || '';
 
             if (err?.status === 400 || (msg.includes('username') && msg.includes('exist')) || err?.error?.code === 'USERNAME_TAKEN') {
-                this.editError = 'Pseudonyme déjà utilisé';
+                this.editError = 'profil-page.edit-modal.error.used-username';
             } else if (err?.code === 'auth/requires-recent-login') {
-                this.editError = 'Pour modifier votre courriel, reconnectez-vous puis réessayez.';
+                this.editError = 'profil-page.edit-modal.error.connection';
             } else {
-                this.editError = err?.error?.error || err?.message || 'Échec de la modification du compte.';
+                this.editError = err?.error?.error || err?.message || 'profil-page.edit-modal.error.general';
             }
         } finally {
             this.saving = false;

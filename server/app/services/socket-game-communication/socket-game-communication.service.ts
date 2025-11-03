@@ -4,7 +4,7 @@ import { ChatMessageDoc } from '@app/interfaces/chat-message-doc';
 import { ChatMessage } from '@common/chat-message';
 import { SocketEventNames } from '@common/enums/socket-events-names';
 import { CombatLog, GameEventLog, RoomMessage } from '@common/socket-data-forms';
-import { Collection, WithId } from 'mongodb';
+import { Collection } from 'mongodb';
 import * as io from 'socket.io';
 import { DatabaseService } from '../database/database.service';
 
@@ -14,8 +14,6 @@ interface UserDoc {
     isDeleted?: boolean;
     username?: string;
 }
-
-const INVISIBLE_SEPARATOR = '\u2063'; // from kotlin
 
 export class SocketGameCommunication {
     constructor(
@@ -35,39 +33,22 @@ export class SocketGameCommunication {
         socket.on('join-room-chat', async (roomId: string) => {
             socket.join(roomId);
 
-            const lastDocs = await this.collection
-                .find({ roomId }, { projection: { _id: 0, text: 1, sender: 1, senderId: 1, timestamp: 1 } })
-                .sort({ timestamp: -1 })
-                .limit(100)
-                .toArray();
-            const users = await this.usersCollection.find({}).toArray();
-
-            const returnProperSenderForMessage = (message: WithId<ChatMessageDoc>) => {
-                // find the user that corresponds to the message senderId (check both _id and id)
-                const user = users.find((u) => u._id === message.senderId || u.id === message.senderId);
-
-                // if no user found, keep original sender (could be a system message)
-                if (!user) return message;
-
-                // if the user is marked deleted or their username is '[supprimé]', sanitize sender
-                if (user && user.username === '[supprimé]') {
-                    return { ...message, sender: '[supprimé]' };
-                }
-
-                return message;
-            };
+            const pipeline = [
+                ...this.withOwnerLookup(),
+                {
+                    $sort: { timestamp: -1 },
+                },
+            ];
+            const lastDocs = await this.collection.aggregate<ChatMessageDoc & { sender: string }>(pipeline).toArray();
 
             // Sanitize sender to just display the user
             const history: ChatMessage[] = lastDocs.reverse().map((chatMessageDoc) => {
-                const sender = chatMessageDoc.sender.split(INVISIBLE_SEPARATOR)[0];
-
-                const sanitizedMessage = {
-                    ...chatMessageDoc,
-                    sender,
-                };
+                console.log(
+                    `chat message - ${chatMessageDoc.sender} - ${chatMessageDoc.senderId} - ${chatMessageDoc.text} - ${chatMessageDoc.timestamp} `,
+                );
                 const chatMessage: ChatMessage = {
                     text: chatMessageDoc.text,
-                    sender: returnProperSenderForMessage(sanitizedMessage).sender,
+                    sender: chatMessageDoc.sender,
                     senderId: chatMessageDoc.senderId,
                     timestamp: chatMessageDoc.timestamp.toISOString(),
                 };
@@ -79,17 +60,18 @@ export class SocketGameCommunication {
         socket.on('room-message', async (data: RoomMessage) => {
             const roomId: string = data.gameId;
             const now = new Date();
-            const u = await this.usersCollection.findOne({ _id: data.message.senderId }, { projection: { isDeleted: 1 } });
+
             const message: ChatMessage = {
                 text: data.message.text,
                 senderId: data.message.senderId,
-                sender: u?.isDeleted ? '[supprimé]' : data.message.sender,
+                sender: data.message.sender,
                 timestamp: now.toISOString(),
             };
             // Converting to Mongo document
             const doc: Omit<ChatMessageDoc, '_id'> = {
-                ...message,
-                roomId,
+                text: message.text,
+                senderId: message.senderId,
+                roomId: roomId,
                 timestamp: now,
             };
 
@@ -120,5 +102,40 @@ export class SocketGameCommunication {
 
             this.sio.to(gameIdCombat).emit('combat-log-sent', gameEvent);
         });
+    }
+
+    private withOwnerLookup() {
+        return [
+            {
+                $lookup: {
+                    from: 'users',
+                    let: { senderId: '$senderId' },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { $eq: ['$id', '$$senderId'] },
+                            },
+                        },
+                        {
+                            $project: {
+                                _id: 0,
+                                username: 1,
+                            },
+                        },
+                    ],
+                    as: 'ownerData',
+                },
+            },
+            {
+                $addFields: {
+                    sender: { $arrayElemAt: ['$ownerData.username', 0] },
+                },
+            },
+            {
+                $project: {
+                    ownerData: 0,
+                },
+            },
+        ];
     }
 }

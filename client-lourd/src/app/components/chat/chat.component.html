@@ -18,11 +18,7 @@
     <div class="chat-messages" #scroll>
         <div class="message-list">
             @for (message of chatService.roomMessages; track message.timestamp + '-' + message.senderId) {
-            <div
-                class="message"
-                [ngClass]="{ 'my-message': isMine(message), 'other-message': !isMine(message) }"
-                [attr.data-sender-id]="message.senderId"
-            >
+            <div class="message" [ngClass]="{ 'my-message': userManager.currentUser().id === message.senderId }">
                 <div class="message-header">
                     <span class="sender">{{ message.sender }}</span>
                     <span class="timestamp">

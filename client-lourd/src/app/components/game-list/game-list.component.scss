@@ -79,6 +79,7 @@ $section-pacement: 1em;
 }
 
 .game-card-list-1 {
+    position: relative;
     animation: appear linear;
     animation-timeline: view();
     animation-range: entry 0;
@@ -91,8 +92,54 @@ $section-pacement: 1em;
     cursor: pointer;
 }
 
-.game-card-list-1:hover {
-    transform: scale(1.05);
+.game-card-list-1 {
+    position: relative;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+    &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+
+        .duplicate {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .duplicate {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 2px solid #000;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.25s ease-in-out;
+
+        i {
+            font-size: 26px;
+            color: #000;
+            transition: color 0.2s ease;
+        }
+
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.85);
+            border-color: #222;
+
+            i {
+                color: #fff;
+            }
+        }
+    }
 }
 
 .game-icons {

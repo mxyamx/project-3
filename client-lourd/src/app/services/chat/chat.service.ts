@@ -13,17 +13,4 @@ export class ChatService {
             this.roomMessages.push(roomMessage);
         }
     }
-
-    // Sanitize message to explictely remove the id of the user and just keep the name
-    sanitizeMessage(messageToSanitize: ChatMessage): ChatMessage {
-        const INVISIBLE_SEPARATOR = '\u2063'; // from kotlin
-        const sender = messageToSanitize.sender.split(INVISIBLE_SEPARATOR)[0];
-
-        const sanitizedMessage = {
-            ...messageToSanitize,
-            sender,
-        };
-
-        return sanitizedMessage;
-    }
 }

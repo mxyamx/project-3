@@ -1,6 +1,6 @@
 <div class="profile-page-container">
     <section class="navigation">
-        <button class="navigation-button" (click)="goHome()"><i class="fas fa-home"></i> Retour à l'accueil</button>
+        <button class="navigation-button" (click)="goHome()"><i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}</button>
     </section>
 
     <div class="profile-left">
@@ -14,51 +14,55 @@
                     <i class="fa fa-mobile-alt"></i> } @case (DeviceType.offline) { <i class="fa-solid fa-ban offline-status"></i> } }
                 </span>
             </p>
-            <p><strong>Courriel:</strong> {{ user.email }}</p>
-            <p><strong>Argent:</strong> {{ user.money }} $</p>
+            <p>
+                <strong>{{ 'profil-page.email' | translate }}:</strong> {{ user.email }}
+            </p>
+            <p>
+                <strong>{{ 'profil-page.money' | translate }}:</strong> {{ user.money }} $
+            </p>
         </div>
 
         <div class="profile-actions">
-            <button class="button" (click)="editAccount()">Modifier le compte</button>
-            <button class="button" (click)="showDeletePopup()">Supprimer le compte</button>
+            <button class="button" (click)="editAccount()">{{ 'profil-page.modify' | translate }}</button>
+            <button class="button" (click)="showDeletePopup()">{{ 'profil-page.delete' | translate }}</button>
         </div>
     </div>
 
     <div class="profile-right">
         <div class="tabs">
             <button [class.active]="activeTab === ActiveTab.Socials" (click)="activeTab = ActiveTab.Socials">
-                <i class="fa fa-users"></i> Résaux sociaux
+                <i class="fa fa-users"></i> {{ 'profil-page.socials' | translate }}
             </button>
             <button [class.active]="activeTab === ActiveTab.Inventory" (click)="activeTab = ActiveTab.Inventory">
-                <i class="fa fa-box"></i> Inventaire
+                <i class="fa fa-box"></i> {{ 'profil-page.inventory' | translate }}
             </button>
             <button [class.active]="activeTab === ActiveTab.Statistics" (click)="activeTab = ActiveTab.Statistics">
-                <i class="fa fa-chart-bar"></i> Statistiques
+                <i class="fa fa-chart-bar"></i> {{ 'profil-page.stats' | translate }}
             </button>
         </div>
 
         @if (deleteAccountWarning) {
         <div class="confirmation-bubble">
-            <p>Êtes-vous sûr de vouloir supprimer votre compte? Cette action est irréversible</p>
+            <p>{{ 'profil-page.delete-account-modal' | translate }}</p>
             <div class="confirmation-buttons">
-                <button (click)="deleteAccount()">Oui</button>
-                <button (click)="hideDeletePopup()">Non</button>
+                <button (click)="deleteAccount()">{{ 'general.button.yes' | translate }}</button>
+                <button (click)="hideDeletePopup()">{{ 'general.button.no' | translate }}</button>
             </div>
         </div>
         }
 
         <div class="tab-content">
             @switch (activeTab) { @case (ActiveTab.Socials) {
-            <p>Amis: {{ user.friends.length }}</p>
-            <p>Utilisateurs Bloqués: {{ user.blocked.length }}</p>
+            <p>{{ 'profil-page.friends' | translate }}: {{ user.friends.length }}</p>
+            <p>{{ 'profil-page.blocked-users' | translate }}: {{ user.blocked.length }}</p>
             } @case (ActiveTab.Inventory) {
             <ul>
                 <li>Placeholder items</li>
             </ul>
             } @case (ActiveTab.Statistics) {
-            <p>Victoires: {{ user.statistics.victoryAmount }}</p>
-            <p>Défaites: {{ user.statistics.defeatAmount }}</p>
-            <p>Combats: {{ user.statistics.combatAmount }}</p>
+            <p>{{ 'profil-page.victories' | translate }}: {{ user.statistics.victoryAmount }}</p>
+            <p>{{ 'profil-page.defeats' | translate }}: {{ user.statistics.defeatAmount }}</p>
+            <p>{{ 'profil-page.combats' | translate }}: {{ user.statistics.combatAmount }}</p>
             } }
         </div>
     </div>
@@ -68,21 +72,21 @@
 
     <div class="edit-modal" *ngIf="isEditing">
         <div class="edit-modal__surface">
-            <h2>Modifier le compte</h2>
+            <h2>{{ 'profil-page.edit-modal.title' | translate }}</h2>
 
             <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
                 <div class="form-row">
-                    <label for="username">Nom d'utilisateur</label>
+                    <label for="username">{{ 'profil-page.edit-modal.username' | translate }}</label>
                     <input id="username" type="text" formControlName="username" />
                 </div>
 
                 <div class="form-row">
-                    <label for="email">Courriel</label>
+                    <label for="email">{{ 'profil-page.edit-modal.email' | translate }}</label>
                     <input id="email" type="email" formControlName="email" />
                 </div>
 
                 <div class="form-row">
-                    <label>Choisir un avatar</label>
+                    <label>{{ 'profil-page.edit-modal.avatar' | translate }}</label>
                     <div class="avatar-grid">
                         <div
                             class="avatar-chip"
@@ -100,11 +104,11 @@
                 </div>
 
                 <div class="modal-actions">
-                    <button type="button" class="button ghost" (click)="closeEdit()">Annuler</button>
-                    <button type="submit" class="button primary" [disabled]="saving">Enregistrer</button>
+                    <button type="button" class="button ghost" (click)="closeEdit()">{{ 'profil-page.edit-modal.cancel' | translate }}</button>
+                    <button type="submit" class="button primary" [disabled]="saving">{{ 'profil-page.edit-modal.save' | translate }}</button>
                 </div>
 
-                <p *ngIf="editError" class="error-message">{{ editError }}</p>
+                <p *ngIf="editError" class="error-message">{{ editError | translate }}</p>
             </form>
         </div>
     </div>

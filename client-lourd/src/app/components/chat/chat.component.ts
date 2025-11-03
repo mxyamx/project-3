@@ -32,7 +32,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     chatService = inject(ChatService);
     private playerSocketService = inject(PlayerSocketService);
-    private userManager = inject(UserManagerService);
+    userManager = inject(UserManagerService);
     readonly gameRoomRegex = GAME_ROOM_REGEX;
     readonly channelGeneralId = CHANNEL_GENERAL_ID;
     // private router = inject(Router);
@@ -63,9 +63,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     configureBaseSocketFeatures() {
         this.playerSocketService.onNewMessage((roomMessage: ChatMessage) => {
-            const sanitizedRoomMessage = this.chatService.sanitizeMessage(roomMessage);
-            console.log(sanitizedRoomMessage);
-            this.chatService.addMessage(sanitizedRoomMessage);
+            this.chatService.addMessage(roomMessage);
             setTimeout(() => this.scrollToBottom(), 0);
         });
     }

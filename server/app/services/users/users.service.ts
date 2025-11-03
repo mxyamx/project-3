@@ -2,7 +2,7 @@
 /* eslint-disable no-dupe-keys */
 /* eslint-disable no-undef */
 import { HttpException } from '@app/classes/http-exception/http.exception';
-import { USER_COLLECTION } from '@app/constants/development-constants';
+import { DATABASE_COLLECTION, USER_COLLECTION } from '@app/constants/development-constants';
 import { DatabaseService } from '@app/services/database/database.service';
 import { InterfaceTheme } from '@common/enums/interfaceTheme';
 import { Language } from '@common/enums/language';
@@ -50,6 +50,7 @@ export class UsersService {
     }
 
     async deleteUser(userId: string): Promise<void> {
+        await this.databaseService.database.collection(DATABASE_COLLECTION).deleteMany({ ownerId: userId });
         const result = await this.collection.updateOne({ id: userId }, { $set: { username: '[supprimé]' } });
 
         if (result.matchedCount === 0) {
