@@ -4,7 +4,7 @@ import { ChatMessageDoc } from '@app/interfaces/chat-message-doc';
 import { ChatMessage } from '@common/chat-message';
 import { SocketEventNames } from '@common/enums/socket-events-names';
 import { CombatLog, GameEventLog, RoomMessage } from '@common/socket-data-forms';
-import { Collection } from 'mongodb';
+import { Collection, WithId } from 'mongodb';
 import * as io from 'socket.io';
 import { DatabaseService } from '../database/database.service';
 
@@ -39,9 +39,12 @@ export class SocketGameCommunication {
                 .sort({ timestamp: -1 })
                 .limit(100)
                 .toArray();
-            const senderIds = [...new Set(lastDocs.map((d) => d.senderId).filter(Boolean))];
-            const users = await this.usersCollection.find({ _id: { $in: senderIds } }, { projection: { _id: 1, isDeleted: 1 } }).toArray();
-            const deleted = new Set(users.filter((u) => u.isDeleted).map((u) => String(u._id)));
+            const users = await this.usersCollection.find({}).toArray();
+
+            const returnProperSenderForMessage = (message: WithId<ChatMessageDoc>) => {
+                const shouldDelete = users.some((user) => message.sender === user.username);
+                return !shouldDelete ? { ...message, sender: '[supprimé]' } : message;
+            };
 
             // Sanitize sender to just display the user
             const history: ChatMessage[] = lastDocs.reverse().map((chatMessageDoc) => {
@@ -53,7 +56,7 @@ export class SocketGameCommunication {
                 };
                 const chatMessage: ChatMessage = {
                     text: chatMessageDoc.text,
-                    sender: sanitizedMessage.sender && deleted.has(String(chatMessageDoc.senderId)) ? '[supprimé]' : sanitizedMessage.sender,
+                    sender: returnProperSenderForMessage(sanitizedMessage).sender,
                     senderId: chatMessageDoc.senderId,
                     timestamp: chatMessageDoc.timestamp.toISOString(),
                 };
