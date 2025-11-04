@@ -1,7 +1,7 @@
-import { Server, Socket } from 'socket.io';
 import { UserSessionManager } from '@app/classes/user-session-manager/user-session-manager';
-import { DeviceType } from '@common/enums/deviceType';
 import { UsersService } from '@app/services/users/users.service';
+import { DeviceType } from '@common/enums/deviceType';
+import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 
 @Service()
@@ -13,20 +13,18 @@ export class UserSessionController {
         private usersService: UsersService,
     ) {
         this.userSessionManager = new UserSessionManager();
-        this.configureConnection();
     }
 
-    private configureConnection(): void {
-        this.sio.on('connection', (socket: Socket) => {
-            this.handleConnection(socket);
-            this.handleDisconnection(socket);
-            this.handleEvents(socket);
-        });
+    public handleUserConnection(socket: Socket): void {
+        this.handleConnection(socket);
+        this.handleDisconnection(socket);
+        this.handleEvents(socket);
     }
 
     private handleConnection(socket: Socket): void {
         try {
             const firebaseId = socket.handshake.auth.userId as string;
+            const deviceType = socket.handshake.auth.deviceType as DeviceType;
 
             if (!firebaseId) {
                 console.error('No firebase ID provided');
@@ -38,7 +36,6 @@ export class UserSessionController {
                 return;
             }
 
-            // Check if user is already connected
             if (this.userSessionManager.isUserOnline(firebaseId)) {
                 console.log(`User ${firebaseId} is already online`);
                 socket.emit('connection-error', {
@@ -49,12 +46,7 @@ export class UserSessionController {
                 return;
             }
 
-            // Register the session
-            const connected = this.userSessionManager.connectUser(
-                firebaseId,
-                socket.id,
-                DeviceType.web
-            );
+            const connected = this.userSessionManager.connectUser(firebaseId, socket.id, deviceType);
 
             if (!connected) {
                 socket.emit('connection-error', {
@@ -65,19 +57,16 @@ export class UserSessionController {
                 return;
             }
 
-            console.log(`User ${firebaseId} connected with socket ${socket.id}`);
-
-            // Optional: Update user status in database for persistence
-            this.updateUserStatusInDB(firebaseId, DeviceType.web).catch((error) => {
-                console.error('Error updating user status in DB:', error);
-            });
-
-            // Emit success
+            console.log(`User ${firebaseId} connected with socket ${socket.id} as ${deviceType}`);
             socket.emit('connection-success', {
                 message: 'Connected successfully',
                 firebaseId,
+                deviceType,
             });
 
+            this.updateUserStatusInDB(firebaseId, deviceType).catch((error) => {
+                console.error('Error updating user status in DB:', error);
+            });
         } catch (error) {
             console.error('Connection error:', error);
             socket.emit('connection-error', {
@@ -96,7 +85,6 @@ export class UserSessionController {
                 if (firebaseId) {
                     console.log(`User ${firebaseId} disconnected`);
 
-                    // Optional: Update user status in database
                     await this.updateUserStatusInDB(firebaseId, DeviceType.offline).catch((error) => {
                         console.error('Error updating user status in DB on disconnect:', error);
                     });
@@ -108,8 +96,7 @@ export class UserSessionController {
     }
 
     private handleEvents(socket: Socket): void {
-        // Check user status event
-        socket.on('check-user-status', (data: { firebaseId: string }) => {
+        socket.on('check-user-status', (data: { firebaseId: string; deviceType: DeviceType }) => {
             const isOnline = this.userSessionManager.isUserOnline(data.firebaseId);
             const session = this.userSessionManager.getUserSession(data.firebaseId);
 
@@ -117,10 +104,10 @@ export class UserSessionController {
                 firebaseId: data.firebaseId,
                 isOnline,
                 session,
+                DeviceType,
             });
         });
 
-        // Get all active users
         socket.on('get-active-users', () => {
             const activeSessions = this.userSessionManager.getAllActiveSessions();
             const activeCount = this.userSessionManager.getActiveUserCount();
@@ -131,7 +118,6 @@ export class UserSessionController {
             });
         });
 
-        // Force disconnect a user (admin feature)
         socket.on('force-disconnect-user', (data: { firebaseId: string }) => {
             const session = this.userSessionManager.getUserSession(data.firebaseId);
             if (session) {
@@ -154,17 +140,14 @@ export class UserSessionController {
         }
     }
 
-    // Public method to check if user is online (can be used by other controllers)
     public isUserOnline(firebaseId: string): boolean {
         return this.userSessionManager.isUserOnline(firebaseId);
     }
 
-    // Public method to get user session
     public getUserSession(firebaseId: string) {
         return this.userSessionManager.getUserSession(firebaseId);
     }
 
-    // Public method to disconnect user
     public disconnectUser(firebaseId: string): boolean {
         const session = this.userSessionManager.getUserSession(firebaseId);
         if (session) {

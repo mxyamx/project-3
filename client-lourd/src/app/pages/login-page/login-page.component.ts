@@ -7,8 +7,8 @@ import { ProfileAvatarImgComponent } from '@app/components/profile-avatar-img/pr
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { LanguageService } from '@app/services/language/language.service';
+import { SessionManagerService } from '@app/services/session-manager/session-manager.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
-import { DeviceType } from '@common/enums/deviceType';
 import { Language } from '@common/enums/language';
 import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
@@ -24,10 +24,12 @@ const MAX_LENGTH = 14;
 })
 export class LoginPageComponent implements OnInit {
     isLogin = true;
+    isLoading = false;
 
     private authService: AuthentificationService = inject(AuthentificationService);
     private httpUserService: HttpUserService = inject(HttpUserService);
     private userManager: UserManagerService = inject(UserManagerService);
+    private sessionManager: SessionManagerService = inject(SessionManagerService);
     private languageService = inject(LanguageService);
     constructor(private router: Router) {}
 
@@ -78,6 +80,7 @@ export class LoginPageComponent implements OnInit {
     }
 
     async onLogin(): Promise<void> {
+        if (this.isLoading) return;
         const emailControl = this.formGroup.get('email');
 
         if (emailControl?.hasError('email')) {
@@ -93,50 +96,42 @@ export class LoginPageComponent implements OnInit {
         }
 
         const { email, password } = this.formGroup.value;
+        this.isLoading = true;
 
         try {
             await this.authService.login(email!, password!);
-
             const userId = this.authService.getCurrentUserId();
             if (!userId) {
                 this.errorMessage = 'login-page.error.user';
+                this.isLoading = false;
                 return;
             }
 
             const user = await firstValueFrom(this.httpUserService.getUser(userId));
+            await this.handleLanguageAndUserUpdate(user);
 
-            if (user.status !== 'offline') {
+            this.userManager.currentUser.set(user);
+
+            const sessionResult = await this.sessionManager.establishUserSession(userId);
+            if (sessionResult === 'SUCCESS') {
+                this.router.navigate(['/home']);
+            }
+            if (sessionResult === 'ALREADY_ONLINE') {
                 this.errorMessage = 'login-page.error.already-online';
+                this.isLoading = false;
                 return;
             }
-            let updatedUser = { ...user, status: DeviceType.web };
-            await firstValueFrom(this.httpUserService.updateUser(updatedUser));
-            this.userManager.currentUser.set(updatedUser);
-            await this.languageService.resolveOnLogin(updatedUser.parameters.language, async (lang) => {
-                updatedUser = {
-                    ...updatedUser,
-                    parameters: {
-                        ...updatedUser.parameters,
-                        language: lang,
-                    },
-                };
-                await firstValueFrom(this.httpUserService.updateUser(updatedUser));
-                this.userManager.currentUser.set(updatedUser);
-            });
-            this.router.navigate(['/home']);
         } catch (err: any) {
             const fbCode = err?.code as string | undefined;
-            if (fbCode) {
-                this.errorMessage = this.authService.mapFirebaseErrors(fbCode);
-            } else {
-                this.errorMessage = err?.message || 'login-page.error.connection';
-            }
+            this.errorMessage = fbCode ? this.authService.mapFirebaseErrors(fbCode) : err?.message || 'login-page.error.connection';
+            this.isLoading = false;
         }
     }
 
-    async onSignup() {
-        const emailControl = this.formGroup.get('email');
+    async onSignup(): Promise<void> {
+        if (this.isLoading) return;
 
+        const emailControl = this.formGroup.get('email');
         if (emailControl?.hasError('email')) {
             this.errorMessage = 'login-page.email.invalid';
             emailControl.markAsTouched();
@@ -156,44 +151,56 @@ export class LoginPageComponent implements OnInit {
             return;
         }
 
-        this.httpUserService.getAllUsers().subscribe({
-            next: async (users) => {
-                const usernameTaken = users.some((user) => user.username === username) || username === '[supprimé]';
-                if (usernameTaken) {
-                    this.errorMessage = 'login-page.create.username.taken';
-                    return;
-                }
+        this.isLoading = true;
 
-                try {
-                    await this.authService.signup(email!, password!);
+        try {
+            const users = await firstValueFrom(this.httpUserService.getAllUsers());
+            const usernameTaken = users.some((user) => user.username === username) || username === '[supprimé]';
 
-                    const userId = this.authService.getCurrentUserId();
-                    if (!userId) {
-                        this.errorMessage = 'login-page.error.user-id';
-                        return;
-                    }
+            if (usernameTaken) {
+                this.errorMessage = 'login-page.create.username.taken';
+                this.isLoading = false;
+                return;
+            }
 
-                    this.userManager.setId(userId);
-                    this.userManager.setUsername(username!);
-                    this.userManager.setEmail(email!);
-                    this.userManager.setAvatar(avatar!);
-                    this.userManager.setParameters({ language: this.selectedLanguage });
-                    console.log(this.userManager.getCurrentUser());
+            await this.authService.signup(email!, password!);
 
-                    this.httpUserService.createUser(this.userManager.getCurrentUser()).subscribe({
-                        next: () => this.router.navigate(['/home']),
-                        error: (err) => {
-                            this.errorMessage = err.message || 'general.server-error';
-                        },
-                    });
-                } catch (err: any) {
-                    this.errorMessage = this.authService.mapFirebaseErrors(err.code);
-                }
-            },
-            error: () => {
-                this.errorMessage = 'login-page.error.general';
-            },
-        });
+            const userId = this.authService.getCurrentUserId();
+            if (!userId) {
+                this.errorMessage = 'login-page.error.user-id';
+                this.isLoading = false;
+                return;
+            }
+
+            this.userManager.setId(userId);
+            this.userManager.setUsername(username!);
+            this.userManager.setEmail(email!);
+            this.userManager.setAvatar(avatar!);
+            this.userManager.setParameters({ language: this.selectedLanguage });
+
+            await firstValueFrom(this.httpUserService.createUser(this.userManager.getCurrentUser()));
+
+            const sessionResult = await this.sessionManager.establishUserSession(userId);
+
+            if (sessionResult === 'ALREADY_ONLINE') {
+                this.errorMessage = 'login-page.error.already-online';
+                this.isLoading = false;
+                await this.authService.logout();
+                return;
+            }
+
+            if (sessionResult !== 'SUCCESS') {
+                this.errorMessage = 'login-page.error.session-failed';
+                this.isLoading = false;
+                return;
+            }
+
+            this.router.navigate(['/home']);
+        } catch (err: any) {
+            const fbCode = err?.code as string | undefined;
+            this.errorMessage = fbCode ? this.authService.mapFirebaseErrors(fbCode) : err?.message || 'login-page.error.general';
+            this.isLoading = false;
+        }
     }
 
     getErrorMessage(field: string): { key: string; params?: Record<string, unknown> } | null {
@@ -269,7 +276,22 @@ export class LoginPageComponent implements OnInit {
         };
         reader.readAsDataURL(file);
     }
+
     onLanguageChange() {
         this.languageService.setTranslate(this.selectedLanguage);
+    }
+
+    private async handleLanguageAndUserUpdate(user: any): Promise<void> {
+        await this.languageService.resolveOnLogin(user.parameters.language, async (lang) => {
+            const updatedUser = {
+                ...user,
+                parameters: {
+                    ...user.parameters,
+                    language: lang,
+                },
+            };
+            await firstValueFrom(this.httpUserService.updateUser(updatedUser));
+            this.userManager.currentUser.set(updatedUser);
+        });
     }
 }

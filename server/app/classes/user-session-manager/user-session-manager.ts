@@ -16,13 +16,9 @@ export class UserSessionManager {
         this.socketToFirebaseMap = new Map();
     }
 
-    /**
-     * Register a new user session
-     */
-    connectUser(firebaseId: string, socketId: string, deviceType: DeviceType = DeviceType.web): boolean {
-        // Check if user is already connected
+    connectUser(firebaseId: string, socketId: string, deviceType: DeviceType): boolean {
         if (this.isUserOnline(firebaseId)) {
-            return false; // User already online
+            return false;
         }
 
         const session: UserSession = {
@@ -38,12 +34,9 @@ export class UserSessionManager {
         return true;
     }
 
-    /**
-     * Disconnect a user session by socket ID
-     */
     disconnectBySocketId(socketId: string): string | null {
         const firebaseId = this.socketToFirebaseMap.get(socketId);
-        
+
         if (!firebaseId) {
             return null;
         }
@@ -54,12 +47,9 @@ export class UserSessionManager {
         return firebaseId;
     }
 
-    /**
-     * Disconnect a user session by firebase ID
-     */
     disconnectByFirebaseId(firebaseId: string): boolean {
         const session = this.activeSessions.get(firebaseId);
-        
+
         if (!session) {
             return false;
         }
@@ -70,47 +60,29 @@ export class UserSessionManager {
         return true;
     }
 
-    /**
-     * Check if a user is currently online
-     */
     isUserOnline(firebaseId: string): boolean {
         return this.activeSessions.has(firebaseId);
     }
 
-    /**
-     * Get user session information
-     */
     getUserSession(firebaseId: string): UserSession | null {
         return this.activeSessions.get(firebaseId) || null;
     }
 
-    /**
-     * Get firebase ID from socket ID
-     */
     getFirebaseIdBySocketId(socketId: string): string | null {
         return this.socketToFirebaseMap.get(socketId) || null;
     }
 
-    /**
-     * Get all active sessions
-     */
     getAllActiveSessions(): UserSession[] {
         return Array.from(this.activeSessions.values());
     }
 
-    /**
-     * Get count of active users
-     */
     getActiveUserCount(): number {
         return this.activeSessions.size;
     }
 
-    /**
-     * Update device type for a session
-     */
     updateDeviceType(firebaseId: string, deviceType: DeviceType): boolean {
         const session = this.activeSessions.get(firebaseId);
-        
+
         if (!session) {
             return false;
         }
@@ -121,9 +93,6 @@ export class UserSessionManager {
         return true;
     }
 
-    /**
-     * Clear all sessions (useful for testing or server restart)
-     */
     clearAllSessions(): void {
         this.activeSessions.clear();
         this.socketToFirebaseMap.clear();

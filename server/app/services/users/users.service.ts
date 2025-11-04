@@ -77,7 +77,7 @@ export class UsersService {
             },
         );
 
-        if (result.matchedCount === 0 || result.modifiedCount === 0) {
+        if (result.matchedCount === 0) {
             throw new Error("Échec lors de la mise à jour de l'utilisateur.");
         }
     }
