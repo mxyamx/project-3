@@ -1,5 +1,8 @@
+/* eslint-disable no-console */
+/* eslint-disable no-dupe-keys */
+/* eslint-disable no-undef */
 import { HttpException } from '@app/classes/http-exception/http.exception';
-import { USER_COLLECTION } from '@app/constants/development-constants';
+import { DATABASE_COLLECTION, USER_COLLECTION } from '@app/constants/development-constants';
 import { DatabaseService } from '@app/services/database/database.service';
 import { InterfaceTheme } from '@common/enums/interfaceTheme';
 import { Language } from '@common/enums/language';
@@ -8,6 +11,7 @@ import httpStatus from 'http-status-codes';
 import { Collection } from 'mongodb';
 import { Service } from 'typedi';
 
+export type UserUpdateDTO = Partial<Pick<User, 'username' | 'email' | 'avatar'>>;
 @Service()
 export class UsersService {
     constructor(private databaseService: DatabaseService) {}
@@ -46,6 +50,7 @@ export class UsersService {
     }
 
     async deleteUser(userId: string): Promise<void> {
+        await this.databaseService.database.collection(DATABASE_COLLECTION).deleteMany({ ownerId: userId });
         const result = await this.collection.updateOne({ id: userId }, { $set: { username: '[supprimé]' } });
 
         if (result.matchedCount === 0) {
@@ -76,6 +81,8 @@ export class UsersService {
                 },
             },
         );
+
+        console.log('update result:', result);
 
         if (result.matchedCount === 0) {
             throw new Error("Échec lors de la mise à jour de l'utilisateur.");

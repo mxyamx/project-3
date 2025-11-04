@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { HttpException } from '@app/classes/http-exception/http.exception';
 import { UsersService } from '@app/services/users/users.service';
 import { User } from '@common/user';

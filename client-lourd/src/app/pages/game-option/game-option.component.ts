@@ -7,6 +7,7 @@ import { BoardGameManagerService } from '@app/services/board-game-manager/board-
 import { generateId } from '@app/utils/functions/id-related-functions';
 import { BoardGame } from '@common/board-game';
 import { GameMode } from '@common/enums/game-mode';
+import { GamePrivacy } from '@common/enums/game-visibility';
 import { UrlPage } from '@common/enums/url-page';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -18,6 +19,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 })
 export class GameOptionComponent {
     settingsForm: FormGroup<OptionForm>;
+    protected readonly gamePrivacies: GamePrivacy[] = [GamePrivacy.Public, GamePrivacy.Private, GamePrivacy.PrivateShared];
     protected readonly gameModes: GameMode[] = [GameMode.Normal, GameMode.CTF];
 
     private sizeHashMap: { [key: string]: number } = {
@@ -32,6 +34,7 @@ export class GameOptionComponent {
         this.settingsForm = new FormGroup<OptionForm>({
             gameMode: new FormControl<GameMode>(GameMode.Normal, Validators.required),
             boardSize: new FormControl<string>('10x10', Validators.required),
+            gamePrivacy: new FormControl<GamePrivacy>(GamePrivacy.Private, Validators.required),
         });
         this.router = new Router();
     }
@@ -55,23 +58,24 @@ export class GameOptionComponent {
         let isValid = false;
 
         const boardSizeChoice: string | null | undefined = this.settingsForm.value.boardSize;
-        if (boardSizeChoice && boardSizeChoice) {
-            newBoard.size = this.sizeHashMap[boardSizeChoice];
-        } else {
-            alert('board size missing');
+        if (!boardSizeChoice) {
             return isValid;
         }
-
+        newBoard.size = this.sizeHashMap[boardSizeChoice];
         newBoard.tiles = this.displayedBoardManager.tileGenerator(newBoard.size);
         newBoard.id = generateId(ID_LENGTH);
 
         const gameModeChoice: GameMode | null | undefined = this.settingsForm.value.gameMode;
-        if (gameModeChoice && gameModeChoice) {
-            newBoard.gameMode = gameModeChoice;
-        } else {
-            alert('game mode missing');
+        if (!gameModeChoice) {
             return isValid;
         }
+        newBoard.gameMode = gameModeChoice;
+
+        const gamePrivacy: GamePrivacy | null | undefined = this.settingsForm.value.gamePrivacy;
+        if (!gamePrivacy) {
+            return isValid;
+        }
+        newBoard.privacy = gamePrivacy;
 
         isValid = true;
         return isValid;

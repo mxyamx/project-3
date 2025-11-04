@@ -1,6 +1,8 @@
 import { HttpException } from '@app/classes/http-exception/http.exception';
+import { AuthedRequest } from '@app/middlewares/auth.middleware';
 import { BoardGameService } from '@app/services/board-game/board-game.service';
 import { BoardGame } from '@common/board-game';
+import { GamePrivacy } from '@common/enums/game-visibility';
 import { Request, Response, Router } from 'express';
 import httpStatus from 'http-status-codes';
 import { Service } from 'typedi';
@@ -80,9 +82,20 @@ export class BoardGameController {
          *           $ref: '#/definitions/BoardGame'
          *
          */
-        this.router.get('/', async (req: Request, res: Response) => {
+        this.router.get('/manageable', async (req: AuthedRequest, res: Response) => {
             try {
-                const boards = await this.boardGameService.getAllBoards();
+                const userId = req.user?.uid;
+                const boards = await this.boardGameService.getManageableBoards(userId);
+                res.status(httpStatus.OK).json(boards);
+            } catch (error) {
+                res.status(httpStatus.NOT_FOUND).send(error.message);
+            }
+        });
+
+        this.router.get('/playable', async (req: AuthedRequest, res: Response) => {
+            try {
+                const userId = req.user?.uid;
+                const boards = await this.boardGameService.getPlayableBoards(userId);
                 res.status(httpStatus.OK).json(boards);
             } catch (error) {
                 res.status(httpStatus.NOT_FOUND).send(error.message);
@@ -157,12 +170,35 @@ export class BoardGameController {
          *       400:
          *         description : échec de l'opération.
          */
-        this.router.post('/', async (req: Request, res: Response) => {
+        this.router.post('/', async (req: AuthedRequest, res: Response) => {
             try {
                 if (req.body && req.body.id) {
+                    const userId = req.user?.uid;
                     const board: BoardGame = req.body;
+                    board.ownerId = userId;
                     await this.boardGameService.createBoard(board);
                     res.status(httpStatus.CREATED).json(board);
+                } else {
+                    res.sendStatus(httpStatus.BAD_REQUEST).json({ error: 'Le corps de la requête est invalide.' });
+                }
+            } catch (error) {
+                if (error instanceof HttpException) {
+                    res.status(error.status).json({ error: error.message });
+                } else {
+                    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Une erreur serveur est survenue.' });
+                }
+            }
+        });
+
+        this.router.post('/duplicate', async (req: AuthedRequest, res: Response) => {
+            try {
+                if (req.body && req.body.id) {
+                    const userId = req.user?.uid;
+                    const board: BoardGame = req.body;
+                    board.ownerId = userId;
+                    board.privacy = GamePrivacy.Private;
+                    const newBoard = await this.boardGameService.duplicateBoard(board);
+                    res.status(httpStatus.CREATED).json(newBoard);
                 } else {
                     res.sendStatus(httpStatus.BAD_REQUEST).json({ error: 'Le corps de la requête est invalide.' });
                 }
@@ -249,9 +285,10 @@ export class BoardGameController {
          *       404:
          *         description : échec de l'opération.
          */
-        this.router.delete('/:id', async (req: Request, res: Response) => {
+        this.router.delete('/:id', async (req: AuthedRequest, res: Response) => {
             try {
-                await this.boardGameService.deleteBoard(req.params.id);
+                const userId = req.user?.uid;
+                await this.boardGameService.deleteBoard(userId, req.params.id);
                 res.status(httpStatus.NO_CONTENT).send();
             } catch (error) {
                 res.status(httpStatus.NOT_FOUND).send(error.message);
