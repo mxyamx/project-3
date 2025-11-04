@@ -9,6 +9,7 @@ import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { LanguageService } from '@app/services/language/language.service';
 import { SessionManagerService } from '@app/services/session-manager/session-manager.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
+import { DeviceType } from '@common/enums/deviceType';
 import { Language } from '@common/enums/language';
 import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
@@ -111,6 +112,7 @@ export class LoginPageComponent implements OnInit {
             await this.handleLanguageAndUserUpdate(user);
 
             this.userManager.currentUser.set(user);
+            this.userManager.setStatus(DeviceType.web);
 
             const sessionResult = await this.sessionManager.establishUserSession(userId);
             if (sessionResult === 'SUCCESS') {
@@ -177,6 +179,7 @@ export class LoginPageComponent implements OnInit {
             this.userManager.setEmail(email!);
             this.userManager.setAvatar(avatar!);
             this.userManager.setParameters({ language: this.selectedLanguage });
+            this.userManager.setStatus(DeviceType.web);
 
             await firstValueFrom(this.httpUserService.createUser(this.userManager.getCurrentUser()));
 
