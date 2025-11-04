@@ -13,9 +13,10 @@ $button-padding-x: 30px;
 $animation-delay-1: 0.2s;
 $text-color: white;
 $border-color: #85c1e9;
-$text-color: white;
 $background-color: #682974;
 $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
+$animation-delay-1: 0.25s;
+@use 'sass:color';
 
 .profile-page-container {
     display: flex;
@@ -46,13 +47,11 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
     margin-bottom: 20px;
     font-size: 1.6rem;
 }
-
 .confirmation-buttons {
     display: flex;
     justify-content: space-evenly;
     gap: 20px;
 }
-
 .confirmation-buttons button {
     background-color: #b09bf4;
     color: #4a2a24;
@@ -64,7 +63,6 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
     cursor: pointer;
     transition: background-color 0.2s;
 }
-
 .confirmation-buttons button:hover {
     background-color: #50287b;
     color: white;
@@ -90,24 +88,19 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
     transition:
         transform 0.2s ease,
         box-shadow 0.2s ease;
-
     &:hover {
         transform: scale(1.05);
         box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
     }
 }
-
 .button:nth-child(1) {
     border-radius: 66px;
     border: 11px solid #270053;
-    opacity: 1;
     background: linear-gradient(284deg, #c985e9 30.46%, #c44ae2 67.39%);
 }
-
 .button:nth-child(2) {
     border-radius: 66px;
     border: 11px solid #0f1733;
-    opacity: 1;
     background: linear-gradient(284deg, #aba8d5 0%, #967fb5 100%);
 }
 
@@ -116,7 +109,6 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
     top: 20px;
     right: 20px;
 }
-
 .navigation-button {
     font-family: $font-primary;
     padding: $button-padding-y $button-padding-x;
@@ -132,11 +124,9 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
     box-shadow: 4px 4px 8px rgba(0, 0, 0, 1);
     border: 11px solid #8350bd;
 }
-
 .navigation-button:hover {
     transform: scale(1.03);
 }
-
 .navigation-button {
     margin-left: auto;
 }
@@ -155,8 +145,7 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
     height: 150px;
     border-radius: 50%;
     object-fit: cover;
-
-    background-color: rgba(255, 255, 255, 0.877); /* adds solid white behind the image */
+    background-color: rgba(255, 255, 255, 0.877);
     border: 4px solid #682974;
     padding: 2px;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
@@ -167,17 +156,14 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
     display: flex;
     flex-direction: column;
 }
-
 .tabs {
     display: flex;
     gap: 1rem;
     margin-bottom: 1rem;
 }
-
 .tabs button i {
     margin-right: 0.5rem;
 }
-
 .tabs button {
     font-family: $font-primary;
     color: white;
@@ -188,7 +174,6 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
     border-bottom: 3px solid transparent;
     background: none;
 }
-
 .tabs button.active {
     border-color: #c6adf3;
 }
@@ -209,19 +194,233 @@ $background-frame: linear-gradient(15deg, #374f7c 0%, $background-color 100%);
     text-align: center;
     gap: 0.5rem;
 }
-
 .username-status {
     font-size: 2rem;
     display: flex;
     align-items: center;
     gap: 0.7rem;
 }
-
 .online-status {
     color: #3b8d4f;
     font-size: 2rem;
 }
-
 .offline-status {
     color: #474747;
+}
+
+/* ======= Edit modal ======= */
+
+.edit-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.6);
+    z-index: 1000;
+}
+
+.edit-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.98);
+    width: min(680px, calc(100vw - 2rem));
+    max-height: 85vh;
+    padding: 0;
+    border-radius: 18px;
+    overflow: hidden;
+    z-index: 1001;
+    animation: scaleIn $animation-delay-1 ease-out forwards;
+    background: url('/assets/background/profileBackground.png') no-repeat center top;
+    background-size: cover;
+}
+
+.edit-modal__surface {
+    position: relative;
+    z-index: 1;
+    margin: 12px;
+    padding: 22px 26px;
+    border-radius: 16px;
+
+    /* Light frosted-glass style like mobile */
+    background: rgba(255, 255, 255, 0.35);
+
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    box-shadow:
+        0 12px 24px rgba(0, 0, 0, 0.3),
+        inset 0 0 0 2px rgba(255, 255, 255, 0.15);
+    color: #1a1023;
+    max-height: calc(85vh - 24px);
+    overflow-y: auto;
+
+    h2 {
+        margin: 0 0 16px;
+        font-family: $font-primary;
+        font-size: 1.7rem;
+        text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+    }
+
+    form {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        label {
+            font-weight: 600;
+            font-family: $font-primary;
+        }
+
+        input[type='text'],
+        input[type='email'] {
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 2px solid #8350bd;
+            background: #fff; // <-- white background
+            color: #1a1023; // dark purple text to fit your theme
+            font-size: 1.05rem;
+            outline: none;
+            font-family: $font-primary;
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+
+            &::placeholder {
+                color: rgba(0, 0, 0, 0.4);
+            }
+
+            &:focus {
+                border-color: #c6adf3;
+                box-shadow: 0 0 0 3px rgba(198, 173, 243, 0.25);
+                background: #fffdfc; // subtle warm white highlight
+            }
+
+            &.invalid {
+                border-color: #e57373;
+                background: #fff0f0;
+            }
+        }
+    }
+
+    .avatar-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(64px, 1fr));
+        gap: 14px;
+        margin-top: 6px;
+    }
+
+    .avatar-chip {
+        border: 3px solid #7f62c5;
+        border-radius: 16px;
+        padding: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        cursor: pointer;
+        transition:
+            transform 120ms ease,
+            box-shadow 120ms ease,
+            border-color 120ms ease;
+
+        img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        &.selected {
+            border-color: #c6adf3;
+            box-shadow:
+                0 0 0 3px rgba(198, 173, 243, 0.35),
+                0 6px 16px rgba(0, 0, 0, 0.25);
+            transform: translateY(-1px);
+        }
+    }
+
+    .avatar-preview {
+        display: flex;
+        justify-content: center;
+        margin-top: 8px;
+
+        img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: rgba(255, 255, 255, 0.85);
+            border: 4px solid #682974;
+            padding: 2px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+        }
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    small.error {
+        color: #ff9e9e;
+        font-size: 0.9rem;
+        margin-top: 8px;
+        display: block;
+    }
+}
+
+.button.primary {
+    border-radius: 66px;
+    border: 11px solid #270053;
+    background: linear-gradient(284deg, #c985e9 30.46%, #c44ae2 67.39%);
+    min-width: 160px;
+    min-height: 52px;
+    font-family: 'Jaro', sans-serif;
+    font-size: 1.25rem;
+    color: #fff;
+    cursor: pointer;
+    box-shadow:
+        0 6px 0 #0c0620,
+        0 12px 24px rgba(0, 0, 0, 0.35);
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow:
+            0 7px 0 #0c0620,
+            0 16px 28px rgba(0, 0, 0, 0.4);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+.button.ghost {
+    border-radius: 66px;
+    border: 11px solid #0f1733;
+    background: linear-gradient(284deg, #aba8d5 0%, #967fb5 100%);
+    color: #fff;
+    min-width: 150px;
+    min-height: 52px;
+    font-family: 'Jaro', sans-serif;
+    font-size: 1.25rem;
+    cursor: pointer;
+    box-shadow:
+        0 6px 0 #0a0f24,
+        0 12px 24px rgba(0, 0, 0, 0.35);
+
+    &:hover {
+        transform: translateY(-1px);
+    }
 }

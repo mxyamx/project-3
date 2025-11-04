@@ -301,7 +301,21 @@
         "blocked-users": "Blocked Users",
         "victories": "Victories",
         "defeats": "Defeats",
-        "combats": "Combats"
+        "combats": "Combats",
+        "edit-modal": {
+            "title": "Edit Account",
+            "username": "Username",
+            "email": "Email",
+            "avatar": "Choose an avatar",
+            "cancel": "Cancel",
+            "save": "Save",
+            "error": {
+                "general": "Account edit failed.",
+                "used-username": "Username already taken",
+                "required-avatar": "Please choose a valid avatar.",
+                "connection": "To change your email, log in again and try again."
+            }
+        }
     },
     "statistics-page": {
         "title": "Game Statistics",
