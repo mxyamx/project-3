@@ -34,6 +34,9 @@ export class SocketGameCommunication {
             socket.join(roomId);
 
             const pipeline = [
+                {
+                    $match: { roomId },
+                },
                 ...this.withOwnerLookup(),
                 {
                     $sort: { timestamp: -1 },
