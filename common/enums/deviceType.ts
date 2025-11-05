@@ -1,5 +1,5 @@
 export enum DeviceType {
     web = 'web',
-    android = 'android',
+    mobile = 'mobile',
     offline = 'offline',
 }

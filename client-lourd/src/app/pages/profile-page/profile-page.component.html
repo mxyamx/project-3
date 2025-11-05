@@ -10,7 +10,7 @@
             <p class="username-status">
                 <strong>{{ user.username }}</strong>
                 <span class="status-icon">
-                    @switch (user.status) { @case (DeviceType.web) { <i class="fa fa-desktop online-status"></i> } @case (DeviceType.android) {
+                    @switch (user.status) { @case (DeviceType.web) { <i class="fa fa-desktop online-status"></i> } @case (DeviceType.mobile) {
                     <i class="fa fa-mobile-alt"></i> } @case (DeviceType.offline) { <i class="fa-solid fa-ban offline-status"></i> } }
                 </span>
             </p>
