@@ -153,6 +153,7 @@ export class UsersController {
          *               language: "fr"
          *               theme: "light"
          *             statistics: {}
+         *             purchasedAvatars: []
          *     responses:
          *       201:
          *         description: Created
@@ -168,6 +169,7 @@ export class UsersController {
                     res.status(httpStatus.BAD_REQUEST).json({ error: 'Le corps de la requête est invalide.' });
                     return;
                 }
+                await this.usersService.createUser(user);
                 res.status(httpStatus.CREATED).json(user);
             } catch (error) {
                 if (error instanceof HttpException) {
@@ -219,6 +221,7 @@ export class UsersController {
          */
         this.router.put('/:id', async (req: Request, res: Response) => {
             try {
+                console.log(`Update request body: ${JSON.stringify(req.body, null, 2)}`);
                 const user: User = req.body;
                 if (!user || user.id !== req.params.id) {
                     res.status(httpStatus.BAD_REQUEST).json({ error: 'ID invalide ou corps de requête manquant.' });

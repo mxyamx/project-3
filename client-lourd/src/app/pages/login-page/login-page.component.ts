@@ -180,7 +180,7 @@ export class LoginPageComponent implements OnInit {
                     this.userManager.setEmail(email!);
                     this.userManager.setAvatar(avatar!);
                     this.userManager.setParameters({ language: this.selectedLanguage });
-
+                    this.userManager.setPurchasedAvatars([]);
                     console.log(this.userManager.getCurrentUser());
 
                     this.httpUserService.createUser(this.userManager.getCurrentUser()).subscribe({

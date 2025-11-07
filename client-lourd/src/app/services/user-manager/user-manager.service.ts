@@ -93,6 +93,17 @@ export class UserManagerService {
         this.currentUser.update((curr) => ({ ...curr, id }));
     }
 
+    setPurchasedAvatars(ids: string[]) {
+        this.currentUser.update((curr) => ({ ...curr, purchasedAvatars: [...ids] }));
+    }
+    addPurchasedAvatar(id: string) {
+        this.currentUser.update((curr) => {
+            const old = new Set(curr.purchasedAvatars ?? []);
+            old.add(id);
+            return { ...curr, purchasedAvatars: Array.from(old) };
+        });
+    }
+
     getCurrentUser(): User {
         return structuredClone(this.currentUser());
     }
