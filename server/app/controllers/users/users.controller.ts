@@ -116,6 +116,7 @@ export class UsersController {
         this.router.get('/:id', async (req: Request, res: Response) => {
             try {
                 const user = await this.usersService.getUser(req.params.id);
+                console.log(`Fetched user: ${JSON.stringify(user, null, 2)}`);
                 if (!user) {
                     res.status(httpStatus.NOT_FOUND).json({ error: 'Utilisateur introuvable.' });
                     return;
@@ -167,7 +168,6 @@ export class UsersController {
                     res.status(httpStatus.BAD_REQUEST).json({ error: 'Le corps de la requête est invalide.' });
                     return;
                 }
-                await this.usersService.createUser(user);
                 res.status(httpStatus.CREATED).json(user);
             } catch (error) {
                 if (error instanceof HttpException) {

@@ -30,6 +30,7 @@ export class UsersService {
 
     async getUser(id: string): Promise<User> {
         const user = await this.collection.findOne({ id });
+        console.log(`User fetched in service from collection directly: ${JSON.stringify(user, null, 2)}`);
         if (user) {
             return user;
         }

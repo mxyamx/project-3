@@ -104,6 +104,7 @@ export class LoginPageComponent implements OnInit {
             }
 
             const user = await firstValueFrom(this.httpUserService.getUser(userId));
+            console.log(`Updates user on login: ${JSON.stringify(user, null, 2)}`);
 
             if (user.status !== 'offline') {
                 this.errorMessage = 'login-page.error.already-online';
@@ -115,6 +116,7 @@ export class LoginPageComponent implements OnInit {
             await this.languageService.resolveOnLogin(updatedUser.parameters.language, async (lang) => {
                 updatedUser = {
                     ...updatedUser,
+                    money: updatedUser.money,
                     parameters: {
                         ...updatedUser.parameters,
                         language: lang,
@@ -178,6 +180,7 @@ export class LoginPageComponent implements OnInit {
                     this.userManager.setEmail(email!);
                     this.userManager.setAvatar(avatar!);
                     this.userManager.setParameters({ language: this.selectedLanguage });
+
                     console.log(this.userManager.getCurrentUser());
 
                     this.httpUserService.createUser(this.userManager.getCurrentUser()).subscribe({

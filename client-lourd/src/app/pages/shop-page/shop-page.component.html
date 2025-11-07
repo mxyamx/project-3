@@ -1,0 +1,35 @@
+<div class="shop-page">
+    <div class="toolbar">
+        <button class="btn" (click)="goBack()"><i class="fas fa-arrow-left"></i> Retour</button>
+        <div class="balance">
+            <i class="fa-solid fa-coins"></i><span>{{ money() }}</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Avatars exclusifs</h2>
+        <div class="grid">
+            <div class="card" *ngFor="let item of catalog">
+                <img [src]="item.asset" [alt]="item.name" />
+                <div class="info">
+                    <div class="name">{{ item.name }}</div>
+                    <div class="price"><i class="fa-solid fa-coins"></i> {{ item.price }}</div>
+                </div>
+
+                <div class="actions" *ngIf="!isOwned(item); else ownedTpl">
+                    <button class="btn primary" [disabled]="!canAfford(item) || buying() === item.id" (click)="buy(item)">
+                        {{ buying() === item.id ? 'Achat…' : canAfford(item) ? 'Acheter' : 'Solde insuffisant' }}
+                    </button>
+                </div>
+
+                <ng-template #ownedTpl>
+                    <div class="owned">Possédé</div>
+                    <button class="btn outline" (click)="equip(item)">Équiper</button>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+    <h2>Thèmes exclusifs</h2>
+
+    <p class="error" *ngIf="errorMsg()">{{ errorMsg() }}</p>
+</div>

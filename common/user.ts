@@ -14,6 +14,7 @@ export interface User {
     parameters: Parameters;
     statistics: PlayerStatistics;
     status: DeviceType;
+    purchasedAvatars?: string[];
 }
 
 export interface UserDTO {
