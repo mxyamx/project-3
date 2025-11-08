@@ -8,13 +8,71 @@
 
     <section class="code-section">
         <div class="tab-container">
-            <button [ngClass]="{'active':showEnterCodeTab()}" (click)="showEnterCodeTab.set(true)">Enter code</button>
-            <button [ngClass]="{'active':!showEnterCodeTab()}" (click)="showEnterCodeTab.set(false)">Find game</button>
+            <button [ngClass]="{'active':showEnterCodeTab()}" (click)="showEnterCodeTab.set(true)">
+                {{'join-game-page.enter-code' | translate}}
+            </button>
+            <button [ngClass]="{'active':!showEnterCodeTab()}" (click)="showEnterCodeTab.set(false)">
+                {{'join-game-page.find-game' | translate}}
+            </button>
         </div>
         @if(showEnterCodeTab()){
-        <h2>{{'join-game-page.enter-code' | translate}} :</h2>
 
         <app-code-input-component (canEnterGame)="canJoinGame($event)" (accessCode)="gameId = $event">></app-code-input-component>
+        } @else {
+        <div class="preview-container">
+            @for(preview of previews();track preview.id){
+            <div class="preview" [ngClass]="{ 'clickable': preview.isJoinable}">
+                <img [src]="preview.previewImage" alt="Preview Image" />
+
+                <p class="line-code">
+                    <i class="fa-solid fa-key"></i>
+                    {{ 'join-game-page.code' | translate }} : {{ preview.id }}
+                </p>
+
+                <p class="line-size">
+                    <i class="fas fa-ruler"></i>
+                    {{ 'game-list.details.size' | translate }} : {{ preview.boardgameSize }} x {{ preview.boardgameSize }}
+                </p>
+
+                @if (preview.isJoinable) {
+                <p class="line-access">
+                    <span class="access joinable">
+                        <i class="fa-solid fa-lock-open"></i>
+                        {{ 'join-game-page.accessibility' | translate }} : {{ 'join-game-page.open' | translate }}
+                    </span>
+                </p>
+                } @else {
+                <p class="line-access">
+                    <span class="access locked">
+                        <i class="fa-solid fa-lock"></i>
+                        {{ 'join-game-page.accessibility' | translate }} : {{ 'join-game-page.close' | translate }}
+                    </span>
+                </p>
+                }
+                <p class="line-players">
+                    <i class="fa-solid fa-users"></i>
+                    {{ 'join-game-page.player-count'| translate }} : {{ preview.playerCount }} / {{ preview.maxPlayerCount }}
+                </p>
+                @if (preview.phase === currentGamePhase.Running) {
+                <p class="line-status">
+                    <span class="status">
+                        {{ 'join-game-page.status.in-game' | translate }}
+                        <app-toast-fight style="--scale: 0.3"></app-toast-fight>
+                    </span>
+                </p>
+                } @else {
+                <p class="line-status">
+                    <span class="status">
+                        {{ 'join-game-page.status.waiting' | translate }}
+                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    </span>
+                </p>
+                }
+            </div>
+
+            }
+        </div>
+
         }
     </section>
 </section>

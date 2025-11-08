@@ -7,24 +7,29 @@ import { VpBehaviorInGame } from '@app/classes/vp-behavior-in-game/vp-behavior-i
 import { VpGameSessionManager } from '@app/classes/vp-game-session/vp-game-session-manager';
 import { VpSocketAddingHandler } from '@app/classes/vp-socket-adding-handler/vp-socket-adding-handler';
 import { VpSocketManager } from '@app/classes/vp-socket-manager/vp-socket-manager';
+import { UserSessionController } from '@app/controllers/user-session-controller/user-session-controller';
 import { ChannelDoc } from '@app/interfaces/channel-doc';
 import { VpSocketAddingHandlerConfig } from '@app/interfaces/vp-socket-adding-handler-config';
 import { CurrentGamesService } from '@app/services/current-games/current-games.service';
 import { SocketGameCommunication } from '@app/services/socket-game-communication/socket-game-communication.service';
 import { CHANNEL_GENERAL_ID, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
-import { CurrentGame } from '@common/current-game';
+import { CurrentGame, CurrentGamePhase } from '@common/current-game';
 import { PlayerLimits } from '@common/enums/players-limit';
+import { SocketEventNames } from '@common/enums/socket-events-names';
 import { Player } from '@common/player';
 import { AvatarManagement, RoomManagement } from '@common/socket-data-forms';
 import * as http from 'http';
 import { Collection } from 'mongodb';
 import * as io from 'socket.io';
+import Container from 'typedi';
 import { DatabaseService } from '../database/database.service';
+import { UsersService } from '../users/users.service';
 export class SocketManager {
     playerSocketMap = new Map<string, string>();
 
     private sio: io.Server;
     private gameScheduler: GameScheduler;
+    private userSessionController: UserSessionController;
     private games: Record<string, Set<string>> = {};
     private vpManagers: Map<string, VirtualPlayerManager> = new Map();
     private vpSockets: Map<string, VpSocketManager> = new Map();
@@ -45,6 +50,7 @@ export class SocketManager {
     ) {
         this.sio = new io.Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
         this.gameScheduler = new GameScheduler(this.sio, this.gameService);
+        this.userSessionController = new UserSessionController(this.sio, Container.get(UsersService));
         this.socketGameCommunication = new SocketGameCommunication(this.sio, this.databaseService);
         const vpSocketAddingHandlerConfig: VpSocketAddingHandlerConfig = {
             sio: this.sio,
@@ -64,6 +70,7 @@ export class SocketManager {
 
     handleSockets(): void {
         this.sio.on('connection', (socket: io.Socket) => {
+            this.userSessionController.handleUserConnection(socket);
             this.gameScheduler.handleCommand(socket);
             this.socketGameCommunication.handleSockets(socket);
 
@@ -91,7 +98,7 @@ export class SocketManager {
             socket.on('update-game-start', async (gameId: string) => {
                 const game = await this.gameService.getGame(gameId);
 
-                game.started = true;
+                game.phase = CurrentGamePhase.Running;
                 await this.gameService.updateGame(game);
             });
 
@@ -291,6 +298,12 @@ export class SocketManager {
                 callback(game || null);
             });
 
+            socket.on(SocketEventNames.GetCurrentGamePreviews, (gameId: string, callback) => {
+                //lets get all the games that are in waiting phase and not lock AND all the games that have drop in enabled but are not full yet
+                const previews = this.gameService.getCurrentGamePreviews();
+                callback(previews);
+            });
+
             socket.on('delete-game', async (gameId: string) => {
                 await this.gameService.deleteGame(gameId);
             });
@@ -318,7 +331,7 @@ export class SocketManager {
                 if (!games) return;
 
                 for (const game of games) {
-                    if (game.adminId === socket.id && !game.started) {
+                    if (game.adminId === socket.id && game.phase != CurrentGamePhase.Waiting) {
                         await this.gameService.deleteGame(game.id);
                         this.sio.to(game.id).emit('admin-left', game);
                         this.sio.socketsLeave(game.id);

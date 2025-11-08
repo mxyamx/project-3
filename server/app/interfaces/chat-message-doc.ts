@@ -1,6 +1,6 @@
 export interface ChatMessageDoc {
     roomId: string;
     text: string;
-    sender: string;
+    senderId: string;
     timestamp: Date;
 }

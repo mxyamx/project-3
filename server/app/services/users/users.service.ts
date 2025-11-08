@@ -1,3 +1,6 @@
+/* eslint-disable no-console */
+/* eslint-disable no-dupe-keys */
+/* eslint-disable no-undef */
 import { HttpException } from '@app/classes/http-exception/http.exception';
 import { DATABASE_COLLECTION, USER_COLLECTION } from '@app/constants/development-constants';
 import { DatabaseService } from '@app/services/database/database.service';
@@ -8,6 +11,7 @@ import httpStatus from 'http-status-codes';
 import { Collection } from 'mongodb';
 import { Service } from 'typedi';
 
+export type UserUpdateDTO = Partial<Pick<User, 'username' | 'email' | 'avatar'>>;
 @Service()
 export class UsersService {
     constructor(private databaseService: DatabaseService) {}
@@ -78,7 +82,9 @@ export class UsersService {
             },
         );
 
-        if (result.matchedCount === 0 || result.modifiedCount === 0) {
+        console.log('update result:', result);
+
+        if (result.matchedCount === 0) {
             throw new Error("Échec lors de la mise à jour de l'utilisateur.");
         }
     }

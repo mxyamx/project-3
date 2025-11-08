@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { ChatMessage } from '@common/chat-message';
-import { CurrentGame } from '@common/current-game';
+import { CurrentGame, CurrentGamePreview } from '@common/current-game';
 import { SocketClientEventNames, SocketEventNames } from '@common/enums/socket-events-names';
 import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { GameEvent } from '@common/game-event';
@@ -58,6 +58,10 @@ export class PlayerSocketService {
 
     emitGetGame(gameId: string, callback: (response: CurrentGame) => void): void {
         this.clientSocketService.emit('get-game', gameId, callback);
+    }
+
+    emitGetCurrentGamePreviews(callback: (response: CurrentGamePreview[]) => void): void {
+        this.clientSocketService.emit(SocketEventNames.GetCurrentGamePreviews, undefined, callback);
     }
 
     emitDeleteGame(gameId: string): void {

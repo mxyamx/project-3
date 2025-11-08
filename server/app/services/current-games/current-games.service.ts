@@ -1,5 +1,6 @@
 import { ID_GENERATION } from '@app/constants/development-constants';
-import { CurrentGame } from '@common/current-game';
+import { CurrentGame, CurrentGamePhase, CurrentGamePreview } from '@common/current-game';
+import { PlayerLimits } from '@common/enums/players-limit';
 import { Player } from '@common/player';
 import 'dotenv/config';
 import * as fs from 'fs';
@@ -14,6 +15,30 @@ export class CurrentGamesService {
     async getAllGames(): Promise<CurrentGame[]> {
         const values = Array.from(this.games.values());
         return values.map(clone);
+    }
+
+    getCurrentGamePreviews(): CurrentGamePreview[] {
+        const values = Array.from(this.games.values());
+
+        return values.map((game) => {
+            const playerCount = game.players.length;
+            const maxPlayerCount = PlayerLimits[game.boardGame.size].maxPlayers;
+            const isJoinable: boolean =
+                (game.phase === CurrentGamePhase.Waiting && !game.locked) ||
+                (game.phase === CurrentGamePhase.Running && game.dropInEnabled) ||
+                game.players.length < maxPlayerCount;
+            const preview: CurrentGamePreview = {
+                id: game.id,
+                playerCount: playerCount,
+                maxPlayerCount: maxPlayerCount,
+                boardgameSize: game.boardGame.size,
+                gameMode: game.boardGame.gameMode,
+                phase: game.phase,
+                previewImage: game.boardGame.previewImage,
+                isJoinable: isJoinable,
+            };
+            return preview;
+        });
     }
 
     async getGame(id: string): Promise<CurrentGame | null> {
@@ -31,7 +56,7 @@ export class CurrentGamesService {
         }
 
         base.id = await this.generateGameId();
-        base.started = false;
+        base.phase = CurrentGamePhase.Waiting;
 
         const toStore = clone(base);
         this.games.set(toStore.id, toStore);
@@ -54,7 +79,7 @@ export class CurrentGamesService {
             ...existing,
             name: patch.name ?? patch.boardGame?.name ?? existing.name,
             locked: patch.locked ?? existing.locked,
-            started: patch.started ?? existing.started,
+            phase: patch.phase ?? existing.phase,
             adminId: patch.adminId ?? existing.adminId,
             boardGame: patch.boardGame !== undefined ? { ...existing.boardGame, ...patch.boardGame } : existing.boardGame,
             players: patch.players !== undefined ? patch.players.map((p) => ({ ...p })) : existing.players,

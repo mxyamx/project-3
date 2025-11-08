@@ -45,5 +45,6 @@ export enum SocketClientEventNames {
 }
 
 export enum SocketEventNames {
+    GetCurrentGamePreviews = 'getCurrentGamePreviews',
     ChatHistory = 'chatHistory',
 }

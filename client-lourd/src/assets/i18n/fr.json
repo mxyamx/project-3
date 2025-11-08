@@ -180,11 +180,21 @@
     },
     "join-game-page": {
         "title": "Joindre une partie",
-        "enter-code": "Entrez le code d'accès vers la partie",
+        "enter-code": "Entrez le code",
+        "find-game": "Trouver une partie",
         "join": "Rejoindre!",
         "invalid-code": "Code de partie invalide !",
         "locked-game": "Partie bloquée par l'administrateur !",
-        "try-again": "Réessayer"
+        "try-again": "Réessayer",
+        "status": {
+            "in-game": "En partie",
+            "waiting": "En salle d’attente"
+        },
+        "player-count": "Nombre de joueurs",
+        "code": "Code d'accès",
+        "accessibility": "Accessibilité",
+        "open": "Ouvert",
+        "close": "Fermer"
     },
     "error-page": {
         "title": "Oups ! Une erreur est survenue. Veuillez réessayer."
@@ -301,7 +311,21 @@
         "blocked-users": "Utilisateurs Bloqués",
         "victories": "Victoires",
         "defeats": "Défaites",
-        "combats": "Combats"
+        "combats": "Combats",
+        "edit-modal": {
+            "title": "Modifier le compte",
+            "username": "Nom d'utilisateur",
+            "email": "Courriel",
+            "avatar": "Choisir un avatar",
+            "cancel": "Annuler",
+            "save": "Enregistrer",
+            "error": {
+                "general": "Échec de la modification du compte.",
+                "used-username": "Pseudonyme déjà utilisé",
+                "required-avatar": "Veuillez choisir un avatar valide.",
+                "connection": "Pour modifier votre courriel, reconnectez-vous puis réessayez."
+            }
+        }
     },
     "statistics-page": {
         "title": "Statistiques de partie",
