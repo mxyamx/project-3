@@ -88,6 +88,10 @@
             .btn.primary {
                 background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.08));
                 border: 1px solid rgba(255, 255, 255, 0.25);
+                border-radius: 10px;
+                color: #fff;
+                font-family: 'Jaro', 'Helvetica Neue', sans-serif;
+                background-color: grey;
             }
             .btn.outline {
                 background: transparent;
