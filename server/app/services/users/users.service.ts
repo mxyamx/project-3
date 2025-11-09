@@ -81,6 +81,7 @@ export class UsersService {
                     statistics: user.statistics,
                     status: user.status,
                     purchasedAvatars: user.purchasedAvatars,
+                    purchasedSounds: user.purchasedSounds,
                 },
             },
         );

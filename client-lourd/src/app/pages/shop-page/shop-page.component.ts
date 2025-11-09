@@ -3,6 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AvatarDef, avatarList } from '@app/constants/avatar-catalog';
+import { SfxDef, sfxList } from '@app/constants/sound-catalog';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -18,15 +19,27 @@ export class ShoppingPageComponent {
     private router = inject(Router);
     private userManager = inject(UserManagerService);
     private httpUser = inject(HttpUserService);
+    private audioMap = new Map<string, HTMLAudioElement>();
 
     user = this.userManager.currentUser.asReadonly();
     catalog: AvatarDef[] = avatarList;
+    sfxCatalog: SfxDef[] = sfxList;
 
     buying = signal<string | null>(null);
     errorMsg = signal<string>('');
 
     money = computed(() => this.user().money ?? 0);
     owned = computed(() => new Set(this.user().purchasedAvatars ?? []));
+    ownedSfx = computed(() => new Set(this.user().purchasedSounds ?? []));
+
+    constructor() {
+        // Preload sounds so preview is instant
+        for (const s of this.sfxCatalog) {
+            const a = new Audio(s.asset);
+            a.preload = 'auto';
+            this.audioMap.set(s.id, a);
+        }
+    }
 
     canAfford(item: AvatarDef) {
         return this.money() >= item.price;
@@ -68,5 +81,52 @@ export class ShoppingPageComponent {
         if (!this.isOwned(item)) return;
         this.userManager.setAvatar(item.asset);
         this.httpUser.updateUser(this.userManager.getCurrentUser()).subscribe();
+    }
+
+    canAffordSfx(s: SfxDef) {
+        return this.money() >= s.price;
+    }
+    isOwnedSfx(s: SfxDef) {
+        return this.ownedSfx().has(s.id);
+    }
+
+    playPreview(s: SfxDef) {
+        // iOS/macOS: must be triggered by a user click—this function is bound to a click handler
+        for (const a of this.audioMap.values()) {
+            a.pause();
+        } // stop any other preview
+        const a = this.audioMap.get(s.id);
+        if (!a) return;
+        a.currentTime = 0;
+        a.play().catch(() => {
+            // swallow autoplay errors; user gesture should normally allow play
+        });
+    }
+
+    stopPreview(s: SfxDef) {
+        const a = this.audioMap.get(s.id);
+        if (a) a.pause();
+    }
+
+    async buySfx(s: SfxDef) {
+        this.errorMsg.set('');
+        if (this.isOwnedSfx(s)) return;
+        if (!this.canAffordSfx(s)) {
+            this.errorMsg.set('Solde insuffisant.');
+            return;
+        }
+
+        this.buying.set(s.id);
+        try {
+            this.userManager.setMoney(this.money() - s.price);
+            const next = Array.from(this.ownedSfx());
+            next.push(s.id);
+            this.userManager.setPurchasedSounds(next);
+            await this.httpUser.updateUser(this.userManager.getCurrentUser()).toPromise();
+        } catch (e: any) {
+            this.errorMsg.set(e?.error?.error || e?.message || 'Erreur lors de l’achat.');
+        } finally {
+            this.buying.set(null);
+        }
     }
 }

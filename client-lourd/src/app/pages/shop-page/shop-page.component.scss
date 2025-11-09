@@ -1,7 +1,6 @@
 .shop-page {
     min-height: 100vh;
     background: url('../../../assets/background/arrierePlanVueEdition.jpg') center/cover no-repeat fixed;
-
     padding: 24px;
     color: #fff;
 
@@ -53,6 +52,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+
             img {
                 width: 100%;
                 height: 160px;
@@ -76,6 +76,14 @@
                 display: flex;
                 gap: 8px;
             }
+            .btn.primary {
+                background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.08));
+                border: 1px solid rgba(255, 255, 255, 0.25);
+                border-radius: 10px;
+                color: #fff;
+                font-family: 'Jaro', 'Helvetica Neue', sans-serif;
+                background-color: grey;
+            }
             .owned {
                 font-size: 12px;
                 opacity: 0.85;
@@ -85,14 +93,7 @@
                 border-radius: 999px;
                 width: fit-content;
             }
-            .btn.primary {
-                background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.08));
-                border: 1px solid rgba(255, 255, 255, 0.25);
-                border-radius: 10px;
-                color: #fff;
-                font-family: 'Jaro', 'Helvetica Neue', sans-serif;
-                background-color: grey;
-            }
+
             .btn.outline {
                 background: transparent;
                 border: 1px solid rgba(255, 255, 255, 0.35);
@@ -107,5 +108,16 @@
         padding: 8px 12px;
         border-radius: 12px;
         width: fit-content;
+    }
+
+    .btn.play {
+        border-radius: 999px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
+        color: #fff;
+        font-family: 'Jaro', 'Helvetica Neue', sans-serif;
     }
 }
