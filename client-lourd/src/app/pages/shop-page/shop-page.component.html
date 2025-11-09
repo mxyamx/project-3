@@ -42,7 +42,7 @@
                     <button class="btn primary" [disabled]="isOwnedSfx(s) || !canAffordSfx(s) || buying() === s.id" (click)="buySfx(s)">
                         <ng-container *ngIf="!isOwnedSfx(s); else sOwned">Acheter</ng-container>
                     </button>
-                    <ng-template #sOwned><div class="owned">Possédé</div></ng-template>
+                    <ng-template #sOwned><div class="owned-sfx">Possédé</div></ng-template>
                 </div>
             </div>
         </div>

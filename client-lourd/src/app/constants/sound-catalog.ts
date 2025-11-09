@@ -6,6 +6,6 @@ export interface SfxDef {
 }
 
 export const sfxList: SfxDef[] = [
-    { id: 'armor-sword-impact', name: 'Tranchant 8-bit', price: 10, asset: 'assets/sfx/armor-sword-impact.mp3' },
-    { id: 'big-punch', name: 'Éclair rétro', price: 200, asset: 'assets/sfx/big-punch.mp3' },
+    { id: 'armor-sword-impact', name: 'Épée ranchante', price: 10, asset: 'assets/sfx/armor-sword-impact.mp3' },
+    { id: 'big-punch', name: 'Coup de la mort', price: 200, asset: 'assets/sfx/big-punch.mp3' },
 ];
