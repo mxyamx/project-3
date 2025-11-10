@@ -44,7 +44,7 @@ export class SocketManager {
 
     private vpSocketAddingHandler: VpSocketAddingHandler;
     private socketGameCommunication: SocketGameCommunication;
-    private boardGameService: BoardGameService; //added
+    private boardGameService: BoardGameService; 
 
     constructor(
         server: http.Server,
@@ -55,7 +55,7 @@ export class SocketManager {
         this.gameScheduler = new GameScheduler(this.sio, this.gameService);
         this.userSessionController = new UserSessionController(this.sio, Container.get(UsersService));
         this.socketGameCommunication = new SocketGameCommunication(this.sio, this.databaseService);
-        this.boardGameService = Container.get(BoardGameService); //added
+        this.boardGameService = Container.get(BoardGameService); 
         const vpSocketAddingHandlerConfig: VpSocketAddingHandlerConfig = {
             sio: this.sio,
             gameService: this.gameService,
@@ -74,21 +74,11 @@ export class SocketManager {
 
     handleSockets(): void {
         this.sio.on('connection', (socket: io.Socket) => {
-            const userId = socket.handshake.auth?.userId || socket.handshake.query?.userId;
-            if (userId) {
-                socket.data.userId = userId as string;
-            }
             this.userSessionController.handleUserConnection(socket);
             this.gameScheduler.handleCommand(socket);
             this.socketGameCommunication.handleSockets(socket);
 
             socket.on('create-game', async (game: CurrentGame, callback) => {
-                // game.adminId = socket.id;
-                // const createdGame = await this.gameService.createGame(game);
-                // this.gameScheduler.createGame(game);
-                // socket.join(createdGame.id);
-                // this.vpManagers.set(createdGame.id, new VirtualPlayerManager());
-                // callback(game);
                 try {
                     const userId = socket.data?.userId || socket.handshake.auth?.userId;
                     if (!userId) {
@@ -102,9 +92,7 @@ export class SocketManager {
                         return;
                     }
 
-                    // Vérifier si le jeu est privé et si l'utilisateur a accès
                     if (boardGame.privacy === GamePrivacy.Private) {
-                        // Seul le propriétaire peut créer une partie avec un jeu privé
                         if (boardGame.ownerId !== userId) {
                             callback({ error: 'GAME_PRIVACY_CHANGED' });
                             return;

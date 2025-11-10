@@ -56,21 +56,15 @@ export class CreationPageComponent implements OnInit {
     }
 
     async hideAlert() {
-        // //added
-        if (this.showVisibilityAlert) {
+        if (this.showVisibilityAlert || this.showAlertConfirmation) {
             this.showVisibilityAlert = false;
-            //this.showAlertConfirmation = false;
+            this.showAlertConfirmation = false;
             await this.loadGames();
             this.hasBeenClicked = false;
             return;
         }
-        this.showAlertConfirmation = false;
         this.showVisibilityAlert = false;
-        
-        // this.showVisibilityAlert = false;
-        // this.showAlertConfirmation = false;
-        // this.hasBeenClicked = false;
-        // await this.loadGames();
+        this.showAlertConfirmation = false;
     }
 
     createNewGame() {
@@ -89,8 +83,7 @@ export class CreationPageComponent implements OnInit {
 
                 this.currentGameService.updatePickedBoardGame(boardGame);
                 const currentGame = this.currentGameService.displayedCurrentGame();
-                this.playerSocketService.emitCreateGame(currentGame, (response: any /*CurrentGame*/) => {
-                    // Gérer les différents types d'erreur
+                this.playerSocketService.emitCreateGame(currentGame, (response: any) => {
                     if (response?.error) {
                         switch (response.error) {
                             case 'GAME_PRIVACY_CHANGED':
@@ -107,8 +100,8 @@ export class CreationPageComponent implements OnInit {
                     }
 
                     if (response?.success && response?.game) {
-                        this.currentGameService.updateCurrentGame(response);
-                        this.playerSocketService.emitJoinAvatarRoom(response.id);
+                        this.currentGameService.updateCurrentGame(response.game);
+                        this.playerSocketService.emitJoinAvatarRoom(response.game.id);
                         this.router.navigate([UrlPage.Avatar]);
                     }
                 });
