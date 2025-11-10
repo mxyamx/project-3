@@ -8,7 +8,6 @@ import { GameSessionManagerService } from '@app/services/game-session-manager/ga
 import { HttpBoardGameService } from '@app/services/http-manager/http-board-game.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { BoardGameDTO } from '@common/board-game';
-//import { CurrentGame } from '@common/current-game';
 import { GameMode } from '@common/enums/game-mode';
 import { UrlPage } from '@common/enums/url-page';
 import { TranslatePipe } from '@ngx-translate/core';
