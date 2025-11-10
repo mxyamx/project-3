@@ -9,6 +9,7 @@ import { VpBehaviorInGame } from '@app/classes/vp-behavior-in-game/vp-behavior-i
 import { VpGameSessionManager } from '@app/classes/vp-game-session/vp-game-session-manager';
 import { VpSocketAddingHandler } from '@app/classes/vp-socket-adding-handler/vp-socket-adding-handler';
 import { VpSocketManager } from '@app/classes/vp-socket-manager/vp-socket-manager';
+import { UserSessionController } from '@app/controllers/user-session-controller/user-session-controller';
 import { ChannelDoc } from '@app/interfaces/channel-doc';
 import { VpSocketAddingHandlerConfig } from '@app/interfaces/vp-socket-adding-handler-config';
 import { CurrentGamesService } from '@app/services/current-games/current-games.service';
@@ -22,11 +23,14 @@ import { AvatarManagement, RoomManagement } from '@common/socket-data-forms';
 import * as http from 'http';
 import { Collection } from 'mongodb';
 import * as io from 'socket.io';
+import Container from 'typedi';
+import { UsersService } from '../users/users.service';
 export class SocketManager {
     playerSocketMap = new Map<string, string>();
 
     private sio: io.Server;
     private gameScheduler: GameScheduler;
+    private userSessionController: UserSessionController;
     private games: Record<string, Set<string>> = {};
     private vpManagers: Map<string, VirtualPlayerManager> = new Map();
     private vpSockets: Map<string, VpSocketManager> = new Map();
@@ -47,6 +51,7 @@ export class SocketManager {
     ) {
         this.sio = new io.Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
         this.gameScheduler = new GameScheduler(this.sio, this.gameService);
+        this.userSessionController = new UserSessionController(this.sio, Container.get(UsersService));
         this.socketGameCommunication = new SocketGameCommunication(this.sio, this.databaseService);
         const vpSocketAddingHandlerConfig: VpSocketAddingHandlerConfig = {
             sio: this.sio,
@@ -66,6 +71,7 @@ export class SocketManager {
 
     handleSockets(): void {
         this.sio.on('connection', (socket: io.Socket) => {
+            this.userSessionController.handleUserConnection(socket);
             this.gameScheduler.handleCommand(socket);
             this.socketGameCommunication.handleSockets(socket);
 
