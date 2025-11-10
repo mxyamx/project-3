@@ -7,12 +7,14 @@ import { Service } from 'typedi';
 @Service()
 export class UserSessionController {
     private userSessionManager: UserSessionManager;
+    vpSocketIds: string[];
 
     constructor(
         private sio: Server,
         private usersService: UsersService,
     ) {
         this.userSessionManager = new UserSessionManager();
+        this.vpSocketIds = [];
     }
 
     public handleUserConnection(socket: Socket): void {
@@ -79,6 +81,11 @@ export class UserSessionController {
 
     private handleDisconnection(socket: Socket): void {
         socket.on('disconnect', async () => {
+            const index = this.vpSocketIds.findIndex((id) => socket.id === id);
+            if (index !== -1) {
+                this.vpSocketIds.slice(index, 1);
+                return;
+            }
             try {
                 const firebaseId = this.userSessionManager.disconnectBySocketId(socket.id);
 

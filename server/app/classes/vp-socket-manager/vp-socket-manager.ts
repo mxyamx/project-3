@@ -10,7 +10,11 @@ export class VpSocketManager {
     clientSocket: ClientSocket;
 
     connect(): Promise<void> {
-        this.clientSocket = ClientIO('ws://localhost:3000', { transports: ['websocket'], upgrade: false });
+        this.clientSocket = ClientIO('ws://localhost:3000', {
+            transports: ['websocket'],
+            upgrade: false,
+            query: { isVirtual: 'true' },
+        });
         return new Promise((resolve) => {
             this.clientSocket.once('connect', () => {
                 resolve();

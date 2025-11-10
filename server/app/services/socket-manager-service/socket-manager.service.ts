@@ -70,7 +70,12 @@ export class SocketManager {
 
     handleSockets(): void {
         this.sio.on('connection', (socket: io.Socket) => {
-            this.userSessionController.handleUserConnection(socket);
+            const { isVirtual } = socket.handshake.query;
+            if (isVirtual !== 'true') {
+                this.userSessionController.handleUserConnection(socket);
+            } else {
+                this.userSessionController.vpSocketIds.push(socket.id);
+            }
             this.gameScheduler.handleCommand(socket);
             this.socketGameCommunication.handleSockets(socket);
 
