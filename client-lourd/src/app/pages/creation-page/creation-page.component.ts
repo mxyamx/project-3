@@ -8,7 +8,7 @@ import { GameSessionManagerService } from '@app/services/game-session-manager/ga
 import { HttpBoardGameService } from '@app/services/http-manager/http-board-game.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { BoardGameDTO } from '@common/board-game';
-import { CurrentGame } from '@common/current-game';
+//import { CurrentGame } from '@common/current-game';
 import { GameMode } from '@common/enums/game-mode';
 import { UrlPage } from '@common/enums/url-page';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -55,9 +55,22 @@ export class CreationPageComponent implements OnInit {
         this.displayedObject = this.gamesList.find((g) => g.id === game.id) || { ...game };
     }
 
-    hideAlert() {
+    async hideAlert() {
+        // //added
+        if (this.showVisibilityAlert) {
+            this.showVisibilityAlert = false;
+            //this.showAlertConfirmation = false;
+            await this.loadGames();
+            this.hasBeenClicked = false;
+            return;
+        }
         this.showAlertConfirmation = false;
         this.showVisibilityAlert = false;
+        
+        // this.showVisibilityAlert = false;
+        // this.showAlertConfirmation = false;
+        // this.hasBeenClicked = false;
+        // await this.loadGames();
     }
 
     createNewGame() {
@@ -76,8 +89,24 @@ export class CreationPageComponent implements OnInit {
 
                 this.currentGameService.updatePickedBoardGame(boardGame);
                 const currentGame = this.currentGameService.displayedCurrentGame();
-                this.playerSocketService.emitCreateGame(currentGame, (response: CurrentGame) => {
-                    if (response) {
+                this.playerSocketService.emitCreateGame(currentGame, (response: any /*CurrentGame*/) => {
+                    // Gérer les différents types d'erreur
+                    if (response?.error) {
+                        switch (response.error) {
+                            case 'GAME_PRIVACY_CHANGED':
+                                this.showVisibilityAlert = true;
+                                break;
+                            case 'GAME_NOT_FOUND':
+                                this.showAlertConfirmation = true;
+                                break;
+                            default:
+                                this.showAlertConfirmation = true;
+                        }
+                        this.hasBeenClicked = false;
+                        return;
+                    }
+
+                    if (response?.success && response?.game) {
                         this.currentGameService.updateCurrentGame(response);
                         this.playerSocketService.emitJoinAvatarRoom(response.id);
                         this.router.navigate([UrlPage.Avatar]);
@@ -86,6 +115,7 @@ export class CreationPageComponent implements OnInit {
             },
             error: () => {
                 this.showAlertConfirmation = true;
+                this.hasBeenClicked = false;
             },
         });
         this.hasBeenClicked = true;
