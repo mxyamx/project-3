@@ -7,6 +7,7 @@ import { VpBehaviorInGame } from '@app/classes/vp-behavior-in-game/vp-behavior-i
 import { VpGameSessionManager } from '@app/classes/vp-game-session/vp-game-session-manager';
 import { VpSocketAddingHandler } from '@app/classes/vp-socket-adding-handler/vp-socket-adding-handler';
 import { VpSocketManager } from '@app/classes/vp-socket-manager/vp-socket-manager';
+import { UserSessionController } from '@app/controllers/user-session-controller/user-session-controller';
 import { ChannelDoc } from '@app/interfaces/channel-doc';
 import { VpSocketAddingHandlerConfig } from '@app/interfaces/vp-socket-adding-handler-config';
 import { CurrentGamesService } from '@app/services/current-games/current-games.service';
@@ -19,9 +20,8 @@ import { AvatarManagement, RoomManagement } from '@common/socket-data-forms';
 import * as http from 'http';
 import { Collection } from 'mongodb';
 import * as io from 'socket.io';
-import { DatabaseService } from '../database/database.service';
-import { UserSessionController } from '@app/controllers/user-session-controller/user-session-controller';
 import Container from 'typedi';
+import { DatabaseService } from '../database/database.service';
 import { UsersService } from '../users/users.service';
 export class SocketManager {
     playerSocketMap = new Map<string, string>();
@@ -69,7 +69,12 @@ export class SocketManager {
 
     handleSockets(): void {
         this.sio.on('connection', (socket: io.Socket) => {
-            this.userSessionController.handleUserConnection(socket);
+            const { isVirtual } = socket.handshake.query;
+            if (isVirtual !== 'true') {
+                this.userSessionController.handleUserConnection(socket);
+            } else {
+                this.userSessionController.vpSocketIds.push(socket.id);
+            }
             this.gameScheduler.handleCommand(socket);
             this.socketGameCommunication.handleSockets(socket);
 
