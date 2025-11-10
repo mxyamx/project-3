@@ -82,6 +82,7 @@ export interface ExecuteAttackRes extends StandardRes {
     attackDice?: number;
     damageDoneAttackingPlayer?: number;
     damageTakenDefendingPlayer?: number;
+    attackSoundEffect?: string;
 }
 
 export interface ExecuteAttackReq extends StandardReq {}

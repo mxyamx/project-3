@@ -70,6 +70,19 @@ export class FightSubController {
             const damageDoneAttackingPlayer = initialDefenderHealth - defendingPlayer.attributes.healthValue;
             const damageTakenDefendingPlayer = damageDoneAttackingPlayer;
 
+            // Retrieve the proper sound effect (randomly)
+            const user = await this.usersService.getUser(attackingPlayer.userId);
+            let soundEffect = '';
+            if (user) {
+                const sounds = user.purchasedSounds ?? [];
+                if (sounds.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * sounds.length);
+                    soundEffect = sounds[randomIndex];
+                } else {
+                    soundEffect = '';
+                }
+            }
+
             const ans: dataForm.ExecuteAttackRes = {
                 successful: true,
                 message: 'success',
@@ -82,6 +95,7 @@ export class FightSubController {
                 attackDice: this.gameSession.attackDiceValue,
                 damageTakenDefendingPlayer,
                 damageDoneAttackingPlayer,
+                attackSoundEffect: soundEffect,
             };
 
             this.sio.to(this.roomCode).emit(SocketClientEventNames.ProcessAttack, ans);
