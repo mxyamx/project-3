@@ -19,6 +19,7 @@ export const STANDARD_PLAYER: Player = {
         bonusDefense: DiceBonus.FourSideBonus,
     },
     organizer: false,
+    userId: '',
 };
 export const STANDARD_GAME_NAME = 'Partie Test';
 export const MAX_ESCAPE_ATTEMPTS = 3;
@@ -71,6 +72,7 @@ export const STANDARD_PLAYERS: Player[] = [
         organizer: false,
         color: 'blue',
         victories: 0,
+        userId: '',
     },
     {
         name: 'player-test2',
@@ -86,6 +88,7 @@ export const STANDARD_PLAYERS: Player[] = [
         organizer: false,
         color: 'green',
         victories: 0,
+        userId: '',
     },
     {
         name: 'player-test3',
@@ -101,6 +104,7 @@ export const STANDARD_PLAYERS: Player[] = [
         organizer: false,
         color: 'red',
         victories: 0,
+        userId: '',
     },
 ];
 export const STANDARD_LIST_PLAYERS: Player[] = [
@@ -119,6 +123,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         color: 'blue',
         inventory: [STANDARD_ITEM],
         position: { x: 0, y: 0 },
+        userId: '',
     },
     {
         name: 'player-test2',
@@ -133,6 +138,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         },
         organizer: false,
         color: 'green',
+        userId: '',
     },
     {
         name: 'player-test3',
@@ -147,6 +153,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         },
         organizer: false,
         color: 'red',
+        userId: '',
     },
     {
         name: 'player-test4',
@@ -162,6 +169,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         organizer: false,
         color: 'red',
         victories: undefined,
+        userId: '',
     },
 ];
 
@@ -183,6 +191,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         position: { x: 0, y: 0 },
         profile: VirtualPlayerProfile.Agressive,
         virtualPlayer: true,
+        userId: '',
     },
     {
         name: 'vp2',
@@ -199,6 +208,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         color: 'green',
         profile: VirtualPlayerProfile.Defensive,
         virtualPlayer: true,
+        userId: '',
     },
     {
         name: 'vp3',
@@ -215,6 +225,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         color: 'red',
         profile: VirtualPlayerProfile.Agressive,
         virtualPlayer: true,
+        userId: '',
     },
     {
         name: 'vp4',
@@ -232,5 +243,6 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         victories: undefined,
         profile: VirtualPlayerProfile.Defensive,
         virtualPlayer: true,
+        userId: '',
     },
 ];

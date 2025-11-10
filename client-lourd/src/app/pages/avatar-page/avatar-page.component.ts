@@ -9,6 +9,7 @@ import { CurrentGameManagerService } from '@app/services/current-game-manager/cu
 import { GameEventService } from '@app/services/game-event/game-event.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
+import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { CharacterAttributes } from '@common/character-attributes';
 import { CurrentGame } from '@common/current-game';
 import { DiceBonus } from '@common/enums/dice-bonus';
@@ -41,6 +42,8 @@ export class AvatarPageComponent implements OnInit {
     currentSelectedAvatar: string | null = null;
     hasBeenClicked: boolean = false;
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
+    userManagerService: UserManagerService = inject(UserManagerService);
+
     private playerSocketService = inject(PlayerSocketService);
     private currentGameManager = inject(CurrentGameManagerService);
     private chatService = inject(ChatService);
@@ -178,6 +181,7 @@ export class AvatarPageComponent implements OnInit {
         };
 
         const player: Player = {
+            userId: this.userManagerService.getCurrentUser().id,
             name: this.formGroup.value.name || '',
             character: this.formGroup.value.avatar || '',
             attributes,

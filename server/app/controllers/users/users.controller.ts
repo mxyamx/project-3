@@ -221,7 +221,6 @@ export class UsersController {
          */
         this.router.put('/:id', async (req: Request, res: Response) => {
             try {
-                console.log(`Update request body: ${JSON.stringify(req.body, null, 2)}`);
                 const user: User = req.body;
                 if (!user || user.id !== req.params.id) {
                     res.status(httpStatus.BAD_REQUEST).json({ error: 'ID invalide ou corps de requête manquant.' });

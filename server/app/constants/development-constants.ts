@@ -47,6 +47,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         organizer: false,
         color: 'blue',
         victories: 0,
+        userId: '',
     },
     {
         name: 'player-test2',
@@ -62,6 +63,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         organizer: false,
         color: 'green',
         victories: 0,
+        userId: '',
     },
     {
         name: 'player-test3',
@@ -77,6 +79,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         organizer: false,
         color: 'red',
         victories: 0,
+        userId: '',
     },
 ];
 
@@ -97,6 +100,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         position: { x: 0, y: 0 },
         profile: VirtualPlayerProfile.Agressive,
         virtualPlayer: true,
+        userId: '',
     },
     {
         name: 'vp2',
@@ -113,6 +117,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         color: 'green',
         profile: VirtualPlayerProfile.Defensive,
         virtualPlayer: true,
+        userId: '',
     },
     {
         name: 'vp3',
@@ -129,6 +134,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         color: 'red',
         profile: VirtualPlayerProfile.Agressive,
         virtualPlayer: true,
+        userId: '',
     },
     {
         name: 'vp4',
@@ -146,6 +152,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         victories: undefined,
         profile: VirtualPlayerProfile.Defensive,
         virtualPlayer: true,
+        userId: '',
     },
 ];
 

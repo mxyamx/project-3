@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { GameClockManager } from '@app/classes/game-clock-manager/game-clock-manager';
 import { GameSession } from '@app/classes/game-session/game-session';
 import {
@@ -6,6 +7,7 @@ import {
     STANDARD_ERROR_MESSAGE,
     WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC,
 } from '@app/constants/development-constants';
+import { UsersService } from '@app/services/users/users.service';
 import { genErrorMessage, sendError } from '@app/utils/functions/socket-error-functions';
 import { GameMode } from '@common/enums/game-mode';
 import { SocketClientEventNames } from '@common/enums/socket-events-names';
@@ -24,6 +26,7 @@ export class FightSubController {
         private gameSession: GameSession,
         private roomCode: string,
         private sio: io.Server,
+        private usersService: UsersService,
     ) {}
 
     startFight(targetPlayerPosition: Position): void {
@@ -182,6 +185,7 @@ export class FightSubController {
     }
 
     private endGame(winner: Player): void {
+        this.updatePlayerMoney(winner);
         this.gameSession.endGame();
         this.clockManager.stopClock();
         const ans: dataForm.EndGameRes = {
@@ -211,6 +215,26 @@ export class FightSubController {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
             this.endGame(attackingPlayer);
         }
+    }
+
+    private async updatePlayerMoney(winner?: Player): Promise<void> {
+        const WINNER_REWARD = 100;
+        const CONSOLATION_REWARD = 50;
+        if (!winner) return;
+
+        // Handling winner reward
+        const user = await this.usersService.getUser(winner.userId);
+        if (!user) return;
+        await this.usersService.updateUser({ ...user, money: user.money + WINNER_REWARD });
+
+        // Handling losers reward
+        this.gameSession.listOfPlayers.getValues().forEach(async (player) => {
+            if (player.userId !== winner.userId) {
+                const loserUser = await this.usersService.getUser(player.userId);
+                if (!loserUser) return;
+                await this.usersService.updateUser({ ...loserUser, money: loserUser.money + CONSOLATION_REWARD });
+            }
+        });
     }
 
     private showEndFightNotification(): void {
