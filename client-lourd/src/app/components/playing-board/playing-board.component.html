@@ -73,7 +73,7 @@
 
 } @if(this.sessionManager.showDropItemInterface()){
 <div class="drop-item-popup" (contextmenu)="contextMenuOnInfoPopUp($event)">
-    <p>déposer un item</p>
+    <p>{{ 'game-page.playing-board.drop-item' | translate }}</p>
     <div class="items-to-drop">
         @for(item of this.sessionManager.chosenPlayer().inventory; track $index){
         <div class="item-section" (click)="clickOnItemToDrop(item)" [style.cursor]="'pointer'">

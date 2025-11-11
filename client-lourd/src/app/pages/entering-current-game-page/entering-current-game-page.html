@@ -7,7 +7,132 @@
     </section>
 
     <section class="code-section">
-        <h2>{{'join-game-page.enter-code' | translate}} :</h2>
-        <app-code-input-component (canEnterGame)="canJoinGame($event)" (accessCode)="gameId = $event">></app-code-input-component>
+        <div class="tab-container">
+            <button [ngClass]="{'active':showEnterCodeTab()}" (click)="showEnterCodeTab.set(true)">
+                {{'join-game-page.enter-code' | translate}}
+            </button>
+            <button [ngClass]="{'active':!showEnterCodeTab()}" (click)="showEnterCodeTab.set(false)">
+                {{'join-game-page.find-game' | translate}}
+            </button>
+        </div>
+        @if(showEnterCodeTab()){
+
+        <section class="code-container">
+            <div class="code-wrapper">
+                <input
+                    #input1
+                    type="text"
+                    maxlength="1"
+                    class="code-input"
+                    (input)="moveToNext(input2, 0)"
+                    (keydown.backspace)="moveToPrev(input1, 0)"
+                    [(ngModel)]="codeArray[0]"
+                />
+                <input
+                    #input2
+                    type="text"
+                    maxlength="1"
+                    class="code-input"
+                    (input)="moveToNext(input3, 1)"
+                    (keydown.backspace)="moveToPrev(input1, 1)"
+                    [(ngModel)]="codeArray[1]"
+                />
+                <input
+                    #input3
+                    type="text"
+                    maxlength="1"
+                    class="code-input"
+                    (input)="moveToNext(input4, 2)"
+                    (keydown.backspace)="moveToPrev(input2, 2)"
+                    [(ngModel)]="codeArray[2]"
+                />
+                <input
+                    #input4
+                    type="text"
+                    maxlength="1"
+                    class="code-input"
+                    (input)="updateCode()"
+                    (keydown.backspace)="moveToPrev(input3, 3)"
+                    [(ngModel)]="codeArray[3]"
+                />
+            </div>
+            <button class="join-button" (click)="enterCode()" [disabled]="!isCodeComplete() || hasBeenClicked">
+                {{'join-game-page.join'|translate}}
+            </button>
+        </section>
+
+        } @else {
+        <div class="preview-container">
+            @for(preview of previews();track preview.id){
+            <div class="preview" [ngClass]="{ 'clickable': preview.isJoinable}" (click)="joinGame(preview)">
+                <img [src]="preview.previewImage" alt="Preview Image" />
+
+                <p class="line-code">
+                    <i class="fa-solid fa-key"></i>
+                    {{ 'join-game-page.code' | translate }} : {{ preview.id }}
+                </p>
+
+                <p class="line-size">
+                    <i class="fas fa-ruler"></i>
+                    {{ 'game-list.details.size' | translate }} : {{ preview.boardgameSize }} x {{ preview.boardgameSize }}
+                </p>
+
+                @if (preview.isJoinable) {
+                <p class="line-access">
+                    <span class="access joinable">
+                        <i class="fa-solid fa-lock-open"></i>
+                        {{ 'join-game-page.accessibility' | translate }} : {{ 'join-game-page.open' | translate }}
+                    </span>
+                </p>
+                } @else {
+                <p class="line-access">
+                    <span class="access locked">
+                        <i class="fa-solid fa-lock"></i>
+                        {{ 'join-game-page.accessibility' | translate }} : {{ 'join-game-page.close' | translate }}
+                    </span>
+                </p>
+                }
+                <p class="line-players">
+                    <i class="fa-solid fa-users"></i>
+                    {{ 'join-game-page.player-count'| translate }} : {{ preview.playerCount }} / {{ preview.maxPlayerCount }}
+                </p>
+                @if (preview.phase === currentGamePhase.Running) {
+                <p class="line-status">
+                    <span class="status">
+                        {{ 'join-game-page.status.in-game' | translate }}
+                        <app-toast-fight style="--scale: 0.3"></app-toast-fight>
+                    </span>
+                </p>
+                } @else {
+                <p class="line-status">
+                    <span class="status">
+                        {{ 'join-game-page.status.waiting' | translate }}
+                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    </span>
+                </p>
+                }
+            </div>
+
+            } @empty {
+            <h2>{{'join-game-page.no-game'|translate}}</h2>
+            }
+        </div>
+
+        } @if (error()) {
+        <div class="modal-overlay" (click)="retry()">
+            <div class="error" (click)="$event.stopPropagation()">
+                <h2>{{'general.error'|translate}}</h2>
+                @if(codeError) {
+                <p class="modal-text">{{'join-game-page.invalid-code'|translate}}</p>
+                } @if(lockedError || limitError) {
+                <p class="modal-text">{{'join-game-page.locked-game'|translate}}</p>
+                }
+                <div class="buttons">
+                    <button class="option-button" (click)="retry()">{{'join-game-page.try-again'| translate }}</button>
+                    <button class="option-button" routerLink="/main-page">{{ 'general.button.back-home' | translate }}</button>
+                </div>
+            </div>
+        </div>
+        }
     </section>
 </section>

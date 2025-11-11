@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AttributeFormComponent } from '@app/components/attribute-form/attribute-form.component';
@@ -11,7 +11,7 @@ import { GameSessionManagerService } from '@app/services/game-session-manager/ga
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { CharacterAttributes } from '@common/character-attributes';
-import { CurrentGame } from '@common/current-game';
+import { CurrentGame, JoinGameAck } from '@common/current-game';
 import { DiceBonus } from '@common/enums/dice-bonus';
 import { PlayerLimits } from '@common/enums/players-limit';
 import { UrlPage } from '@common/enums/url-page';
@@ -23,9 +23,8 @@ import { TranslatePipe } from '@ngx-translate/core';
     templateUrl: './avatar-page.component.html',
     styleUrls: ['./avatar-page.component.scss'],
 })
-export class AvatarPageComponent implements OnInit {
+export class AvatarPageComponent implements OnInit, OnDestroy {
     formGroup = new FormGroup({
-        name: new FormControl('', [Validators.required]),
         avatar: new FormControl<string | null>(null, [Validators.required]),
         attributes: new FormControl<CharacterAttributes | null>(null, [Validators.required]),
         bonus: new FormControl('', [Validators.required]),
@@ -41,6 +40,7 @@ export class AvatarPageComponent implements OnInit {
     selectedAvatars: Set<string> = new Set();
     currentSelectedAvatar: string | null = null;
     hasBeenClicked: boolean = false;
+    joiningRoom: boolean = false;
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     userManagerService: UserManagerService = inject(UserManagerService);
 
@@ -50,17 +50,13 @@ export class AvatarPageComponent implements OnInit {
     private gameEventService = inject(GameEventService);
     private gameId: string = '';
     private currentGame: CurrentGame;
+    userManager = inject(UserManagerService);
 
     constructor(private router: Router) {}
 
     ngOnInit() {
         this.formGroup.valueChanges.subscribe(() => {
             this.updateButtonState();
-        });
-        this.formGroup.get('name')?.valueChanges.subscribe((value) => {
-            if (value && value.trim() !== value) {
-                this.formGroup.get('name')?.setValue(value.trim(), { emitEvent: false });
-            }
         });
         const idGame = this.currentGameManager.displayedCurrentGame().id;
         if (idGame) {
@@ -82,6 +78,13 @@ export class AvatarPageComponent implements OnInit {
         });
     }
 
+    ngOnDestroy(): void {
+        if (!this.joiningRoom) {
+            this.deleteGameOnAdminQuit();
+            this.deselectAvatarOnPlayerQuit();
+        }
+    }
+
     deleteGameOnAdminQuit() {
         if (this.currentGameManager.displayedCurrentGame().players.length === 0) {
             this.playerSocketService.emitDeleteGame(this.gameId);
@@ -90,6 +93,7 @@ export class AvatarPageComponent implements OnInit {
 
     deselectAvatarOnPlayerQuit() {
         if (this.currentSelectedAvatar) {
+            console.log('emit!!!!!!');
             this.playerSocketService.emitAvatarDeselection(this.gameId, this.currentSelectedAvatar, (updatedAvatars: string[]) => {
                 this.selectedAvatars = new Set(updatedAvatars);
                 this.currentSelectedAvatar = null;
@@ -181,14 +185,15 @@ export class AvatarPageComponent implements OnInit {
         };
 
         const player: Player = {
+            name: this.userManager.currentUser().username || '',
             userId: this.userManagerService.getCurrentUser().id,
-            name: this.formGroup.value.name || '',
             character: this.formGroup.value.avatar || '',
             attributes,
             organizer: this.currentGame.players.length === 0,
             virtualPlayer: false,
             victories: 0,
             color: 'red',
+            socketId: '',
         };
 
         this.playerSocketService.emitGetGame(this.gameId, (response: CurrentGame) => {
@@ -206,14 +211,15 @@ export class AvatarPageComponent implements OnInit {
                 this.limitError = true;
                 return;
             }
-            player.name = this.currentGameManager.verifyUniquePlayerName(player.name, this.currentGame.players);
 
             this.gameSessionManager.updateChosenPlayer(player);
 
-            this.playerSocketService.emitJoinGame(this.gameId, player, (joinResponse: CurrentGame) => {
+            this.playerSocketService.emitJoinGame(this.gameId, player, (joinResponse: JoinGameAck) => {
                 if (joinResponse) {
-                    this.currentGameManager.addPlayer(player);
-                    this.gameSessionManager.updateGameId(joinResponse.id);
+                    this.joiningRoom = true;
+                    this.currentGameManager.addPlayer(joinResponse.player);
+                    this.gameSessionManager.updateChosenPlayer(joinResponse.player);
+                    this.gameSessionManager.updateGameId(joinResponse.game.id);
                     this.router.navigate([UrlPage.Waiting]);
                 }
             });

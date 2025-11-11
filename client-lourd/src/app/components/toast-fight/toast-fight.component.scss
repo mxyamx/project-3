@@ -1,0 +1,53 @@
+:host {
+    --scale: 1;
+}
+
+.character {
+    position: relative;
+    display: inline-block;
+
+    width: calc(150px * var(--scale));
+    height: calc(150px * var(--scale));
+}
+
+.sword {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform-origin: bottom center;
+
+    width: 70%;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.player .sword {
+    transform: rotate(45deg);
+    animation: swingLeft 1.5s ease-in-out infinite;
+}
+
+.enemy .sword {
+    transform: rotate(-45deg) scaleX(-1);
+    animation: swingRight 1.5s ease-in-out infinite;
+}
+
+@keyframes swingLeft {
+    0%,
+    100% {
+        transform: rotate(45deg);
+    }
+    50% {
+        transform: rotate(-10deg);
+    }
+}
+
+@keyframes swingRight {
+    0%,
+    100% {
+        transform: rotate(-45deg) scaleX(-1);
+    }
+    50% {
+        transform: rotate(10deg) scaleX(-1);
+    }
+}

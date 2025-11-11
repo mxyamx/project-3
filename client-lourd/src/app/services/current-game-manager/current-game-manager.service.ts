@@ -1,6 +1,6 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
 import { BoardGame } from '@common/board-game';
-import { CurrentGame } from '@common/current-game';
+import { CurrentGame, CurrentGamePhase } from '@common/current-game';
 import { BoardGameSize } from '@common/enums/board-game-size';
 import { GameMode } from '@common/enums/game-mode';
 import { GamePrivacy } from '@common/enums/game-visibility';
@@ -30,6 +30,8 @@ export class CurrentGameManagerService {
         boardGame: this.pickedBoardGame,
         locked: false,
         adminId: '',
+        phase: CurrentGamePhase.Waiting,
+        dropInEnabled: false,
     });
 
     updateCurrentGame(newGame: CurrentGame): void {
@@ -58,6 +60,8 @@ export class CurrentGameManagerService {
             boardGame: this.pickedBoardGame,
             locked: false,
             adminId: '',
+            phase: CurrentGamePhase.Waiting,
+            dropInEnabled: false,
         });
     }
 

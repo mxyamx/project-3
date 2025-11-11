@@ -40,7 +40,6 @@ export class UserSessionController {
             socket.data.userId = firebaseId;
 
             if (this.userSessionManager.isUserOnline(firebaseId)) {
-                console.log(`User ${firebaseId} is already online`);
                 socket.emit('connection-error', {
                     message: 'User is already connected from another device',
                     code: 'ALREADY_ONLINE',
@@ -60,7 +59,6 @@ export class UserSessionController {
                 return;
             }
 
-            console.log(`User ${firebaseId} connected with socket ${socket.id} as ${deviceType}`);
             socket.emit('connection-success', {
                 message: 'Connected successfully',
                 firebaseId,
@@ -91,8 +89,6 @@ export class UserSessionController {
                 const firebaseId = this.userSessionManager.disconnectBySocketId(socket.id);
 
                 if (firebaseId) {
-                    console.log(`User ${firebaseId} disconnected`);
-
                     await this.updateUserStatusInDB(firebaseId, DeviceType.offline).catch((error) => {
                         console.error('Error updating user status in DB on disconnect:', error);
                     });

@@ -180,11 +180,22 @@
     },
     "join-game-page": {
         "title": "Join a Game",
-        "enter-code": "Enter the access code for the game",
+        "enter-code": "Enter code",
+        "find-game": "Find game",
         "join": "Join!",
         "invalid-code": "Invalid game code!",
         "locked-game": "Game locked by the administrator!",
-        "try-again": "Try Again"
+        "try-again": "Try Again",
+        "status": {
+            "in-game": "In game",
+            "waiting": "In wait room"
+        },
+        "player-count": "Player count",
+        "code": "Access Code",
+        "accessibility": "Accessibility",
+        "open": "Open",
+        "close": "Close",
+        "no-game": "No game in progress"
     },
     "error-page": {
         "title": "Oops! An error occurred. Please try again."

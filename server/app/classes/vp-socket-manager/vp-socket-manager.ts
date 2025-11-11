@@ -9,15 +9,16 @@ export const environment = {
 export class VpSocketManager {
     clientSocket: ClientSocket;
 
-    constructor() {
-        this.connect();
-    }
-
-    connect() {
+    connect(): Promise<void> {
         this.clientSocket = ClientIO('ws://localhost:3000', {
             transports: ['websocket'],
             upgrade: false,
             query: { isVirtual: 'true' },
+        });
+        return new Promise((resolve) => {
+            this.clientSocket.once('connect', () => {
+                resolve();
+            });
         });
     }
 

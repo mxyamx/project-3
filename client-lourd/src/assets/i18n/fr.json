@@ -180,11 +180,22 @@
     },
     "join-game-page": {
         "title": "Joindre une partie",
-        "enter-code": "Entrez le code d'accès vers la partie",
+        "enter-code": "Entrez le code",
+        "find-game": "Trouver une partie",
         "join": "Rejoindre!",
         "invalid-code": "Code de partie invalide !",
         "locked-game": "Partie bloquée par l'administrateur !",
-        "try-again": "Réessayer"
+        "try-again": "Réessayer",
+        "status": {
+            "in-game": "En partie",
+            "waiting": "En salle d’attente"
+        },
+        "player-count": "Nombre de joueurs",
+        "code": "Code d'accès",
+        "accessibility": "Accessibilité",
+        "open": "Ouvert",
+        "close": "Fermer",
+        "no-game": "Aucune partie en cours"
     },
     "error-page": {
         "title": "Oups ! Une erreur est survenue. Veuillez réessayer."

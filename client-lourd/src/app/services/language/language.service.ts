@@ -48,20 +48,6 @@ export class LanguageService {
         this.localStorageService.setItem(LANGUAGE_STORAGE_KEY, lang);
     }
 
-    async resolveOnLogin(serverLang: Language, updateServerLang: (lang: Language) => Promise<void>): Promise<Language> {
-        const local = this.coerceSupported(this.localStorageService.getItem<string>(LANGUAGE_STORAGE_KEY));
-
-        if (local && local !== serverLang) {
-            this.translate.use(local);
-            await updateServerLang(local);
-            this.localStorageService.setItem(LANGUAGE_STORAGE_KEY, local);
-            return local;
-        }
-        this.translate.use(serverLang);
-        this.localStorageService.setItem(LANGUAGE_STORAGE_KEY, serverLang);
-        return serverLang;
-    }
-
     private coerceSupported(code: string | null): Language | null {
         if (!code) return null;
         return this.langs.find((lang) => lang === code) || null;
