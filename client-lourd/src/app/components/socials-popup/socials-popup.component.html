@@ -1,0 +1,106 @@
+<div class="popup-overlay" (click)="onClose()">
+    <div class="popup" (click)="$event.stopPropagation()">
+        <button class="close-btn" (click)="onClose()">×</button>
+
+        <div class="popup-content">
+            <div class="tabs">
+                <button [class.active]="activeTab === 'friends'" (click)="activeTab = 'friends'">Amis ({{ friends.length }})</button>
+                <button [class.active]="activeTab === 'received'" (click)="activeTab = 'received'">Reçues ({{ pendingRequests.length }})</button>
+                <button [class.active]="activeTab === 'sent'" (click)="activeTab = 'sent'">Envoyées ({{ sentRequests.length }})</button>
+                <button [class.active]="activeTab === 'add'" (click)="activeTab = 'add'">Ajouter</button>
+            </div>
+
+            <div class="tab-content" [ngSwitch]="activeTab">
+                <!-- Friends Tab -->
+                <div *ngSwitchCase="'friends'">
+                    <div *ngIf="isLoading" class="loading">Chargement...</div>
+                    <ul class="user-list" *ngIf="!isLoading">
+                        <li *ngFor="let friend of friends">
+                            <div class="user-info">
+                                <img [src]="friend.avatar" [alt]="friend.username" class="avatar" />
+                                <span class="name">{{ friend.username }}</span>
+                            </div>
+                            <div class="actions">
+                                <button class="icon-btn remove-btn" (click)="removeFriend(friend)" title="Supprimer">
+                                    <i class="fa fa-user-minus"></i>
+                                </button>
+                            </div>
+                        </li>
+                        <li *ngIf="friends.length === 0" class="empty-state">Aucun ami pour le moment</li>
+                    </ul>
+                </div>
+
+                <!-- Received Requests Tab -->
+                <div *ngSwitchCase="'received'">
+                    <ul class="user-list">
+                        <li *ngFor="let request of pendingRequests">
+                            <div class="user-info">
+                                <img [src]="request.sender.avatar" [alt]="request.sender.username" class="avatar" />
+                                <span class="name">{{ request.sender.username }}</span>
+                            </div>
+                            <div class="actions">
+                                <button class="icon-btn accept-btn" (click)="acceptRequest(request)" title="Accepter">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                                <button class="icon-btn reject-btn" (click)="rejectRequest(request)" title="Refuser">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                        </li>
+                        <li *ngIf="pendingRequests.length === 0" class="empty-state">Aucune demande reçue</li>
+                    </ul>
+                </div>
+
+                <!-- Sent Requests Tab -->
+                <div *ngSwitchCase="'sent'">
+                    <ul class="user-list">
+                        <li *ngFor="let request of sentRequests">
+                            <div class="user-info">
+                                <img [src]="request.receiver.avatar" [alt]="request.receiver.username" class="avatar" />
+                                <span class="name">{{ request.receiver.username }}</span>
+                            </div>
+                            <div class="actions">
+                                <button class="icon-btn cancel-btn" (click)="cancelRequest(request)" title="Annuler">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                        </li>
+                        <li *ngIf="sentRequests.length === 0" class="empty-state">Aucune demande envoyée</li>
+                    </ul>
+                </div>
+
+                <!-- Add Friends Tab -->
+                <div *ngSwitchCase="'add'" class="add-user">
+                    <div class="search-bar">
+                        <input
+                            [(ngModel)]="searchQuery"
+                            placeholder="Chercher un utilisateur..."
+                            (keyup.enter)="searchUsers()"
+                            (input)="onSearchChange()"
+                        />
+                        <button class="icon-btn search-btn" (click)="searchUsers()" title="Rechercher">
+                            <i class="fa fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+
+                    <ul class="user-list" *ngIf="searchResults.length > 0">
+                        <li *ngFor="let user of searchResults">
+                            <div class="user-info">
+                                <img [src]="user.avatar" [alt]="user.username" class="avatar" />
+                                <span class="name">{{ user.username }}</span>
+                            </div>
+                            <div class="actions">
+                                <button class="icon-btn add-btn" (click)="sendFriendRequest(user)" title="Envoyer une demande">
+                                    <i class="fa fa-user-plus"></i>
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <!-- Only show "no results" after user has actually searched -->
+                    <div *ngIf="hasSearched && searchResults.length === 0" class="empty-state">Aucun utilisateur trouvé</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

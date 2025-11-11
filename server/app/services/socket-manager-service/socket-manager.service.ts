@@ -3,6 +3,7 @@
 import { FightVpSocketEvent } from '@app/classes/fight-vp-socket-event/fight-vp-socket-event';
 import { GameScheduler } from '@app/classes/game-scheduler/game-scheduler';
 import { GameVpSocketEvent } from '@app/classes/game-vp-socket-event/game-vp-socket-event';
+import { UserSessionManager } from '@app/classes/user-session-manager/user-session-manager';
 import { VirtualPlayerManager } from '@app/classes/virtual-player-manager/virtual-player-manager';
 import { VpBehaviorInFight } from '@app/classes/vp-behavior-in-fight/vp-behavior-in-fight';
 import { VpBehaviorInGame } from '@app/classes/vp-behavior-in-game/vp-behavior-in-game';
@@ -23,15 +24,17 @@ import { AvatarManagement, RoomManagement } from '@common/socket-data-forms';
 import * as http from 'http';
 import { Collection } from 'mongodb';
 import * as io from 'socket.io';
-import Container from 'typedi';
-import { DatabaseService } from '../database/database.service';
+import { FriendSocketManager } from '../friends/friend-socket.manager';
 import { UsersService } from '../users/users.service';
+import Container from 'typedi';
 export class SocketManager {
     playerSocketMap = new Map<string, string>();
 
     private sio: io.Server;
     private gameScheduler: GameScheduler;
+    private friendSocketManager: FriendSocketManager;
     private userSessionController: UserSessionController;
+    private userSessionManager: UserSessionManager;
     private games: Record<string, Set<string>> = {};
     private vpManagers: Map<string, VirtualPlayerManager> = new Map();
     private vpSockets: Map<string, VpSocketManager> = new Map();
@@ -51,6 +54,7 @@ export class SocketManager {
         private databaseService: DatabaseService,
     ) {
         this.sio = new io.Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
+        this.userSessionManager = new UserSessionManager();
         this.gameScheduler = new GameScheduler(this.sio, this.gameService);
         this.userSessionController = new UserSessionController(this.sio, Container.get(UsersService));
         this.socketGameCommunication = new SocketGameCommunication(this.sio, this.databaseService);
@@ -68,6 +72,7 @@ export class SocketManager {
             games: this.games,
         };
         this.vpSocketAddingHandler = new VpSocketAddingHandler(vpSocketAddingHandlerConfig);
+        this.friendSocketManager = new FriendSocketManager(this.sio, this.userSessionManager);
     }
 
     handleSockets(): void {
@@ -80,6 +85,7 @@ export class SocketManager {
             }
             this.gameScheduler.handleCommand(socket);
             this.socketGameCommunication.handleSockets(socket);
+            this.friendSocketManager.handleUserConnection(socket);
 
             socket.on('create-game', async (game: CurrentGame, callback) => {
                 game.adminId = socket.id;

@@ -53,8 +53,9 @@
 
         <div class="tab-content">
             @switch (activeTab) { @case (ActiveTab.Socials) {
-            <p>{{ 'profil-page.friends' | translate }}: {{ user.friends.length }}</p>
-            <p>{{ 'profil-page.blocked-users' | translate }}: {{ user.blocked.length }}</p>
+            <!-- <p>{{ 'profil-page.friends' | translate }}: {{ user.friends.length }}</p>
+            <p>{{ 'profil-page.blocked-users' | translate }}: {{ user.blocked.length }}</p> -->
+            <app-socials-page></app-socials-page>
             } @case (ActiveTab.Inventory) {
             <ul>
                 <li>Placeholder items</li>

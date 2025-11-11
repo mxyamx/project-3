@@ -1,6 +1,7 @@
 import { Component, inject, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
+import { SocialsPopupComponent } from '@app/components/socials-popup/socials-popup.component';
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
 import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
@@ -12,7 +13,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     selector: 'app-main-page',
     templateUrl: './main-page.component.html',
     styleUrls: ['./main-page.component.scss'],
-    imports: [RouterLink, ChatContainerComponent, TranslatePipe],
+    imports: [RouterLink, ChatContainerComponent, TranslatePipe, SocialsPopupComponent],
 })
 export class MainPageComponent implements OnDestroy, OnInit {
     chatDockService: ChatDockService = inject(ChatDockService);
@@ -25,6 +26,7 @@ export class MainPageComponent implements OnDestroy, OnInit {
     readonly title: string = 'Méchante Patte';
     avatar = this.userManager.currentUser.asReadonly();
     showChat: WritableSignal<boolean> = signal(false);
+    showSocialsPopup: WritableSignal<boolean> = signal(false);
 
     ngOnInit() {
         if (!this.playerSocketService.isConnected()) {
@@ -70,5 +72,13 @@ export class MainPageComponent implements OnDestroy, OnInit {
 
     openSettings(): void {
         this.router.navigate(['/settings']);
+    }
+
+    openSocialsPopup() {
+        this.showSocialsPopup.set(true);
+    }
+
+    closeSocialsPopup() {
+        this.showSocialsPopup.set(false);
     }
 }

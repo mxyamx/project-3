@@ -1,0 +1,83 @@
+.socials-container {
+    display: flex;
+    flex-direction: column;
+    height: 95%;
+    padding: 20px;
+    font-family: 'Jaro', sans-serif;
+}
+
+.friends-section,
+.blocked-section {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+h2 {
+    margin-bottom: 10px;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+button {
+    font-family: 'Jaro', sans-serif;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: white;
+}
+
+.remove-btn {
+    background: #007bff;
+
+    &:hover {
+        background: #0056b3;
+    }
+}
+
+.block-btn {
+    background: #dc3545;
+
+    &:hover {
+        background: #a71d2a;
+    }
+}
+
+.unblock-btn {
+    background: #28a745;
+
+    &:hover {
+        background: #1e7e34;
+    }
+}
