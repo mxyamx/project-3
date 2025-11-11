@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { assetFromId } from '@app/constants/avatar-catalog';
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
@@ -20,13 +21,18 @@ export class ProfilePageComponent {
     private authService: AuthentificationService = inject(AuthentificationService);
     private httpUserService: HttpUserService = inject(HttpUserService);
     private fb: FormBuilder = inject(FormBuilder);
+    private router: Router = inject(Router);
 
     DeviceType = DeviceType;
     ActiveTab = ActiveTab;
 
-    private router: Router = inject(Router);
+    /** Hold the signal… */
+    userSig = this.userManager.currentUser.asReadonly();
+    /** …and expose a plain object for template/class usage */
+    get user() {
+        return this.userSig();
+    }
 
-    user = this.userManager.currentUser();
     activeTab = ActiveTab.Socials;
 
     PRESET_AVATARS: string[] = [
@@ -37,9 +43,10 @@ export class ProfilePageComponent {
         'assets/profiles/deer-modified.png',
         'assets/profiles/hyena-modified.png',
     ];
+
+    ALL_AVATARS = signal<string[]>([]);
     selectedAvatarIndex = signal<number | null>(null);
 
-    // ========= UI state =========
     deleteAccountWarning = false;
     isEditing = false;
     saving = false;
@@ -47,9 +54,20 @@ export class ProfilePageComponent {
     editForm: FormGroup = this.fb.group({
         username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(32)]],
         email: ['', [Validators.required, Validators.email]],
-        avatar: ['', [Validators.required]], // must choose one
+        avatar: ['', [Validators.required]],
     });
     avatarPreview = signal<string>('');
+
+    ngOnInit() {
+        this.rebuildAvatarList();
+    }
+
+    private rebuildAvatarList() {
+        const purchasedIds = this.user.purchasedAvatars ?? [];
+        const purchasedAssets = purchasedIds.map((id) => assetFromId(id)).filter((x): x is string => !!x);
+        const set = new Set<string>([...this.PRESET_AVATARS, ...purchasedAssets]);
+        this.ALL_AVATARS.set([...set]);
+    }
 
     // ========= Navigation =========
     goHome() {
@@ -77,16 +95,15 @@ export class ProfilePageComponent {
     }
 
     editAccount() {
-        this.editForm.reset({
-            username: this.user.username,
-            email: this.user.email,
-            avatar: this.user.avatar ?? '',
-        });
+        this.rebuildAvatarList();
 
-        // preselect avatar if it's in the preset list
-        const idx = this.PRESET_AVATARS.indexOf(this.user.avatar || '');
+        const u = this.user;
+        this.editForm.reset({ username: u.username, email: u.email, avatar: u.avatar ?? '' });
+
+        const all = this.ALL_AVATARS();
+        const idx = all.indexOf(u.avatar || '');
         this.selectedAvatarIndex.set(idx >= 0 ? idx : null);
-        this.avatarPreview.set(idx >= 0 ? this.PRESET_AVATARS[idx] : this.user.avatar || '');
+        this.avatarPreview.set(idx >= 0 ? all[idx] : u.avatar || '');
 
         this.editError = '';
         this.isEditing = true;
@@ -101,7 +118,8 @@ export class ProfilePageComponent {
     }
 
     chooseAvatar(index: number) {
-        const path = this.PRESET_AVATARS[index];
+        const all = this.ALL_AVATARS();
+        const path = all[index];
         this.selectedAvatarIndex.set(index);
         this.editForm.patchValue({ avatar: path });
         this.avatarPreview.set(path);
@@ -114,12 +132,14 @@ export class ProfilePageComponent {
         }
 
         const { username, email, avatar } = this.editForm.value as { username: string; email: string; avatar: string };
-        if (!this.PRESET_AVATARS.includes(avatar)) {
+
+        if (!this.ALL_AVATARS().includes(avatar)) {
             this.editError = 'profil-page.edit-modal.error.required-avatar';
             return;
         }
 
-        const nothingChanged = username === this.user.username && email === this.user.email && avatar === (this.user.avatar || '');
+        const u = this.user;
+        const nothingChanged = username === u.username && email === u.email && avatar === (u.avatar || '');
         if (nothingChanged) {
             this.isEditing = false;
             return;
@@ -129,20 +149,20 @@ export class ProfilePageComponent {
         this.editError = '';
 
         try {
-            if (email !== this.user.email) await this.authService.updateCurrentUserEmail(email);
+            if (email !== u.email) await this.authService.updateCurrentUserEmail(email);
             await this.authService.updateCurrentUserProfile(username, avatar);
 
-            const payload = { ...this.user, username, email, avatar };
-
-            // PUT /api/users/:id → 204 No Content
+            const payload = { ...u, username, email, avatar };
             await this.httpUserService.updateUser(payload).toPromise();
 
-            Object.assign(this.user, payload);
+            // reflect UI state immediately
+            this.userManager.setUsername(username);
+            this.userManager.setEmail(email);
+            this.userManager.setAvatar(avatar);
 
             this.isEditing = false;
         } catch (err: any) {
             const msg = err?.error?.error?.toString()?.toLowerCase?.() || err?.message?.toLowerCase?.() || '';
-
             if (err?.status === 400 || (msg.includes('username') && msg.includes('exist')) || err?.error?.code === 'USERNAME_TAKEN') {
                 this.editError = 'profil-page.edit-modal.error.used-username';
             } else if (err?.code === 'auth/requires-recent-login') {

@@ -93,6 +93,22 @@ export class UserManagerService {
         this.currentUser.update((curr) => ({ ...curr, id }));
     }
 
+    setPurchasedSounds(ids: string[]) {
+        const u = this.getCurrentUser();
+        this.currentUser.set({ ...u, purchasedSounds: ids });
+    }
+
+    setPurchasedAvatars(ids: string[]) {
+        this.currentUser.update((curr) => ({ ...curr, purchasedAvatars: [...ids] }));
+    }
+    addPurchasedAvatar(id: string) {
+        this.currentUser.update((curr) => {
+            const old = new Set(curr.purchasedAvatars ?? []);
+            old.add(id);
+            return { ...curr, purchasedAvatars: Array.from(old) };
+        });
+    }
+
     getCurrentUser(): User {
         return structuredClone(this.currentUser());
     }

@@ -5,6 +5,7 @@ import { FightSubController } from '@app/controllers/fight-sub-controller/fight-
 import { GameSessionController } from '@app/controllers/game-session-controller/game-session-controller';
 import { MovementSubController } from '@app/controllers/movement-sub-controller/movement-sub-controller';
 import { CurrentGamesService } from '@app/services/current-games/current-games.service';
+import { UsersService } from '@app/services/users/users.service';
 import { BoardGame } from '@common/board-game';
 import { CurrentGame } from '@common/current-game';
 import { SocketClientEventNames, SocketServerEventNames } from '@common/enums/socket-events-names';
@@ -14,6 +15,7 @@ import { Player } from '@common/player';
 import { Position } from '@common/position';
 import * as dataForm from '@common/socket-data-forms';
 import * as io from 'socket.io';
+import { Container } from 'typedi';
 
 export class GameScheduler {
     private gameMap: Map<string, GameSessionController>;
@@ -36,7 +38,9 @@ export class GameScheduler {
         const newGameSession: GameSession = new GameSession(newBoard);
         const newClockManager: GameClockManager = new GameClockManager(newGameSession, this.sio, game.id);
 
-        const newFightSubController: FightSubController = new FightSubController(newClockManager, newGameSession, game.id, this.sio);
+        const usersService = Container.get(UsersService);
+
+        const newFightSubController: FightSubController = new FightSubController(newClockManager, newGameSession, game.id, this.sio, usersService);
         const newMovementSubController: MovementSubController = new MovementSubController(newGameSession, game.id, this.sio);
         const newController: GameSessionController = new GameSessionController(
             newGameSession,

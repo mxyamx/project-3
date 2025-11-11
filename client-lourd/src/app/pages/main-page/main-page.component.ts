@@ -56,6 +56,10 @@ export class MainPageComponent implements OnDestroy, OnInit {
         });
     }
 
+    openShop() {
+        this.router.navigate(['/shop']);
+    }
+
     openProfile() {
         this.router.navigate(['/profile']);
     }

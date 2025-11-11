@@ -90,7 +90,7 @@
                     <div class="avatar-grid">
                         <div
                             class="avatar-chip"
-                            *ngFor="let avatar of PRESET_AVATARS; let i = index"
+                            *ngFor="let avatar of ALL_AVATARS(); let i = index"
                             [class.selected]="selectedAvatarIndex() === i"
                             (click)="chooseAvatar(i)"
                         >

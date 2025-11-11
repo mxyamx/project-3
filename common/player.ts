@@ -5,6 +5,7 @@ import { Position } from './position';
 import { PlayerStatistics } from './statistics';
 
 export interface Player {
+    userId: string;
     name: string;
     character: string;
     attributes: CharacterAttributes;

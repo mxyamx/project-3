@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable max-lines */
 import { FightVpSocketEvent } from '@app/classes/fight-vp-socket-event/fight-vp-socket-event';
 import { GameScheduler } from '@app/classes/game-scheduler/game-scheduler';
 import { GameVpSocketEvent } from '@app/classes/game-vp-socket-event/game-vp-socket-event';
@@ -11,6 +13,7 @@ import { UserSessionController } from '@app/controllers/user-session-controller/
 import { ChannelDoc } from '@app/interfaces/channel-doc';
 import { VpSocketAddingHandlerConfig } from '@app/interfaces/vp-socket-adding-handler-config';
 import { CurrentGamesService } from '@app/services/current-games/current-games.service';
+import { DatabaseService } from '@app/services/database/database.service';
 import { SocketGameCommunication } from '@app/services/socket-game-communication/socket-game-communication.service';
 import { CHANNEL_GENERAL_ID, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
 import { CurrentGame } from '@common/current-game';
