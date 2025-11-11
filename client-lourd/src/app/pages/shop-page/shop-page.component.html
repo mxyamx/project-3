@@ -1,54 +1,70 @@
 <div class="shop-page">
     <div class="toolbar">
-        <button class="btn" (click)="goBack()"><i class="fas fa-arrow-left"></i> Retour</button>
+        <button class="btn" (click)="goBack()"><i class="fas fa-arrow-left"></i> {{ 'shop-page.back-button' | translate }}</button>
         <div class="balance">
             <i class="fa-solid fa-coins"></i><span>{{ money() }}</span>
         </div>
     </div>
 
     <div class="section">
-        <h2>Avatars exclusifs</h2>
+        <h2>{{ 'shop-page.Exclusive-avatars' | translate }}</h2>
         <div class="grid">
             <div class="card" *ngFor="let item of catalog">
                 <img [src]="item.asset" [alt]="item.name" />
                 <div class="info">
-                    <div class="name">{{ item.name }}</div>
+                    <div class="name">{{ 'shop-page.avatars.' + item.nameKey | translate: {} : 'shop' }}</div>
                     <div class="price"><i class="fa-solid fa-coins"></i> {{ item.price }}</div>
                 </div>
 
                 <div class="actions" *ngIf="!isOwned(item); else ownedTpl">
                     <button class="btn primary" [disabled]="!canAfford(item) || buying() === item.id" (click)="buy(item)">
-                        {{ buying() === item.id ? 'Achat…' : canAfford(item) ? 'Acheter' : 'Solde insuffisant' }}
+                        {{
+                            buying() === item.id
+                                ? ('shop-page.Purchase' | translate) + '…'
+                                : canAfford(item)
+                                ? ('shop-page.Purchase' | translate)
+                                : ('shop-page.insufficient-balance' | translate)
+                        }}
                     </button>
                 </div>
+
                 <ng-template #ownedTpl>
-                    <div class="owned">Possédé</div>
+                    <div class="owned">{{ 'shop-page.Owned' | translate }}</div>
                 </ng-template>
             </div>
         </div>
     </div>
 
     <div class="section">
-        <h2>Effets sonores exclusifs</h2>
+        <h2>{{ 'shop-page.Sound-effects-exclusive' | translate }}</h2>
         <div class="grid">
             <div class="card" *ngFor="let s of sfxCatalog">
                 <div class="info">
-                    <div class="name">{{ s.name }}</div>
+                    <div class="name">{{ 'shop-page.effects.' + s.nameKey | translate: {} : 'shop' }}</div>
                     <div class="price"><i class="fa-solid fa-coins"></i> {{ s.price }}</div>
                 </div>
 
                 <div class="actions">
-                    <button class="btn play" (click)="playPreview(s)"><i class="fa-solid fa-play"></i> Pré-écouter</button>
-                </div>
-
-                <!-- Buy / Owned for SFX mirrors the avatar logic -->
-                <div class="actions" *ngIf="!isOwnedSfx(s); else sOwnedTpl">
-                    <button class="btn primary" [disabled]="!canAffordSfx(s) || buying() === s.id" (click)="buySfx(s)">
-                        {{ buying() === s.id ? 'Achat…' : canAffordSfx(s) ? 'Acheter' : 'Solde insuffisant' }}
+                    <button class="btn play" (click)="playPreview(s)">
+                        <i class="fa-solid fa-play"></i>
+                        {{ 'shop-page.pre-listen' | translate }}
                     </button>
                 </div>
+
+                <div class="actions" *ngIf="!isOwnedSfx(s); else sOwnedTpl">
+                    <button class="btn primary" [disabled]="!canAffordSfx(s) || buying() === s.id" (click)="buySfx(s)">
+                        {{
+                            buying() === s.id
+                                ? ('shop-page.Purchase' | translate) + '…'
+                                : canAffordSfx(s)
+                                ? ('shop-page.Purchase' | translate)
+                                : ('shop-page.insufficient-balance' | translate)
+                        }}
+                    </button>
+                </div>
+
                 <ng-template #sOwnedTpl>
-                    <div class="owned-sfx">Possédé</div>
+                    <div class="owned-sfx">{{ 'shop-page.Owned' | translate }}</div>
                 </ng-template>
             </div>
         </div>
