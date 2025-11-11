@@ -20,6 +20,7 @@ export const STANDARD_PLAYER: Player = {
     },
     organizer: false,
     socketId: '',
+    userId: '',
 };
 export const STANDARD_GAME_NAME = 'Partie Test';
 export const MAX_ESCAPE_ATTEMPTS = 3;
@@ -73,6 +74,7 @@ export const STANDARD_PLAYERS: Player[] = [
         color: 'blue',
         victories: 0,
         socketId: '',
+        userId: '',
     },
     {
         name: 'player-test2',
@@ -89,6 +91,7 @@ export const STANDARD_PLAYERS: Player[] = [
         color: 'green',
         victories: 0,
         socketId: '',
+        userId: '',
     },
     {
         name: 'player-test3',
@@ -105,6 +108,7 @@ export const STANDARD_PLAYERS: Player[] = [
         color: 'red',
         victories: 0,
         socketId: '',
+        userId: '',
     },
 ];
 export const STANDARD_LIST_PLAYERS: Player[] = [
@@ -124,6 +128,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         inventory: [STANDARD_ITEM],
         position: { x: 0, y: 0 },
         socketId: '',
+        userId: '',
     },
     {
         name: 'player-test2',
@@ -139,6 +144,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         organizer: false,
         color: 'green',
         socketId: '',
+        userId: '',
     },
     {
         name: 'player-test3',
@@ -154,6 +160,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         organizer: false,
         color: 'red',
         socketId: '',
+        userId: '',
     },
     {
         name: 'player-test4',
@@ -170,6 +177,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         color: 'red',
         victories: undefined,
         socketId: '',
+        userId: '',
     },
 ];
 
@@ -192,6 +200,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         profile: VirtualPlayerProfile.Agressive,
         virtualPlayer: true,
         socketId: '',
+        userId: '',
     },
     {
         name: 'vp2',
@@ -209,6 +218,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         profile: VirtualPlayerProfile.Defensive,
         virtualPlayer: true,
         socketId: '',
+        userId: '',
     },
     {
         name: 'vp3',
@@ -226,6 +236,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         profile: VirtualPlayerProfile.Agressive,
         virtualPlayer: true,
         socketId: '',
+        userId: '',
     },
     {
         name: 'vp4',
@@ -244,5 +255,6 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         profile: VirtualPlayerProfile.Defensive,
         virtualPlayer: true,
         socketId: '',
+        userId: '',
     },
 ];

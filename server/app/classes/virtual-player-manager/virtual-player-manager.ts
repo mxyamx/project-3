@@ -46,6 +46,7 @@ export class VirtualPlayerManager {
         };
 
         const virtualPlayer: VirtualPlayer = {
+            userId: 'vp',
             name,
             character: `assets/avatars/${this.availableAvatars[Math.floor(Math.random() * this.availableAvatars.length)]}`,
             attributes,

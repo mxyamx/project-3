@@ -42,6 +42,8 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
     hasBeenClicked: boolean = false;
     joiningRoom: boolean = false;
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
+    userManagerService: UserManagerService = inject(UserManagerService);
+
     private playerSocketService = inject(PlayerSocketService);
     private currentGameManager = inject(CurrentGameManagerService);
     private chatService = inject(ChatService);
@@ -184,6 +186,7 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
 
         const player: Player = {
             name: this.userManager.currentUser().username || '',
+            userId: this.userManagerService.getCurrentUser().id,
             character: this.formGroup.value.avatar || '',
             attributes,
             organizer: this.currentGame.players.length === 0,

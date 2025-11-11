@@ -32,6 +32,7 @@ const routes: Routes = [
     { path: '', redirectTo: '/login', pathMatch: 'full' },
     { path: 'login', component: LoginPageComponent },
     { path: 'profile', component: ProfilePageComponent },
+    { path: 'shop', loadComponent: () => import('@app/pages/shop-page/shop-page.component').then((m) => m.ShoppingPageComponent) },
     { path: 'settings', component: SettingsPageComponent },
     { path: 'home', component: MainPageComponent },
     { path: 'admin-page', component: AdminPageComponent },

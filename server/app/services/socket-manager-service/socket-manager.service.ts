@@ -1,4 +1,6 @@
 import { AvatarContainer } from '@app/classes/avatar-container';
+/* eslint-disable no-console */
+/* eslint-disable max-lines */
 import { FightVpSocketEvent } from '@app/classes/fight-vp-socket-event/fight-vp-socket-event';
 import { GameScheduler } from '@app/classes/game-scheduler/game-scheduler';
 import { GameVpSocketEvent } from '@app/classes/game-vp-socket-event/game-vp-socket-event';
@@ -12,6 +14,7 @@ import { UserSessionController } from '@app/controllers/user-session-controller/
 import { ChannelDoc } from '@app/interfaces/channel-doc';
 import { VpSocketAddingHandlerConfig } from '@app/interfaces/vp-socket-adding-handler-config';
 import { CurrentGamesService } from '@app/services/current-games/current-games.service';
+import { DatabaseService } from '@app/services/database/database.service';
 import { SocketGameCommunication } from '@app/services/socket-game-communication/socket-game-communication.service';
 import { CHANNEL_GENERAL_ID, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
 import { CurrentGame, CurrentGamePhase, JoinGameAck } from '@common/current-game';
@@ -23,7 +26,6 @@ import * as http from 'http';
 import { Collection } from 'mongodb';
 import * as io from 'socket.io';
 import Container from 'typedi';
-import { DatabaseService } from '../database/database.service';
 import { UsersService } from '../users/users.service';
 export class SocketManager {
     playerSocketMap = new Map<string, string>();
@@ -242,7 +244,11 @@ export class SocketManager {
 
             socket.on('delete-game', async (gameId: string) => {
                 console.log('delete-game');
-                await this.gameService.deleteGame(gameId);
+                const game = await this.gameService.getGame(gameId);
+                if (!game) {
+                    return;
+                }
+                this.cancelWaitingRoom(game, 'admin-left-waiting');
             });
 
             socket.on('disconnecting', async () => {
@@ -277,6 +283,10 @@ export class SocketManager {
                     this.avatarContainer.releaseBySocket(game.id, socket.id);
                     this.sio.to(game.id).emit('avatar-list-updated', this.avatarContainer.getSelectedAvatars(game.id));
 
+                    if (game.players.length === 0 && game.adminId === socket.id && game.phase === CurrentGamePhase.Waiting) {
+                        this.cancelWaitingRoom(game, 'admin-left-waiting');
+                        return;
+                    }
                     const player = game.players.find((disconnectedPlayer) => disconnectedPlayer.socketId === socket.id);
                     if (!player) return;
                     await this.leavePlayer(game.id, player, 'timeout');
