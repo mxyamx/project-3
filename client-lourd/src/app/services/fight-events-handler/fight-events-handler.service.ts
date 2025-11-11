@@ -17,6 +17,7 @@ import { PlayerState } from '@common/enums/player-state';
 import { SocketClientEventNames } from '@common/enums/socket-events-names';
 import { Player } from '@common/player';
 import * as dataForm from '@common/socket-data-forms';
+import { SfxService } from '../sound/sound.service';
 
 @Injectable({
     providedIn: 'root',
@@ -29,6 +30,7 @@ export class FightEventsHandlerService {
     private diceService: DiceService = inject(DiceService);
     private statisticsManager: StatisticsManagerService = inject(StatisticsManagerService);
     private gameEventService: GameEventService = inject(GameEventService);
+    private sfxService: SfxService = inject(SfxService);
 
     configureBaseSocket(): void {
         this.handleStartFight();
@@ -87,6 +89,11 @@ export class FightEventsHandlerService {
             if (isCurrentPlayerAttacker) {
                 this.gameEventService.showLogAttackNotification(data);
             }
+
+            if (data.attackSoundEffect) {
+                this.sfxService.playById(data.attackSoundEffect);
+            }
+
             this.gameInterfaceService.hideEscapeConfirmation();
         });
     }
