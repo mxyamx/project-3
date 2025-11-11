@@ -435,5 +435,25 @@
         "missing-entry-points": "All starting points must be placed",
         "missing-flag": "The flag must be placed",
         "success": "Registration successful!"
+    },
+
+    "shop-page": {
+        "back-button": "Back",
+        "Exclusive-avatars": "Exclusive Avatars",
+        "avatars": {
+            "Alpha-wolf": "Alpha wolf",
+            "Agile-Kangaroo": "Agile Kangourou",
+            "Royal-eagle": "Royal Eagle",
+            "Majestic-lion": "Majestic Lion"
+        },
+        "Sound-effects-exclusive": "Sound Effects Exclusive",
+        "effects": {
+            "Sword-Clash": "Sword Clash",
+            "Punch-of-death": "Punch of death"
+        },
+        "Purchase": "Purchase",
+        "Owned": "Owned",
+        "insufficient-balance": "Insufficient balance",
+        "pre-listen": "Pre-listen"
     }
 }

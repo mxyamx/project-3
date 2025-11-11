@@ -435,5 +435,25 @@
         "missing-entry-points": "Tous les points de départ doivent être placés",
         "missing-flag": "Le drapeau doit être placé",
         "success": "Enregistrement réussi!"
+    },
+
+    "shop-page": {
+        "back-button": "Retour",
+        "Exclusive-avatars": "Avatars exclusifs",
+        "avatars": {
+            "Alpha-wolf": "Loup Alpha",
+            "Agile-Kangaroo": "Kangourou Agile",
+            "Royal-eagle": "Aigle Royal",
+            "Majestic-lion": "Lion Majestueux"
+        },
+        "Sound-effects-exclusive": "Effets sonores exclusifs",
+        "effects": {
+            "Sword-Clash": "Épée tranchante",
+            "Punch-of-death": "Coup de la mort"
+        },
+        "Purchase": "Acheter",
+        "Owned": "Possédé",
+        "insufficient-balance": "Solde insuffisant",
+        "pre-listen": "Pré-écouter"
     }
 }
