@@ -14,7 +14,11 @@ export class VpSocketManager {
     }
 
     connect() {
-        this.clientSocket = ClientIO('ws://localhost:3000', { transports: ['websocket'], upgrade: false });
+        this.clientSocket = ClientIO('ws://localhost:3000', {
+            transports: ['websocket'],
+            upgrade: false,
+            query: { isVirtual: 'true' },
+        });
     }
 
     emit(event: string, data?: unknown, callback?: (response: unknown) => void) {
