@@ -24,7 +24,6 @@ import * as http from 'http';
 import { Collection } from 'mongodb';
 import * as io from 'socket.io';
 import Container from 'typedi';
-import { DatabaseService } from '../database/database.service';
 import { UsersService } from '../users/users.service';
 import { GamePrivacy } from '@common/enums/game-visibility';
 import { BoardGameService } from '../board-game/board-game.service';
