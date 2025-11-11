@@ -24,8 +24,10 @@ import * as http from 'http';
 import { Collection } from 'mongodb';
 import * as io from 'socket.io';
 import Container from 'typedi';
-import { DatabaseService } from '../database/database.service';
 import { UsersService } from '../users/users.service';
+import { GamePrivacy } from '@common/enums/game-visibility';
+import { BoardGameService } from '../board-game/board-game.service';
+
 export class SocketManager {
     playerSocketMap = new Map<string, string>();
 
@@ -44,6 +46,7 @@ export class SocketManager {
 
     private vpSocketAddingHandler: VpSocketAddingHandler;
     private socketGameCommunication: SocketGameCommunication;
+    private boardGameService: BoardGameService; 
 
     constructor(
         server: http.Server,
@@ -54,6 +57,7 @@ export class SocketManager {
         this.gameScheduler = new GameScheduler(this.sio, this.gameService);
         this.userSessionController = new UserSessionController(this.sio, Container.get(UsersService));
         this.socketGameCommunication = new SocketGameCommunication(this.sio, this.databaseService);
+        this.boardGameService = Container.get(BoardGameService); 
         const vpSocketAddingHandlerConfig: VpSocketAddingHandlerConfig = {
             sio: this.sio,
             gameService: this.gameService,
@@ -82,12 +86,34 @@ export class SocketManager {
             this.socketGameCommunication.handleSockets(socket);
 
             socket.on('create-game', async (game: CurrentGame, callback) => {
-                game.adminId = socket.id;
-                const createdGame = await this.gameService.createGame(game);
-                this.gameScheduler.createGame(game);
-                socket.join(createdGame.id);
-                this.vpManagers.set(createdGame.id, new VirtualPlayerManager());
-                callback(game);
+                try {
+                    const userId = socket.data?.userId || socket.handshake.auth?.userId;
+                    if (!userId) {
+                        callback({ error: 'UNAUTHORIZED' });
+                        return;
+                    }
+
+                    const boardGame = await this.boardGameService.getBoard(game.boardGame.id);
+                    if (!boardGame) {
+                        callback({ error: 'GAME_NOT_FOUND' });
+                        return;
+                    }
+
+                    if (boardGame.privacy === GamePrivacy.Private) {
+                        if (boardGame.ownerId !== userId) {
+                            callback({ error: 'GAME_PRIVACY_CHANGED' });
+                            return;
+                        }
+                    }
+                    game.adminId = socket.id;
+                    const createdGame = await this.gameService.createGame(game);
+                    this.gameScheduler.createGame(game);
+                    socket.join(createdGame.id);
+                    this.vpManagers.set(createdGame.id, new VirtualPlayerManager());
+                    callback({ success: true, game: createdGame });
+                } catch (error) {
+                    callback({ error: 'SERVER_ERROR' });
+                }
             });
 
             socket.on('toggle-lock', async (gameId: string, callback) => {
