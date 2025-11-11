@@ -153,8 +153,8 @@
     },
     "creation-page": {
         "title": "Crée une nouvelle partie",
-        "boardgame-deleted-modal": "Attention!! Ce jeu a déjà été supprimé. Veuillez rafraichir la page.",
-        "visibility-modal": "Attention!! Ce jeu a changé de visibilité. Veuillez rafraichir la page.",
+        "boardgame-deleted-modal": "Attention!! Ce jeu a déjà été supprimé.",
+        "visibility-modal": "Attention!! Ce jeu a changé de visibilité.",
         "create": "Créer une nouvelle partie"
     },
     "game-list": {

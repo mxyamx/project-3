@@ -37,6 +37,7 @@ export class UserSessionController {
                 socket.disconnect();
                 return;
             }
+            socket.data.userId = firebaseId;
 
             if (this.userSessionManager.isUserOnline(firebaseId)) {
                 socket.emit('connection-error', {

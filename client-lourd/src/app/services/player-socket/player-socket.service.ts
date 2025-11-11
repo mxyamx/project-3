@@ -202,7 +202,7 @@ export class PlayerSocketService {
     }
 
     leaveActiveGame(gameId: string): void {
-        this.clientSocketService.send('leave-active-game', { gameId });
+        this.clientSocketService.emit('leave-active-game', { gameId });
     }
     unsubscribeGameEvents(): void {
         this.unsubscribeChat();

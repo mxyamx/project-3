@@ -153,8 +153,8 @@
     },
     "creation-page": {
         "title": "Create a New Game",
-        "boardgame-deleted-modal": "Warning!! This game has already been deleted. Please refresh the page.",
-        "visibility-modal": "Warning!! This game's visibility has changed. Please refresh the page.",
+        "boardgame-deleted-modal": "Warning!! This game has already been deleted.",
+        "visibility-modal": "Warning!! This game's visibility has changed.",
         "create": "Create New Game"
     },
     "game-list": {
