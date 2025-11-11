@@ -38,6 +38,7 @@ export class GameSocketEventService {
     private statisticsService: StatisticsManagerService = inject(StatisticsManagerService);
     private limitOfItems: number = MAXIMUM_AMOUNT_OF_ITEM;
     private gameEventService: GameEventService = inject(GameEventService);
+    gameEnding: boolean = false;
 
     configureBaseSocket(router: Router): void {
         if (this.socketManager.isSocketAlive()) {
@@ -164,6 +165,7 @@ export class GameSocketEventService {
             }, endGameNotificationEndingTime);
 
             setTimeout(() => {
+                this.gameEnding = false;
                 this.router.navigate([UrlPage.Statistics], {
                     state: { data: gameId },
                 });

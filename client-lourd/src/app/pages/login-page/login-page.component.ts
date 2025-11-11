@@ -109,7 +109,7 @@ export class LoginPageComponent implements OnInit {
             }
 
             const user = await firstValueFrom(this.httpUserService.getUser(userId));
-            await this.handleLanguageAndUserUpdate(user);
+            this.languageService.setTranslate(user.parameters.language);
 
             this.userManager.currentUser.set(user);
             this.userManager.setStatus(DeviceType.web);
@@ -282,19 +282,5 @@ export class LoginPageComponent implements OnInit {
 
     onLanguageChange() {
         this.languageService.setTranslate(this.selectedLanguage);
-    }
-
-    private async handleLanguageAndUserUpdate(user: any): Promise<void> {
-        await this.languageService.resolveOnLogin(user.parameters.language, async (lang) => {
-            const updatedUser = {
-                ...user,
-                parameters: {
-                    ...user.parameters,
-                    language: lang,
-                },
-            };
-            await firstValueFrom(this.httpUserService.updateUser(updatedUser));
-            this.userManager.currentUser.set(updatedUser);
-        });
     }
 }

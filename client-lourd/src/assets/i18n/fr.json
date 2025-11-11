@@ -153,8 +153,8 @@
     },
     "creation-page": {
         "title": "Crée une nouvelle partie",
-        "boardgame-deleted-modal": "Attention!! Ce jeu a déjà été supprimé. Veuillez rafraichir la page.",
-        "visibility-modal": "Attention!! Ce jeu a changé de visibilité. Veuillez rafraichir la page.",
+        "boardgame-deleted-modal": "Attention!! Ce jeu a déjà été supprimé.",
+        "visibility-modal": "Attention!! Ce jeu a changé de visibilité.",
         "create": "Créer une nouvelle partie"
     },
     "game-list": {
@@ -180,11 +180,22 @@
     },
     "join-game-page": {
         "title": "Joindre une partie",
-        "enter-code": "Entrez le code d'accès vers la partie",
+        "enter-code": "Entrez le code",
+        "find-game": "Trouver une partie",
         "join": "Rejoindre!",
         "invalid-code": "Code de partie invalide !",
         "locked-game": "Partie bloquée par l'administrateur !",
-        "try-again": "Réessayer"
+        "try-again": "Réessayer",
+        "status": {
+            "in-game": "En partie",
+            "waiting": "En salle d’attente"
+        },
+        "player-count": "Nombre de joueurs",
+        "code": "Code d'accès",
+        "accessibility": "Accessibilité",
+        "open": "Ouvert",
+        "close": "Fermer",
+        "no-game": "Aucune partie en cours"
     },
     "error-page": {
         "title": "Oups ! Une erreur est survenue. Veuillez réessayer."
@@ -435,5 +446,25 @@
         "missing-entry-points": "Tous les points de départ doivent être placés",
         "missing-flag": "Le drapeau doit être placé",
         "success": "Enregistrement réussi!"
+    },
+
+    "shop-page": {
+        "back-button": "Retour",
+        "Exclusive-avatars": "Avatars exclusifs",
+        "avatars": {
+            "Alpha-wolf": "Loup Alpha",
+            "Agile-Kangaroo": "Kangourou Agile",
+            "Royal-eagle": "Aigle Royal",
+            "Majestic-lion": "Lion Majestueux"
+        },
+        "Sound-effects-exclusive": "Effets sonores exclusifs",
+        "effects": {
+            "Sword-Clash": "Épée tranchante",
+            "Punch-of-death": "Coup de la mort"
+        },
+        "Purchase": "Acheter",
+        "Owned": "Possédé",
+        "insufficient-balance": "Solde insuffisant",
+        "pre-listen": "Pré-écouter"
     }
 }

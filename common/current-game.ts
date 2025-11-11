@@ -1,12 +1,35 @@
 import { BoardGame } from './board-game';
+import { GameMode } from './enums/game-mode';
 import { Player } from './player';
 
+export enum CurrentGamePhase {
+    Waiting = 'waiting',
+    Running = 'running',
+    Ended = 'ended',
+}
 export interface CurrentGame {
     id: string;
     name?: string;
     players: Player[];
     boardGame: BoardGame;
     locked: boolean;
-    adminId?: string;
-    started?: boolean;
+    adminId: string;
+    phase: CurrentGamePhase;
+    dropInEnabled: boolean;
+}
+
+export interface CurrentGamePreview {
+    id: string;
+    playerCount: number;
+    maxPlayerCount: number;
+    boardgameSize: number;
+    gameMode: GameMode;
+    phase: CurrentGamePhase;
+    previewImage: string;
+    isJoinable: boolean;
+}
+
+export interface JoinGameAck {
+    game: CurrentGame;
+    player: Player;
 }

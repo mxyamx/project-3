@@ -87,13 +87,6 @@ export class PlayersListComponent implements OnInit {
         this.showAlertOfAdminLeft = false;
     }
 
-    deletePlayer(player: Player) {
-        if (this.gameId) {
-            this.playerSocketService.emitLeaveGame(this.gameId, player);
-        }
-        this.closePlayerModal();
-    }
-
     kickPlayer(player: Player) {
         if (this.gameId) {
             this.playerSocketService.emitKickPlayer(this.gameId, player);

@@ -8,7 +8,6 @@ import { GameSessionManagerService } from '@app/services/game-session-manager/ga
 import { HttpBoardGameService } from '@app/services/http-manager/http-board-game.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { BoardGameDTO } from '@common/board-game';
-import { CurrentGame } from '@common/current-game';
 import { GameMode } from '@common/enums/game-mode';
 import { UrlPage } from '@common/enums/url-page';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -55,9 +54,16 @@ export class CreationPageComponent implements OnInit {
         this.displayedObject = this.gamesList.find((g) => g.id === game.id) || { ...game };
     }
 
-    hideAlert() {
-        this.showAlertConfirmation = false;
+    async hideAlert() {
+        if (this.showVisibilityAlert || this.showAlertConfirmation) {
+            this.showVisibilityAlert = false;
+            this.showAlertConfirmation = false;
+            await this.loadGames();
+            this.hasBeenClicked = false;
+            return;
+        }
         this.showVisibilityAlert = false;
+        this.showAlertConfirmation = false;
     }
 
     createNewGame() {
@@ -76,16 +82,32 @@ export class CreationPageComponent implements OnInit {
 
                 this.currentGameService.updatePickedBoardGame(boardGame);
                 const currentGame = this.currentGameService.displayedCurrentGame();
-                this.playerSocketService.emitCreateGame(currentGame, (response: CurrentGame) => {
-                    if (response) {
-                        this.currentGameService.updateCurrentGame(response);
-                        this.playerSocketService.emitJoinAvatarRoom(response.id);
+                this.playerSocketService.emitCreateGame(currentGame, (response: any) => {
+                    if (response?.error) {
+                        switch (response.error) {
+                            case 'GAME_PRIVACY_CHANGED':
+                                this.showVisibilityAlert = true;
+                                break;
+                            case 'GAME_NOT_FOUND':
+                                this.showAlertConfirmation = true;
+                                break;
+                            default:
+                                this.showAlertConfirmation = true;
+                        }
+                        this.hasBeenClicked = false;
+                        return;
+                    }
+
+                    if (response?.success && response?.game) {
+                        this.currentGameService.updateCurrentGame(response.game);
+                        this.playerSocketService.emitJoinAvatarRoom(response.game.id);
                         this.router.navigate([UrlPage.Avatar]);
                     }
                 });
             },
             error: () => {
                 this.showAlertConfirmation = true;
+                this.hasBeenClicked = false;
             },
         });
         this.hasBeenClicked = true;
