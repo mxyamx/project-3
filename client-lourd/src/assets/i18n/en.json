@@ -194,7 +194,8 @@
         "code": "Access Code",
         "accessibility": "Accessibility",
         "open": "Open",
-        "close": "Close"
+        "close": "Close",
+        "no-game": "No game in progress"
     },
     "error-page": {
         "title": "Oops! An error occurred. Please try again."

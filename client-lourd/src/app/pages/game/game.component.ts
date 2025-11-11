@@ -73,6 +73,7 @@ export class GameComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.gameSocketEventManager.gameEnding = false;
         this.subscription = this.gameInterfaceService.isInterfaceVisible$.subscribe((isVisible) => {
             this.showGameInterface = isVisible;
         });
@@ -87,6 +88,11 @@ export class GameComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         if (this.subscription) {
             this.subscription.unsubscribe();
+        }
+
+        if (!this.gameSocketEventManager.gameEnding) {
+            this.playerSocketService.leaveActiveGame(this.gameSessionManager.gameId());
+            this.playerSocketService.unsubscribeGameEvents();
         }
     }
 
@@ -134,7 +140,7 @@ export class GameComponent implements OnInit, OnDestroy {
         this.showAbandonConfirmation = false;
         const player = this.gameSessionManager.chosenPlayer();
         if (player) {
-            this.playerSocketService.leaveActiveGame(player);
+            this.playerSocketService.leaveActiveGame(this.gameSessionManager.gameId());
         }
         this.gameSessionManager.leaveGame();
         setTimeout(() => {

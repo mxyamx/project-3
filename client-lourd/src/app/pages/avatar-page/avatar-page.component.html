@@ -1,8 +1,6 @@
 <div class="form-container">
     <section class="navigation">
-        <button class="navigation-button" routerLink="/main-page" (click)="deleteGameOnAdminQuit(); deselectAvatarOnPlayerQuit()">
-            <i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}
-        </button>
+        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}</button>
     </section>
     <h1>{{ 'avatar-page.title' | translate }}</h1>
     @if(showVisibilityAlert) {

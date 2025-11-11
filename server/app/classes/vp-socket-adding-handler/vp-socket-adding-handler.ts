@@ -16,6 +16,7 @@ import { VpRoomManagement } from '@common/socket-data-forms';
 import { VirtualPlayer } from '@common/virtual-player';
 import * as io from 'socket.io';
 import { Server } from 'socket.io';
+import { AvatarContainer } from '../avatar-container';
 
 export class VpSocketAddingHandler {
     private sio: Server;
@@ -28,7 +29,7 @@ export class VpSocketAddingHandler {
     private vpBehaviorsInGame: Map<string, VpBehaviorInGame>;
     private vpBehaviorsInFight: Map<string, VpBehaviorInFight>;
     private vpGameSessionManagers: Map<string, VpGameSessionManager>;
-    private games: Record<string, Set<string>>;
+    private avatarContainer: AvatarContainer;
 
     constructor(vpSocketAddingHandlerConfig: VpSocketAddingHandlerConfig) {
         this.sio = vpSocketAddingHandlerConfig.sio;
@@ -41,7 +42,7 @@ export class VpSocketAddingHandler {
         this.vpBehaviorsInGame = vpSocketAddingHandlerConfig.vpBehaviorsInGame;
         this.vpBehaviorsInFight = vpSocketAddingHandlerConfig.vpBehaviorsInFight;
         this.vpGameSessionManagers = vpSocketAddingHandlerConfig.vpGameSessionManagers;
-        this.games = vpSocketAddingHandlerConfig.games;
+        this.avatarContainer = vpSocketAddingHandlerConfig.avatarContainer;
     }
 
     register(socket: io.Socket): void {
@@ -99,11 +100,9 @@ export class VpSocketAddingHandler {
         const virtualPlayer = vpManager.createVirtualPlayer(profile);
         if (!virtualPlayer) return null;
 
-        if (!this.games[gameId]) {
-            this.games[gameId] = new Set();
-        }
-
-        const usedAvatars = Array.from(this.games[gameId]);
+        const vpSocketManager = new VpSocketManager();
+        await vpSocketManager.connect();
+        const usedAvatars = this.avatarContainer.getSelectedAvatars(gameId);
         const availableAvatars = vpManager.availableAvatars.filter((avatar) => !usedAvatars.includes(`assets/avatars/${avatar}`));
 
         if (availableAvatars.length === 0) {
@@ -113,11 +112,10 @@ export class VpSocketAddingHandler {
         const randomAvatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
         virtualPlayer.character = `assets/avatars/${randomAvatar}`;
 
-        this.games[gameId].add(virtualPlayer.character);
-        this.sio.to(gameId).emit('avatar-list-updated', Array.from(this.games[gameId]));
+        this.avatarContainer.selectAvatar(gameId, virtualPlayer.character, vpSocketManager.clientSocket.id);
 
-        const vpSocketManager = new VpSocketManager();
-        await vpSocketManager.connect();
+        this.sio.to(gameId).emit('avatar-list-updated', this.avatarContainer.getSelectedAvatars(gameId));
+        console.log(this.avatarContainer.getSelectedAvatars(gameId));
         const vpState = new VpState();
         const vpGameSessionManager = new VpGameSessionManager(vpSocketManager, vpState, {
             initialPlayer: virtualPlayer,
@@ -161,7 +159,7 @@ export class VpSocketAddingHandler {
 
     private async notifyVpAdded(gameId: string, virtualPlayer: VirtualPlayer, maxPlayers: number) {
         this.sio.to(gameId).emit('player-joined', virtualPlayer);
-        this.sio.to(gameId).emit('avatar-list-updated', Array.from(this.games[gameId]));
+        this.sio.to(gameId).emit('avatar-list-updated', this.avatarContainer.getSelectedAvatars(gameId));
 
         const updatedGame = await this.gameService.getGame(gameId);
         if (updatedGame && updatedGame.players.length >= maxPlayers && !updatedGame.locked) {

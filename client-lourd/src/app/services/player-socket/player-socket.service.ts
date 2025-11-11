@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { ChatMessage } from '@common/chat-message';
-import { CurrentGame, CurrentGamePreview } from '@common/current-game';
+import { CurrentGame, CurrentGamePreview, JoinGameAck } from '@common/current-game';
 import { SocketClientEventNames, SocketEventNames } from '@common/enums/socket-events-names';
 import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { GameEvent } from '@common/game-event';
@@ -40,7 +40,7 @@ export class PlayerSocketService {
         this.clientSocketService.emit('toggle-lock', gameId, callback);
     }
 
-    emitJoinGame(gameId: string, player: Player, callback: (response: CurrentGame) => void): void {
+    emitJoinGame(gameId: string, player: Player, callback: (response: JoinGameAck) => void): void {
         this.clientSocketService.emit('join-game', { gameId, player }, callback);
     }
 
@@ -48,8 +48,8 @@ export class PlayerSocketService {
         this.clientSocketService.emit('start-game', gameId);
     }
 
-    emitLeaveGame(gameId: string, player: Player): void {
-        this.clientSocketService.emit('leave-game', { gameId, player });
+    emitLeaveGame(gameId: string): void {
+        this.clientSocketService.emit('leave-game', { gameId });
     }
 
     emitKickPlayer(gameId: string, player: Player): void {
@@ -102,6 +102,10 @@ export class PlayerSocketService {
 
     onAvatarSelected(callback: (avatarList: string[]) => void): void {
         this.clientSocketService.on<string[]>('avatar-list-updated', callback);
+    }
+
+    onCurrentGamePreviewsUpdated(callback: (previews: CurrentGamePreview[]) => void): void {
+        this.clientSocketService.on<CurrentGamePreview[]>(SocketEventNames.CurrentGamePreviewsUpdated, callback);
     }
 
     onAvatarDeselected(callback: (avatarList: string[]) => void): void {
@@ -197,8 +201,8 @@ export class PlayerSocketService {
         this.clientSocketService.off(SocketEventNames.ChatHistory);
     }
 
-    leaveActiveGame(player: Player): void {
-        this.clientSocketService.send('leave-active-game', { player });
+    leaveActiveGame(gameId: string): void {
+        this.clientSocketService.send('leave-active-game', { gameId });
     }
     unsubscribeGameEvents(): void {
         this.unsubscribeChat();

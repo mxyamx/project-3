@@ -194,7 +194,8 @@
         "code": "Code d'accès",
         "accessibility": "Accessibilité",
         "open": "Ouvert",
-        "close": "Fermer"
+        "close": "Fermer",
+        "no-game": "Aucune partie en cours"
     },
     "error-page": {
         "title": "Oups ! Une erreur est survenue. Veuillez réessayer."

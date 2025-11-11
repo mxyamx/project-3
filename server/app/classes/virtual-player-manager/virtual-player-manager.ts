@@ -53,6 +53,7 @@ export class VirtualPlayerManager {
             virtualPlayer: true as const,
             profile,
             color: 'red',
+            socketId: '',
         };
 
         return virtualPlayer;

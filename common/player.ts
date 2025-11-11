@@ -13,7 +13,7 @@ export interface Player {
     victories?: number;
     color?: string;
     virtualPlayer?: boolean;
-    socketId?: string;
+    socketId: string;
     isNotInGame?: boolean;
     inventory?: Item[];
     leavingKey?: number;

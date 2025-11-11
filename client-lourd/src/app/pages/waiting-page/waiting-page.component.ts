@@ -94,7 +94,10 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        if (!this.isStartingGame) {
+        console.log('hello');
+        if (!this.isStartingGame && this.gameId) {
+            console.log('active player');
+            this.playerSocketService.emitLeaveGame(this.gameId);
             this.playerSocketService.unsubscribeGameEvents();
         }
     }
@@ -143,12 +146,7 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
         this.hasBeenClicked = true;
     }
 
-    deletePlayer(player: Player) {
-        if (this.gameId) {
-            this.chatDockService.leftGame();
-            this.playerSocketService.emitLeaveGame(this.gameId, player);
-            this.playerSocketService.unsubscribeGameEvents();
-        }
+    leaveGame() {
         this.router.navigate([UrlPage.Home]);
     }
 

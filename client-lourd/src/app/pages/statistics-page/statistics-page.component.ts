@@ -1,11 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { GlobalStatisticsComponent } from '@app/components/global-statistics/global-statistics.component';
 import { PlayerStatisticsComponent } from '@app/components/player-statistics/player-statistics.component';
 import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
-import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
+import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
@@ -15,8 +15,8 @@ import { TranslatePipe } from '@ngx-translate/core';
     templateUrl: './statistics-page.component.html',
     styleUrl: './statistics-page.component.scss',
 })
-export class StatisticsPageComponent {
-    socketService = inject(SocketClientService);
+export class StatisticsPageComponent implements OnDestroy {
+    private playerSocketService: PlayerSocketService = inject(PlayerSocketService);
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     chatDockService: ChatDockService = inject(ChatDockService);
     gameId: string = '';
@@ -27,5 +27,10 @@ export class StatisticsPageComponent {
         if (state) {
             this.gameId = state.data;
         }
+    }
+
+    ngOnDestroy(): void {
+        this.playerSocketService.emitLeaveGame(this.gameId);
+        this.playerSocketService.unsubscribeGameEvents();
     }
 }

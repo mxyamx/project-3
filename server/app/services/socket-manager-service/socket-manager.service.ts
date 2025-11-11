@@ -1,3 +1,4 @@
+import { AvatarContainer } from '@app/classes/avatar-container';
 import { FightVpSocketEvent } from '@app/classes/fight-vp-socket-event/fight-vp-socket-event';
 import { GameScheduler } from '@app/classes/game-scheduler/game-scheduler';
 import { GameVpSocketEvent } from '@app/classes/game-vp-socket-event/game-vp-socket-event';
@@ -13,7 +14,7 @@ import { VpSocketAddingHandlerConfig } from '@app/interfaces/vp-socket-adding-ha
 import { CurrentGamesService } from '@app/services/current-games/current-games.service';
 import { SocketGameCommunication } from '@app/services/socket-game-communication/socket-game-communication.service';
 import { CHANNEL_GENERAL_ID, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
-import { CurrentGame, CurrentGamePhase } from '@common/current-game';
+import { CurrentGame, CurrentGamePhase, JoinGameAck } from '@common/current-game';
 import { PlayerLimits } from '@common/enums/players-limit';
 import { SocketEventNames } from '@common/enums/socket-events-names';
 import { Player } from '@common/player';
@@ -30,7 +31,7 @@ export class SocketManager {
     private sio: io.Server;
     private gameScheduler: GameScheduler;
     private userSessionController: UserSessionController;
-    private games: Record<string, Set<string>> = {};
+    private avatarContainer = new AvatarContainer();
     private vpManagers: Map<string, VirtualPlayerManager> = new Map();
     private vpSockets: Map<string, VpSocketManager> = new Map();
     private gameVpSocketEvents = new Map<string, GameVpSocketEvent>();
@@ -49,6 +50,7 @@ export class SocketManager {
         private databaseService: DatabaseService,
     ) {
         this.sio = new io.Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
+        this.gameService.setIo(this.sio);
         this.gameScheduler = new GameScheduler(this.sio, this.gameService);
         this.userSessionController = new UserSessionController(this.sio, Container.get(UsersService));
         this.socketGameCommunication = new SocketGameCommunication(this.sio, this.databaseService);
@@ -63,7 +65,7 @@ export class SocketManager {
             vpBehaviorsInGame: this.vpBehaviorsInGame,
             vpBehaviorsInFight: this.vpBehaviorsInFight,
             vpGameSessionManagers: this.vpGameSessionManagers,
-            games: this.games,
+            avatarContainer: this.avatarContainer,
         };
         this.vpSocketAddingHandler = new VpSocketAddingHandler(vpSocketAddingHandlerConfig);
     }
@@ -109,35 +111,28 @@ export class SocketManager {
 
             socket.on('avatar-selection', (data: AvatarManagement, callback) => {
                 const { gameId, avatar } = data;
-                if (!this.games[gameId]) {
-                    this.games[gameId] = new Set();
-                }
+                const ok = this.avatarContainer.selectAvatar(gameId, avatar, socket.id);
 
-                if (this.games[gameId].has(avatar)) {
-                    callback(this.games[gameId]);
+                if (!ok) {
+                    callback(this.avatarContainer.getSelectedAvatars(gameId));
                     return;
                 }
+                this.sio.to(gameId).emit('avatar-list-updated', this.avatarContainer.getSelectedAvatars(gameId));
 
-                this.games[gameId].add(avatar);
-                this.sio.to(gameId).emit('avatar-list-updated', Array.from(this.games[gameId]));
-                callback(Array.from(this.games[gameId]));
+                callback(this.avatarContainer.getSelectedAvatars(gameId));
             });
 
             socket.on('avatar-deselection', (data: AvatarManagement, callback) => {
+                console.log('avatar-deselection');
                 const { gameId, avatar } = data;
-                if (this.games[gameId]) {
-                    this.games[gameId].delete(avatar);
-                    this.sio.to(gameId).emit('avatar-list-updated', Array.from(this.games[gameId]));
-                }
-                callback(Array.from(this.games[gameId]));
+                this.avatarContainer.deselectAvatar(gameId, avatar, socket.id);
+
+                this.sio.to(gameId).emit('avatar-list-updated', this.avatarContainer.getSelectedAvatars(gameId));
+                callback(this.avatarContainer.getSelectedAvatars(gameId));
             });
 
             socket.on('get-selected-avatars', async (gameId: string, callback) => {
-                if (this.games[gameId]) {
-                    callback(Array.from(this.games[gameId]));
-                } else {
-                    callback([]);
-                }
+                callback(this.avatarContainer.getSelectedAvatars(gameId));
             });
 
             socket.on('join-room', async (gameId: string) => {
@@ -156,7 +151,6 @@ export class SocketManager {
                     await this.gameService.addPlayer(playerWithId, gameId);
                     this.gameScheduler.joinGame(playerWithId, game, socket);
                     socket.join(gameId);
-
                     this.sio.to(gameId).emit('player-joined', playerWithId);
 
                     const maxPlayers = PlayerLimits[game.boardGame.size].maxPlayers;
@@ -166,8 +160,9 @@ export class SocketManager {
                         await this.gameService.updateGame(game);
                         this.sio.to(gameId).emit('lock-updated', game);
                     }
-
-                    callback(game);
+                    const updatedGame = await this.gameService.getGame(gameId);
+                    const joinGameAck: JoinGameAck = { game: updatedGame, player: playerWithId };
+                    callback(joinGameAck);
                 } else {
                     return;
                 }
@@ -189,8 +184,8 @@ export class SocketManager {
                 for (const player of game.players) {
                     await this.gameService.removePlayer(player, game.id);
                     this.sio.to(game.id).emit('player-left', player);
-                    this.games[game.id].delete(player.character);
-                    this.sio.to(game.id).emit('avatar-list-updated', Array.from(this.games[game.id]));
+                    this.avatarContainer.releaseBySocket(gameId, player.socketId);
+                    this.sio.to(game.id).emit('avatar-list-updated', this.avatarContainer.getSelectedAvatars(gameId));
 
                     if (player.virtualPlayer) {
                         const vpManager = this.vpManagers.get(gameId);
@@ -215,87 +210,23 @@ export class SocketManager {
                 this.sio.to(gameId).emit('admin-left', gameId);
             });
 
-            socket.on('leave-game', async (data: RoomManagement) => {
-                const { gameId, player } = data;
+            socket.on('leave-game', async ({ gameId }: RoomManagement) => {
+                console.log('leave-game');
                 const game = await this.gameService.getGame(gameId);
                 if (!game) return;
-
-                const playerToRemove = game.players.find((playerToRemoveFound) => playerToRemoveFound.socketId === player.socketId);
-                if (playerToRemove) {
-                    await this.gameService.removePlayer(playerToRemove, gameId);
-                    this.gameScheduler.disconnectPlayer(player.socketId);
-
-                    this.sio.to(gameId).emit('player-left', playerToRemove);
-
-                    if (playerToRemove.virtualPlayer) {
-                        const vpManager = this.vpManagers.get(gameId);
-                        if (vpManager) {
-                            vpManager.releaseVpName(playerToRemove.name);
-                        }
-                    }
-                }
-
-                if (game.adminId === socket.id) {
-                    this.sio.to(game.id).emit('admin-left', game);
-                }
-
-                await this.gameService.removePlayer(player, gameId);
-                this.sio.to(gameId).emit('player-left', player);
-
-                if (this.games[gameId]) {
-                    this.games[gameId].delete(player.character);
-                    this.sio.to(gameId).emit('avatar-list-updated', Array.from(this.games[gameId]));
-                }
-
-                socket.leave(gameId);
-                const updatedGame = await this.gameService.getGame(gameId);
-                if (updatedGame) {
-                    const maxPlayers = PlayerLimits[updatedGame.boardGame.size].maxPlayers;
-                    if (updatedGame.players.length < maxPlayers && updatedGame.locked) {
-                        updatedGame.locked = false;
-                        await this.gameService.updateGame(updatedGame);
-                    }
-                    this.sio.to(gameId).emit('lock-updated', updatedGame);
-                }
+                const existing = game.players.find((p) => p.socketId === socket.id);
+                console.log(`existing player.socket id - ${socket.id} --- ${existing}`);
+                if (!existing) return;
+                await this.leavePlayer(gameId, existing, 'quit');
             });
 
-            socket.on('kick-player', async (data: RoomManagement) => {
-                const { gameId, player } = data;
-                await this.gameService.removePlayer(player, gameId);
-                this.gameScheduler.disconnectPlayer(player.socketId);
-                this.sio.to(gameId).emit('kicked', player);
-
-                if (this.games[gameId]) {
-                    this.games[gameId].delete(player.character);
-                    this.sio.to(gameId).emit('avatar-list-updated', Array.from(this.games[gameId]));
-                }
-
-                if (player.virtualPlayer) {
-                    const vpManager = this.vpManagers.get(gameId);
-                    if (vpManager) {
-                        vpManager.releaseVpName(player.name);
-                    }
-                    this.gameScheduler.disconnectPlayer(player.socketId);
-                    const vpSocket = this.vpSockets.get(player.socketId);
-                    if (vpSocket) {
-                        vpSocket.clientSocket.disconnect();
-                        this.vpSockets.delete(player.socketId);
-                        this.gameVpSocketEvents.delete(player.socketId);
-                        this.fightVpSocketEvents.delete(player.socketId);
-                        this.vpGameSessionManagers.delete(player.socketId);
-                        this.vpBehaviorsInGame.delete(player.socketId);
-                        this.vpBehaviorsInFight.delete(player.socketId);
-                    }
-                }
-                const updatedGame = await this.gameService.getGame(gameId);
-                if (updatedGame) {
-                    const maxPlayers = PlayerLimits[updatedGame.boardGame.size].maxPlayers;
-                    if (updatedGame.players.length < maxPlayers && updatedGame.locked) {
-                        updatedGame.locked = false;
-                        await this.gameService.updateGame(updatedGame);
-                    }
-                    this.sio.to(gameId).emit('lock-updated', updatedGame);
-                }
+            socket.on('kick-player', async ({ gameId, player }: RoomManagement) => {
+                console.log('kick-player');
+                const game = await this.gameService.getGame(gameId);
+                if (!game) return;
+                const existing = game.players.find((p) => p.socketId === player.socketId);
+                if (!existing) return;
+                await this.leavePlayer(gameId, existing, 'kick');
             });
 
             socket.on('get-game', async (gameId: string, callback) => {
@@ -310,6 +241,7 @@ export class SocketManager {
             });
 
             socket.on('delete-game', async (gameId: string) => {
+                console.log('delete-game');
                 await this.gameService.deleteGame(gameId);
             });
 
@@ -324,87 +256,157 @@ export class SocketManager {
                 // await this.purgeCurrentGames(socketId, roomsWithSize);
             });
 
-            socket.on('leave-active-game', async (data: { player: Player }) => {
-                const { player } = data;
-                await this.gameScheduler.disconnectPlayer(player.socketId);
+            socket.on('leave-active-game', async (data: { gameId: string }) => {
+                console.log('leave-active-game');
+                const { gameId } = data;
+                const game = await this.gameService.getGame(gameId);
+                if (!game) return;
+                const existing = game.players.find((p) => p.socketId === socket.id);
+                if (!existing) return;
+                await this.leavePlayer(gameId, existing, 'quit');
             });
 
             socket.on('disconnect', async () => {
+                console.log('disconnect');
                 await this.gameScheduler.disconnectPlayer(socket.id);
 
                 const games = await this.gameService.getAllGames();
                 if (!games) return;
 
                 for (const game of games) {
-                    if (game.adminId === socket.id && game.phase != CurrentGamePhase.Waiting) {
-                        await this.gameService.deleteGame(game.id);
-                        this.sio.to(game.id).emit('admin-left', game);
-                        this.sio.socketsLeave(game.id);
-                        this.vpManagers.delete(game.id);
-                        socket.disconnect();
-                        return;
-                    }
+                    this.avatarContainer.releaseBySocket(game.id, socket.id);
+                    this.sio.to(game.id).emit('avatar-list-updated', this.avatarContainer.getSelectedAvatars(game.id));
 
                     const player = game.players.find((disconnectedPlayer) => disconnectedPlayer.socketId === socket.id);
-                    if (player) {
-                        if (this.games[game.id]) {
-                            this.games[game.id].delete(player.character);
-                            this.sio.to(game.id).emit('avatar-list-updated', Array.from(this.games[game.id]));
-                        }
-
-                        await this.gameService.removePlayer(player, game.id);
-                        this.sio.to(game.id).emit('player-left', player);
-                        const updatedGame = await this.gameService.getGame(game.id);
-                        if (!updatedGame) {
-                            socket.leave(game.id);
-                            socket.disconnect();
-                            return;
-                        }
-
-                        const remainingPlayers = updatedGame.players.filter((p) => !p.virtualPlayer);
-                        if (remainingPlayers.length === 0) {
-                            const gameController = this.gameScheduler['gameMap'].get(game.id);
-                            if (gameController) {
-                                gameController['endGame']();
-                            }
-
-                            const virtualPlayers = updatedGame.players.filter((p) => p.virtualPlayer);
-                            for (const vp of virtualPlayers) {
-                                const vpSocket = this.vpSockets.get(vp.socketId);
-                                if (vpSocket) {
-                                    vpSocket.clientSocket.removeAllListeners();
-                                    vpSocket.clientSocket.disconnect();
-                                    this.vpSockets.delete(vp.socketId);
-                                    this.vpBehaviorsInGame.delete(vp.socketId);
-                                    this.vpBehaviorsInFight.delete(vp.socketId);
-                                    this.gameVpSocketEvents.delete(vp.socketId);
-                                    this.fightVpSocketEvents.delete(vp.socketId);
-                                    this.vpGameSessionManagers.delete(vp.socketId);
-                                }
-
-                                await this.gameService.removePlayer(vp, game.id);
-                                this.sio.to(game.id).emit('player-left', vp);
-                                if (vp.virtualPlayer) {
-                                    const vpManager = this.vpManagers.get(game.id);
-                                    if (vpManager) {
-                                        vpManager.releaseVpName(vp.name);
-                                    }
-                                }
-                            }
-
-                            this.sio.socketsLeave(game.id);
-                            this.vpManagers.delete(game.id);
-                            this.gameScheduler['gameMap'].delete(game.id);
-                        }
-
-                        socket.leave(game.id);
-                        socket.disconnect();
-                    }
+                    if (!player) return;
+                    await this.leavePlayer(game.id, player, 'timeout');
                 }
             });
 
             this.vpSocketAddingHandler.register(socket);
         });
+    }
+
+    private async leavePlayer(gameId: string, player: Player, reason: 'quit' | 'kick' | 'timeout' | 'admin-quit'): Promise<void> {
+        console.log('leavePlayer');
+
+        const game = await this.gameService.getGame(gameId);
+        if (!game) return;
+
+        const isOrganizer = game.adminId === player.socketId;
+        const isWaiting = game.phase === CurrentGamePhase.Waiting;
+
+        if (isOrganizer && isWaiting) {
+            await this.cancelWaitingRoom(game, 'admin-left-waiting');
+            return;
+        }
+        await this.gameService.removePlayer(player, gameId);
+
+        this.gameScheduler.disconnectPlayer(player.socketId);
+
+        this.avatarContainer.releaseBySocket(gameId, player.socketId);
+        this.sio.to(game.id).emit('avatar-list-updated', this.avatarContainer.getSelectedAvatars(gameId));
+
+        if (player.virtualPlayer) {
+            const vpManager = this.vpManagers.get(gameId);
+            vpManager?.releaseVpName(player.name);
+            const vpSocket = this.vpSockets.get(player.socketId);
+            if (vpSocket) {
+                vpSocket.clientSocket.removeAllListeners();
+                vpSocket.clientSocket.disconnect();
+            }
+            this.vpSockets.delete(player.socketId);
+            this.gameVpSocketEvents.delete(player.socketId);
+            this.fightVpSocketEvents.delete(player.socketId);
+            this.vpGameSessionManagers.delete(player.socketId);
+            this.vpBehaviorsInGame.delete(player.socketId);
+            this.vpBehaviorsInFight.delete(player.socketId);
+        }
+
+        this.sio.sockets.sockets.get(player.socketId)?.leave(gameId);
+
+        this.sio.to(gameId).emit('player-left', player);
+
+        const updatedGame = await this.gameService.getGame(gameId);
+        if (!updatedGame) return;
+
+        const maxPlayers = PlayerLimits[updatedGame.boardGame.size].maxPlayers;
+        if (updatedGame.phase === CurrentGamePhase.Waiting && updatedGame.locked && updatedGame.players.length < maxPlayers) {
+            updatedGame.locked = false;
+            await this.gameService.updateGame(updatedGame);
+            this.sio.to(gameId).emit('lock-updated', updatedGame);
+        }
+
+        await this.maybeEndGameAndCleanup(updatedGame);
+    }
+    private async maybeEndGameAndCleanup(game: CurrentGame): Promise<void> {
+        const humanPlayers = game.players.filter((p) => !p.virtualPlayer);
+        if (humanPlayers.length === 0) {
+            console.log('delete game');
+            const ctl = this.gameScheduler['gameMap'].get(game.id);
+            ctl?.['endGame']?.();
+
+            for (const vp of game.players.filter((p) => p.virtualPlayer)) {
+                await this.gameService.removePlayer(vp, game.id);
+                this.sio.to(game.id).emit('player-left', { ...vp, reason: 'gc' });
+                const vpManager = this.vpManagers.get(game.id);
+                vpManager?.releaseVpName(vp.name);
+                const vpSocket = this.vpSockets.get(vp.socketId);
+                if (vpSocket) {
+                    vpSocket.clientSocket.removeAllListeners();
+                    vpSocket.clientSocket.disconnect();
+                }
+                this.vpSockets.delete(vp.socketId);
+                this.vpBehaviorsInGame.delete(vp.socketId);
+                this.vpBehaviorsInFight.delete(vp.socketId);
+                this.gameVpSocketEvents.delete(vp.socketId);
+                this.fightVpSocketEvents.delete(vp.socketId);
+                this.vpGameSessionManagers.delete(vp.socketId);
+            }
+
+            this.sio.socketsLeave(game.id);
+            this.vpManagers.delete(game.id);
+            this.gameScheduler['gameMap'].delete(game.id);
+            this.avatarContainer.clearGame(game.id);
+            this.sio.to(game.id).emit('avatar-list-updated', []);
+
+            await this.gameService.deleteGame(game.id);
+            await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: game.id });
+        }
+    }
+    private async cancelWaitingRoom(game: CurrentGame, reason: 'admin-left-waiting'): Promise<void> {
+        const { id: gameId } = game;
+
+        this.sio.to(game.id).emit('admin-left', game);
+
+        this.avatarContainer.clearGame(game.id);
+        this.sio.to(game.id).emit('avatar-list-updated', []);
+
+        for (const p of game.players.filter((p) => p.virtualPlayer)) {
+            const vpManager = this.vpManagers.get(gameId);
+            vpManager?.releaseVpName(p.name);
+            const vpSocket = this.vpSockets.get(p.socketId);
+            if (vpSocket) {
+                vpSocket.clientSocket.removeAllListeners();
+                vpSocket.clientSocket.disconnect();
+            }
+            this.vpSockets.delete(p.socketId);
+            this.gameVpSocketEvents.delete(p.socketId);
+            this.fightVpSocketEvents.delete(p.socketId);
+            this.vpGameSessionManagers.delete(p.socketId);
+            this.vpBehaviorsInGame.delete(p.socketId);
+            this.vpBehaviorsInFight.delete(p.socketId);
+        }
+
+        for (const p of [...game.players]) {
+            await this.gameService.removePlayer(p, gameId);
+        }
+
+        this.sio.socketsLeave(gameId);
+        this.vpManagers.delete(gameId);
+        this.gameScheduler['gameMap'].delete(gameId);
+
+        await this.gameService.deleteGame(gameId);
     }
 
     private async purgeChatHistoryIfRoomEmpty(socketID: string, rooms: Map<string, number>): Promise<void> {
@@ -432,22 +434,4 @@ export class SocketManager {
             console.error('purgeChatHistoryIfRoomEmpty failed:', err);
         }
     }
-    // private async purgeCurrentGames(socketID: string, rooms: Map<string, number>): Promise<void> {
-    //     try {
-    //         for (const room of rooms) {
-    //             if (room[0] === socketID || room[0] === CHANNEL_GENERAL_ID) continue;
-
-    //             const sizeBeforeLeave = room[1];
-
-    //             if (sizeBeforeLeave > 1) continue;
-
-    //             const regex = /^\d{4}$/;
-    //             if (!regex.test(room[0])) continue;
-
-    //             await this.gameService.deleteGame(room[0]);
-    //         }
-    //     } catch (err) {
-    //         console.error('purgeCurrentGames failed:', err);
-    //     }
-    // }
 }

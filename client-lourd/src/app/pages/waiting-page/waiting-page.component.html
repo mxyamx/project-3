@@ -1,9 +1,7 @@
 <div class="waiting-container">
     <section class="navigation">
         <div class="action-buttons">
-            <button class="navigation-button" (click)="deletePlayer(gameSessionManager.chosenPlayer())">
-                <i class="fas fa-home"></i>{{ 'waiting-page.leave' | translate }}
-            </button>
+            <button class="navigation-button" (click)="leaveGame()"><i class="fas fa-home"></i>{{ 'waiting-page.leave' | translate }}</button>
             @if(isOrganizer()) {
             <button
                 class="virtual-player-generation"

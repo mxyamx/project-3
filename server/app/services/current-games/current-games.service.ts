@@ -1,20 +1,27 @@
 import { ID_GENERATION } from '@app/constants/development-constants';
 import { CurrentGame, CurrentGamePhase, CurrentGamePreview } from '@common/current-game';
 import { PlayerLimits } from '@common/enums/players-limit';
+import { SocketEventNames } from '@common/enums/socket-events-names';
 import { Player } from '@common/player';
 import 'dotenv/config';
 import * as fs from 'fs';
+import * as io from 'socket.io';
 import { Service } from 'typedi';
 
 const clone = <T>(x: T): T => structuredClone(x);
 
 @Service()
 export class CurrentGamesService {
+    private sio: io.Server;
     private games: Map<string, CurrentGame> = new Map();
     private filePath = '/home/hugod/Desktop/Polytechnique/LOG3900/LOG3900-206/server/app/services/current-games/current-games.json';
     async getAllGames(): Promise<CurrentGame[]> {
         const values = Array.from(this.games.values());
         return values.map(clone);
+    }
+
+    setIo(io: io.Server) {
+        this.sio = io;
     }
 
     getCurrentGamePreviews(): CurrentGamePreview[] {
@@ -24,8 +31,7 @@ export class CurrentGamesService {
             const playerCount = game.players.length;
             const maxPlayerCount = PlayerLimits[game.boardGame.size].maxPlayers;
             const isJoinable: boolean =
-                (game.phase === CurrentGamePhase.Waiting && !game.locked) ||
-                (game.phase === CurrentGamePhase.Running && game.dropInEnabled) ||
+                ((game.phase === CurrentGamePhase.Waiting && !game.locked) || (game.phase === CurrentGamePhase.Running && game.dropInEnabled)) &&
                 game.players.length < maxPlayerCount;
             const preview: CurrentGamePreview = {
                 id: game.id,
@@ -60,6 +66,7 @@ export class CurrentGamesService {
 
         const toStore = clone(base);
         this.games.set(toStore.id, toStore);
+        this.emitUpdatedCurrentGamePreviews();
 
         return clone(toStore);
     }
@@ -69,6 +76,7 @@ export class CurrentGamesService {
             throw new Error("Le jeu actuel n'a pas été trouvé.");
         }
         this.delete(id);
+        this.emitUpdatedCurrentGamePreviews();
     }
 
     async updateGame(patch: Partial<CurrentGame> & { id: string }): Promise<void> {
@@ -87,6 +95,7 @@ export class CurrentGamesService {
         };
 
         this.set(next);
+        this.emitUpdatedCurrentGamePreviews();
     }
 
     async addPlayer(player: Player, gameId: string): Promise<void> {
@@ -101,6 +110,7 @@ export class CurrentGamesService {
         };
 
         this.set(next);
+        this.emitUpdatedCurrentGamePreviews();
     }
 
     async removePlayer(player: Player, gameId: string): Promise<void> {
@@ -114,6 +124,7 @@ export class CurrentGamesService {
         };
 
         this.set(next);
+        this.emitUpdatedCurrentGamePreviews();
     }
 
     private set(game: CurrentGame): void {
@@ -166,5 +177,9 @@ export class CurrentGamesService {
             }
         }
         return gameId;
+    }
+
+    private emitUpdatedCurrentGamePreviews() {
+        this.sio.emit(SocketEventNames.CurrentGamePreviewsUpdated, this.getCurrentGamePreviews());
     }
 }

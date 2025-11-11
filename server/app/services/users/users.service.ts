@@ -82,8 +82,6 @@ export class UsersService {
             },
         );
 
-        console.log('update result:', result);
-
         if (result.matchedCount === 0) {
             throw new Error("Échec lors de la mise à jour de l'utilisateur.");
         }

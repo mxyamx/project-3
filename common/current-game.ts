@@ -28,3 +28,8 @@ export interface CurrentGamePreview {
     previewImage: string;
     isJoinable: boolean;
 }
+
+export interface JoinGameAck {
+    game: CurrentGame;
+    player: Player;
+}
