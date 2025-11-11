@@ -15,6 +15,7 @@
                     <div class="name">{{ item.name }}</div>
                     <div class="price"><i class="fa-solid fa-coins"></i> {{ item.price }}</div>
                 </div>
+
                 <div class="actions" *ngIf="!isOwned(item); else ownedTpl">
                     <button class="btn primary" [disabled]="!canAfford(item) || buying() === item.id" (click)="buy(item)">
                         {{ buying() === item.id ? 'Achat…' : canAfford(item) ? 'Acheter' : 'Solde insuffisant' }}
@@ -35,15 +36,20 @@
                     <div class="name">{{ s.name }}</div>
                     <div class="price"><i class="fa-solid fa-coins"></i> {{ s.price }}</div>
                 </div>
+
                 <div class="actions">
                     <button class="btn play" (click)="playPreview(s)"><i class="fa-solid fa-play"></i> Pré-écouter</button>
                 </div>
-                <div class="actions">
-                    <button class="btn primary" [disabled]="isOwnedSfx(s) || !canAffordSfx(s) || buying() === s.id" (click)="buySfx(s)">
-                        <ng-container *ngIf="!isOwnedSfx(s); else sOwned">Acheter</ng-container>
+
+                <!-- Buy / Owned for SFX mirrors the avatar logic -->
+                <div class="actions" *ngIf="!isOwnedSfx(s); else sOwnedTpl">
+                    <button class="btn primary" [disabled]="!canAffordSfx(s) || buying() === s.id" (click)="buySfx(s)">
+                        {{ buying() === s.id ? 'Achat…' : canAffordSfx(s) ? 'Acheter' : 'Solde insuffisant' }}
                     </button>
-                    <ng-template #sOwned><div class="owned-sfx">Possédé</div></ng-template>
                 </div>
+                <ng-template #sOwnedTpl>
+                    <div class="owned-sfx">Possédé</div>
+                </ng-template>
             </div>
         </div>
     </div>
