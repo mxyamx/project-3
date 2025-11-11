@@ -4,7 +4,6 @@ import { PlayerLimits } from '@common/enums/players-limit';
 import { SocketEventNames } from '@common/enums/socket-events-names';
 import { Player } from '@common/player';
 import 'dotenv/config';
-import * as fs from 'fs';
 import * as io from 'socket.io';
 import { Service } from 'typedi';
 
@@ -14,7 +13,6 @@ const clone = <T>(x: T): T => structuredClone(x);
 export class CurrentGamesService {
     private sio: io.Server;
     private games: Map<string, CurrentGame> = new Map();
-    private filePath = '/home/hugod/Desktop/Polytechnique/LOG3900/LOG3900-206/server/app/services/current-games/current-games.json';
     async getAllGames(): Promise<CurrentGame[]> {
         const values = Array.from(this.games.values());
         return values.map(clone);
@@ -75,7 +73,7 @@ export class CurrentGamesService {
         if (!this.games.has(id)) {
             throw new Error("Le jeu actuel n'a pas été trouvé.");
         }
-        this.delete(id);
+        this.games.delete(id);
         this.emitUpdatedCurrentGamePreviews();
     }
 
@@ -94,7 +92,7 @@ export class CurrentGamesService {
             id: existing.id,
         };
 
-        this.set(next);
+        this.games.set(next.id, next);
         this.emitUpdatedCurrentGamePreviews();
     }
 
@@ -109,7 +107,7 @@ export class CurrentGamesService {
             players: [...game.players, clone(player)],
         };
 
-        this.set(next);
+        this.games.set(next.id, next);
         this.emitUpdatedCurrentGamePreviews();
     }
 
@@ -123,49 +121,9 @@ export class CurrentGamesService {
             players: clone(nextPlayers),
         };
 
-        this.set(next);
+        this.games.set(next.id, next);
         this.emitUpdatedCurrentGamePreviews();
     }
-
-    private set(game: CurrentGame): void {
-        const { boardGame, ...rest } = game;
-        try {
-            const games = this.readGames();
-            const idx = games.findIndex((g) => g.id === rest.id);
-            if (idx >= 0) games[idx] = rest;
-            else games.push(rest);
-            this.writeGames(games);
-            this.games.set(game.id, game);
-        } catch (error) {
-            console.error('Error processing JSON file:', error);
-        }
-    }
-
-    private delete(id: string) {
-        try {
-            const games = this.readGames().filter((g) => g.id !== id);
-            this.writeGames(games);
-            this.games.delete(id);
-        } catch (error) {
-            console.error('Error processing JSON file:', error);
-        }
-    }
-
-    private readGames(): Omit<CurrentGame, 'boardGame'>[] {
-        try {
-            const text = fs.readFileSync(this.filePath, 'utf8').trim();
-            if (!text) return [];
-            return JSON.parse(text);
-        } catch {
-            fs.writeFileSync(this.filePath, '[]', 'utf8');
-            return [];
-        }
-    }
-
-    private writeGames(games: Omit<CurrentGame, 'boardGame'>[]) {
-        fs.writeFileSync(this.filePath, JSON.stringify(games, null, 2), 'utf8');
-    }
-
     private async generateGameId(): Promise<string> {
         let gameId = '';
         let isExistingGame = true;

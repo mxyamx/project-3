@@ -91,7 +91,7 @@ export class GameComponent implements OnInit, OnDestroy {
         }
 
         if (!this.gameSocketEventManager.gameEnding) {
-            this.playerSocketService.leaveActiveGame(this.gameSessionManager.gameId());
+            this.playerSocketService.emitLeaveGame(this.gameSessionManager.gameId());
             this.playerSocketService.unsubscribeGameEvents();
         }
     }
@@ -140,7 +140,7 @@ export class GameComponent implements OnInit, OnDestroy {
         this.showAbandonConfirmation = false;
         const player = this.gameSessionManager.chosenPlayer();
         if (player) {
-            this.playerSocketService.leaveActiveGame(this.gameSessionManager.gameId());
+            this.playerSocketService.emitLeaveGame(this.gameSessionManager.gameId());
         }
         this.gameSessionManager.leaveGame();
         setTimeout(() => {

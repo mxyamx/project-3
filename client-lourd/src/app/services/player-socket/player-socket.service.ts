@@ -201,9 +201,6 @@ export class PlayerSocketService {
         this.clientSocketService.off(SocketEventNames.ChatHistory);
     }
 
-    leaveActiveGame(gameId: string): void {
-        this.clientSocketService.emit('leave-active-game', { gameId });
-    }
     unsubscribeGameEvents(): void {
         this.unsubscribeChat();
         this.clientSocketService.off('admin-left');

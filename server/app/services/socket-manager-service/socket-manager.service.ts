@@ -252,6 +252,7 @@ export class SocketManager {
 
             socket.on('kick-player', async ({ gameId, player }: RoomManagement) => {
                 console.log('kick-player');
+                this.sio.to(gameId).emit('kicked', player);
                 const game = await this.gameService.getGame(gameId);
                 if (!game) return;
                 const existing = game.players.find((p) => p.socketId === player.socketId);
