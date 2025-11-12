@@ -455,12 +455,27 @@
             "Alpha-wolf": "Alpha wolf",
             "Agile-Kangaroo": "Agile Kangourou",
             "Royal-eagle": "Royal Eagle",
-            "Majestic-lion": "Majestic Lion"
+            "Majestic-lion": "Majestic Lion",
+            "Sweet-hippo": "Sweet Hippo",
+            "Elegant-giraffe": "Elegant Giraffe",
+            "Proud-horse": "Proud Horse",
+            "Fierce-tiger": "Fierce Tiger",
+            "Polar-bear": "Majestic Polar Bear",
+            "warthog": "Three-horned Warthog",
+            "Powerful-penguin": "Powerful Penguin",
+            "Black-panther": "Black Panther",
+            "Cunning-crocodile": "Cunning Crocodile",
+            "panda-cuddly": "Cuddly Panda"
         },
         "Sound-effects-exclusive": "Sound Effects Exclusive",
         "effects": {
             "Sword-Clash": "Sword Clash",
-            "Punch-of-death": "Punch of death"
+            "Punch-of-death": "Punch of death",
+            "Swift-attack": "Swift attack",
+            "Monster-attack": "Monster attack",
+            "Explosion": "Explosion",
+            "Evil-laugh": "Evil laugh",
+            "knife-cutting": "Knife attack"
         },
         "Purchase": "Purchase",
         "Owned": "Owned",
