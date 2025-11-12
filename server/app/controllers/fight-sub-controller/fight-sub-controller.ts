@@ -71,7 +71,10 @@ export class FightSubController {
             const damageTakenDefendingPlayer = damageDoneAttackingPlayer;
 
             // Retrieve the proper sound effect (randomly)
-            const user = await this.usersService.getUser(attackingPlayer.userId);
+            let user = null;
+            if (!attackingPlayer?.virtualPlayer) {
+                user = await this.usersService.getUser(attackingPlayer.userId);
+            }
             let soundEffect = '';
             if (user) {
                 const sounds = user.purchasedSounds ?? [];
@@ -237,6 +240,10 @@ export class FightSubController {
         if (!winner) return;
 
         // Handling winner reward
+        const isVp = winner?.virtualPlayer;
+        if (isVp) {
+            return;
+        }
         const user = await this.usersService.getUser(winner.userId);
         if (!user) return;
         await this.usersService.updateUser({ ...user, money: user.money + WINNER_REWARD });
@@ -244,7 +251,11 @@ export class FightSubController {
         // Handling losers reward
         this.gameSession.listOfPlayers.getValues().forEach(async (player) => {
             if (player.userId !== winner.userId) {
-                const loserUser = await this.usersService.getUser(player.userId);
+                const isVp = winner?.virtualPlayer;
+                if (isVp) {
+                    return;
+                }
+                const loserUser = await this.usersService.getUser(winner.userId);
                 if (!loserUser) return;
                 await this.usersService.updateUser({ ...loserUser, money: loserUser.money + CONSOLATION_REWARD });
             }
