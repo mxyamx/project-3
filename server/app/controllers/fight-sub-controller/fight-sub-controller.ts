@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable no-console */
 import { GameClockManager } from '@app/classes/game-clock-manager/game-clock-manager';
 import { GameSession } from '@app/classes/game-session/game-session';
@@ -251,11 +252,11 @@ export class FightSubController {
         // Handling losers reward
         this.gameSession.listOfPlayers.getValues().forEach(async (player) => {
             if (player.userId !== winner.userId) {
-                const isVp = winner?.virtualPlayer;
+                const isVp = player?.virtualPlayer;
                 if (isVp) {
                     return;
                 }
-                const loserUser = await this.usersService.getUser(winner.userId);
+                const loserUser = await this.usersService.getUser(player.userId);
                 if (!loserUser) return;
                 await this.usersService.updateUser({ ...loserUser, money: loserUser.money + CONSOLATION_REWARD });
             }
