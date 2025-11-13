@@ -66,6 +66,14 @@ export class GameScheduler {
         this.playerMap.set(socket.id, { firsElement: player, secondElement: game.id });
     }
 
+    joinActiveGame(player: Player, game: CurrentGame): dataForm.UpdateGamedRes | null {
+        const controller: GameSessionController = this.gameMap.get(game.id);
+        if (!controller) return null;
+        const ans = controller.addActivePlayer(player);
+        this.playerMap.set(player.socketId, { firsElement: player, secondElement: game.id });
+        return ans;
+    }
+
     joinGameVp(player: Player, game: CurrentGame, socket: VpSocketManager): void {
         const controller: GameSessionController = this.gameMap.get(game.id);
         if (!controller) return;

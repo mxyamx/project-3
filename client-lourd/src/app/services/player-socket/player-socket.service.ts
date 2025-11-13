@@ -120,8 +120,8 @@ export class PlayerSocketService {
         this.clientSocketService.emit('avatar-deselection', { gameId, avatar }, callback);
     }
 
-    emitJoinAvatarRoom(gameId: string): void {
-        this.clientSocketService.emit('join-room', gameId);
+    emitJoinAvatarRoom(gameId: string, callback: (response: JoinGameAck) => void): void {
+        this.clientSocketService.emit('join-room', gameId, callback);
     }
 
     onAvatarRoomJoined(callback: (playerId: string) => void): void {

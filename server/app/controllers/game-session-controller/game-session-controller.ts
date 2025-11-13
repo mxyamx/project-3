@@ -176,6 +176,20 @@ export class GameSessionController {
         this.gameSession.listOfPlayers.add(player);
         this.gameSession.staticMapOfPlayer.set(player.name, structuredClone(player));
     }
+    addActivePlayer(player: Player): dataForm.UpdateGamedRes | null {
+        if (this.gameSession.gameOver) return null;
+        if (!this.gameSession.gameStarted) return null;
+        const ans: dataForm.UpdateGamedRes = {
+            successful: true,
+            message: '',
+            boardGame: this.gameSession.board,
+            activePlayer: this.gameSession.activePlayerInstance,
+            listOfPlayers: this.gameSession.listOfPlayers.getValues(),
+        };
+        this.gameSession.placeAndAddActivePlayer(player);
+        this.updateGame();
+        return ans;
+    }
 
     movePlayer(path: Position[], socket: io.Socket, isMovingToItem?: boolean): void {
         if (this.gameSession.gameOver) return;
@@ -350,7 +364,7 @@ export class GameSessionController {
 
         this.sio.to(this.roomCode).emit(SocketClientEventNames.EndGame, ans);
     }
-
+    //TODO MIGHT USE THIS TO INFORM THE OTHER PLAYERS
     private updateGame(): void {
         if (this.gameOver()) return;
         const ans: dataForm.UpdateGamedRes = {

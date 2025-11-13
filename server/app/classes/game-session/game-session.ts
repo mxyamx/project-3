@@ -36,6 +36,7 @@ export class GameSession {
     private itemEffectApplicator: ItemEffectApplicator;
 
     private escapeMAp = new Map<string, number>();
+    private originalBoardGame: BoardGame;
 
     constructor(private boardGame: BoardGame) {
         this.players = new DynamicPlayerList();
@@ -49,6 +50,7 @@ export class GameSession {
         this.droppingItems = false;
         this.itemEffectApplicator = new ItemEffectApplicator();
         this.escapeMAp = new Map();
+        this.originalBoardGame = structuredClone(boardGame);
     }
 
     get board(): BoardGame {
@@ -182,6 +184,7 @@ export class GameSession {
         for (const item of this.activePlayer.inventory) {
             this.itemEffectApplicator.applyEffect(this.activePlayer, item.name);
         }
+
         this.players.moveFirstToBack();
         this.activePlayer = this.players.getFirst();
     }
@@ -379,6 +382,38 @@ export class GameSession {
             }
         }
     }
+    placeAndAddActivePlayer(player: Player): void {
+        const usedStartPos: Position[] = this.listOfPlayers.getValues().map((player) => {
+            return player?.startPosition;
+        });
+
+        const leavingKey = this.listOfPlayers.getValues().length;
+
+        loop1: for (let i = 0; i < this.originalBoardGame.size; ++i) {
+            for (let j = 0; j < this.originalBoardGame.size; ++j) {
+                const containedItem: Item | undefined = this.originalBoardGame.tiles[i][j].containedItem;
+                if (!containedItem) continue;
+
+                if (containedItem.type === ItemType.StartingPoint && !usedStartPos.find((pos) => pos.x === i && pos.y === j)) {
+                    const startPos: Position = { x: i, y: j };
+                    const spawnPos = this.isValidPosition(startPos) ? startPos : this.findNearestValidTile(startPos);
+                    this.boardGame.tiles[spawnPos.x][spawnPos.y].containedPlayer = player;
+                    player.position = spawnPos;
+                    player.inventory = [];
+                    player.leavingKey = leavingKey;
+                    player.ctfTeam = CtfTeam.FirstTeam; //TODO: I PUT A RANDOM TEAM I DON'T THINK WE ARE GONNA NEED THIS LOGIC
+                    player.startPosition = startPos;
+
+                    this.listOfPlayers.addToBack(player);
+                    const playerCopy = structuredClone(player);
+                    playerCopy.position = startPos;
+                    this.staticPlayerMap.set(playerCopy.name, playerCopy);
+                    this.victoriesMap.set(player.name, 0);
+                    break loop1;
+                }
+            }
+        }
+    }
     private placePlayers(): void {
         const stackOfPlayers: Player[] = shuffleArray<Player>(this.players.getValues());
         let positionInListOfPlayers = 0;
@@ -410,6 +445,7 @@ export class GameSession {
                         (this.staticPlayerMap.get(player.name) ?? STANDARD_LIST_PLAYERS[0]).startPosition = { x: i, y: j };
 
                         playerIsInFirstTeam = !playerIsInFirstTeam;
+                        this.victoriesMap.set(player.name, 0);
                     }
                 }
             }

@@ -25,24 +25,32 @@ export class CurrentGamesService {
     getCurrentGamePreviews(): CurrentGamePreview[] {
         const values = Array.from(this.games.values());
 
-        return values.map((game) => {
-            const playerCount = game.players.length;
-            const maxPlayerCount = PlayerLimits[game.boardGame.size].maxPlayers;
-            const isJoinable: boolean =
-                ((game.phase === CurrentGamePhase.Waiting && !game.locked) || (game.phase === CurrentGamePhase.Running && game.dropInEnabled)) &&
-                game.players.length < maxPlayerCount;
-            const preview: CurrentGamePreview = {
-                id: game.id,
-                playerCount: playerCount,
-                maxPlayerCount: maxPlayerCount,
-                boardgameSize: game.boardGame.size,
-                gameMode: game.boardGame.gameMode,
-                phase: game.phase,
-                previewImage: game.boardGame.previewImage,
-                isJoinable: isJoinable,
-            };
-            return preview;
-        });
+        return values
+            .filter((game) => game.phase !== CurrentGamePhase.Ended && game.players.length > 0)
+            .map((game) => {
+                const playerCount = game.players.length;
+                const maxPlayerCount = PlayerLimits[game.boardGame.size].maxPlayers;
+                const isJoinable: boolean = this.canJoin(game);
+                const preview: CurrentGamePreview = {
+                    id: game.id,
+                    playerCount: playerCount,
+                    maxPlayerCount: maxPlayerCount,
+                    boardgameSize: game.boardGame.size,
+                    gameMode: game.boardGame.gameMode,
+                    phase: game.phase,
+                    previewImage: game.boardGame.previewImage,
+                    isJoinable: isJoinable,
+                };
+                return preview;
+            });
+    }
+
+    canJoin(game: CurrentGame): boolean {
+        const maxPlayerCount = PlayerLimits[game.boardGame.size].maxPlayers;
+        return (
+            ((game.phase === CurrentGamePhase.Waiting && !game.locked) || (game.phase === CurrentGamePhase.Running && game.dropInEnabled)) &&
+            game.players.length < maxPlayerCount
+        );
     }
 
     async getGame(id: string): Promise<CurrentGame | null> {

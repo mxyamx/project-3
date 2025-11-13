@@ -94,9 +94,7 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        console.log('hello');
         if (!this.isStartingGame && this.gameId) {
-            console.log('active player');
             this.playerSocketService.emitLeaveGame(this.gameId);
             this.playerSocketService.unsubscribeGameEvents();
         }
