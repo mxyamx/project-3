@@ -168,3 +168,10 @@ export const SMALL_DICE_VALUE = 4;
 export const LARGE_DICE_VALUE = 6;
 
 export const DEFAULT_VIRTUAL_PLAYER_NAME_LIST = ['Seraphis', 'Thanos', 'Rubilax', 'Marlis', 'Loki', 'Kratos'];
+
+export const DATE_FORMAT_CONSTANTS = {
+    seconds: 1000,
+    minutes: 60,
+};
+
+export const PERCENTAGE_CALCULATION = 100;

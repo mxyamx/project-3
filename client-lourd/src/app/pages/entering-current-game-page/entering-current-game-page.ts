@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ToastFightComponent } from '@app/components/toast-fight/toast-fight.component';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
-import { CurrentGame, CurrentGamePhase, CurrentGamePreview } from '@common/current-game';
-import { PlayerLimits } from '@common/enums/players-limit';
+import { CurrentGame, CurrentGamePhase, CurrentGamePreview, JoinGameAck } from '@common/current-game';
 import { SocketEventNames } from '@common/enums/socket-events-names';
 import { UrlPage } from '@common/enums/url-page';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -20,7 +19,6 @@ import { TranslatePipe } from '@ngx-translate/core';
     styleUrls: ['./entering-current-game-page.scss'],
 })
 export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
-    @Input() gameId: string = '';
     currentGame: CurrentGame;
     showEnterCodeTab: WritableSignal<boolean> = signal(true);
     previews: WritableSignal<CurrentGamePreview[]> = signal([]);
@@ -46,65 +44,57 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
         this.clientSocketService.off(SocketEventNames.CurrentGamePreviewsUpdated);
     }
 
-    canJoinGame(canEnter: boolean): void {
-        if (canEnter) {
-            this.router.navigate([UrlPage.Avatar]);
-            this.playerSocketService.emitJoinAvatarRoom(this.gameId);
-        }
-    }
-
     moveToNext(nextInput: HTMLInputElement, index: number): void {
         if (this.codeArray[index] && nextInput) {
             nextInput.focus();
         }
-        this.updateCode();
     }
 
     moveToPrev(prevInput: HTMLInputElement, index: number): void {
         if (!this.codeArray[index] && prevInput) {
             prevInput.focus();
         }
-        this.updateCode();
-    }
-
-    updateCode(): void {
-        this.gameId = this.codeArray.join('');
     }
 
     isCodeComplete(): boolean {
         return this.codeArray.every((value) => value.length === 1);
     }
 
-    validateJoin(code: string): void {
-        this.playerSocketService.emitGetGame(code, (response: CurrentGame) => {
-            if (response) {
-                if (response.locked) {
-                    this.lockedError = true;
-                }
-                const maxPlayers = PlayerLimits[response.boardGame.size].maxPlayers;
-                if (response.players.length >= maxPlayers) {
-                    this.limitError = true;
-                }
-                if (!this.error()) {
-                    this.currentGameManager.updateCurrentGame(response);
-                    this.canJoinGame(true);
-                    this.hasBeenClicked = true;
-                }
-            } else {
-                this.codeError = true;
+    joinGame(id: string) {
+        this.playerSocketService.emitJoinAvatarRoom(id, (response: JoinGameAck) => {
+            if (response.codeError) {
+                this.codeError = response.codeError;
+                return;
             }
+            if (response.lockedError) {
+                this.lockedError = response.lockedError;
+                return;
+            }
+            if (response.limitError) {
+                this.limitError = response.limitError;
+                return;
+            }
+
+            if (!response.game) {
+                this.codeError = true;
+                return;
+            }
+            this.currentGameManager.updateCurrentGame(response.game);
+            this.hasBeenClicked = true;
+            this.router.navigate([UrlPage.Avatar]);
         });
     }
 
-    joinGame(preview: CurrentGamePreview) {
+    findGame(preview: CurrentGamePreview) {
         if (!preview.isJoinable) {
             return;
         }
-        this.validateJoin(preview.id);
+
+        this.joinGame(preview.id);
     }
     enterCode() {
         const code = this.codeArray.join('');
-        this.validateJoin(code);
+        this.joinGame(code);
     }
 
     error(): boolean {

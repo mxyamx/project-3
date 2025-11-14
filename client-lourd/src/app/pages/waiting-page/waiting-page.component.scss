@@ -86,7 +86,21 @@ p {
     }
 }
 
+.blocked-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 15px;
+
+    i {
+        color: goldenrod;
+        font-size: 30px;
+        margin-right: 40px;
+    }
+}
+
 .navigation-button,
+.btn-disabled,
 .btn-locked,
 .btn-unlocked {
     font-family: $font-primary;
@@ -109,8 +123,9 @@ p {
 }
 
 .btn-locked,
+.btn-disabled,
 .btn-unlocked {
-    width: 185px;
+    width: 200px;
 }
 
 .btn-locked:hover {
@@ -124,6 +139,11 @@ p {
     background-color: rgb(71, 11, 11);
     border-color: red;
 }
+.btn-disabled:hover {
+    transform: scale(1.03);
+    background-color: rgb(50, 50, 50);
+    border-color: rgb(81, 81, 81);
+}
 
 .btn-locked {
     background-color: green;
@@ -133,6 +153,11 @@ p {
 .btn-unlocked {
     background-color: red;
     border-color: rgb(71, 11, 11);
+}
+
+.btn-disabled {
+    background-color: rgb(81, 81, 81);
+    border-color: rgb(50, 50, 50);
 }
 
 .navigation-button:hover {
@@ -241,10 +266,17 @@ app-chat-container {
     font-size: 15px;
     white-space: pre-line;
     transform: translateX(5%);
-    bottom: -110%;
-    right: 10%;
     transition: opacity 0.2s ease-in-out;
     pointer-events: none;
+}
+.tl1 {
+    bottom: 95%;
+    right: 10%;
+}
+
+.tl2 {
+    bottom: -36%;
+    right: 10%;
 }
 
 .button-gold {
