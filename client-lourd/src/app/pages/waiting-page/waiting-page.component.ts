@@ -46,6 +46,8 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     protected showVirtualPlayerProfile: boolean = false;
     protected virtualPlayerProfile = VirtualPlayerProfile;
 
+    entryPrice: number = 25;
+
     private currentGameManager = inject(CurrentGameManagerService);
     private socketManager: SocketClientService = inject(SocketClientService);
     private playerSocketService = inject(PlayerSocketService);
@@ -65,6 +67,7 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
                 if (response) {
                     this.currentGame = response;
                     this.roomLockedState = response.locked;
+                    this.entryPrice = response.entryPrice;
                     this.playersLimitReached = this.playerlimit();
                     this.automaticLock();
                 }

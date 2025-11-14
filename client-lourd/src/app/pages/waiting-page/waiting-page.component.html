@@ -44,6 +44,18 @@
                 <p class="game-code">{{ gameId }}</p>
             </div>
         </div>
+        <div class="entry-fee-section">
+            <span class="entry-fee-label"> {{ 'waiting-page.entry-fee-label' | translate }}: </span>
+
+            <span class="entry-fee-value" *ngIf="entryPrice > 0; else freeEntry"> <i class="fa-solid fa-coins"></i> {{ entryPrice }} </span>
+
+            <ng-template #freeEntry>
+                <span class="entry-fee-value free">
+                    {{ 'waiting-page.entry-fee-free' | translate }}
+                </span>
+            </ng-template>
+        </div>
+
         <div class="second-section">
             <div class="left-zone">
                 <div class="text">{{ 'waiting-page.waiting' | translate }}</div>

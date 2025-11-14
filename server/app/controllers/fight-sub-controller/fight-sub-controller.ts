@@ -22,12 +22,14 @@ export class FightSubController {
     private fightLoserName: string | undefined;
     private fightWinnerName: string | undefined;
 
+    // eslint-disable-next-line max-params
     constructor(
         private clockManager: GameClockManager,
         private gameSession: GameSession,
         private roomCode: string,
         private sio: io.Server,
         private usersService: UsersService,
+        private entryPrice: number,
     ) {}
 
     startFight(targetPlayerPosition: Position): void {
@@ -236,8 +238,9 @@ export class FightSubController {
     }
 
     private async updatePlayerMoney(winner?: Player): Promise<void> {
-        const WINNER_REWARD = 100;
-        const CONSOLATION_REWARD = 50;
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        const WINNER_REWARD = Number(this.entryPrice * this.gameSession.listOfPlayers.getValues().length * 2) / 3;
+        const CONSOLATION_REWARD = Number(this.entryPrice * this.gameSession.listOfPlayers.getValues().length) / 3;
         if (!winner) return;
 
         // Handling winner reward

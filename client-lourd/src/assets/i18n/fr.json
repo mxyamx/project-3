@@ -348,6 +348,8 @@
         "unlock-room": "Débloquer la salle",
         "locked-room": "Salle bloquée! Personne ne peut plus entrer.",
         "unlocked-room": "Salle débloquée! La partie est encore ouverte.",
+        "entry-fee-label": "Frais d'entrée ",
+        "entry-fee-free": "Salle gratuite",
         "code": "Code d'accès",
         "waiting": "En attente de joueurs ...",
         "start-game": "Lancer la partie",
@@ -359,6 +361,8 @@
         },
         "player-amount-modal": "Le nombre de joueurs doit être pair pour commencer une partie en mode CTF."
     },
+    "entry-fee-label": "Frais d'entrée",
+    "entry-fee-free": "Salle gratuite",
     "attribute-form": {
         "physical": "Attributs physiques",
         "health": {

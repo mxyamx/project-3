@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { GameClockManager } from '@app/classes/game-clock-manager/game-clock-manager';
 import { GameSession } from '@app/classes/game-session/game-session';
 import {
@@ -33,6 +34,7 @@ export class GameSessionController {
     private fightLoserName: string | undefined;
     private fightWinnerName: string | undefined;
 
+    // eslint-disable-next-line max-params
     constructor(
         private gameSession: GameSession,
         private sio: io.Server,
@@ -195,7 +197,7 @@ export class GameSessionController {
                 if (this.gameSession.ctfIsOver()) {
                     await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
                     this.winnerTeam = this.gameSession.activePlayerInstance.ctfTeam;
-                    this.endGame();
+                    await this.endGame();
                 }
             }
         }, MOVEMENT_TIME_INTERVAL_MSEC);
@@ -325,7 +327,7 @@ export class GameSessionController {
         if (this.gameSession.ctfIsOver()) {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
             this.winnerTeam = this.gameSession.activePlayerInstance.ctfTeam;
-            this.endGame();
+            await this.endGame();
         }
     }
 
@@ -338,7 +340,7 @@ export class GameSessionController {
         this.fightSubController.endFight();
     }
 
-    private endGame(winner?: Player): void {
+    private async endGame(winner?: Player): Promise<void> {
         this.gameSession.endGame();
         this.clockManager.stopClock();
         const ans: dataForm.EndGameRes = {
