@@ -40,6 +40,10 @@ export class PlayerSocketService {
         this.clientSocketService.emit('toggle-lock', gameId, callback);
     }
 
+    emitToggleDropIn(gameId: string, callback: (dropInEnabled: boolean) => void): void {
+        this.clientSocketService.emit('toggle-drop-in', gameId, callback);
+    }
+
     emitJoinGame(gameId: string, player: Player, callback: (response: JoinGameAck) => void): void {
         this.clientSocketService.emit('join-game', { gameId, player }, callback);
     }
@@ -78,6 +82,10 @@ export class PlayerSocketService {
 
     onLockUpdated(callback: (game: CurrentGame) => void): void {
         this.clientSocketService.on<CurrentGame>('lock-updated', callback);
+    }
+
+    onDropInUpdated(callback: (game: CurrentGame) => void): void {
+        this.clientSocketService.on<CurrentGame>('drop-in-updated', callback);
     }
 
     onPlayerJoined(callback: (player: Player) => void): void {
@@ -120,8 +128,8 @@ export class PlayerSocketService {
         this.clientSocketService.emit('avatar-deselection', { gameId, avatar }, callback);
     }
 
-    emitJoinAvatarRoom(gameId: string): void {
-        this.clientSocketService.emit('join-room', gameId);
+    emitJoinAvatarRoom(gameId: string, callback: (response: JoinGameAck) => void): void {
+        this.clientSocketService.emit('join-room', gameId, callback);
     }
 
     onAvatarRoomJoined(callback: (playerId: string) => void): void {
@@ -235,5 +243,6 @@ export class PlayerSocketService {
         this.clientSocketService.off(SocketClientEventNames.MovementOver);
         this.clientSocketService.off(SocketClientEventNames.ToggleDoorState);
         this.clientSocketService.off(SocketClientEventNames.Teleport);
+        this.clientSocketService.off('drop-in-updated');
     }
 }

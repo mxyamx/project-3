@@ -63,6 +63,8 @@ export class MovementSubController {
 
     teleportPlayer(oldPosition: Position, newPosition: Position): void {
         this.gameSession.teleport(oldPosition, newPosition);
+        this.gameSession.statisticsManager.updateTilePercentage(newPosition);
+        this.gameSession.statisticsManager.updatePlayerTilePercentage(this.gameSession.activePlayerInstance.userId, newPosition);
 
         const ans: dataForm.TeleportPlayerRes = {
             successful: true,

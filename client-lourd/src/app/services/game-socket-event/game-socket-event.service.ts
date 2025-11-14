@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
     ATTACK_LARGE_TIME_LIMIT_SEC,
@@ -95,7 +95,6 @@ export class GameSocketEventService {
             }
 
             this.notificationService.hideTurnTransition();
-            this.statisticsService.updateNumberTurns();
             this.gameSessionManager.changeState(PlayerState.WaitingForTurn);
             if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
                 this.gameSessionManager.changeState(PlayerState.WaitingForAction);
@@ -135,6 +134,14 @@ export class GameSocketEventService {
             }
 
             const gameId = this.gameSessionManager.gameId();
+            if (data.globalStats && data.listOfPlayerStats) {
+                this.statisticsService.reset();
+                this.statisticsService.displayedGlobalStatistics.set(data.globalStats);
+                for (const stat of data.listOfPlayerStats) {
+                    const { name, ...rest } = stat;
+                    this.statisticsService.playerStatisticsMap.set(name, signal(rest));
+                }
+            }
             if (gameId === EMPTY_CODE) {
                 return;
             }
@@ -142,33 +149,33 @@ export class GameSocketEventService {
             const endGameNotificationStartingTime = 500;
             const endGameNotificationEndingTime = 2800;
 
-            const entryPrice = this.currentGamesService.displayedCurrentGame().entryPrice;
+            this.currentGamesService.displayedCurrentGame().entryPrice;
 
-            const WINNER_REWARD = Number(entryPrice * this.gameSessionManager.listOfPlayers.length * 2) / 3;
-            const CONSOLATION_REWARD = Number(entryPrice * this.gameSessionManager.listOfPlayers.length) / 3;
-            if (!data.winner) return;
+            // const WINNER_REWARD = Number(entryPrice * this.gameSessionManager.listOfPlayers.length * 2) / 3;
+            // const CONSOLATION_REWARD = Number(entryPrice * this.gameSessionManager.listOfPlayers.length) / 3;
+            // if (!data.winner) return;
 
-            // Handling winner reward
-            const isVp = data.winner?.virtualPlayer;
-            if (isVp) {
-                return;
-            }
-            const user = await this.usersService.getUser(data.winner.userId);
-            if (!user) return;
-            await this.usersService.updateUser({ ...user, money: user.money + WINNER_REWARD });
+            // // Handling winner reward
+            // const isVp = data.winner?.virtualPlayer;
+            // if (isVp) {
+            //     return;
+            // }
+            // const user = await this.usersService.getUser(data.winner.userId);
+            // if (!user) return;
+            // await this.usersService.updateUser({ ...user, money: user.money + WINNER_REWARD });
 
-            // Handling losers reward
-            this.gameSessionManager.listOfPlayers.forEach(async (player) => {
-                if (player.userId !== data.winner?.userId) {
-                    const isVp = player?.virtualPlayer;
-                    if (isVp) {
-                        return;
-                    }
-                    const loserUser = await this.usersService.getUser(player.userId);
-                    if (!loserUser) return;
-                    await this.usersService.updateUser({ ...loserUser, money: loserUser.money + CONSOLATION_REWARD });
-                }
-            });
+            // // Handling losers reward
+            // this.gameSessionManager.listOfPlayers.forEach(async (player) => {
+            //     if (player.userId !== data.winner?.userId) {
+            //         const isVp = player?.virtualPlayer;
+            //         if (isVp) {
+            //             return;
+            //         }
+            //         const loserUser = await this.usersService.getUser(player.userId);
+            //         if (!loserUser) return;
+            //         await this.usersService.updateUser({ ...loserUser, money: loserUser.money + CONSOLATION_REWARD });
+            //     }
+            // });
 
             this.gameSessionManager.changeState(PlayerState.EndGame);
             this.hideNotifications();
@@ -180,7 +187,6 @@ export class GameSocketEventService {
             setTimeout(
                 () => {
                     this.gameSessionManager.leaveGame();
-                    this.statisticsService.setEndTime();
                 },
                 (this.gameSessionManager.chosenPlayer().leavingKey ?? 1) * gapMsec,
             );
@@ -283,10 +289,6 @@ export class GameSocketEventService {
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
 
             this.gameSessionManager.updateCanPickUpItem(true);
-
-            data.activePlayer.inventory?.forEach((item) => {
-                this.statisticsService.updateItemsCollected(data.activePlayer.name, item);
-            });
 
             if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
                 if (data.pickedItem?.name === ItemName.GameEditor2) {

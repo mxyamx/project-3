@@ -82,6 +82,8 @@ export class GameClockManager {
             message: 'transition started',
         };
 
+        this.gameSession.statisticsManager.updateNumberTurns();
+
         this.sio.to(this.roomCode).emit(SocketClientEventNames.StartTurn, ans);
     }
 }

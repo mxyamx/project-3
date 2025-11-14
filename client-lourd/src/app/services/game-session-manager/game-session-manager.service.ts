@@ -16,7 +16,6 @@ import { GameEventService } from '@app/services/game-event/game-event.service';
 import { MovementSystemManagerService } from '@app/services/movement-system-manager/movement-system-manager.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { PlayerStateManagerService } from '@app/services/player-state-manager/player-state-manager.service';
-import { StatisticsManagerService } from '@app/services/statistics-manager/statistics-manager.service';
 import { BoardGame } from '@common/board-game';
 import { GameMode } from '@common/enums/game-mode';
 import { ItemType } from '@common/enums/item-type';
@@ -88,7 +87,6 @@ export class GameSessionManagerService {
     private fightSystemManager: FightSystemManagerService = inject(FightSystemManagerService);
     private movementSystemManager: MovementSystemManagerService = inject(MovementSystemManagerService);
     private _leavingGame: WritableSignal<boolean> = signal(false);
-    private statisticsManager: StatisticsManagerService = inject(StatisticsManagerService);
     private playerSocket: PlayerSocketService = inject(PlayerSocketService);
     private _gameEventService?: GameEventService;
 
@@ -237,9 +235,7 @@ export class GameSessionManagerService {
         this.nbOfActions.set(INITIAL_AMOUNT_OF_ACTION);
         this.nbOfEvasions.set(INITIAL_AMOUNT_OF_EVASION);
         this.canEndTurn.set(true);
-        this.listOfPlayers().forEach((player) => {
-            this.statisticsManager.initializePlayerStatistics(player);
-        });
+
         if (this.chosenPlayer().name === this.activePlayer().name) {
             this.changeState(PlayerState.WaitingForAction);
         } else {

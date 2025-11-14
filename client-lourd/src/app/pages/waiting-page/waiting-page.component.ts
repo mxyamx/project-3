@@ -35,10 +35,13 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     gameId: string | null;
     currentGame: CurrentGame;
     showTooltip: boolean = false;
+    showDropInTooltip: boolean = false;
     roomLockedState: boolean = false;
+    dropInEnabled: boolean = false;
     playersLimitReached: boolean = false;
     hasBeenClicked: boolean = false;
     hasToggleState: boolean = false;
+    hasToggleStateDropIn: boolean = false;
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     showPlayerAmountWarning = false;
     chatDockService: ChatDockService = inject(ChatDockService);
@@ -68,6 +71,7 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
                     this.currentGame = response;
                     this.roomLockedState = response.locked;
                     this.entryPrice = response.entryPrice;
+                    this.dropInEnabled = response.dropInEnabled;
                     this.playersLimitReached = this.playerlimit();
                     this.automaticLock();
                 }
@@ -99,12 +103,18 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
                 this.roomLockedState = game.locked;
             }
         });
+
+        this.playerSocketService.onDropInUpdated((game: CurrentGame) => {
+            if (game.id === this.gameId) {
+                this.hasToggleStateDropIn = false;
+                this.currentGame = game;
+                this.dropInEnabled = game.dropInEnabled;
+            }
+        });
     }
 
     ngOnDestroy(): void {
-        console.log('hello');
         if (!this.isStartingGame && this.gameId) {
-            console.log('active player');
             this.playerSocketService.emitLeaveGame(this.gameId);
             this.playerSocketService.unsubscribeGameEvents();
         }
@@ -124,6 +134,18 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
                 if (this.currentGame) {
                     this.currentGame.locked = locked;
                     this.roomLockedState = locked;
+                }
+            });
+        }
+    }
+
+    toggleDropIn() {
+        if (this.gameId) {
+            this.hasToggleStateDropIn = true;
+            this.playerSocketService.emitToggleDropIn(this.gameId, (dropInEnabled: boolean) => {
+                if (this.currentGame) {
+                    this.currentGame.dropInEnabled = dropInEnabled;
+                    this.dropInEnabled = dropInEnabled;
                 }
             });
         }
@@ -210,8 +232,6 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
                 this.gameSessionManager.updateActivePlayer(data.activePlayer);
                 this.gameSessionManager.updateDisplayedList(structuredClone(data.listOfPlayers));
                 this.statisticsManager.reset();
-                this.statisticsManager.setStartTime();
-                this.statisticsManager.updateNumberTurns();
                 this.isStartingGame = true;
 
                 this.router.navigate([UrlPage.Game]);

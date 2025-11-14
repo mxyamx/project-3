@@ -10,6 +10,7 @@ import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { BoardGameDTO } from '@common/board-game';
+import { JoinGameAck } from '@common/current-game';
 import { GameMode } from '@common/enums/game-mode';
 import { UrlPage } from '@common/enums/url-page';
 import { User } from '@common/user';
@@ -134,8 +135,9 @@ export class CreationPageComponent implements OnInit {
                         });
 
                         this.currentGameService.updateCurrentGame(response.game);
-                        this.playerSocketService.emitJoinAvatarRoom(response.game.id);
-                        this.router.navigate([UrlPage.Avatar]);
+                        this.playerSocketService.emitJoinAvatarRoom(response.game.id, (response: JoinGameAck) => {
+                            this.router.navigate([UrlPage.Avatar]);
+                        });
                     }
                 });
             },

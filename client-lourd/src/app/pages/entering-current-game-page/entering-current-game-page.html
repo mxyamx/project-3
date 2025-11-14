@@ -46,15 +46,7 @@
                     (keydown.backspace)="moveToPrev(input2, 2)"
                     [(ngModel)]="codeArray[2]"
                 />
-                <input
-                    #input4
-                    type="text"
-                    maxlength="1"
-                    class="code-input"
-                    (input)="updateCode()"
-                    (keydown.backspace)="moveToPrev(input3, 3)"
-                    [(ngModel)]="codeArray[3]"
-                />
+                <input #input4 type="text" maxlength="1" class="code-input" (keydown.backspace)="moveToPrev(input3, 3)" [(ngModel)]="codeArray[3]" />
             </div>
             <button class="join-button" (click)="enterCode()" [disabled]="!isCodeComplete() || hasBeenClicked">
                 {{'join-game-page.join'|translate}}
@@ -70,7 +62,7 @@
         clickable: preview.isJoinable && preview.entryPrice <= playerMoney,
         'not-enough-money': preview.entryPrice > playerMoney
     }"
-                (click)="preview.isJoinable && preview.entryPrice <= playerMoney && joinGame(preview)"
+                (click)="preview.isJoinable && preview.entryPrice <= playerMoney && joinGame(preview.id)"
             >
                 <img [src]="preview.previewImage" alt="Preview Image" />
 

@@ -131,6 +131,18 @@ export class SocketManager {
                 }
             });
 
+            socket.on('toggle-drop-in', async (gameId: string, callback) => {
+                const game = await this.gameService.getGame(gameId);
+                if (game) {
+                    game.dropInEnabled = !game.dropInEnabled;
+                    await this.gameService.updateGame(game);
+                    this.sio.to(gameId).emit('drop-in-updated', game);
+                    callback(game.dropInEnabled);
+                } else {
+                    callback(false);
+                }
+            });
+
             socket.on('update-game-start', async (gameId: string) => {
                 const game = await this.gameService.getGame(gameId);
 
@@ -152,7 +164,6 @@ export class SocketManager {
             });
 
             socket.on('avatar-deselection', (data: AvatarManagement, callback) => {
-                console.log('avatar-deselection');
                 const { gameId, avatar } = data;
                 this.avatarContainer.deselectAvatar(gameId, avatar, socket.id);
 
@@ -164,38 +175,86 @@ export class SocketManager {
                 callback(this.avatarContainer.getSelectedAvatars(gameId));
             });
 
-            socket.on('join-room', async (gameId: string) => {
+            socket.on('join-room', async (gameId: string, callback) => {
                 const game = await this.gameService.getGame(gameId);
-                if (game) {
-                    socket.join(gameId);
+                if (!game || game.phase === CurrentGamePhase.Ended) {
+                    const response: JoinGameAck = { codeError: true, limitError: false, lockedError: false };
+                    callback(response);
+                    return;
                 }
+                if ((game.phase === CurrentGamePhase.Waiting && game.locked) || (game.phase === CurrentGamePhase.Running && !game.dropInEnabled)) {
+                    const response: JoinGameAck = { codeError: false, limitError: false, lockedError: true };
+                    callback(response);
+                    return;
+                }
+                const maxPlayerCount = PlayerLimits[game.boardGame.size].maxPlayers;
+                if (game.players.length >= maxPlayerCount) {
+                    const response: JoinGameAck = { codeError: false, limitError: true, lockedError: false };
+                    callback(response);
+                    return;
+                }
+
+                socket.join(gameId);
                 this.sio.to(gameId).emit('avatar-room-joined');
+                callback({ game: game, codeError: false, limitError: false, lockedError: false });
             });
 
             socket.on('join-game', async (data: RoomManagement, callback) => {
                 const { gameId, player } = data;
                 const game = await this.gameService.getGame(gameId);
-                if (game) {
-                    const playerWithId: Player = { ...player, socketId: socket.id };
-                    await this.gameService.addPlayer(playerWithId, gameId);
-                    this.gameScheduler.joinGame(playerWithId, game, socket);
-                    socket.join(gameId);
-                    this.sio.to(gameId).emit('player-joined', playerWithId);
-
-                    const maxPlayers = PlayerLimits[game.boardGame.size].maxPlayers;
-
-                    if (game.players.length >= maxPlayers && !game.locked) {
-                        game.locked = true;
-                        await this.gameService.updateGame(game);
-                        this.sio.to(gameId).emit('lock-updated', game);
-                    }
-                    const updatedGame = await this.gameService.getGame(gameId);
-                    const joinGameAck: JoinGameAck = { game: updatedGame, player: playerWithId };
-                    callback(joinGameAck);
-                } else {
+                if (!game || game.phase === CurrentGamePhase.Ended) {
+                    const response: JoinGameAck = { codeError: true, limitError: false, lockedError: false };
+                    callback(response);
                     return;
                 }
+                if ((game.phase === CurrentGamePhase.Waiting && game.locked) || (game.phase === CurrentGamePhase.Running && !game.dropInEnabled)) {
+                    const response: JoinGameAck = { codeError: false, limitError: false, lockedError: true };
+                    callback(response);
+                    return;
+                }
+                const maxPlayerCount = PlayerLimits[game.boardGame.size].maxPlayers;
+                if (game.players.length >= maxPlayerCount) {
+                    const response: JoinGameAck = { codeError: false, limitError: true, lockedError: false };
+                    callback(response);
+                    return;
+                }
+                if (game.phase === CurrentGamePhase.Running) {
+                    //TODO APPY LOGIC
+                    const playerWithId: Player = { ...player, socketId: socket.id };
+                    await this.gameService.addPlayer(playerWithId, gameId);
+                    const ans = this.gameScheduler.joinActiveGame(playerWithId, game);
+                    socket.join(gameId);
+                    const updatedGame = await this.gameService.getGame(gameId);
+                    const joinGameAck: JoinGameAck = {
+                        game: updatedGame,
+                        player: playerWithId,
+                        codeError: false,
+                        limitError: false,
+                        lockedError: false,
+                        updateGamedRes: ans,
+                    };
+                    callback(joinGameAck);
+                    return;
+                }
+
+                const playerWithId: Player = { ...player, socketId: socket.id };
+                await this.gameService.addPlayer(playerWithId, gameId);
+                this.gameScheduler.joinGame(playerWithId, game, socket);
+                socket.join(gameId);
+                this.sio.to(gameId).emit('player-joined', playerWithId);
+
+                const maxPlayers = PlayerLimits[game.boardGame.size].maxPlayers;
+
+                if (game.players.length >= maxPlayers && !game.locked) {
+                    game.locked = true;
+                    await this.gameService.updateGame(game);
+                    this.sio.to(gameId).emit('lock-updated', game);
+                }
+                const updatedGame = await this.gameService.getGame(gameId);
+                const joinGameAck: JoinGameAck = { game: updatedGame, player: playerWithId, codeError: false, limitError: false, lockedError: false };
+                callback(joinGameAck);
             });
+            //TODO: MAKE A SOCKET EVENT FROM SERVER TO CLIENT 'player-joined-active' and add logic client side
 
             socket.on('start-game', async (gameId: string) => {
                 const game = await this.gameService.getGame(gameId);
@@ -254,18 +313,15 @@ export class SocketManager {
             });
 
             socket.on('leave-game', async (data: { gameId: string }) => {
-                console.log('leave-game');
                 const { gameId } = data;
                 const game = await this.gameService.getGame(gameId);
                 if (!game) return;
                 const existing = game.players.find((p) => p.socketId === socket.id);
-                console.log(`existing player.socket id - ${socket.id} --- ${existing}`);
                 if (!existing) return;
                 await this.leavePlayer(gameId, existing, 'quit');
             });
 
             socket.on('kick-player', async ({ gameId, player }: RoomManagement) => {
-                console.log('kick-player');
                 this.sio.to(gameId).emit('kicked', player);
                 const game = await this.gameService.getGame(gameId);
                 if (!game) return;
@@ -286,7 +342,6 @@ export class SocketManager {
             });
 
             socket.on('delete-game', async (gameId: string) => {
-                console.log('delete-game');
                 const game = await this.gameService.getGame(gameId);
                 if (!game) {
                     return;
@@ -306,7 +361,6 @@ export class SocketManager {
             });
 
             socket.on('leave-active-game', async (data: { gameId: string }) => {
-                console.log('leave-active-game');
                 const { gameId } = data;
                 const game = await this.gameService.getGame(gameId);
                 if (!game) return;
@@ -316,7 +370,6 @@ export class SocketManager {
             });
 
             socket.on('disconnect', async () => {
-                console.log('disconnect');
                 await this.gameScheduler.disconnectPlayer(socket.id);
 
                 const games = await this.gameService.getAllGames();
@@ -341,8 +394,6 @@ export class SocketManager {
     }
 
     private async leavePlayer(gameId: string, player: Player, reason: 'quit' | 'kick' | 'timeout' | 'admin-quit'): Promise<void> {
-        console.log('leavePlayer');
-
         const game = await this.gameService.getGame(gameId);
         if (!game) return;
 
@@ -395,7 +446,6 @@ export class SocketManager {
     private async maybeEndGameAndCleanup(game: CurrentGame): Promise<void> {
         const humanPlayers = game.players.filter((p) => !p.virtualPlayer);
         if (humanPlayers.length === 0) {
-            console.log('delete game');
             const ctl = this.gameScheduler['gameMap'].get(game.id);
             ctl?.['endGame']?.();
 
@@ -424,7 +474,6 @@ export class SocketManager {
             this.sio.to(game.id).emit('avatar-list-updated', []);
 
             await this.gameService.deleteGame(game.id);
-            await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: game.id });
         }
     }
     private async cancelWaitingRoom(game: CurrentGame, reason: 'admin-left-waiting'): Promise<void> {

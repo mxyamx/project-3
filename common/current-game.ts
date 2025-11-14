@@ -1,6 +1,7 @@
 import { BoardGame } from './board-game';
 import { GameMode } from './enums/game-mode';
 import { Player } from './player';
+import { UpdateGamedRes } from './socket-data-forms';
 
 export enum CurrentGamePhase {
     Waiting = 'waiting',
@@ -32,6 +33,10 @@ export interface CurrentGamePreview {
 }
 
 export interface JoinGameAck {
-    game: CurrentGame;
-    player: Player;
+    game?: CurrentGame;
+    player?: Player;
+    limitError: boolean;
+    lockedError: boolean;
+    codeError: boolean;
+    updateGamedRes?: UpdateGamedRes;
 }

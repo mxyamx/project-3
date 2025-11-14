@@ -46,9 +46,6 @@ export class SocketGameCommunication {
 
             // Sanitize sender to just display the user
             const history: ChatMessage[] = lastDocs.reverse().map((chatMessageDoc) => {
-                console.log(
-                    `chat message - ${chatMessageDoc.sender} - ${chatMessageDoc.senderId} - ${chatMessageDoc.text} - ${chatMessageDoc.timestamp} `,
-                );
                 const chatMessage: ChatMessage = {
                     text: chatMessageDoc.text,
                     sender: chatMessageDoc.sender,
