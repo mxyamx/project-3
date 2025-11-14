@@ -7,6 +7,7 @@ import { CurrentGameManagerService } from '@app/services/current-game-manager/cu
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { HttpBoardGameService } from '@app/services/http-manager/http-board-game.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
+import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { BoardGameDTO } from '@common/board-game';
 import { GameMode } from '@common/enums/game-mode';
 import { UrlPage } from '@common/enums/url-page';
@@ -26,9 +27,20 @@ export class CreationPageComponent implements OnInit {
     displayedObject: BoardGameDTO | null = null;
     hasBeenClicked: boolean = false;
     gameManager: GameSessionManagerService = inject(GameSessionManagerService);
+    userManagerService: UserManagerService = inject(UserManagerService);
     httpBoardGameService = inject(HttpBoardGameService);
+
     gameMode: typeof GameMode = GameMode;
     isLoading: WritableSignal<boolean> = signal(false);
+
+    maxPollPrize: number = this.userManagerService.getCurrentUser().money;
+    selectedPollPrizeAmount: number = 0;
+
+    onPollPrizeChange(event: Event): void {
+        const value = Number((event.target as HTMLInputElement).value);
+        this.selectedPollPrizeAmount = value;
+    }
+
     private currentGameService = inject(CurrentGameManagerService);
     private playerSocketService = inject(PlayerSocketService);
     constructor(private router: Router) {}

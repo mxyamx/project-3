@@ -155,7 +155,8 @@
         "title": "Crée une nouvelle partie",
         "boardgame-deleted-modal": "Attention!! Ce jeu a déjà été supprimé.",
         "visibility-modal": "Attention!! Ce jeu a changé de visibilité.",
-        "create": "Créer une nouvelle partie"
+        "create": "Créer une nouvelle partie",
+        "poll-prize-title": "Sélectionnez un prix d'entrée pour la partie"
     },
     "game-list": {
         "title": "Liste des Jeux",

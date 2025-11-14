@@ -155,7 +155,8 @@
         "title": "Create a New Game",
         "boardgame-deleted-modal": "Warning!! This game has already been deleted.",
         "visibility-modal": "Warning!! This game's visibility has changed.",
-        "create": "Create New Game"
+        "create": "Create New Game",
+        "poll-prize-title": "Select an entry fee for the game"
     },
     "game-list": {
         "title": "Game List",
