@@ -266,7 +266,7 @@ export class SocketManager {
             });
 
             socket.on(SocketEventNames.GetCurrentGamePreviews, (gameId: string, callback) => {
-                //lets get all the games that are in waiting phase and not lock AND all the games that have drop in enabled but are not full yet
+                // lets get all the games that are in waiting phase and not lock AND all the games that have drop in enabled but are not full yet
                 const previews = this.gameService.getCurrentGamePreviews();
                 callback(previews);
             });

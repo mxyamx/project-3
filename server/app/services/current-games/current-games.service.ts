@@ -33,13 +33,14 @@ export class CurrentGamesService {
                 game.players.length < maxPlayerCount;
             const preview: CurrentGamePreview = {
                 id: game.id,
-                playerCount: playerCount,
-                maxPlayerCount: maxPlayerCount,
+                playerCount,
+                maxPlayerCount,
                 boardgameSize: game.boardGame.size,
                 gameMode: game.boardGame.gameMode,
                 phase: game.phase,
                 previewImage: game.boardGame.previewImage,
-                isJoinable: isJoinable,
+                isJoinable,
+                entryPrice: game.entryPrice,
             };
             return preview;
         });

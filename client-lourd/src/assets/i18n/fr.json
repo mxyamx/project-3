@@ -167,7 +167,10 @@
             "mode": "Mode",
             "last-modified": "Modifié le",
             "privacy": "Confidentialité",
-            "owner": "Propriétaire"
+            "owner": "Propriétaire",
+            "entry-price": "Prix d'entrée",
+            "free": "Gratuit",
+            "not-enough-money": "Fonds insuffisants"
         }
     },
     "admin-page": {

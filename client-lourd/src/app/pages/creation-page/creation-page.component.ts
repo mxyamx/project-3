@@ -94,7 +94,7 @@ export class CreationPageComponent implements OnInit {
 
                 this.currentGameService.updatePickedBoardGame(boardGame);
                 const currentGame = this.currentGameService.displayedCurrentGame();
-                this.playerSocketService.emitCreateGame(currentGame, (response: any) => {
+                this.playerSocketService.emitCreateGame({ ...currentGame, entryPrice: this.selectedPollPrizeAmount }, (response: any) => {
                     if (response?.error) {
                         switch (response.error) {
                             case 'GAME_PRIVACY_CHANGED':

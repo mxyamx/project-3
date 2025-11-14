@@ -29,7 +29,9 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
     codeError: boolean = false;
     lockedError: boolean = false;
     limitError: boolean = false;
+    moneyError = false;
     hasBeenClicked: boolean = false;
+    playerMoney = 50;
     private playerSocketService: PlayerSocketService = inject(PlayerSocketService);
     private clientSocketService: SocketClientService = inject(SocketClientService);
     private currentGameManager = inject(CurrentGameManagerService);
@@ -78,6 +80,10 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
     validateJoin(code: string): void {
         this.playerSocketService.emitGetGame(code, (response: CurrentGame) => {
             if (response) {
+                if (response.entryPrice > this.playerMoney) {
+                    this.moneyError = true;
+                }
+
                 if (response.locked) {
                     this.lockedError = true;
                 }
@@ -100,6 +106,10 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
         if (!preview.isJoinable) {
             return;
         }
+        if (preview.entryPrice > this.playerMoney) {
+            this.moneyError = true;
+            return;
+        }
         this.validateJoin(preview.id);
     }
     enterCode() {
@@ -108,12 +118,13 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
     }
 
     error(): boolean {
-        return this.lockedError || this.limitError || this.codeError;
+        return this.lockedError || this.limitError || this.codeError || this.moneyError;
     }
 
     retry() {
         this.codeError = false;
         this.lockedError = false;
         this.limitError = false;
+        this.moneyError = false;
     }
 }

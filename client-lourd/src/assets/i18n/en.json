@@ -167,7 +167,10 @@
             "mode": "Mode",
             "last-modified": "Last Modified",
             "privacy": "Privacy",
-            "owner": "Owner"
+            "owner": "Owner",
+            "entry-price": "Entry Price",
+            "free": "Free",
+            "not-enough-money": "Insufficient funds"
         }
     },
     "admin-page": {
