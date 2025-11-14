@@ -15,6 +15,9 @@ export class DynamicPlayerList {
         this.list.push(value);
         this.sortList();
     }
+    addToBack(value: Player): void {
+        this.list.push(value);
+    }
 
     remove(value: Player): void {
         this.list = this.list.filter((item) => item.name !== value.name);

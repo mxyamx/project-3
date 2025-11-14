@@ -74,6 +74,7 @@ export class VpSocketAddingHandler {
             });
 
             virtualPlayer.socketId = vpSocketId;
+            virtualPlayer.userId = vpSocketId;
             await this.gameService.addPlayer(virtualPlayer, gameId);
             this.gameScheduler.joinGameVp(virtualPlayer, game, vpSocketManager);
             vpSocketManager.joinRoom(gameId);
@@ -115,7 +116,6 @@ export class VpSocketAddingHandler {
         this.avatarContainer.selectAvatar(gameId, virtualPlayer.character, vpSocketManager.clientSocket.id);
 
         this.sio.to(gameId).emit('avatar-list-updated', this.avatarContainer.getSelectedAvatars(gameId));
-        console.log(this.avatarContainer.getSelectedAvatars(gameId));
         const vpState = new VpState();
         const vpGameSessionManager = new VpGameSessionManager(vpSocketManager, vpState, {
             initialPlayer: virtualPlayer,

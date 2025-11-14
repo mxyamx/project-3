@@ -11,7 +11,6 @@ import { GameEventService } from '@app/services/game-event/game-event.service';
 import { GameInterfaceService } from '@app/services/game-interface/game-interface.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
-import { StatisticsManagerService } from '@app/services/statistics-manager/statistics-manager.service';
 import { GameMode } from '@common/enums/game-mode';
 import { PlayerState } from '@common/enums/player-state';
 import { SocketClientEventNames } from '@common/enums/socket-events-names';
@@ -28,7 +27,6 @@ export class FightEventsHandlerService {
     private playerSocket: PlayerSocketService = inject(PlayerSocketService);
     private gameInterfaceService: GameInterfaceService = inject(GameInterfaceService);
     private diceService: DiceService = inject(DiceService);
-    private statisticsManager: StatisticsManagerService = inject(StatisticsManagerService);
     private gameEventService: GameEventService = inject(GameEventService);
     private sfxService: SfxService = inject(SfxService);
 
@@ -55,8 +53,6 @@ export class FightEventsHandlerService {
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
             this.gameSessionManager.updateAttackingPlayer(data.attackingPlayer);
             this.gameSessionManager.updateDefendingPlayer(data.defendingPlayer);
-            this.statisticsManager.updateCombatAmount(data.attackingPlayer.name);
-            this.statisticsManager.updateCombatAmount(data.defendingPlayer.name);
 
             this.gameSessionManager.updateCanStartFight(true);
             this.gameSessionManager.updateCanExecuteAttack(true);
@@ -72,11 +68,6 @@ export class FightEventsHandlerService {
         this.socketManager.on(SocketClientEventNames.ProcessAttack, (data: dataForm.ExecuteAttackRes) => {
             if (!data.successful) {
                 return;
-            }
-
-            if (data.damageDoneAttackingPlayer && data.damageTakenDefendingPlayer) {
-                this.statisticsManager.addLifePointsLost(data.defendingPlayer.name, data.damageTakenDefendingPlayer);
-                this.statisticsManager.addLifePointsOpponentLost(data.attackingPlayer.name, data.damageDoneAttackingPlayer);
             }
 
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
@@ -131,9 +122,6 @@ export class FightEventsHandlerService {
             if (!data.successful) {
                 return;
             }
-            if (data.escapingPlayer) {
-                this.statisticsManager.updateEscapeAmount(data.escapingPlayer.name);
-            }
 
             if (data.message.includes('escaped')) {
                 this.gameInterfaceService.hideInterface();
@@ -153,12 +141,6 @@ export class FightEventsHandlerService {
 
             this.gameSessionManager.updateNbOfEvasions(INITIAL_AMOUNT_OF_EVASION);
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
-            if (data.winnerName) {
-                this.statisticsManager.updateVictoryAmount(data.winnerName);
-            }
-            if (data.loserName) {
-                this.statisticsManager.updateDefeatAmount(data.loserName);
-            }
 
             this.gameSessionManager.updateBoardGame(data.boardGame);
 

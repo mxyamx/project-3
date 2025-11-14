@@ -1,3 +1,4 @@
+import { JoinGameAck } from '@common/current-game';
 import { io as ClientIO, Socket as ClientSocket } from 'socket.io-client';
 
 export const environment = {
@@ -30,7 +31,7 @@ export class VpSocketManager {
 
     joinRoom(roomId: string): void {
         if (this.clientSocket && this.clientSocket.connected) {
-            this.clientSocket.emit('join-room', roomId);
+            this.clientSocket.emit('join-room', roomId, (response: JoinGameAck) => {});
         }
     }
 }

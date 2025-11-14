@@ -13,26 +13,47 @@
             </button>
             }
         </div>
-        <div class="blocked-section">
-            <i
-                [ngClass]="roomLockedState ? 'fa fa-lock' : 'fa fa-lock-open'"
-                (mouseenter)="showTooltip = true"
-                (mouseleave)="showTooltip = false"
-            ></i>
-            <button
-                [class.btn-locked]="roomLockedState"
-                [class.btn-unlocked]="!roomLockedState"
-                [ngClass]="[roomLockedState ? 'btn-locked' : 'btn-unlocked', !isOrganizer() ? 'hidden' : '']"
-                [disabled]="!isOrganizer() || hasToggleState"
-                (click)="toggleRoomState()"
-            >
-                {{ (roomLockedState ? 'waiting-page.unlock-room' : 'waiting-page.lock-room') | translate }}
-            </button>
-            @if(showTooltip) { @if(currentGame.locked) {
-            <div class="tooltip">{{ 'waiting-page.locked-room' | translate }}</div>
-            } @else {
-            <div class="tooltip">{{ 'waiting-page.locked-room' | translate }}</div>
-            } }
+        <div class="blocked-container">
+            <div class="blocked-section">
+                <i
+                    [ngClass]="roomLockedState ? 'fa fa-lock' : 'fa fa-lock-open'"
+                    (mouseenter)="showTooltip = true"
+                    (mouseleave)="showTooltip = false"
+                ></i>
+                <button
+                    [class.btn-locked]="roomLockedState"
+                    [class.btn-unlocked]="!roomLockedState"
+                    [ngClass]="[roomLockedState ? 'btn-locked' : 'btn-unlocked', !isOrganizer() ? 'hidden' : '']"
+                    [disabled]="!isOrganizer() || hasToggleState"
+                    (click)="toggleRoomState()"
+                >
+                    {{ (roomLockedState ? 'waiting-page.unlock-room' : 'waiting-page.lock-room') | translate }}
+                </button>
+                @if(showTooltip) { @if(currentGame.locked){
+                <div class="tooltip tl1">{{ 'waiting-page.locked-room' | translate }}</div>
+                } @else {
+                <div class="tooltip tl1">{{ 'waiting-page.unlocked-room' | translate }}</div>
+                } }
+            </div>
+            <div class="blocked-section">
+                <i
+                    [ngClass]="dropInEnabled ? 'fa fa-lock' : 'fa fa-lock-open'"
+                    (mouseenter)="showDropInTooltip = true"
+                    (mouseleave)="showDropInTooltip = false"
+                ></i>
+                <button
+                    [ngClass]="[dropInEnabled ? 'btn-locked' : 'btn-disabled', !isOrganizer() ? 'hidden' : '']"
+                    [disabled]="!isOrganizer() || hasToggleStateDropIn"
+                    (click)="toggleDropIn()"
+                >
+                    {{ (dropInEnabled ? 'waiting-page.disable-drop-in' : 'waiting-page.enable-drop-in') | translate }}
+                </button>
+                @if(showDropInTooltip) { @if(dropInEnabled){
+                <div class="tooltip tl2">{{ 'waiting-page.drop-in-enabled' | translate }}</div>
+                } @else {
+                <div class="tooltip tl2">{{ 'waiting-page.drop-in-disabled' | translate }}</div>
+                } }
+            </div>
         </div>
     </section>
     <section>

@@ -8,6 +8,7 @@ import { GameSessionManagerService } from '@app/services/game-session-manager/ga
 import { HttpBoardGameService } from '@app/services/http-manager/http-board-game.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { BoardGameDTO } from '@common/board-game';
+import { JoinGameAck } from '@common/current-game';
 import { GameMode } from '@common/enums/game-mode';
 import { UrlPage } from '@common/enums/url-page';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -100,8 +101,9 @@ export class CreationPageComponent implements OnInit {
 
                     if (response?.success && response?.game) {
                         this.currentGameService.updateCurrentGame(response.game);
-                        this.playerSocketService.emitJoinAvatarRoom(response.game.id);
-                        this.router.navigate([UrlPage.Avatar]);
+                        this.playerSocketService.emitJoinAvatarRoom(response.game.id, (response: JoinGameAck) => {
+                            this.router.navigate([UrlPage.Avatar]);
+                        });
                     }
                 });
             },

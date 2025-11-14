@@ -15,6 +15,7 @@ import { Item } from '@common/item';
 import { Player } from '@common/player';
 import { Position } from '@common/position';
 import { Tile } from '@common/tile';
+import { StatisticsManager } from '../statistics-manager/statistics-manager';
 
 export class GameSession {
     private players: DynamicPlayerList;
@@ -22,7 +23,6 @@ export class GameSession {
     private ongoingFight: Fight | undefined;
 
     private staticPlayerMap: Map<string, Player>;
-    private victoriesMap: Map<string, number>;
 
     private gameHasStarted: boolean;
     private gameIsOver: boolean;
@@ -36,11 +36,14 @@ export class GameSession {
     private itemEffectApplicator: ItemEffectApplicator;
 
     private escapeMAp = new Map<string, number>();
+    private originalBoardGame: BoardGame;
+
+    statisticsManager: StatisticsManager;
 
     constructor(private boardGame: BoardGame) {
         this.players = new DynamicPlayerList();
         this.staticPlayerMap = new Map();
-        this.victoriesMap = new Map();
+        this.statisticsManager = new StatisticsManager(boardGame.tiles);
         this.gameHasStarted = false;
         this.gameIsOver = false;
         this.defenseDice = 0;
@@ -49,6 +52,7 @@ export class GameSession {
         this.droppingItems = false;
         this.itemEffectApplicator = new ItemEffectApplicator();
         this.escapeMAp = new Map();
+        this.originalBoardGame = structuredClone(boardGame);
     }
 
     get board(): BoardGame {
@@ -172,6 +176,8 @@ export class GameSession {
         this.activePlayer.attributes.speedValue -= this.weightFunction(
             this.boardGame.tiles[this.activePlayer.position.x][this.activePlayer.position.y],
         );
+        this.statisticsManager.updateTilePercentage(newPosition);
+        this.statisticsManager.updatePlayerTilePercentage(player.userId, newPosition);
     }
 
     changeActivePlayer(): void {
@@ -182,6 +188,7 @@ export class GameSession {
         for (const item of this.activePlayer.inventory) {
             this.itemEffectApplicator.applyEffect(this.activePlayer, item.name);
         }
+
         this.players.moveFirstToBack();
         this.activePlayer = this.players.getFirst();
     }
@@ -192,7 +199,8 @@ export class GameSession {
 
         this.placeItems();
         this.placePlayers();
-        this.buildVictoriesMap();
+        this.initializePlayerStatistics();
+        this.statisticsManager.setStartTime();
 
         if (hasDuplicateNames(this.players.getValues())) {
             this.endGame();
@@ -296,11 +304,9 @@ export class GameSession {
     }
 
     registerVictory(player: Player): void {
-        let oldAmount = this.victoriesMap.get(player.name);
-        const newAmount = ++oldAmount;
-        this.victoriesMap.set(player.name, newAmount);
+        this.statisticsManager.updateVictoryAmount(player.userId);
 
-        player.victories = newAmount;
+        player.victories = this.statisticsManager.getVictoryAmount(player.userId);
 
         if (this.itemEffectApplicator.hasItem(player, ItemName.ConditionBased2)) {
             this.itemEffectApplicator.applyEffect(player, ItemName.ConditionBased2);
@@ -308,7 +314,7 @@ export class GameSession {
     }
 
     getPlayerAmountOfVic(player: Player): number {
-        return this.victoriesMap.get(player.name);
+        return this.statisticsManager.getVictoryAmount(player.userId);
     }
 
     removePlayer(player: Player): void {
@@ -330,6 +336,7 @@ export class GameSession {
 
     endGame(): void {
         this.gameIsOver = true;
+        this.statisticsManager.setEndTime();
     }
 
     teleport(oldPosition: Position, newPosition: Position): void {
@@ -375,6 +382,60 @@ export class GameSession {
                     } else {
                         this.boardGame.tiles[i][j].containedItem.disabled = true;
                     }
+                }
+            }
+        }
+    }
+    placeAndAddActivePlayer(player: Player): void {
+        let firstTeamPlayerCount: number = 0;
+        let secondTeamPlayerCount: number = 0;
+
+        const usedStartPos: Position[] = this.listOfPlayers.getValues().map((player) => {
+            if (player?.ctfTeam) {
+                firstTeamPlayerCount = player.ctfTeam === CtfTeam.FirstTeam ? firstTeamPlayerCount + 1 : 0;
+                secondTeamPlayerCount = player.ctfTeam === CtfTeam.SecondTeam ? secondTeamPlayerCount + 1 : 0;
+            }
+
+            return player?.startPosition;
+        });
+
+        const leavingKey = this.listOfPlayers.getValues().length;
+
+        loop1: for (let i = 0; i < this.originalBoardGame.size; ++i) {
+            for (let j = 0; j < this.originalBoardGame.size; ++j) {
+                const containedItem: Item | undefined = this.originalBoardGame.tiles[i][j].containedItem;
+                if (!containedItem) continue;
+
+                if (containedItem.type === ItemType.StartingPoint && !usedStartPos.find((pos) => pos.x === i && pos.y === j)) {
+                    const startPos: Position = { x: i, y: j };
+                    const spawnPos = this.isValidPosition(startPos) ? startPos : this.findNearestValidTile(startPos);
+                    this.boardGame.tiles[spawnPos.x][spawnPos.y].containedPlayer = player;
+                    player.position = spawnPos;
+                    player.inventory = [];
+                    player.leavingKey = leavingKey;
+                    const teams: CtfTeam[] = [CtfTeam.FirstTeam, CtfTeam.SecondTeam];
+                    player.ctfTeam =
+                        firstTeamPlayerCount > secondTeamPlayerCount
+                            ? CtfTeam.SecondTeam
+                            : firstTeamPlayerCount === secondTeamPlayerCount
+                              ? teams[Math.floor(Math.random() * teams.length)]
+                              : CtfTeam.FirstTeam;
+                    player.startPosition = startPos;
+
+                    if (this.statisticsManager.playerStatisticsMap.has(player.userId)) {
+                        player.victories = this.statisticsManager.getVictoryAmount(player.userId);
+                        this.statisticsManager.playerStatisticsMap.set(player.userId, {
+                            ...this.statisticsManager.playerStatisticsMap.get(player.userId),
+                            name: player.name,
+                        });
+                    } else {
+                        this.statisticsManager.initializePlayerStatistics(player);
+                    }
+                    this.listOfPlayers.addToBack(player);
+                    const playerCopy = structuredClone(player);
+                    playerCopy.position = startPos;
+                    this.staticPlayerMap.set(playerCopy.name, playerCopy);
+                    break loop1;
                 }
             }
         }
@@ -530,9 +591,9 @@ export class GameSession {
         this.droppingItems = false;
     }
 
-    private buildVictoriesMap(): void {
+    private initializePlayerStatistics(): void {
         for (const player of this.players.getValues()) {
-            this.victoriesMap.set(player.name, 0);
+            this.statisticsManager.initializePlayerStatistics(player);
         }
     }
     private weightFunction(tile: Tile): number {
