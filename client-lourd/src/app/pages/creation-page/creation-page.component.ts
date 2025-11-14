@@ -6,11 +6,13 @@ import { LoadingComponent } from '@app/components/loading/loading.component';
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { HttpBoardGameService } from '@app/services/http-manager/http-board-game.service';
+import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { BoardGameDTO } from '@common/board-game';
 import { GameMode } from '@common/enums/game-mode';
 import { UrlPage } from '@common/enums/url-page';
+import { User } from '@common/user';
 import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
@@ -29,6 +31,7 @@ export class CreationPageComponent implements OnInit {
     gameManager: GameSessionManagerService = inject(GameSessionManagerService);
     userManagerService: UserManagerService = inject(UserManagerService);
     httpBoardGameService = inject(HttpBoardGameService);
+    httpUserService = inject(HttpUserService);
 
     gameMode: typeof GameMode = GameMode;
     isLoading: WritableSignal<boolean> = signal(false);
@@ -111,6 +114,25 @@ export class CreationPageComponent implements OnInit {
                     }
 
                     if (response?.success && response?.game) {
+                        const user = this.userManagerService.getCurrentUser();
+                        const newMoney = Math.max(0, user.money - this.selectedPollPrizeAmount);
+                        const updatedUser: User = { ...user, money: newMoney };
+
+                        this.httpUserService.updateUser(updatedUser).subscribe({
+                            next: () => {
+                                // update local signal so UI stays in sync
+                                this.userManagerService.setMoney(newMoney);
+                                // if you ever stay on this page, keep slider consistent
+                                this.maxPollPrize = newMoney;
+                                if (this.selectedPollPrizeAmount > newMoney) {
+                                    this.selectedPollPrizeAmount = newMoney;
+                                }
+                            },
+                            error: () => {
+                                // optional: show an error toast; for now ignore
+                            },
+                        });
+
                         this.currentGameService.updateCurrentGame(response.game);
                         this.playerSocketService.emitJoinAvatarRoom(response.game.id);
                         this.router.navigate([UrlPage.Avatar]);

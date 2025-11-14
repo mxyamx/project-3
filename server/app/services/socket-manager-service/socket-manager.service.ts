@@ -210,7 +210,21 @@ export class SocketManager {
                     return;
                 }
 
+                this.sio.to(gameId).emit('admin-left', gameId);
+
                 for (const player of game.players) {
+                    // Reimburse players money
+                    if (game.entryPrice > 0 && !player.virtualPlayer) {
+                        const usersService = Container.get(UsersService);
+                        const user = await usersService.getUser(player.userId);
+                        if (user) {
+                            console.log(`Reimbursing player ${player.name} with ${game.entryPrice}`);
+                            const newMoney = user.money + game.entryPrice;
+                            const updatedUser = { ...user, money: newMoney };
+                            await usersService.updateUser(updatedUser);
+                        }
+                    }
+
                     await this.gameService.removePlayer(player, game.id);
                     this.sio.to(game.id).emit('player-left', player);
                     this.avatarContainer.releaseBySocket(gameId, player.socketId);
@@ -234,9 +248,9 @@ export class SocketManager {
                         }
                     }
                 }
+                this.sio.to(gameId).emit('admin-left', gameId);
                 this.sio.socketsLeave(game.id);
                 await this.gameService.deleteGame(game.id);
-                this.sio.to(gameId).emit('admin-left', gameId);
             });
 
             socket.on('leave-game', async (data: { gameId: string }) => {

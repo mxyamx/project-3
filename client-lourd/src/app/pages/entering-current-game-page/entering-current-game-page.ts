@@ -5,11 +5,14 @@ import { Router, RouterLink } from '@angular/router';
 import { ToastFightComponent } from '@app/components/toast-fight/toast-fight.component';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
+import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
+import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { CurrentGame, CurrentGamePhase, CurrentGamePreview } from '@common/current-game';
 import { PlayerLimits } from '@common/enums/players-limit';
 import { SocketEventNames } from '@common/enums/socket-events-names';
 import { UrlPage } from '@common/enums/url-page';
+import { User } from '@common/user';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
@@ -31,12 +34,16 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
     limitError: boolean = false;
     moneyError = false;
     hasBeenClicked: boolean = false;
-    playerMoney = 50;
+    playerMoney: number;
+    private httpUserService = inject(HttpUserService);
     private playerSocketService: PlayerSocketService = inject(PlayerSocketService);
     private clientSocketService: SocketClientService = inject(SocketClientService);
+    private userManagerService = inject(UserManagerService);
     private currentGameManager = inject(CurrentGameManagerService);
 
-    constructor(private router: Router) {}
+    constructor(private router: Router) {
+        this.playerMoney = this.userManagerService.getCurrentUser().money;
+    }
 
     ngOnInit(): void {
         this.playerSocketService.emitGetCurrentGamePreviews((previews: CurrentGamePreview[]) => {
@@ -80,18 +87,25 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
     validateJoin(code: string): void {
         this.playerSocketService.emitGetGame(code, (response: CurrentGame) => {
             if (response) {
-                if (response.entryPrice > this.playerMoney) {
+                // refresh from user manager to avoid stale value
+                const user = this.userManagerService.getCurrentUser();
+                const currentMoney = user.money;
+
+                if (response.entryPrice > currentMoney) {
                     this.moneyError = true;
                 }
 
                 if (response.locked) {
                     this.lockedError = true;
                 }
+
                 const maxPlayers = PlayerLimits[response.boardGame.size].maxPlayers;
                 if (response.players.length >= maxPlayers) {
                     this.limitError = true;
                 }
+
                 if (!this.error()) {
+                    this.chargeEntryFee(response.entryPrice);
                     this.currentGameManager.updateCurrentGame(response);
                     this.canJoinGame(true);
                     this.hasBeenClicked = true;
@@ -112,6 +126,7 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
         }
         this.validateJoin(preview.id);
     }
+
     enterCode() {
         const code = this.codeArray.join('');
         this.validateJoin(code);
@@ -126,5 +141,25 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
         this.lockedError = false;
         this.limitError = false;
         this.moneyError = false;
+    }
+
+    private chargeEntryFee(entryPrice: number): void {
+        if (entryPrice <= 0) return;
+
+        const user = this.userManagerService.getCurrentUser();
+        const newMoney = Math.max(0, user.money - entryPrice);
+        const updatedUser: User = { ...user, money: newMoney };
+
+        this.httpUserService.updateUser(updatedUser).subscribe({
+            next: () => {
+                // update local state
+                this.userManagerService.setMoney(newMoney);
+                this.playerMoney = newMoney;
+            },
+            error: () => {
+                // optional: show a toast or log; for now ignore
+                // (you could also revert moneyError or show a modal)
+            },
+        });
     }
 }

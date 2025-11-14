@@ -9,8 +9,10 @@ import { SocketClientService } from '@app/services/client-socket/socket-client.s
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
 import { GameEventService } from '@app/services/game-event/game-event.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
+import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { StatisticsManagerService } from '@app/services/statistics-manager/statistics-manager.service';
+import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { CurrentGame } from '@common/current-game';
 import { GameMode } from '@common/enums/game-mode';
 import { PlayerLimits } from '@common/enums/players-limit';
@@ -20,6 +22,7 @@ import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { GameEvent } from '@common/game-event';
 import { Player } from '@common/player';
 import * as socketDataForm from '@common/socket-data-forms';
+import { User } from '@common/user';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
@@ -46,6 +49,8 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     private currentGameManager = inject(CurrentGameManagerService);
     private socketManager: SocketClientService = inject(SocketClientService);
     private playerSocketService = inject(PlayerSocketService);
+    private httpUserService = inject(HttpUserService);
+    private userManagerService: UserManagerService = inject(UserManagerService);
     private statisticsManager: StatisticsManagerService = inject(StatisticsManagerService);
     private gameEventService: GameEventService = inject(GameEventService);
 
@@ -147,7 +152,35 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     }
 
     leaveGame() {
-        this.router.navigate([UrlPage.Home]);
+        if (this.isOrganizer()) {
+            this.playerSocketService.emitAdminLeaving(this.currentGame.id);
+        }
+        console.log('leaving game');
+
+        if (this.currentGame.entryPrice > 0) {
+            console.log('leaving game after if check');
+            console.log(`current game entry price: ${this.currentGame.entryPrice}`);
+
+            const user = this.userManagerService.getCurrentUser();
+            const newMoney = user.money + this.currentGame.entryPrice;
+            const updatedUser: User = { ...user, money: newMoney };
+
+            this.httpUserService.updateUser(updatedUser).subscribe({
+                next: () => {
+                    // Update local state
+                    this.userManagerService.setMoney(newMoney);
+
+                    this.finalizeLeave();
+                },
+                error: (err) => {
+                    console.error('Failed to refund:', err);
+                    // optional: show a toast
+                    this.finalizeLeave();
+                },
+            });
+        } else {
+            this.finalizeLeave();
+        }
     }
 
     playerlimit(): boolean {
@@ -218,5 +251,10 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
             this.playerSocketService.emitAddVirtualPlayer(this.gameId, profile);
         }
         this.hideVirtualPlayerProfilePopup();
+    }
+
+    private finalizeLeave() {
+        // this.playerSocketService.emitLeaveGame(this.currentGame.id);
+        this.router.navigate(['/main-page']);
     }
 }
