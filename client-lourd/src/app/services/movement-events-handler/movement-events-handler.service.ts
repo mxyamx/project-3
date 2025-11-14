@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { GameEventService } from '@app/services/game-event/game-event.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
-import { StatisticsManagerService } from '@app/services/statistics-manager/statistics-manager.service';
 import { GameMode } from '@common/enums/game-mode';
 import { ItemType } from '@common/enums/item-type';
 import { PlayerState } from '@common/enums/player-state';
@@ -16,7 +15,6 @@ import * as dataForm from '@common/socket-data-forms';
 export class MovementEventsHandlerService {
     private gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     private socketManager: SocketClientService = inject(SocketClientService);
-    private statisticsManager: StatisticsManagerService = inject(StatisticsManagerService);
     private gameEventService: GameEventService = inject(GameEventService);
 
     configureBaseSocket(): void {
@@ -32,10 +30,6 @@ export class MovementEventsHandlerService {
                 return;
             }
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
-            if (data.activePlayer.position) {
-                this.statisticsManager.updateTilePercentage(data.activePlayer.position);
-                this.statisticsManager.updatePlayerTilePercentage(data.activePlayer.name, data.activePlayer.position);
-            }
 
             if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
                 this.gameSessionManager.updateChosenPlayer(data.activePlayer);
@@ -70,9 +64,6 @@ export class MovementEventsHandlerService {
                 return;
             }
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
-            if (data.doorPosition) {
-                this.statisticsManager.updateDoorPercentage(data.doorPosition);
-            }
 
             this.gameSessionManager.updateBoardGame(data.boardGame);
 
@@ -91,11 +82,6 @@ export class MovementEventsHandlerService {
         this.socketManager.on(SocketClientEventNames.Teleport, (data: dataForm.TeleportPlayerRes) => {
             if (!data.successful) {
                 return;
-            }
-
-            if (data.activePlayer.position) {
-                this.statisticsManager.updateTilePercentage(data.activePlayer.position);
-                this.statisticsManager.updatePlayerTilePercentage(data.activePlayer.name, data.activePlayer.position);
             }
 
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);

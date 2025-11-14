@@ -93,7 +93,6 @@ export class GameSocketEventService {
             }
 
             this.notificationService.hideTurnTransition();
-            this.statisticsService.updateNumberTurns();
             this.gameSessionManager.changeState(PlayerState.WaitingForTurn);
             if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
                 this.gameSessionManager.changeState(PlayerState.WaitingForAction);
@@ -260,10 +259,6 @@ export class GameSocketEventService {
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
 
             this.gameSessionManager.updateCanPickUpItem(true);
-
-            data.activePlayer.inventory?.forEach((item) => {
-                this.statisticsService.updateItemsCollected(data.activePlayer.name, item);
-            });
 
             if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
                 if (data.pickedItem?.name === ItemName.GameEditor2) {

@@ -387,7 +387,15 @@ export class GameSession {
         }
     }
     placeAndAddActivePlayer(player: Player): void {
+        let firstTeamPlayerCount: number = 0;
+        let secondTeamPlayerCount: number = 0;
+
         const usedStartPos: Position[] = this.listOfPlayers.getValues().map((player) => {
+            if (player?.ctfTeam) {
+                firstTeamPlayerCount = player.ctfTeam === CtfTeam.FirstTeam ? firstTeamPlayerCount + 1 : 0;
+                secondTeamPlayerCount = player.ctfTeam === CtfTeam.SecondTeam ? secondTeamPlayerCount + 1 : 0;
+            }
+
             return player?.startPosition;
         });
 
@@ -405,7 +413,13 @@ export class GameSession {
                     player.position = spawnPos;
                     player.inventory = [];
                     player.leavingKey = leavingKey;
-                    player.ctfTeam = CtfTeam.FirstTeam; //TODO: I PUT A RANDOM TEAM I DON'T THINK WE ARE GONNA NEED THIS LOGIC
+                    const teams: CtfTeam[] = [CtfTeam.FirstTeam, CtfTeam.SecondTeam];
+                    player.ctfTeam =
+                        firstTeamPlayerCount > secondTeamPlayerCount
+                            ? CtfTeam.SecondTeam
+                            : firstTeamPlayerCount === secondTeamPlayerCount
+                              ? teams[Math.floor(Math.random() * teams.length)]
+                              : CtfTeam.FirstTeam;
                     player.startPosition = startPos;
 
                     if (this.statisticsManager.playerStatisticsMap.has(player.userId)) {

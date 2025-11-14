@@ -256,8 +256,6 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
             this.gameSessionManager.updateActivePlayer(data.activePlayer);
             this.gameSessionManager.updateDisplayedList(structuredClone(data.listOfPlayers));
             this.statisticsManager.reset();
-            this.statisticsManager.setStartTime();
-            this.statisticsManager.updateNumberTurns();
 
             this.router.navigate([UrlPage.Game]);
 
