@@ -9,6 +9,7 @@ import {
 } from '@app/constants/development-constants';
 import { FightSubController } from '@app/controllers/fight-sub-controller/fight-sub-controller';
 import { MovementSubController } from '@app/controllers/movement-sub-controller/movement-sub-controller';
+import { CurrentGamesService } from '@app/services/current-games/current-games.service';
 import { genErrorMessage, sendError } from '@app/utils/functions/socket-error-functions';
 import { CtfTeam } from '@common/enums/ctf-team';
 import { GameMode } from '@common/enums/game-mode';
@@ -18,6 +19,7 @@ import { Player } from '@common/player';
 import { Position } from '@common/position';
 import * as dataForm from '@common/socket-data-forms';
 import { StartGameData } from '@common/socket-data-forms';
+import { PlayerStatistics } from '@common/statistics';
 import * as io from 'socket.io';
 import { setTimeout as delay } from 'timers/promises';
 
@@ -39,6 +41,7 @@ export class GameSessionController {
         private clockManager: GameClockManager,
         private fightSubController: FightSubController,
         private movementSubController: MovementSubController,
+        private gameService: CurrentGamesService,
     ) {
         this.isPlayerMoving = false;
         this.standardStackPlayer = STANDARD_LIST_PLAYERS;
@@ -92,6 +95,9 @@ export class GameSessionController {
             const pickedItem = this.gameSession.board.tiles[player.position.x][player.position.y].containedItem;
 
             this.gameSession.pickUpItem(player);
+            this.gameSession.activePlayerInstance.inventory?.forEach((item) => {
+                this.gameSession.statisticsManager.updateItemsCollected(this.gameSession.activePlayerInstance.userId, item);
+            });
 
             const ans: dataForm.PickUpItemRes = {
                 successful: true,
@@ -179,6 +185,8 @@ export class GameSessionController {
     addActivePlayer(player: Player): dataForm.UpdateGamedRes | null {
         if (this.gameSession.gameOver) return null;
         if (!this.gameSession.gameStarted) return null;
+
+        this.gameSession.placeAndAddActivePlayer(player);
         const ans: dataForm.UpdateGamedRes = {
             successful: true,
             message: '',
@@ -186,7 +194,6 @@ export class GameSessionController {
             activePlayer: this.gameSession.activePlayerInstance,
             listOfPlayers: this.gameSession.listOfPlayers.getValues(),
         };
-        this.gameSession.placeAndAddActivePlayer(player);
         this.updateGame();
         return ans;
     }
@@ -264,6 +271,7 @@ export class GameSessionController {
 
     toggleDoorState(doorPosition: Position): void {
         if (this.gameOver()) return;
+        this.gameSession.statisticsManager.updateDoorPercentage(doorPosition);
         this.movementSubController.toggleDoorState(doorPosition);
     }
 
@@ -353,13 +361,22 @@ export class GameSessionController {
     }
 
     private endGame(winner?: Player): void {
+        //TODO I THINK I WILL SEND THE STATS HERE!
         this.gameSession.endGame();
+        this.gameService.setGameEnded(this.roomCode);
         this.clockManager.stopClock();
+        let listOfPlayerStats: (PlayerStatistics & { name: string })[] = [];
+        this.gameSession.statisticsManager.playerStatisticsMap.forEach((value) => {
+            const stat: PlayerStatistics & { name: string } = { ...value };
+            listOfPlayerStats.push(stat);
+        });
         const ans: dataForm.EndGameRes = {
             successful: true,
             message: 'Game Over',
             winnerTeam: this.winnerTeam,
             winner,
+            globalStats: this.gameSession.statisticsManager.displayedGlobalStatistics,
+            listOfPlayerStats: listOfPlayerStats,
         };
 
         this.sio.to(this.roomCode).emit(SocketClientEventNames.EndGame, ans);

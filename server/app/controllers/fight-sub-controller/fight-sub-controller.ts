@@ -14,6 +14,7 @@ import { SocketClientEventNames } from '@common/enums/socket-events-names';
 import { Player } from '@common/player';
 import { Position } from '@common/position';
 import * as dataForm from '@common/socket-data-forms';
+import { PlayerStatistics } from '@common/statistics';
 import * as io from 'socket.io';
 import { setTimeout as delay } from 'timers/promises';
 
@@ -39,6 +40,8 @@ export class FightSubController {
                 this.gameSession.activePlayerInstance,
                 this.gameSession.board.tiles[targetPlayerPosition.x][targetPlayerPosition.y].containedPlayer,
             );
+            this.gameSession.statisticsManager.updateCombatAmount(this.gameSession.fight.attackingPlayer.userId);
+            this.gameSession.statisticsManager.updateCombatAmount(this.gameSession.fight.defendingPlayer.userId);
             const ans: dataForm.StartFightRes = {
                 successful: true,
                 message: 'success',
@@ -85,6 +88,10 @@ export class FightSubController {
                     soundEffect = '';
                 }
             }
+            if (damageDoneAttackingPlayer && damageTakenDefendingPlayer) {
+                this.gameSession.statisticsManager.addLifePointsLost(defendingPlayer.userId, damageTakenDefendingPlayer);
+                this.gameSession.statisticsManager.addLifePointsOpponentLost(attackingPlayer.userId, damageDoneAttackingPlayer);
+            }
 
             const ans: dataForm.ExecuteAttackRes = {
                 successful: true,
@@ -124,6 +131,7 @@ export class FightSubController {
             const defenderPlayer = this.gameSession.fight.defendingPlayer;
             let ans: dataForm.EscapeAttemptRes;
             if (attempResult) {
+                this.gameSession.statisticsManager.updateEscapeAmount(escapingPlayer.userId);
                 ans = {
                     successful: true,
                     message: 'you escaped ',
@@ -205,10 +213,17 @@ export class FightSubController {
         this.updatePlayerMoney(winner);
         this.gameSession.endGame();
         this.clockManager.stopClock();
+        let listOfPlayerStats: (PlayerStatistics & { name: string; userId: string })[] = [];
+        this.gameSession.statisticsManager.playerStatisticsMap.forEach((value, key) => {
+            const stat: PlayerStatistics & { name: string; userId: string } = { ...value, userId: key };
+            listOfPlayerStats.push(stat);
+        });
         const ans: dataForm.EndGameRes = {
             successful: true,
             message: 'Game Over',
             winner,
+            globalStats: this.gameSession.statisticsManager.displayedGlobalStatistics,
+            listOfPlayerStats: listOfPlayerStats,
         };
 
         this.sio.to(this.roomCode).emit(SocketClientEventNames.EndGame, ans);
@@ -220,6 +235,7 @@ export class FightSubController {
         this.fightLoserName = defendingPlayer.name;
         this.fightWinnerName = attackingPlayer.name;
         this.showEndFightNotification();
+        this.gameSession.statisticsManager.updateDefeatAmount(defendingPlayer.userId);
 
         this.gameSession.registerVictory(attackingPlayer);
         await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);

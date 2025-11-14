@@ -131,6 +131,18 @@ export class SocketManager {
                 }
             });
 
+            socket.on('toggle-drop-in', async (gameId: string, callback) => {
+                const game = await this.gameService.getGame(gameId);
+                if (game) {
+                    game.dropInEnabled = !game.dropInEnabled;
+                    await this.gameService.updateGame(game);
+                    this.sio.to(gameId).emit('drop-in-updated', game);
+                    callback(game.dropInEnabled);
+                } else {
+                    callback(false);
+                }
+            });
+
             socket.on('update-game-start', async (gameId: string) => {
                 const game = await this.gameService.getGame(gameId);
 
@@ -448,7 +460,6 @@ export class SocketManager {
             this.sio.to(game.id).emit('avatar-list-updated', []);
 
             await this.gameService.deleteGame(game.id);
-            await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: game.id });
         }
     }
     private async cancelWaitingRoom(game: CurrentGame, reason: 'admin-left-waiting'): Promise<void> {

@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
     ATTACK_LARGE_TIME_LIMIT_SEC,
@@ -133,6 +133,14 @@ export class GameSocketEventService {
             }
 
             const gameId = this.gameSessionManager.gameId();
+            if (data.globalStats && data.listOfPlayerStats) {
+                this.statisticsService.reset();
+                this.statisticsService.displayedGlobalStatistics.set(data.globalStats);
+                for (const stat of data.listOfPlayerStats) {
+                    const { name, ...rest } = stat;
+                    this.statisticsService.playerStatisticsMap.set(name, signal(rest));
+                }
+            }
             if (gameId === EMPTY_CODE) {
                 return;
             }
@@ -150,7 +158,6 @@ export class GameSocketEventService {
             setTimeout(
                 () => {
                     this.gameSessionManager.leaveGame();
-                    this.statisticsService.setEndTime();
                 },
                 (this.gameSessionManager.chosenPlayer().leavingKey ?? 1) * gapMsec,
             );

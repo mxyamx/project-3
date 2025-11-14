@@ -6,6 +6,7 @@ import { GameEvent } from './game-event';
 import { Item } from './item';
 import { Player } from './player';
 import { Position } from './position';
+import { GlobalStatistics, PlayerStatistics } from './statistics';
 
 export interface GameCreationDataForm {
     gameCode: string;
@@ -146,6 +147,8 @@ export interface StartTurnRes extends StandardRes {}
 export interface EndGameRes extends StandardRes {
     winner?: Player;
     winnerTeam?: CtfTeam;
+    globalStats?: GlobalStatistics;
+    listOfPlayerStats?: (PlayerStatistics & { name: string })[];
 }
 
 export interface UpdateGamedRes extends StandardRes {

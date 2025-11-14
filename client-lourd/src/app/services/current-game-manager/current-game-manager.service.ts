@@ -31,7 +31,7 @@ export class CurrentGameManagerService {
         locked: false,
         adminId: '',
         phase: CurrentGamePhase.Waiting,
-        dropInEnabled: true,
+        dropInEnabled: false,
     });
 
     updateCurrentGame(newGame: CurrentGame): void {
@@ -61,7 +61,7 @@ export class CurrentGameManagerService {
             locked: false,
             adminId: '',
             phase: CurrentGamePhase.Waiting,
-            dropInEnabled: true,
+            dropInEnabled: false,
         });
     }
 

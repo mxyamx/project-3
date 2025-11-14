@@ -32,10 +32,13 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     gameId: string | null;
     currentGame: CurrentGame;
     showTooltip: boolean = false;
+    showDropInTooltip: boolean = false;
     roomLockedState: boolean = false;
+    dropInEnabled: boolean = false;
     playersLimitReached: boolean = false;
     hasBeenClicked: boolean = false;
     hasToggleState: boolean = false;
+    hasToggleStateDropIn: boolean = false;
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     showPlayerAmountWarning = false;
     chatDockService: ChatDockService = inject(ChatDockService);
@@ -60,6 +63,7 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
                 if (response) {
                     this.currentGame = response;
                     this.roomLockedState = response.locked;
+                    this.dropInEnabled = response.dropInEnabled;
                     this.playersLimitReached = this.playerlimit();
                     this.automaticLock();
                 }
@@ -91,6 +95,14 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
                 this.roomLockedState = game.locked;
             }
         });
+
+        this.playerSocketService.onDropInUpdated((game: CurrentGame) => {
+            if (game.id === this.gameId) {
+                this.hasToggleStateDropIn = false;
+                this.currentGame = game;
+                this.dropInEnabled = game.dropInEnabled;
+            }
+        });
     }
 
     ngOnDestroy(): void {
@@ -114,6 +126,18 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
                 if (this.currentGame) {
                     this.currentGame.locked = locked;
                     this.roomLockedState = locked;
+                }
+            });
+        }
+    }
+
+    toggleDropIn() {
+        if (this.gameId) {
+            this.hasToggleStateDropIn = true;
+            this.playerSocketService.emitToggleDropIn(this.gameId, (dropInEnabled: boolean) => {
+                if (this.currentGame) {
+                    this.currentGame.dropInEnabled = dropInEnabled;
+                    this.dropInEnabled = dropInEnabled;
                 }
             });
         }

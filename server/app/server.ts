@@ -1,6 +1,7 @@
 import { Application } from '@app/app';
 import * as http from 'http';
 import { AddressInfo } from 'net';
+import { EventEmitter } from 'stream';
 import { Service } from 'typedi';
 import { CurrentGamesService } from './services/current-games/current-games.service';
 import { DatabaseService } from './services/database/database.service';
@@ -10,13 +11,16 @@ export class Server {
     private static readonly appPort: string | number | boolean = Server.normalizePort(process.env.PORT || '3000');
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     private static readonly baseTen: number = 10;
+    private static readonly nListeners: number = 30;
     private server: http.Server;
     private socketManager: SocketManager;
     constructor(
         private readonly application: Application,
         private databaseService: DatabaseService,
         private currentGameService: CurrentGamesService,
-    ) {}
+    ) {
+        EventEmitter.setMaxListeners(Server.nListeners);
+    }
 
     private static normalizePort(val: number | string): number | string | boolean {
         const port: number = typeof val === 'string' ? parseInt(val, this.baseTen) : val;

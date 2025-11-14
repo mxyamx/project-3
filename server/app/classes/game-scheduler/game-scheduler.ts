@@ -48,6 +48,7 @@ export class GameScheduler {
             newClockManager,
             newFightSubController,
             newMovementSubController,
+            this.gameService,
         );
 
         newController.gameId = game.id;
@@ -251,11 +252,9 @@ export class GameScheduler {
                         const game = await this.gameService.getGame(gameId);
                         if (game && count < countMax) {
                             if (game.players.length === 0) {
-                                try {
-                                    await this.gameService.deleteGame(gameId);
-                                } catch {
-                                    clearInterval(interval);
-                                }
+                                await this.gameService.deleteGame(gameId);
+
+                                clearInterval(interval);
                             }
                         } else {
                             clearInterval(interval);

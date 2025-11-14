@@ -6,6 +6,7 @@ import { Player } from '@common/player';
 import 'dotenv/config';
 import * as io from 'socket.io';
 import { Service } from 'typedi';
+import { DatabaseService } from '../database/database.service';
 
 const clone = <T>(x: T): T => structuredClone(x);
 
@@ -13,6 +14,8 @@ const clone = <T>(x: T): T => structuredClone(x);
 export class CurrentGamesService {
     private sio: io.Server;
     private games: Map<string, CurrentGame> = new Map();
+
+    constructor(private databaseService: DatabaseService) {}
     async getAllGames(): Promise<CurrentGame[]> {
         const values = Array.from(this.games.values());
         return values.map(clone);
@@ -77,10 +80,29 @@ export class CurrentGamesService {
         return clone(toStore);
     }
 
+    setGameEnded(id: string): void {
+        const existing = this.games.get(id);
+        if (!existing) return;
+        const next: CurrentGame = {
+            ...existing,
+            phase: CurrentGamePhase.Ended,
+        };
+        this.games.set(next.id, next);
+        this.emitUpdatedCurrentGamePreviews();
+    }
+
     async deleteGame(id: string): Promise<void> {
-        if (!this.games.has(id)) {
+        const game = this.games.get(id);
+        if (!game) {
             throw new Error("Le jeu actuel n'a pas été trouvé.");
         }
+
+        try {
+            await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: id });
+        } catch (error) {
+            console.warn(`Impossible de supprimer les messages du chat pour ${id} (ignoré).`);
+        }
+
         this.games.delete(id);
         this.emitUpdatedCurrentGamePreviews();
     }
@@ -94,6 +116,7 @@ export class CurrentGamesService {
             name: patch.name ?? patch.boardGame?.name ?? existing.name,
             locked: patch.locked ?? existing.locked,
             phase: patch.phase ?? existing.phase,
+            dropInEnabled: patch.dropInEnabled ?? existing.dropInEnabled,
             adminId: patch.adminId ?? existing.adminId,
             boardGame: patch.boardGame !== undefined ? { ...existing.boardGame, ...patch.boardGame } : existing.boardGame,
             players: patch.players !== undefined ? patch.players.map((p) => ({ ...p })) : existing.players,
