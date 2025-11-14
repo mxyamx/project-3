@@ -466,5 +466,65 @@
         "Owned": "Possédé",
         "insufficient-balance": "Solde insuffisant",
         "pre-listen": "Pré-écouter"
+    },
+
+    "socials-popup": {
+        "tabs": {
+            "friends": "Amis",
+            "received": "Reçues",
+            "sent": "Envoyées",
+            "add": "Ajouter"
+        },
+        "actions": {
+            "remove": "Supprimer",
+            "accept": "Accepter",
+            "reject": "Refuser",
+            "cancel": "Annuler",
+            "add": "Ajouter ami",
+            "search": "Rechercher",
+            "block": "Bloquer"
+        },
+        "empty": {
+            "no-friends": "Aucun ami pour le moment",
+            "no-pending": "Aucune demande reçue",
+            "no-sent": "Aucune demande envoyée",
+            "no-results": "Aucun utilisateur trouvé"
+        },
+        "errors": {
+            "search-failed": "Échec de la recherche d'utilisateurs",
+            "send-request-failed": "Échec de l'envoi de la demande d'ami",
+            "accept-failed": "Échec de l'acceptation de la demande",
+            "reject-failed": "Échec du rejet de la demande",
+            "cancel-failed": "Échec de l'annulation de la demande",
+            "remove-failed": "Échec de la suppression de l'ami"
+        },
+        "confirm-remove-friend": "Êtes-vous sûr de vouloir supprimer cet ami ?",
+        "confirm-block-user": "Êtes-vous sûr de vouloir bloquer cet utilisateur ?",
+        "block-not-implemented": "Fonctionnalité de blocage pas encore implémentée",
+        "loading": "Chargement...",
+        "searching": "Recherche...",
+        "search-placeholder": "Chercher un utilisateur..."
+    },
+
+    "socials-page": {
+        "my-friends": "Mes amis",
+        "blocked-users": "Utilisateurs bloqués",
+        "actions": {
+            "remove": "Supprimer ami",
+            "block": "Bloquer utilisateur",
+            "unblock": "Débloquer utilisateur"
+        },
+        "empty": {
+            "no-friends": "Aucun ami pour le moment",
+            "no-blocked": "Aucun utilisateur bloqué"
+        },
+        "confirm-remove-friend": "Êtes-vous sûr de vouloir supprimer cet ami ?",
+        "confirm-block-user": "Êtes-vous sûr de vouloir bloquer cet utilisateur ? Il sera retiré de votre liste d'amis.",
+        "confirm-unblock-user": "Êtes-vous sûr de vouloir débloquer cet utilisateur ?",
+        "errors": {
+            "remove-failed": "Échec de la suppression de l'ami"
+        },
+        "block-not-implemented": "Fonctionnalité de blocage pas encore implémentée",
+        "unblock-not-implemented": "Fonctionnalité de déblocage pas encore implémentée"
     }
 }

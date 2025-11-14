@@ -27,10 +27,10 @@ import { AvatarManagement, RoomManagement } from '@common/socket-data-forms';
 import * as http from 'http';
 import { Collection } from 'mongodb';
 import * as io from 'socket.io';
-import { BoardGameService } from '../board-game/board-game.service';
-import { UsersService } from '../users/users.service';
 import Container from 'typedi';
+import { BoardGameService } from '../board-game/board-game.service';
 import { FriendSocketManager } from '../friends/friend-socket.manager';
+import { UsersService } from '../users/users.service';
 export class SocketManager {
     playerSocketMap = new Map<string, string>();
 
@@ -60,9 +60,14 @@ export class SocketManager {
     ) {
         this.sio = new io.Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
         this.userSessionManager = new UserSessionManager();
+        console.log('🔧 UserSessionManager created');
         this.gameService.setIo(this.sio);
         this.gameScheduler = new GameScheduler(this.sio, this.gameService);
-        this.userSessionController = new UserSessionController(this.sio, Container.get(UsersService));
+        this.userSessionController = new UserSessionController(
+            this.sio,
+            Container.get(UsersService),
+            this.userSessionManager, // ← ADD THIS
+        );
         this.socketGameCommunication = new SocketGameCommunication(this.sio, this.databaseService);
         this.boardGameService = Container.get(BoardGameService);
         const vpSocketAddingHandlerConfig: VpSocketAddingHandlerConfig = {

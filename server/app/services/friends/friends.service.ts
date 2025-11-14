@@ -252,8 +252,21 @@ export class FriendsService {
     async searchUsers(query: string, currentUserId: string): Promise<User[]> {
         const currentUser = await this.usersService.getUser(currentUserId);
 
-        // IDs à exclure: soi-même, amis existants, utilisateurs bloqués
-        const excludedIds = [currentUserId, ...(currentUser.friends || []), ...(currentUser.blocked || [])];
+        // Get all pending requests involving current user (sent OR received)
+        const pendingRequests = await this.requestsCollection
+            .find({
+                $or: [
+                    { senderId: currentUserId, status: RequestStatus.Pending },
+                    { receiverId: currentUserId, status: RequestStatus.Pending },
+                ],
+            })
+            .toArray();
+
+        // Extract user IDs from pending requests
+        const pendingUserIds = pendingRequests.map((req) => (req.senderId === currentUserId ? req.receiverId : req.senderId));
+
+        // IDs à exclure: soi-même, amis existants, utilisateurs bloqués, demandes en attente
+        const excludedIds = [currentUserId, ...(currentUser.friends || []), ...(currentUser.blocked || []), ...pendingUserIds];
 
         const users = await this.usersCollection
             .find({

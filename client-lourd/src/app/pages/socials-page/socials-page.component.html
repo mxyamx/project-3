@@ -1,34 +1,71 @@
 <div class="socials-container">
     <!-- Friends Section -->
     <div class="friends-section">
-        <h2><i class="fa fa-users"></i> Mes amis</h2>
-        <ul>
+        <h2>
+            <i class="fa fa-users"></i>
+            {{ 'socials-page.my-friends' | translate }} ({{ friends.length }})
+        </h2>
+        <ul class="user-list">
             <li *ngFor="let friend of friends">
                 <div class="user-info">
-                    <img class="avatar" src="https://via.placeholder.com/40" alt="Avatar" />
-                    <span>{{ friend.username }}</span>
+                    <img class="avatar" [src]="friend.avatar" [alt]="friend.username" />
+                    <span class="name">{{ friend.username }}</span>
                 </div>
                 <div class="actions">
-                    <button class="remove-btn" (click)="removeFriend(friend.id)">Supprimer</button>
-                    <button class="block-btn" (click)="blockUser(friend.id)">Bloquer</button>
+                    <button class="icon-btn remove-btn" (click)="confirmRemoveFriend(friend)" [title]="'socials-page.actions.remove' | translate">
+                        <i class="fa fa-user-minus"></i>
+                    </button>
+                    <button class="icon-btn block-btn" (click)="confirmBlockUser(friend)" [title]="'socials-page.actions.block' | translate">
+                        <i class="fa fa-ban"></i>
+                    </button>
                 </div>
+            </li>
+            <li *ngIf="friends.length === 0" class="empty-state">
+                {{ 'socials-page.empty.no-friends' | translate }}
             </li>
         </ul>
     </div>
 
     <!-- Blocked Section -->
     <div class="blocked-section">
-        <h2><i class="fa fa-ban"></i> Utilisateurs bloqués</h2>
-        <ul>
+        <h2>
+            <i class="fa fa-ban"></i>
+            {{ 'socials-page.blocked-users' | translate }} ({{ blockedUsers.length }})
+        </h2>
+        <ul class="user-list">
             <li *ngFor="let blocked of blockedUsers">
                 <div class="user-info">
-                    <img class="avatar" src="https://via.placeholder.com/40" alt="Avatar" />
-                    <span>{{ blocked.username }}</span>
+                    <img class="avatar" [src]="blocked.avatar" [alt]="blocked.username" />
+                    <span class="name">{{ blocked.username }}</span>
                 </div>
                 <div class="actions">
-                    <button class="unblock-btn" (click)="unblockUser(blocked.id)">Débloquer</button>
+                    <button class="icon-btn unblock-btn" (click)="confirmUnblockUser(blocked)" [title]="'socials-page.actions.unblock' | translate">
+                        <i class="fa fa-unlock"></i>
+                    </button>
                 </div>
+            </li>
+            <li *ngIf="blockedUsers.length === 0" class="empty-state">
+                {{ 'socials-page.empty.no-blocked' | translate }}
             </li>
         </ul>
     </div>
 </div>
+
+<!-- Confirmation Dialog -->
+@if (showConfirmation) {
+<div class="confirmation-bubble">
+    <p>{{ confirmationMessage | translate }}</p>
+    <div class="confirmation-buttons">
+        <button (click)="confirmAction()">{{ 'general.button.yes' | translate }}</button>
+        <button (click)="closeConfirmation()">{{ 'general.button.no' | translate }}</button>
+    </div>
+</div>
+}
+
+<!-- Error Message Bubble -->
+@if (showError) {
+<div class="error-bubble">
+    <button class="close-error-btn" (click)="closeError()">×</button>
+    <p>{{ errorMessage | translate }}</p>
+</div>
+}

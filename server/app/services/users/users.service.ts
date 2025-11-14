@@ -30,7 +30,7 @@ export class UsersService {
 
     async getUser(id: string): Promise<User> {
         const user = await this.collection.findOne({ id });
-        console.log(`User fetched in service from collection directly: ${JSON.stringify(user, null, 2)}`);
+        // console.log(`User fetched in service from collection directly: ${JSON.stringify(user, null, 2)}`);
         if (user) {
             return user;
         }
@@ -38,7 +38,7 @@ export class UsersService {
     }
 
     async createUser(user: User): Promise<void> {
-        console.log(`Calling createUser from userService from Server: ${JSON.stringify(user, null, 2)}`);
+        //console.log(`Calling createUser from userService from Server: ${JSON.stringify(user, null, 2)}`);
         const existingUsername = await this.collection.findOne({
             $and: [{ username: user.username }, { username: { $ne: '[supprimé]' } }],
         });
@@ -47,7 +47,7 @@ export class UsersService {
         }
 
         if (!user.parameters) user.parameters = { language: Language.french, theme: InterfaceTheme.Light };
-        console.log(`Creating user in service: ${JSON.stringify(user, null, 2)}`);
+        //console.log(`Creating user in service: ${JSON.stringify(user, null, 2)}`);
         await this.collection.insertOne(user);
     }
 

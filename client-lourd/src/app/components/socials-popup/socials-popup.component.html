@@ -4,16 +4,24 @@
 
         <div class="popup-content">
             <div class="tabs">
-                <button [class.active]="activeTab === 'friends'" (click)="activeTab = 'friends'">Amis ({{ friends.length }})</button>
-                <button [class.active]="activeTab === 'received'" (click)="activeTab = 'received'">Reçues ({{ pendingRequests.length }})</button>
-                <button [class.active]="activeTab === 'sent'" (click)="activeTab = 'sent'">Envoyées ({{ sentRequests.length }})</button>
-                <button [class.active]="activeTab === 'add'" (click)="activeTab = 'add'">Ajouter</button>
+                <button [class.active]="activeTab === 'friends'" (click)="activeTab = 'friends'">
+                    {{ 'socials-popup.tabs.friends' | translate }} ({{ friendCount() }})
+                </button>
+                <button [class.active]="activeTab === 'received'" (click)="activeTab = 'received'">
+                    {{ 'socials-popup.tabs.received' | translate }} ({{ pendingCount() }})
+                </button>
+                <button [class.active]="activeTab === 'sent'" (click)="activeTab = 'sent'">
+                    {{ 'socials-popup.tabs.sent' | translate }} ({{ sentCount() }})
+                </button>
+                <button [class.active]="activeTab === 'add'" (click)="activeTab = 'add'">
+                    {{ 'socials-popup.tabs.add' | translate }}
+                </button>
             </div>
 
             <div class="tab-content" [ngSwitch]="activeTab">
                 <!-- Friends Tab -->
                 <div *ngSwitchCase="'friends'">
-                    <div *ngIf="isLoading" class="loading">Chargement...</div>
+                    <div *ngIf="isLoading" class="loading">{{ 'socials-popup.loading' | translate }}</div>
                     <ul class="user-list" *ngIf="!isLoading">
                         <li *ngFor="let friend of friends">
                             <div class="user-info">
@@ -21,12 +29,23 @@
                                 <span class="name">{{ friend.username }}</span>
                             </div>
                             <div class="actions">
-                                <button class="icon-btn remove-btn" (click)="removeFriend(friend)" title="Supprimer">
+                                <button
+                                    class="icon-btn remove-btn"
+                                    (click)="confirmRemoveFriend(friend)"
+                                    [title]="'socials-popup.actions.remove' | translate"
+                                >
                                     <i class="fa fa-user-minus"></i>
+                                </button>
+                                <button
+                                    class="icon-btn block-btn"
+                                    (click)="confirmBlockUser(friend)"
+                                    [title]="'socials-popup.actions.block' | translate"
+                                >
+                                    <i class="fa fa-ban"></i>
                                 </button>
                             </div>
                         </li>
-                        <li *ngIf="friends.length === 0" class="empty-state">Aucun ami pour le moment</li>
+                        <li *ngIf="friendCount() === 0" class="empty-state">{{ 'socials-popup.empty.no-friends' | translate }}</li>
                     </ul>
                 </div>
 
@@ -39,15 +58,23 @@
                                 <span class="name">{{ request.sender.username }}</span>
                             </div>
                             <div class="actions">
-                                <button class="icon-btn accept-btn" (click)="acceptRequest(request)" title="Accepter">
+                                <button
+                                    class="icon-btn accept-btn"
+                                    (click)="acceptRequest(request)"
+                                    [title]="'socials-popup.actions.accept' | translate"
+                                >
                                     <i class="fa fa-check"></i>
                                 </button>
-                                <button class="icon-btn reject-btn" (click)="rejectRequest(request)" title="Refuser">
+                                <button
+                                    class="icon-btn reject-btn"
+                                    (click)="rejectRequest(request)"
+                                    [title]="'socials-popup.actions.reject' | translate"
+                                >
                                     <i class="fa fa-times"></i>
                                 </button>
                             </div>
                         </li>
-                        <li *ngIf="pendingRequests.length === 0" class="empty-state">Aucune demande reçue</li>
+                        <li *ngIf="pendingCount() === 0" class="empty-state">{{ 'socials-popup.empty.no-pending' | translate }}</li>
                     </ul>
                 </div>
 
@@ -60,12 +87,16 @@
                                 <span class="name">{{ request.receiver.username }}</span>
                             </div>
                             <div class="actions">
-                                <button class="icon-btn cancel-btn" (click)="cancelRequest(request)" title="Annuler">
+                                <button
+                                    class="icon-btn cancel-btn"
+                                    (click)="cancelRequest(request)"
+                                    [title]="'socials-popup.actions.cancel' | translate"
+                                >
                                     <i class="fa fa-times"></i>
                                 </button>
                             </div>
                         </li>
-                        <li *ngIf="sentRequests.length === 0" class="empty-state">Aucune demande envoyée</li>
+                        <li *ngIf="sentCount() === 0" class="empty-state">{{ 'socials-popup.empty.no-sent' | translate }}</li>
                     </ul>
                 </div>
 
@@ -74,33 +105,67 @@
                     <div class="search-bar">
                         <input
                             [(ngModel)]="searchQuery"
-                            placeholder="Chercher un utilisateur..."
+                            [placeholder]="'socials-popup.search-placeholder' | translate"
                             (keyup.enter)="searchUsers()"
                             (input)="onSearchChange()"
                         />
-                        <button class="icon-btn search-btn" (click)="searchUsers()" title="Rechercher">
+                        <button
+                            class="icon-btn search-btn"
+                            (click)="searchUsers()"
+                            [disabled]="isLoading"
+                            [title]="'socials-popup.actions.search' | translate"
+                        >
                             <i class="fa fa-magnifying-glass"></i>
                         </button>
                     </div>
 
-                    <ul class="user-list" *ngIf="searchResults.length > 0">
+                    <div *ngIf="isLoading" class="loading">{{ 'socials-popup.searching' | translate }}</div>
+
+                    <ul class="user-list" *ngIf="!isLoading && searchResults.length > 0">
                         <li *ngFor="let user of searchResults">
                             <div class="user-info">
                                 <img [src]="user.avatar" [alt]="user.username" class="avatar" />
                                 <span class="name">{{ user.username }}</span>
                             </div>
                             <div class="actions">
-                                <button class="icon-btn add-btn" (click)="sendFriendRequest(user)" title="Envoyer une demande">
+                                <button class="icon-btn add-btn" (click)="sendFriendRequest(user)" [title]="'socials-popup.actions.add' | translate">
                                     <i class="fa fa-user-plus"></i>
+                                </button>
+                                <button
+                                    class="icon-btn block-btn"
+                                    (click)="confirmBlockUser(user)"
+                                    [title]="'socials-popup.actions.block' | translate"
+                                >
+                                    <i class="fa fa-ban"></i>
                                 </button>
                             </div>
                         </li>
                     </ul>
 
-                    <!-- Only show "no results" after user has actually searched -->
-                    <div *ngIf="hasSearched && searchResults.length === 0" class="empty-state">Aucun utilisateur trouvé</div>
+                    <div *ngIf="!isLoading && hasSearched && searchResults.length === 0" class="empty-state">
+                        {{ 'socials-popup.empty.no-results' | translate }}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Confirmation Dialog -->
+@if (showConfirmation) {
+<div class="confirmation-bubble" (click)="$event.stopPropagation()">
+    <p>{{ confirmationMessage | translate }}</p>
+    <div class="confirmation-buttons">
+        <button (click)="confirmAction()">{{ 'general.button.yes' | translate }}</button>
+        <button (click)="closeConfirmation()">{{ 'general.button.no' | translate }}</button>
+    </div>
+</div>
+}
+
+<!-- Error Message Bubble -->
+@if (showError) {
+<div class="error-bubble" (click)="$event.stopPropagation()">
+    <button class="close-error-btn" (click)="closeError()">×</button>
+    <p>{{ errorMessage | translate }}</p>
+</div>
+}

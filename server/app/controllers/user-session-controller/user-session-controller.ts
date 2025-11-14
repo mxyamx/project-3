@@ -12,8 +12,9 @@ export class UserSessionController {
     constructor(
         private sio: Server,
         private usersService: UsersService,
+        userSessionManager?: UserSessionManager,
     ) {
-        this.userSessionManager = new UserSessionManager();
+        this.userSessionManager = userSessionManager || new UserSessionManager();
         this.vpSocketIds = [];
     }
 

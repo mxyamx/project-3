@@ -259,6 +259,16 @@ ul.user-list {
         }
     }
 
+    &.block-btn {
+        color: #dc3545;
+
+        &:hover {
+            transform: scale(1.2);
+            color: #c82333;
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+    }
+
     // Reject/Cancel button (red)
     &.reject-btn,
     &.cancel-btn {
@@ -381,4 +391,53 @@ ul.user-list {
     .user-info .name {
         font-size: 1rem;
     }
+}
+
+.confirmation-bubble,
+.error-bubble {
+    position: fixed;
+    font-size: 1.2rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    text-align: center;
+}
+
+.confirmation-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 20px;
+}
+
+.confirmation-buttons button {
+    background-color: #6398df;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'jaro';
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.confirmation-buttons button:hover {
+    background-color: rgb(60, 88, 148);
+    color: white;
+}
+
+.close-error-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 20px;
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    cursor: pointer;
 }

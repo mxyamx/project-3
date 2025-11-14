@@ -7,7 +7,15 @@
             <div class="user-actions">
                 <i class="fa-solid fa-shopping-cart logout-button" aria-hidden="true" (click)="openShop()"></i>
                 <i class="fa-solid fa-message logout-button" aria-hidden="true" (click)="openGeneralChat()"></i>
-                <i class="fa-solid fa-user-group logout-button" aria-hidden="true" (click)="openSocialsPopup()"></i>
+
+                <!-- Friends icon with notification badge -->
+                <div class="notification-wrapper">
+                    <i class="fa-solid fa-user-group logout-button" aria-hidden="true" (click)="openSocialsPopup()"></i>
+                    @if (pendingRequestCount() > 0) {
+                    <span class="notification-badge">{{ pendingRequestCount() }}</span>
+                    }
+                </div>
+
                 <img [src]="avatar().avatar" alt="Avatar" class="avatar-icon" (click)="openProfile()" />
                 <i class="fa-solid fa-gear logout-button" aria-hidden="true" (click)="openSettings()"></i>
                 <i class="fa fa-sign-out-alt logout-button" aria-hidden="true" (click)="logout()"></i>
@@ -30,6 +38,7 @@
             <span>Maryam Mehdaoui</span>, <span>Nadine Rzig</span>
         </p>
     </footer>
+
     @if(showChat() && !this.chatDockService.chatDetache()){
     <div class="chat-container">
         <app-chat-container></app-chat-container>
