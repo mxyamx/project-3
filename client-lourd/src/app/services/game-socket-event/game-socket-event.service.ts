@@ -163,32 +163,6 @@ export class GameSocketEventService {
 
             this.currentGamesService.displayedCurrentGame().entryPrice;
 
-            // const WINNER_REWARD = Number(entryPrice * this.gameSessionManager.listOfPlayers.length * 2) / 3;
-            // const CONSOLATION_REWARD = Number(entryPrice * this.gameSessionManager.listOfPlayers.length) / 3;
-            // if (!data.winner) return;
-
-            // // Handling winner reward
-            // const isVp = data.winner?.virtualPlayer;
-            // if (isVp) {
-            //     return;
-            // }
-            // const user = await this.usersService.getUser(data.winner.userId);
-            // if (!user) return;
-            // await this.usersService.updateUser({ ...user, money: user.money + WINNER_REWARD });
-
-            // // Handling losers reward
-            // this.gameSessionManager.listOfPlayers.forEach(async (player) => {
-            //     if (player.userId !== data.winner?.userId) {
-            //         const isVp = player?.virtualPlayer;
-            //         if (isVp) {
-            //             return;
-            //         }
-            //         const loserUser = await this.usersService.getUser(player.userId);
-            //         if (!loserUser) return;
-            //         await this.usersService.updateUser({ ...loserUser, money: loserUser.money + CONSOLATION_REWARD });
-            //     }
-            // });
-
             this.gameSessionManager.changeState(PlayerState.EndGame);
             this.hideNotifications();
 

@@ -176,7 +176,9 @@ export class GameSessionController {
 
         if (this.gameSession.listOfPlayers.getValues().length < 2) {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
-            this.endGame();
+            const remainingPlayers = this.gameSession.listOfPlayers.getValues();
+            const winner = remainingPlayers.length === 1 ? remainingPlayers[0] : undefined;
+            this.endGame(winner);
         }
     }
 
