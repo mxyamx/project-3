@@ -17,6 +17,7 @@ export interface CurrentGame {
     adminId: string;
     phase: CurrentGamePhase;
     dropInEnabled: boolean;
+    entryPrice: number;
 }
 
 export interface CurrentGamePreview {
@@ -28,6 +29,7 @@ export interface CurrentGamePreview {
     phase: CurrentGamePhase;
     previewImage: string;
     isJoinable: boolean;
+    entryPrice: number;
 }
 
 export interface JoinGameAck {
@@ -36,5 +38,6 @@ export interface JoinGameAck {
     limitError: boolean;
     lockedError: boolean;
     codeError: boolean;
+    insufficientFundsError?: boolean;
     updateGamedRes?: UpdateGamedRes;
 }

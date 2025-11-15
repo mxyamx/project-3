@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { GameClockManager } from '@app/classes/game-clock-manager/game-clock-manager';
 import { GameSession } from '@app/classes/game-session/game-session';
 import {
@@ -10,6 +11,8 @@ import {
 import { FightSubController } from '@app/controllers/fight-sub-controller/fight-sub-controller';
 import { MovementSubController } from '@app/controllers/movement-sub-controller/movement-sub-controller';
 import { CurrentGamesService } from '@app/services/current-games/current-games.service';
+import { PrizePoolService } from '@app/services/prize-pool/prize-pool/prize-pool.service';
+import { UsersService } from '@app/services/users/users.service';
 import { genErrorMessage, sendError } from '@app/utils/functions/socket-error-functions';
 import { CtfTeam } from '@common/enums/ctf-team';
 import { GameMode } from '@common/enums/game-mode';
@@ -22,6 +25,7 @@ import { StartGameData } from '@common/socket-data-forms';
 import { PlayerStatistics } from '@common/statistics';
 import * as io from 'socket.io';
 import { setTimeout as delay } from 'timers/promises';
+import { Container } from 'typedi';
 
 export class GameSessionController {
     private standardStackPlayer: Player[];
@@ -35,6 +39,7 @@ export class GameSessionController {
     private fightLoserName: string | undefined;
     private fightWinnerName: string | undefined;
 
+    // eslint-disable-next-line max-params
     constructor(
         private gameSession: GameSession,
         private sio: io.Server,
@@ -171,7 +176,9 @@ export class GameSessionController {
 
         if (this.gameSession.listOfPlayers.getValues().length < 2) {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
-            this.endGame();
+            const remainingPlayers = this.gameSession.listOfPlayers.getValues();
+            const winner = remainingPlayers.length === 1 ? remainingPlayers[0] : undefined;
+            this.endGame(winner);
         }
     }
 
@@ -216,7 +223,7 @@ export class GameSessionController {
                 if (this.gameSession.ctfIsOver()) {
                     await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
                     this.winnerTeam = this.gameSession.activePlayerInstance.ctfTeam;
-                    this.endGame();
+                    await this.endGame();
                 }
             }
         }, MOVEMENT_TIME_INTERVAL_MSEC);
@@ -347,7 +354,7 @@ export class GameSessionController {
         if (this.gameSession.ctfIsOver()) {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
             this.winnerTeam = this.gameSession.activePlayerInstance.ctfTeam;
-            this.endGame();
+            await this.endGame();
         }
     }
 
@@ -360,12 +367,20 @@ export class GameSessionController {
         this.fightSubController.endFight();
     }
 
-    private endGame(winner?: Player): void {
-        //TODO I THINK I WILL SEND THE STATS HERE!
+    private async endGame(winner?: Player): Promise<void> {
+        // TODO I THINK I WILL SEND THE STATS HERE!
         this.gameSession.endGame();
         this.gameService.setGameEnded(this.roomCode);
         this.clockManager.stopClock();
-        let listOfPlayerStats: (PlayerStatistics & { name: string })[] = [];
+
+        // Distribute prizes
+        if (this.gameSession.board.gameMode === GameMode.Normal && winner) {
+            await this.distributePrizes(winner);
+        } else if (this.gameSession.board.gameMode === GameMode.CTF && this.winnerTeam) {
+            await this.distributePrizesForCTF(this.winnerTeam);
+        }
+
+        const listOfPlayerStats: (PlayerStatistics & { name: string })[] = [];
         this.gameSession.statisticsManager.playerStatisticsMap.forEach((value) => {
             const stat: PlayerStatistics & { name: string } = { ...value };
             listOfPlayerStats.push(stat);
@@ -376,12 +391,13 @@ export class GameSessionController {
             winnerTeam: this.winnerTeam,
             winner,
             globalStats: this.gameSession.statisticsManager.displayedGlobalStatistics,
-            listOfPlayerStats: listOfPlayerStats,
+            listOfPlayerStats,
         };
 
         this.sio.to(this.roomCode).emit(SocketClientEventNames.EndGame, ans);
     }
-    //TODO MIGHT USE THIS TO INFORM THE OTHER PLAYERS
+
+    // TODO MIGHT USE THIS TO INFORM THE OTHER PLAYERS
     private updateGame(): void {
         if (this.gameOver()) return;
         const ans: dataForm.UpdateGamedRes = {
@@ -432,5 +448,80 @@ export class GameSessionController {
             winnerName: this.fightWinnerName ?? '',
         };
         this.sio.to(this.roomCode).emit(SocketClientEventNames.ShowEndFightNotification, ans);
+    }
+
+    private async distributePrizes(winner: Player): Promise<void> {
+        const prizePoolService = Container.get(PrizePoolService);
+        const game = await this.gameService.getGame(this.roomCode);
+        if (!game || game.entryPrice === 0) return;
+
+        const activePlayers = this.gameSession.getActivePlayers();
+        const humanPlayers = activePlayers.filter((p) => !p.virtualPlayer);
+
+        // Sole winner case
+        if (humanPlayers.length === 1) {
+            const prizeAmount = prizePoolService.calculateSoleWinnerPrize(game.entryPrice, this.gameSession.initialPlayers);
+            await this.updatePlayerMoney(humanPlayers[0].userId, prizeAmount);
+            return;
+        }
+
+        // Normal case
+        const winners = [winner];
+        const losers = humanPlayers.filter((player) => player.userId !== winner.userId && !this.gameSession.hasPlayerAbandoned(player.userId));
+
+        const distribution = prizePoolService.calculatePrizeDistribution(game.entryPrice, this.gameSession.initialPlayers, winners, losers);
+
+        for (const [userId, amount] of distribution.winners) {
+            await this.updatePlayerMoney(userId, amount);
+        }
+
+        for (const [userId, amount] of distribution.losers) {
+            await this.updatePlayerMoney(userId, amount);
+        }
+    }
+
+    private async distributePrizesForCTF(winningTeam: CtfTeam): Promise<void> {
+        const prizePoolService = Container.get(PrizePoolService);
+        const game = await this.gameService.getGame(this.roomCode);
+        if (!game || game.entryPrice === 0) return;
+
+        const activePlayers = this.gameSession.getActivePlayers();
+        const humanPlayers = activePlayers.filter((p) => !p.virtualPlayer);
+
+        // Get winning and losing team members (excluding abandoned players)
+        const winningTeamPlayers = humanPlayers.filter((p) => p.ctfTeam === winningTeam && !this.gameSession.hasPlayerAbandoned(p.userId));
+        const losingTeamPlayers = humanPlayers.filter((p) => p.ctfTeam !== winningTeam && !this.gameSession.hasPlayerAbandoned(p.userId));
+
+        // If no human players remain, no prizes to distribute
+        if (winningTeamPlayers.length === 0) return;
+
+        const distribution = prizePoolService.calculatePrizeDistribution(
+            game.entryPrice,
+            this.gameSession.initialPlayers,
+            winningTeamPlayers,
+            losingTeamPlayers,
+        );
+
+        for (const [userId, amount] of distribution.winners) {
+            await this.updatePlayerMoney(userId, amount);
+        }
+
+        for (const [userId, amount] of distribution.losers) {
+            await this.updatePlayerMoney(userId, amount);
+        }
+    }
+
+    private async updatePlayerMoney(userId: string, amount: number): Promise<void> {
+        try {
+            const usersService = Container.get(UsersService);
+            const user = await usersService.getUser(userId);
+            if (!user) return;
+
+            const updatedUser = { ...user, money: user.money + amount };
+            await usersService.updateUser(updatedUser);
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error(`Failed to update money for user ${userId}:`, error);
+        }
     }
 }

@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable max-lines */
 import { DynamicPlayerList } from '@app/classes/dynamic-player-list/dynamic-player-list';
 import { ItemEffectApplicator } from '@app/classes/item-effect-applicator/item-effect-applicator';
+import { StatisticsManager } from '@app/classes/statistics-manager/statistics-manager';
 import { LARGE_DICE_VALUE, SMALL_DICE_VALUE, STANDARD_LIST_PLAYERS } from '@app/constants/development-constants';
 import { hasDuplicateNames, shuffleArray } from '@app/utils/functions/general-usage-functions';
 import { BoardGame } from '@common/board-game';
@@ -15,9 +17,10 @@ import { Item } from '@common/item';
 import { Player } from '@common/player';
 import { Position } from '@common/position';
 import { Tile } from '@common/tile';
-import { StatisticsManager } from '../statistics-manager/statistics-manager';
 
 export class GameSession {
+    statisticsManager: StatisticsManager;
+
     private players: DynamicPlayerList;
     private activePlayer: Player;
     private ongoingFight: Fight | undefined;
@@ -38,7 +41,8 @@ export class GameSession {
     private escapeMAp = new Map<string, number>();
     private originalBoardGame: BoardGame;
 
-    statisticsManager: StatisticsManager;
+    private initialPlayerCount: number = 0;
+    private abandonedPlayers: Set<string> = new Set();
 
     constructor(private boardGame: BoardGame) {
         this.players = new DynamicPlayerList();
@@ -196,6 +200,7 @@ export class GameSession {
     startGame(): void {
         this.gameHasStarted = true;
         this.activePlayer = this.players.getFirst();
+        this.initialPlayerCount = this.players.getValues().length;
 
         this.placeItems();
         this.placePlayers();
@@ -361,7 +366,6 @@ export class GameSession {
         if (this.board.gameMode !== GameMode.CTF) return false;
         return this.activePlayerHasFlag() && JSON.stringify(this.activePlayer.position) === JSON.stringify(this.activePlayer.startPosition);
     }
-
     private activePlayerHasFlag(): boolean {
         return this.activePlayer.inventory.find((i: Item) => {
             return i.type === ItemType.Flag;
@@ -387,8 +391,8 @@ export class GameSession {
         }
     }
     placeAndAddActivePlayer(player: Player): void {
-        let firstTeamPlayerCount: number = 0;
-        let secondTeamPlayerCount: number = 0;
+        let firstTeamPlayerCount = 0;
+        let secondTeamPlayerCount = 0;
 
         const usedStartPos: Position[] = this.listOfPlayers.getValues().map((player) => {
             if (player?.ctfTeam) {
@@ -633,5 +637,21 @@ export class GameSession {
                 : false;
         }
         return false;
+    }
+
+    get initialPlayers(): number {
+        return this.initialPlayerCount;
+    }
+
+    markPlayerAsAbandoned(userId: string): void {
+        this.abandonedPlayers.add(userId);
+    }
+
+    hasPlayerAbandoned(userId: string): boolean {
+        return this.abandonedPlayers.has(userId);
+    }
+
+    getActivePlayers(): Player[] {
+        return this.players.getValues().filter((player) => !this.abandonedPlayers.has(player.userId));
     }
 }

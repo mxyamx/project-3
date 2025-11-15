@@ -155,7 +155,8 @@
         "title": "Create a New Game",
         "boardgame-deleted-modal": "Warning!! This game has already been deleted.",
         "visibility-modal": "Warning!! This game's visibility has changed.",
-        "create": "Create New Game"
+        "create": "Create New Game",
+        "poll-prize-title": "Select an entry fee for the game"
     },
     "game-list": {
         "title": "Game List",
@@ -166,7 +167,10 @@
             "mode": "Mode",
             "last-modified": "Last Modified",
             "privacy": "Privacy",
-            "owner": "Owner"
+            "owner": "Owner",
+            "entry-price": "Entry Price",
+            "free": "Free",
+            "not-enough-money": "Insufficient funds"
         }
     },
     "admin-page": {
@@ -337,6 +341,8 @@
         "doors": "Total Doors Manipulated",
         "flags": "Flag Possessions"
     },
+    "entry-fee-label": "Entry fee",
+    "entry-fee-free": "Free room",
     "waiting-page": {
         "leave": "Leave",
         "full-room": "Room Full",
@@ -351,6 +357,8 @@
         "code": "Access Code",
         "waiting": "Waiting for players...",
         "start-game": "Start Game",
+        "entry-fee-label": "Entry fee",
+        "entry-fee-free": "Free Room",
         "vp": {
             "button": "Generate Virtual Player",
             "title": "Choose the virtual player profile",
@@ -454,17 +462,32 @@
 
     "shop-page": {
         "back-button": "Back",
-        "Exclusive-avatars": "Exclusive Avatars",
+        "Exclusive-avatars": "Exclusive profile Avatars ",
         "avatars": {
             "Alpha-wolf": "Alpha wolf",
             "Agile-Kangaroo": "Agile Kangourou",
             "Royal-eagle": "Royal Eagle",
-            "Majestic-lion": "Majestic Lion"
+            "Majestic-lion": "Majestic Lion",
+            "Sweet-hippo": "Sweet Hippo",
+            "Elegant-giraffe": "Elegant Giraffe",
+            "Proud-horse": "Proud Horse",
+            "Fierce-tiger": "Fierce Tiger",
+            "Polar-bear": "Majestic Polar Bear",
+            "warthog": "Three-horned Warthog",
+            "Powerful-penguin": "Powerful Penguin",
+            "Black-panther": "Black Panther",
+            "Cunning-crocodile": "Cunning Crocodile",
+            "panda-cuddly": "Cuddly Panda"
         },
         "Sound-effects-exclusive": "Sound Effects Exclusive",
         "effects": {
             "Sword-Clash": "Sword Clash",
-            "Punch-of-death": "Punch of death"
+            "Punch-of-death": "Punch of death",
+            "Swift-attack": "Swift attack",
+            "Monster-attack": "Monster attack",
+            "Explosion": "Explosion",
+            "Evil-laugh": "Evil laugh",
+            "knife-cutting": "Knife attack"
         },
         "Purchase": "Purchase",
         "Owned": "Owned",

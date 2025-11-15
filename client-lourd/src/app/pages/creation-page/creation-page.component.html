@@ -25,6 +25,32 @@
 
     <div class="creation-button-container"></div>
 
+    <section class="poll-prize-container">
+        <div class="poll-prize-header">
+            <h3 class="poll-prize-title">
+                {{ 'creation-page.poll-prize-title' | translate }}
+                <!-- or hardcode a string for now -->
+            </h3>
+
+            <div class="poll-prize-values">
+                <span class="poll-prize-current">{{ selectedPollPrizeAmount }}</span>
+                <span>{{ maxPollPrize }}</span>
+            </div>
+        </div>
+
+        <div class="poll-prize-slider-wrapper">
+            <input
+                type="range"
+                class="poll-prize-slider"
+                min="0"
+                [max]="maxPollPrize"
+                step="1"
+                [value]="selectedPollPrizeAmount"
+                (input)="onPollPrizeChange($event)"
+            />
+        </div>
+    </section>
+
     <div class="creation-content" [ngClass]="{ 'no-game-selected': true, 'game-selected': true }">
         <app-game-list [gamesList]="gamesList" (gameSelected)="setDisplayedObject($event)" [theme]="'green'" [isLoading]="isLoading()">
         </app-game-list>

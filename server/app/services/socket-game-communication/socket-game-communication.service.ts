@@ -71,7 +71,7 @@ export class SocketGameCommunication {
             const doc: Omit<ChatMessageDoc, '_id'> = {
                 text: message.text,
                 senderId: message.senderId,
-                roomId: roomId,
+                roomId,
                 timestamp: now,
             };
 

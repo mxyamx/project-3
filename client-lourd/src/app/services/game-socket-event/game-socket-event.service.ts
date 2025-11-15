@@ -23,6 +23,7 @@ import { PlayerState } from '@common/enums/player-state';
 import { SocketClientEventNames } from '@common/enums/socket-events-names';
 import { UrlPage } from '@common/enums/url-page';
 import * as dataForm from '@common/socket-data-forms';
+import { CurrentGameManagerService } from '../current-game-manager/current-game-manager.service';
 
 @Injectable({
     providedIn: 'root',
@@ -36,6 +37,7 @@ export class GameSocketEventService {
     private movementEventsHandler: MovementEventsHandlerService = inject(MovementEventsHandlerService);
     private gameInterfaceService: GameInterfaceService = inject(GameInterfaceService);
     private statisticsService: StatisticsManagerService = inject(StatisticsManagerService);
+    private currentGamesService: CurrentGameManagerService = inject(CurrentGameManagerService);
     private limitOfItems: number = MAXIMUM_AMOUNT_OF_ITEM;
     private gameEventService: GameEventService = inject(GameEventService);
     gameEnding: boolean = false;
@@ -131,6 +133,18 @@ export class GameSocketEventService {
                 return;
             }
 
+            // if (data.winner) {
+            //     const isCurrentPlayerWinner = data.winner.userId === this.gameSessionManager.chosenPlayer().userId;
+
+            //     if (isCurrentPlayerWinner) {
+            //         // Show winner notification with prize
+            //         this.notificationService.showWinnerNotification(/* prize amount */);
+            //     } else {
+            //         // Show consolation notification
+            //         this.notificationService.showConsolationNotification(/* prize amount */);
+            //     }
+            // }
+
             const gameId = this.gameSessionManager.gameId();
             if (data.globalStats && data.listOfPlayerStats) {
                 this.statisticsService.reset();
@@ -146,6 +160,8 @@ export class GameSocketEventService {
             const gapMsec = 100;
             const endGameNotificationStartingTime = 500;
             const endGameNotificationEndingTime = 2800;
+
+            this.currentGamesService.displayedCurrentGame().entryPrice;
 
             this.gameSessionManager.changeState(PlayerState.EndGame);
             this.hideNotifications();

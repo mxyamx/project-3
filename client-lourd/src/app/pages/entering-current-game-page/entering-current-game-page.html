@@ -56,7 +56,14 @@
         } @else {
         <div class="preview-container">
             @for(preview of previews();track preview.id){
-            <div class="preview" [ngClass]="{ 'clickable': preview.isJoinable}" (click)="findGame(preview)">
+            <div
+                class="preview"
+                [ngClass]="{
+        clickable: preview.isJoinable && preview.entryPrice <= playerMoney,
+        'not-enough-money': preview.entryPrice > playerMoney
+    }"
+                (click)="preview.isJoinable && preview.entryPrice <= playerMoney && joinGame(preview.id)"
+            >
                 <img [src]="preview.previewImage" alt="Preview Image" />
 
                 <p class="line-code">
@@ -67,6 +74,15 @@
                 <p class="line-size">
                     <i class="fas fa-ruler"></i>
                     {{ 'game-list.details.size' | translate }} : {{ preview.boardgameSize }} x {{ preview.boardgameSize }}
+                </p>
+
+                <p class="line-entry">
+                    <i class="fa-solid fa-coins"></i>
+                    {{ 'game-list.details.entry-price' | translate }} : @if (preview.entryPrice === 0) {
+                    <span class="entry-price-badge free"> {{ 'game-list.details.free' | translate }} </span>
+                    } @else {
+                    <span class="entry-price-badge"> {{ preview.entryPrice }} </span>
+                    }
                 </p>
 
                 @if (preview.isJoinable) {
@@ -118,6 +134,8 @@
                 <p class="modal-text">{{'join-game-page.invalid-code'|translate}}</p>
                 } @if(lockedError || limitError) {
                 <p class="modal-text">{{'join-game-page.locked-game'|translate}}</p>
+                } @if (moneyError) {
+                <p class="modal-text">{{ 'game-list.details.not-enough-money' | translate }}</p>
                 }
                 <div class="buttons">
                     <button class="option-button" (click)="retry()">{{'join-game-page.try-again'| translate }}</button>

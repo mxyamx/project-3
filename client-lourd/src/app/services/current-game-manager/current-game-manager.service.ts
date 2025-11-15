@@ -32,6 +32,7 @@ export class CurrentGameManagerService {
         adminId: '',
         phase: CurrentGamePhase.Waiting,
         dropInEnabled: false,
+        entryPrice: 0,
     });
 
     updateCurrentGame(newGame: CurrentGame): void {
@@ -62,6 +63,7 @@ export class CurrentGameManagerService {
             adminId: '',
             phase: CurrentGamePhase.Waiting,
             dropInEnabled: false,
+            entryPrice: 0,
         });
     }
 

@@ -5,7 +5,9 @@ import { Router, RouterLink } from '@angular/router';
 import { ToastFightComponent } from '@app/components/toast-fight/toast-fight.component';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
+import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
+import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { CurrentGame, CurrentGamePhase, CurrentGamePreview, JoinGameAck } from '@common/current-game';
 import { SocketEventNames } from '@common/enums/socket-events-names';
 import { UrlPage } from '@common/enums/url-page';
@@ -27,9 +29,13 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
     codeError: boolean = false;
     lockedError: boolean = false;
     limitError: boolean = false;
+    moneyError = false;
     hasBeenClicked: boolean = false;
+
+    private httpUserService = inject(HttpUserService);
     private playerSocketService: PlayerSocketService = inject(PlayerSocketService);
     private clientSocketService: SocketClientService = inject(SocketClientService);
+    private userManagerService = inject(UserManagerService);
     private currentGameManager = inject(CurrentGameManagerService);
 
     constructor(private router: Router) {}
@@ -40,8 +46,13 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
         });
         this.playerSocketService.onCurrentGamePreviewsUpdated((previews: CurrentGamePreview[]) => this.previews.set(previews));
     }
+
     ngOnDestroy(): void {
         this.clientSocketService.off(SocketEventNames.CurrentGamePreviewsUpdated);
+    }
+
+    get playerMoney(): number {
+        return this.userManagerService.currentUser().money;
     }
 
     moveToNext(nextInput: HTMLInputElement, index: number): void {
@@ -62,6 +73,13 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
 
     joinGame(id: string) {
         this.playerSocketService.emitJoinAvatarRoom(id, (response: JoinGameAck) => {
+            const preview = this.previews().find((p) => p.id === id);
+
+            if (preview && preview.entryPrice > this.playerMoney) {
+                this.moneyError = true;
+                return;
+            }
+
             if (response.codeError) {
                 this.codeError = response.codeError;
                 return;
@@ -74,11 +92,18 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
                 this.limitError = response.limitError;
                 return;
             }
+            if (response.insufficientFundsError) {
+                this.moneyError = true;
+                return;
+            }
 
             if (!response.game) {
                 this.codeError = true;
                 return;
             }
+
+            this.refreshUserData();
+
             this.currentGameManager.updateCurrentGame(response.game);
             this.hasBeenClicked = true;
             this.router.navigate([UrlPage.Avatar]);
@@ -89,21 +114,35 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
         if (!preview.isJoinable) {
             return;
         }
-
-        this.joinGame(preview.id);
+        if (preview.entryPrice > this.playerMoney) {
+            this.moneyError = true;
+            return;
+        }
     }
+
     enterCode() {
         const code = this.codeArray.join('');
         this.joinGame(code);
     }
 
     error(): boolean {
-        return this.lockedError || this.limitError || this.codeError;
+        return this.lockedError || this.limitError || this.codeError || this.moneyError;
     }
 
     retry() {
         this.codeError = false;
         this.lockedError = false;
         this.limitError = false;
+        this.moneyError = false;
+    }
+
+    private refreshUserData(): void {
+        const userId = this.userManagerService.getCurrentUser().id;
+        this.httpUserService.getUser(userId).subscribe({
+            next: (user) => {
+                this.userManagerService.setMoney(user.money);
+            },
+            error: (err) => console.error('Failed to refresh user data:', err),
+        });
     }
 }

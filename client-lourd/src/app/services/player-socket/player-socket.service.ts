@@ -72,8 +72,8 @@ export class PlayerSocketService {
         this.clientSocketService.emit('delete-game', gameId);
     }
 
-    emitAdminLeaving(gameId: string, callback: () => void): void {
-        this.clientSocketService.emit('admin-leaving', gameId, callback);
+    emitAdminLeaving(gameId: string): void {
+        this.clientSocketService.emit('admin-leaving', gameId);
     }
 
     onAdminLeft(callback: (gameId: string) => void): void {

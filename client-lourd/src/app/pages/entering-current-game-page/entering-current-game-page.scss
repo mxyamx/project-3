@@ -416,3 +416,38 @@ $button-border-radius: 66px;
     background: linear-gradient(135deg, #6fb3e0, #d4eaf7);
     color: white;
 }
+
+.line-entry {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+    font-size: 0.95rem;
+    color: #ffffff;
+}
+
+.line-entry i {
+    width: 18px;
+    text-align: center;
+}
+
+/* pill showing the price */
+.entry-price-badge {
+    padding: 4px 12px;
+    border-radius: 999px;
+    background-color: #ffffff; // or whatever fits your card
+    color: #000000; // TEXT BLACK
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* when entry price is 0 */
+.entry-price-badge.free {
+    background-color: #b1e8b3; // light green if you want
+    color: #000000; // still black text
+}
+
+.preview.not-enough-money {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

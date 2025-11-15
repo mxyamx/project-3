@@ -40,7 +40,14 @@ export class GameScheduler {
 
         const usersService = Container.get(UsersService);
 
-        const newFightSubController: FightSubController = new FightSubController(newClockManager, newGameSession, game.id, this.sio, usersService);
+        const newFightSubController: FightSubController = new FightSubController(
+            newClockManager,
+            newGameSession,
+            game.id,
+            this.sio,
+            usersService,
+            game.entryPrice,
+        );
         const newMovementSubController: MovementSubController = new MovementSubController(newGameSession, game.id, this.sio);
         const newController: GameSessionController = new GameSessionController(
             newGameSession,
