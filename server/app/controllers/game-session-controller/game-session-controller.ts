@@ -25,7 +25,7 @@ import { StartGameData } from '@common/socket-data-forms';
 import { PlayerStatistics } from '@common/statistics';
 import * as io from 'socket.io';
 import { setTimeout as delay } from 'timers/promises';
-import Container from 'typedi';
+import { Container } from 'typedi';
 
 export class GameSessionController {
     private standardStackPlayer: Player[];
@@ -374,8 +374,10 @@ export class GameSessionController {
         this.clockManager.stopClock();
 
         // Distribute prizes
-        if (winner && this.gameSession.board.gameMode === GameMode.Normal) {
+        if (this.gameSession.board.gameMode === GameMode.Normal && winner) {
             await this.distributePrizes(winner);
+        } else if (this.gameSession.board.gameMode === GameMode.CTF && this.winnerTeam) {
+            await this.distributePrizesForCTF(this.winnerTeam);
         }
 
         const listOfPlayerStats: (PlayerStatistics & { name: string })[] = [];
@@ -394,6 +396,7 @@ export class GameSessionController {
 
         this.sio.to(this.roomCode).emit(SocketClientEventNames.EndGame, ans);
     }
+
     // TODO MIGHT USE THIS TO INFORM THE OTHER PLAYERS
     private updateGame(): void {
         if (this.gameOver()) return;
@@ -487,6 +490,37 @@ export class GameSessionController {
         } catch (error) {
             // eslint-disable-next-line no-console
             console.error(`Failed to update money for user ${userId}:`, error);
+        }
+    }
+
+    private async distributePrizesForCTF(winningTeam: CtfTeam): Promise<void> {
+        const prizePoolService = Container.get(PrizePoolService);
+        const game = await this.gameService.getGame(this.roomCode);
+        if (!game || game.entryPrice === 0) return;
+
+        const activePlayers = this.gameSession.getActivePlayers();
+        const humanPlayers = activePlayers.filter((p) => !p.virtualPlayer);
+
+        // Get winning and losing team members (excluding abandoned players)
+        const winningTeamPlayers = humanPlayers.filter((p) => p.ctfTeam === winningTeam && !this.gameSession.hasPlayerAbandoned(p.userId));
+        const losingTeamPlayers = humanPlayers.filter((p) => p.ctfTeam !== winningTeam && !this.gameSession.hasPlayerAbandoned(p.userId));
+
+        // If no human players remain, no prizes to distribute
+        if (winningTeamPlayers.length === 0) return;
+
+        const distribution = prizePoolService.calculatePrizeDistribution(
+            game.entryPrice,
+            this.gameSession.initialPlayers,
+            winningTeamPlayers,
+            losingTeamPlayers,
+        );
+
+        for (const [userId, amount] of distribution.winners) {
+            await this.updatePlayerMoney(userId, amount);
+        }
+
+        for (const [userId, amount] of distribution.losers) {
+            await this.updatePlayerMoney(userId, amount);
         }
     }
 }
