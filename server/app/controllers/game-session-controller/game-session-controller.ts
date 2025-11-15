@@ -449,6 +449,7 @@ export class GameSessionController {
         };
         this.sio.to(this.roomCode).emit(SocketClientEventNames.ShowEndFightNotification, ans);
     }
+
     private async distributePrizes(winner: Player): Promise<void> {
         const prizePoolService = Container.get(PrizePoolService);
         const game = await this.gameService.getGame(this.roomCode);
@@ -466,7 +467,7 @@ export class GameSessionController {
 
         // Normal case
         const winners = [winner];
-        const losers = activePlayers.filter((player) => player.userId !== winner.userId && !this.gameSession.hasPlayerAbandoned(player.userId));
+        const losers = humanPlayers.filter((player) => player.userId !== winner.userId && !this.gameSession.hasPlayerAbandoned(player.userId));
 
         const distribution = prizePoolService.calculatePrizeDistribution(game.entryPrice, this.gameSession.initialPlayers, winners, losers);
 
@@ -476,20 +477,6 @@ export class GameSessionController {
 
         for (const [userId, amount] of distribution.losers) {
             await this.updatePlayerMoney(userId, amount);
-        }
-    }
-
-    private async updatePlayerMoney(userId: string, amount: number): Promise<void> {
-        try {
-            const usersService = Container.get(UsersService);
-            const user = await usersService.getUser(userId);
-            if (!user) return;
-
-            const updatedUser = { ...user, money: user.money + amount };
-            await usersService.updateUser(updatedUser);
-        } catch (error) {
-            // eslint-disable-next-line no-console
-            console.error(`Failed to update money for user ${userId}:`, error);
         }
     }
 
@@ -521,6 +508,20 @@ export class GameSessionController {
 
         for (const [userId, amount] of distribution.losers) {
             await this.updatePlayerMoney(userId, amount);
+        }
+    }
+
+    private async updatePlayerMoney(userId: string, amount: number): Promise<void> {
+        try {
+            const usersService = Container.get(UsersService);
+            const user = await usersService.getUser(userId);
+            if (!user) return;
+
+            const updatedUser = { ...user, money: user.money + amount };
+            await usersService.updateUser(updatedUser);
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error(`Failed to update money for user ${userId}:`, error);
         }
     }
 }
