@@ -13,7 +13,6 @@ import { BoardGameDTO } from '@common/board-game';
 import { JoinGameAck } from '@common/current-game';
 import { GameMode } from '@common/enums/game-mode';
 import { UrlPage } from '@common/enums/url-page';
-import { User } from '@common/user';
 import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
@@ -37,8 +36,11 @@ export class CreationPageComponent implements OnInit {
     gameMode: typeof GameMode = GameMode;
     isLoading: WritableSignal<boolean> = signal(false);
 
-    maxPollPrize: number = this.userManagerService.getCurrentUser().money;
     selectedPollPrizeAmount: number = 0;
+
+    get maxPollPrize(): number {
+        return this.userManagerService.currentUser().money;
+    }
 
     onPollPrizeChange(event: Event): void {
         const value = Number((event.target as HTMLInputElement).value);
@@ -86,7 +88,6 @@ export class CreationPageComponent implements OnInit {
         if (!this.displayedObject) return;
 
         this.currentGameService.reset();
-
         const gameId = this.displayedObject.id;
 
         this.httpBoardGameService.getBoard(gameId).subscribe({
@@ -98,6 +99,7 @@ export class CreationPageComponent implements OnInit {
 
                 this.currentGameService.updatePickedBoardGame(boardGame);
                 const currentGame = this.currentGameService.displayedCurrentGame();
+
                 this.playerSocketService.emitCreateGame({ ...currentGame, entryPrice: this.selectedPollPrizeAmount }, (response: any) => {
                     if (response?.error) {
                         switch (response.error) {
@@ -107,6 +109,9 @@ export class CreationPageComponent implements OnInit {
                             case 'GAME_NOT_FOUND':
                                 this.showAlertConfirmation = true;
                                 break;
+                            case 'INSUFFICIENT_FUNDS':
+                                alert('Insufficient funds to create this game');
+                                break;
                             default:
                                 this.showAlertConfirmation = true;
                         }
@@ -115,24 +120,7 @@ export class CreationPageComponent implements OnInit {
                     }
 
                     if (response?.success && response?.game) {
-                        const user = this.userManagerService.getCurrentUser();
-                        const newMoney = Math.max(0, user.money - this.selectedPollPrizeAmount);
-                        const updatedUser: User = { ...user, money: newMoney };
-
-                        this.httpUserService.updateUser(updatedUser).subscribe({
-                            next: () => {
-                                // update local signal so UI stays in sync
-                                this.userManagerService.setMoney(newMoney);
-                                // if you ever stay on this page, keep slider consistent
-                                this.maxPollPrize = newMoney;
-                                if (this.selectedPollPrizeAmount > newMoney) {
-                                    this.selectedPollPrizeAmount = newMoney;
-                                }
-                            },
-                            error: () => {
-                                // optional: show an error toast; for now ignore
-                            },
-                        });
+                        this.refreshUserData();
 
                         this.currentGameService.updateCurrentGame(response.game);
                         this.playerSocketService.emitJoinAvatarRoom(response.game.id, (response: JoinGameAck) => {
@@ -147,5 +135,18 @@ export class CreationPageComponent implements OnInit {
             },
         });
         this.hasBeenClicked = true;
+    }
+
+    private refreshUserData(): void {
+        const userId = this.userManagerService.getCurrentUser().id;
+        this.httpUserService.getUser(userId).subscribe({
+            next: (user) => {
+                this.userManagerService.setMoney(user.money);
+                if (this.selectedPollPrizeAmount > user.money) {
+                    this.selectedPollPrizeAmount = user.money;
+                }
+            },
+            error: (err) => console.error('Failed to refresh user data:', err),
+        });
     }
 }

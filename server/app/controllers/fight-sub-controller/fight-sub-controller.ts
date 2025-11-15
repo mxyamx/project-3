@@ -8,6 +8,7 @@ import {
     STANDARD_ERROR_MESSAGE,
     WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC,
 } from '@app/constants/development-constants';
+import { PrizePoolService } from '@app/services/prize-pool/prize-pool/prize-pool.service';
 import { UsersService } from '@app/services/users/users.service';
 import { genErrorMessage, sendError } from '@app/utils/functions/socket-error-functions';
 import { GameMode } from '@common/enums/game-mode';
@@ -18,8 +19,11 @@ import * as dataForm from '@common/socket-data-forms';
 import { PlayerStatistics } from '@common/statistics';
 import * as io from 'socket.io';
 import { setTimeout as delay } from 'timers/promises';
+import Container from 'typedi';
 
 export class FightSubController {
+    private prizePoolService: PrizePoolService;
+
     private fightLoserName: string | undefined;
     private fightWinnerName: string | undefined;
 
@@ -31,7 +35,9 @@ export class FightSubController {
         private sio: io.Server,
         private usersService: UsersService,
         private entryPrice: number,
-    ) {}
+    ) {
+        this.prizePoolService = Container.get(PrizePoolService);
+    }
 
     startFight(targetPlayerPosition: Position): void {
         try {
@@ -212,11 +218,14 @@ export class FightSubController {
         }
     }
 
-    private endGame(winner: Player): void {
-        this.updatePlayerMoney(winner);
+    private async endGame(winner: Player): Promise<void> {
         this.gameSession.endGame();
         this.clockManager.stopClock();
-        let listOfPlayerStats: (PlayerStatistics & { name: string; userId: string })[] = [];
+
+        // Distribute prizes
+        await this.distributePrizes(winner);
+
+        const listOfPlayerStats: (PlayerStatistics & { name: string; userId: string })[] = [];
         this.gameSession.statisticsManager.playerStatisticsMap.forEach((value, key) => {
             const stat: PlayerStatistics & { name: string; userId: string } = { ...value, userId: key };
             listOfPlayerStats.push(stat);
@@ -226,7 +235,7 @@ export class FightSubController {
             message: 'Game Over',
             winner,
             globalStats: this.gameSession.statisticsManager.displayedGlobalStatistics,
-            listOfPlayerStats: listOfPlayerStats,
+            listOfPlayerStats,
         };
 
         this.sio.to(this.roomCode).emit(SocketClientEventNames.EndGame, ans);
@@ -251,35 +260,6 @@ export class FightSubController {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
             this.endGame(attackingPlayer);
         }
-    }
-
-    private async updatePlayerMoney(winner?: Player): Promise<void> {
-        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-        const WINNER_REWARD = Number(this.entryPrice * this.gameSession.listOfPlayers.getValues().length * 2) / 3;
-        const CONSOLATION_REWARD = Number(this.entryPrice * this.gameSession.listOfPlayers.getValues().length) / 3;
-        if (!winner) return;
-
-        // Handling winner reward
-        const isVp = winner?.virtualPlayer;
-        if (isVp) {
-            return;
-        }
-        const user = await this.usersService.getUser(winner.userId);
-        if (!user) return;
-        await this.usersService.updateUser({ ...user, money: user.money + WINNER_REWARD });
-
-        // Handling losers reward
-        this.gameSession.listOfPlayers.getValues().forEach(async (player) => {
-            if (player.userId !== winner.userId) {
-                const isVp = player?.virtualPlayer;
-                if (isVp) {
-                    return;
-                }
-                const loserUser = await this.usersService.getUser(player.userId);
-                if (!loserUser) return;
-                await this.usersService.updateUser({ ...loserUser, money: loserUser.money + CONSOLATION_REWARD });
-            }
-        });
     }
 
     private showEndFightNotification(): void {
@@ -311,5 +291,57 @@ export class FightSubController {
         if (!escapeAmount) return false;
 
         return escapeAmount >= MAX_AMOUNT_OF_ESCAPES;
+    }
+
+    private async distributePrizes(winner: Player): Promise<void> {
+        if (this.entryPrice === 0) return; // No entry fee, no prizes
+
+        const activePlayers = this.gameSession.getActivePlayers();
+
+        // Check if only one player remains (sole winner case)
+        const humanPlayers = activePlayers.filter((p) => !p.virtualPlayer);
+        if (humanPlayers.length === 1) {
+            await this.handleSoleWinner(humanPlayers[0]);
+            return;
+        }
+
+        // Normal case: distribute to winners and losers
+        const winners = [winner];
+        const losers = activePlayers.filter((player) => player.userId !== winner.userId && !this.gameSession.hasPlayerAbandoned(player.userId));
+
+        const distribution = this.prizePoolService.calculatePrizeDistribution(this.entryPrice, this.gameSession.initialPlayers, winners, losers);
+
+        // Update winner(s)
+        for (const [userId, amount] of distribution.winners) {
+            await this.updatePlayerMoney(userId, amount);
+        }
+
+        // Update losers with consolation
+        for (const [userId, amount] of distribution.losers) {
+            await this.updatePlayerMoney(userId, amount);
+        }
+    }
+
+    private async handleSoleWinner(winner: Player): Promise<void> {
+        if (winner.virtualPlayer) return;
+
+        const prizeAmount = this.prizePoolService.calculateSoleWinnerPrize(this.entryPrice, this.gameSession.initialPlayers);
+
+        await this.updatePlayerMoney(winner.userId, prizeAmount);
+    }
+
+    private async updatePlayerMoney(userId: string, amount: number): Promise<void> {
+        try {
+            const user = await this.usersService.getUser(userId);
+            if (!user) return;
+
+            const updatedUser = {
+                ...user,
+                money: user.money + amount,
+            };
+            await this.usersService.updateUser(updatedUser);
+        } catch (error) {
+            console.error(`Failed to update money for user ${userId}:`, error);
+        }
     }
 }

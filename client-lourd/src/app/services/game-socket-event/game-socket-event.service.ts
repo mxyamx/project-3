@@ -133,6 +133,18 @@ export class GameSocketEventService {
                 return;
             }
 
+            // if (data.winner) {
+            //     const isCurrentPlayerWinner = data.winner.userId === this.gameSessionManager.chosenPlayer().userId;
+
+            //     if (isCurrentPlayerWinner) {
+            //         // Show winner notification with prize
+            //         this.notificationService.showWinnerNotification(/* prize amount */);
+            //     } else {
+            //         // Show consolation notification
+            //         this.notificationService.showConsolationNotification(/* prize amount */);
+            //     }
+            // }
+
             const gameId = this.gameSessionManager.gameId();
             if (data.globalStats && data.listOfPlayerStats) {
                 this.statisticsService.reset();

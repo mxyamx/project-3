@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { ID_GENERATION } from '@app/constants/development-constants';
 import { CurrentGame, CurrentGamePhase, CurrentGamePreview } from '@common/current-game';
 import { PlayerLimits } from '@common/enums/players-limit';
@@ -36,13 +37,13 @@ export class CurrentGamesService {
                 const isJoinable: boolean = this.canJoin(game);
                 const preview: CurrentGamePreview = {
                     id: game.id,
-                    playerCount: playerCount,
-                    maxPlayerCount: maxPlayerCount,
+                    playerCount,
+                    maxPlayerCount,
                     boardgameSize: game.boardGame.size,
                     gameMode: game.boardGame.gameMode,
                     phase: game.phase,
                     previewImage: game.boardGame.previewImage,
-                    isJoinable: isJoinable,
+                    isJoinable,
                     entryPrice: game.entryPrice,
                 };
                 return preview;
@@ -95,7 +96,8 @@ export class CurrentGamesService {
     async deleteGame(id: string): Promise<void> {
         const game = this.games.get(id);
         if (!game) {
-            throw new Error("Le jeu actuel n'a pas été trouvé.");
+            console.log(`Game ${id} not found for deletion (already deleted)`);
+            return; // Don't throw, just return
         }
 
         try {

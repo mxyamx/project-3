@@ -38,5 +38,6 @@ export interface JoinGameAck {
     limitError: boolean;
     lockedError: boolean;
     codeError: boolean;
+    insufficientFundsError?: boolean;
     updateGamedRes?: UpdateGamedRes;
 }

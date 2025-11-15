@@ -11,6 +11,8 @@ import {
 import { FightSubController } from '@app/controllers/fight-sub-controller/fight-sub-controller';
 import { MovementSubController } from '@app/controllers/movement-sub-controller/movement-sub-controller';
 import { CurrentGamesService } from '@app/services/current-games/current-games.service';
+import { PrizePoolService } from '@app/services/prize-pool/prize-pool/prize-pool.service';
+import { UsersService } from '@app/services/users/users.service';
 import { genErrorMessage, sendError } from '@app/utils/functions/socket-error-functions';
 import { CtfTeam } from '@common/enums/ctf-team';
 import { GameMode } from '@common/enums/game-mode';
@@ -23,6 +25,7 @@ import { StartGameData } from '@common/socket-data-forms';
 import { PlayerStatistics } from '@common/statistics';
 import * as io from 'socket.io';
 import { setTimeout as delay } from 'timers/promises';
+import Container from 'typedi';
 
 export class GameSessionController {
     private standardStackPlayer: Player[];
@@ -362,12 +365,18 @@ export class GameSessionController {
         this.fightSubController.endFight();
     }
 
-    private endGame(winner?: Player): void {
-        //TODO I THINK I WILL SEND THE STATS HERE!
+    private async endGame(winner?: Player): Promise<void> {
+        // TODO I THINK I WILL SEND THE STATS HERE!
         this.gameSession.endGame();
         this.gameService.setGameEnded(this.roomCode);
         this.clockManager.stopClock();
-        let listOfPlayerStats: (PlayerStatistics & { name: string })[] = [];
+
+        // Distribute prizes
+        if (winner && this.gameSession.board.gameMode === GameMode.Normal) {
+            await this.distributePrizes(winner);
+        }
+
+        const listOfPlayerStats: (PlayerStatistics & { name: string })[] = [];
         this.gameSession.statisticsManager.playerStatisticsMap.forEach((value) => {
             const stat: PlayerStatistics & { name: string } = { ...value };
             listOfPlayerStats.push(stat);
@@ -378,12 +387,12 @@ export class GameSessionController {
             winnerTeam: this.winnerTeam,
             winner,
             globalStats: this.gameSession.statisticsManager.displayedGlobalStatistics,
-            listOfPlayerStats: listOfPlayerStats,
+            listOfPlayerStats,
         };
 
         this.sio.to(this.roomCode).emit(SocketClientEventNames.EndGame, ans);
     }
-    //TODO MIGHT USE THIS TO INFORM THE OTHER PLAYERS
+    // TODO MIGHT USE THIS TO INFORM THE OTHER PLAYERS
     private updateGame(): void {
         if (this.gameOver()) return;
         const ans: dataForm.UpdateGamedRes = {
@@ -434,5 +443,48 @@ export class GameSessionController {
             winnerName: this.fightWinnerName ?? '',
         };
         this.sio.to(this.roomCode).emit(SocketClientEventNames.ShowEndFightNotification, ans);
+    }
+    private async distributePrizes(winner: Player): Promise<void> {
+        const prizePoolService = Container.get(PrizePoolService);
+        const game = await this.gameService.getGame(this.roomCode);
+        if (!game || game.entryPrice === 0) return;
+
+        const activePlayers = this.gameSession.getActivePlayers();
+        const humanPlayers = activePlayers.filter((p) => !p.virtualPlayer);
+
+        // Sole winner case
+        if (humanPlayers.length === 1) {
+            const prizeAmount = prizePoolService.calculateSoleWinnerPrize(game.entryPrice, this.gameSession.initialPlayers);
+            await this.updatePlayerMoney(humanPlayers[0].userId, prizeAmount);
+            return;
+        }
+
+        // Normal case
+        const winners = [winner];
+        const losers = activePlayers.filter((player) => player.userId !== winner.userId && !this.gameSession.hasPlayerAbandoned(player.userId));
+
+        const distribution = prizePoolService.calculatePrizeDistribution(game.entryPrice, this.gameSession.initialPlayers, winners, losers);
+
+        for (const [userId, amount] of distribution.winners) {
+            await this.updatePlayerMoney(userId, amount);
+        }
+
+        for (const [userId, amount] of distribution.losers) {
+            await this.updatePlayerMoney(userId, amount);
+        }
+    }
+
+    private async updatePlayerMoney(userId: string, amount: number): Promise<void> {
+        try {
+            const usersService = Container.get(UsersService);
+            const user = await usersService.getUser(userId);
+            if (!user) return;
+
+            const updatedUser = { ...user, money: user.money + amount };
+            await usersService.updateUser(updatedUser);
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error(`Failed to update money for user ${userId}:`, error);
+        }
     }
 }

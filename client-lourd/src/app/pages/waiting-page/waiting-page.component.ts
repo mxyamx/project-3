@@ -22,7 +22,6 @@ import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { GameEvent } from '@common/game-event';
 import { Player } from '@common/player';
 import * as socketDataForm from '@common/socket-data-forms';
-import { User } from '@common/user';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
@@ -180,32 +179,7 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
         if (this.isOrganizer()) {
             this.playerSocketService.emitAdminLeaving(this.currentGame.id);
         }
-        console.log('leaving game');
-
-        if (this.currentGame.entryPrice > 0) {
-            console.log('leaving game after if check');
-            console.log(`current game entry price: ${this.currentGame.entryPrice}`);
-
-            const user = this.userManagerService.getCurrentUser();
-            const newMoney = user.money + this.currentGame.entryPrice;
-            const updatedUser: User = { ...user, money: newMoney };
-
-            this.httpUserService.updateUser(updatedUser).subscribe({
-                next: () => {
-                    // Update local state
-                    this.userManagerService.setMoney(newMoney);
-
-                    this.finalizeLeave();
-                },
-                error: (err) => {
-                    console.error('Failed to refund:', err);
-                    // optional: show a toast
-                    this.finalizeLeave();
-                },
-            });
-        } else {
-            this.finalizeLeave();
-        }
+        this.finalizeLeave();
     }
 
     playerlimit(): boolean {
@@ -277,7 +251,17 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     }
 
     private finalizeLeave() {
-        // this.playerSocketService.emitLeaveGame(this.currentGame.id);
+        // Refresh user data to get updated balance from server
+        this.refreshUserData();
         this.router.navigate(['/main-page']);
+    }
+    private refreshUserData(): void {
+        const userId = this.userManagerService.getCurrentUser().id;
+        this.httpUserService.getUser(userId).subscribe({
+            next: (user) => {
+                this.userManagerService.setMoney(user.money);
+            },
+            error: (err) => console.error('Failed to refresh user data:', err),
+        });
     }
 }
