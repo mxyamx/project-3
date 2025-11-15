@@ -134,5 +134,42 @@ export class FriendsController {
                 res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: (error as Error).message });
             }
         });
+
+        // POST /friends/block/:userId - Block a user
+        this.router.post('/block/:userId', async (req: AuthedRequest, res: Response) => {
+            try {
+                const currentUserId = req.user?.uid;
+                const { userId } = req.params;
+
+                await this.friendsService.blockUser(currentUserId, userId);
+                res.status(httpStatus.NO_CONTENT).send();
+            } catch (error: unknown) {
+                res.status(httpStatus.BAD_REQUEST).json({ error: (error as Error).message });
+            }
+        });
+
+        // DELETE /friends/block/:userId - Unblock a user
+        this.router.delete('/block/:userId', async (req: AuthedRequest, res: Response) => {
+            try {
+                const currentUserId = req.user?.uid;
+                const { userId } = req.params;
+
+                await this.friendsService.unblockUser(currentUserId, userId);
+                res.status(httpStatus.NO_CONTENT).send();
+            } catch (error: unknown) {
+                res.status(httpStatus.BAD_REQUEST).json({ error: (error as Error).message });
+            }
+        });
+
+        // GET /friends/blocked - Get blocked users list
+        this.router.get('/blocked', async (req: AuthedRequest, res: Response) => {
+            try {
+                const userId = req.user?.uid;
+                const blockedUsers = await this.friendsService.getBlockedUsers(userId);
+                res.status(httpStatus.OK).json(blockedUsers);
+            } catch (error: unknown) {
+                res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: (error as Error).message });
+            }
+        });
     }
 }

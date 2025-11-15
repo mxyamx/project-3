@@ -1,16 +1,11 @@
 import { HttpException } from '@app/classes/http-exception/http.exception';
 import { FRIENDS_COLLECTION } from '@app/constants/development-constants';
-import {
-    friendEvents,
-    FriendEventType,
-    FriendRequestAcceptedPayload,
-    FriendRequestRejectedPayload,
-    FriendRequestSentPayload,
-} from '@app/events/friendEvents';
+import { friendEvents } from '@app/events/friendEvents';
 import { DatabaseService } from '@app/services/database/database.service';
 import { UsersService } from '@app/services/users/users.service';
+import { FriendEventType } from '@common/enums/friend-event-type';
 import { RequestStatus } from '@common/enums/request-status';
-import { FriendRequest } from '@common/friend-request';
+import { FriendRequest, FriendRequestAcceptedPayload, FriendRequestRejectedPayload, FriendRequestSentPayload } from '@common/friend-request';
 import { User } from '@common/user';
 import httpStatus from 'http-status-codes';
 import { Collection, ObjectId } from 'mongodb';
@@ -32,24 +27,20 @@ export class FriendsService {
     }
 
     async sendFriendRequest(senderId: string, receiverId: string): Promise<FriendRequest> {
-        // Validations
         if (senderId === receiverId) {
             throw new HttpException('Vous ne pouvez pas vous envoyer une demande à vous-même', httpStatus.BAD_REQUEST);
         }
 
         const [sender, receiver] = await Promise.all([this.usersService.getUser(senderId), this.usersService.getUser(receiverId)]);
 
-        // Vérifier si déjà amis
         if (sender.friends?.includes(receiverId)) {
             throw new HttpException('Vous êtes déjà amis', httpStatus.BAD_REQUEST);
         }
 
-        // Vérifier si bloqué
         if (receiver.blocked?.includes(senderId)) {
             throw new HttpException("Impossible d'envoyer une demande à cet utilisateur", httpStatus.FORBIDDEN);
         }
 
-        // Vérifier si requête existe déjà
         const existingRequest = await this.requestsCollection.findOne({
             $or: [
                 { senderId, receiverId, status: RequestStatus.Pending },
@@ -61,7 +52,6 @@ export class FriendsService {
             throw new HttpException('Une demande existe déjà entre ces utilisateurs', httpStatus.BAD_REQUEST);
         }
 
-        // Créer la requête
         const request: FriendRequest = {
             id: new ObjectId().toString(),
             senderId,
@@ -73,7 +63,6 @@ export class FriendsService {
 
         await this.requestsCollection.insertOne(request);
 
-        // ✨ Émettre l'événement
         const payload: FriendRequestSentPayload = {
             request: {
                 id: request.id,
@@ -104,19 +93,15 @@ export class FriendsService {
             throw new HttpException('Cette demande a déjà été traitée', httpStatus.BAD_REQUEST);
         }
 
-        // Récupérer les utilisateurs
         const [sender, receiver] = await Promise.all([this.usersService.getUser(request.senderId), this.usersService.getUser(request.receiverId)]);
 
-        // Ajouter aux listes d'amis
         await Promise.all([
             this.usersCollection.updateOne({ id: request.senderId }, { $addToSet: { friends: request.receiverId } }),
             this.usersCollection.updateOne({ id: request.receiverId }, { $addToSet: { friends: request.senderId } }),
         ]);
 
-        // ✅ Supprimer la requête (pas besoin de la garder)
         await this.requestsCollection.deleteOne({ id: requestId });
 
-        // ✨ Émettre l'événement
         const payload: FriendRequestAcceptedPayload = {
             requestId: request.id,
             senderId: sender.id,
@@ -149,10 +134,8 @@ export class FriendsService {
             throw new HttpException('Cette demande a déjà été traitée', httpStatus.BAD_REQUEST);
         }
 
-        // ✅ Supprimer la requête directement
         await this.requestsCollection.deleteOne({ id: requestId });
 
-        // ✨ Émettre l'événement
         const payload: FriendRequestRejectedPayload = {
             requestId: request.id,
             senderId: request.senderId,
@@ -163,16 +146,13 @@ export class FriendsService {
     }
 
     async removeFriend(userId: string, friendId: string): Promise<void> {
-        // Vérifier que les utilisateurs existent
         await Promise.all([this.usersService.getUser(userId), this.usersService.getUser(friendId)]);
 
-        // Retirer des deux listes d'amis
         await Promise.all([
             this.usersCollection.updateOne({ id: userId }, { $pull: { friends: friendId } }),
             this.usersCollection.updateOne({ id: friendId }, { $pull: { friends: userId } }),
         ]);
 
-        // ✨ Émettre l'événement
         friendEvents.emit(FriendEventType.FRIEND_REMOVED, {
             userId,
             friendId,
@@ -193,10 +173,6 @@ export class FriendsService {
         await this.requestsCollection.deleteOne({ id: requestId });
     }
 
-    // ============================================
-    // Récupération des données
-    // ============================================
-
     async getPendingRequests(userId: string): Promise<Array<FriendRequest & { sender: { id: string; username: string; avatar: string } }>> {
         const requests = await this.requestsCollection
             .find({
@@ -205,7 +181,6 @@ export class FriendsService {
             })
             .toArray();
 
-        // Enrichir avec les données du sender
         const enrichedRequests = await Promise.all(
             requests.map(async (request) => {
                 const sender = await this.usersService.getUser(request.senderId);
@@ -231,7 +206,6 @@ export class FriendsService {
             })
             .toArray();
 
-        // Enrichir avec les données du receiver
         const enrichedRequests = await Promise.all(
             requests.map(async (request) => {
                 const receiver = await this.usersService.getUser(request.receiverId);
@@ -252,7 +226,6 @@ export class FriendsService {
     async searchUsers(query: string, currentUserId: string): Promise<User[]> {
         const currentUser = await this.usersService.getUser(currentUserId);
 
-        // Get all pending requests involving current user (sent OR received)
         const pendingRequests = await this.requestsCollection
             .find({
                 $or: [
@@ -262,11 +235,17 @@ export class FriendsService {
             })
             .toArray();
 
-        // Extract user IDs from pending requests
         const pendingUserIds = pendingRequests.map((req) => (req.senderId === currentUserId ? req.receiverId : req.senderId));
 
-        // IDs à exclure: soi-même, amis existants, utilisateurs bloqués, demandes en attente
-        const excludedIds = [currentUserId, ...(currentUser.friends || []), ...(currentUser.blocked || []), ...pendingUserIds];
+        const usersWhoBlockedMe = await this.usersCollection
+            .find({
+                blocked: currentUserId,
+            })
+            .toArray();
+
+        const blockerIds = usersWhoBlockedMe.map((user) => user.id);
+
+        const excludedIds = [currentUserId, ...(currentUser.friends || []), ...(currentUser.blocked || []), ...pendingUserIds, ...blockerIds];
 
         const users = await this.usersCollection
             .find({
@@ -285,9 +264,72 @@ export class FriendsService {
             return [];
         }
 
-        // Récupérer les objets User complets pour chaque friendId
         const friends = await this.usersCollection.find({ id: { $in: user.friends } }).toArray();
 
         return friends;
+    }
+
+    async blockUser(userId: string, blockedUserId: string): Promise<void> {
+        if (userId === blockedUserId) {
+            throw new HttpException('Vous ne pouvez pas vous bloquer vous-même', httpStatus.BAD_REQUEST);
+        }
+
+        const [user] = await Promise.all([this.usersService.getUser(userId), this.usersService.getUser(blockedUserId)]);
+
+        if (user.blocked?.includes(blockedUserId)) {
+            throw new HttpException('Cet utilisateur est déjà bloqué', httpStatus.BAD_REQUEST);
+        }
+
+        await this.usersCollection.updateOne({ id: userId }, { $addToSet: { blocked: blockedUserId } });
+
+        if (user.friends?.includes(blockedUserId)) {
+            await Promise.all([
+                this.usersCollection.updateOne({ id: userId }, { $pull: { friends: blockedUserId } }),
+                this.usersCollection.updateOne({ id: blockedUserId }, { $pull: { friends: userId } }),
+            ]);
+
+            friendEvents.emit(FriendEventType.FRIEND_REMOVED, {
+                userId,
+                friendId: blockedUserId,
+            });
+        }
+
+        await this.requestsCollection.deleteMany({
+            $or: [
+                { senderId: userId, receiverId: blockedUserId },
+                { senderId: blockedUserId, receiverId: userId },
+            ],
+        });
+        friendEvents.emit(FriendEventType.USER_BLOCKED, {
+            blockerId: userId,
+            blockedUserId: blockedUserId,
+        });
+    }
+
+    async unblockUser(userId: string, blockedUserId: string): Promise<void> {
+        const user = await this.usersService.getUser(userId);
+
+        if (!user.blocked?.includes(blockedUserId)) {
+            throw new HttpException("Cet utilisateur n'est pas bloqué", httpStatus.BAD_REQUEST);
+        }
+
+        await this.usersCollection.updateOne({ id: userId }, { $pull: { blocked: blockedUserId } });
+
+        friendEvents.emit(FriendEventType.USER_UNBLOCKED, {
+            unblockerId: userId,
+            unblockedUserId: blockedUserId,
+        });
+    }
+
+    async getBlockedUsers(userId: string): Promise<User[]> {
+        const user = await this.usersService.getUser(userId);
+
+        if (!user.blocked || user.blocked.length === 0) {
+            return [];
+        }
+
+        const blockedUsers = await this.usersCollection.find({ id: { $in: user.blocked } }).toArray();
+
+        return blockedUsers;
     }
 }

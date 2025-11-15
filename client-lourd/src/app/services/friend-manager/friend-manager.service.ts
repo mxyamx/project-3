@@ -12,6 +12,7 @@ export class FriendManagerService {
     friends: WritableSignal<User[]> = signal([]);
     pendingRequests: WritableSignal<(FriendRequest & { sender: { id: string; username: string; avatar: string } })[]> = signal([]);
     sentRequests: WritableSignal<(FriendRequest & { receiver: { id: string; username: string; avatar: string } })[]> = signal([]);
+    blockedUsers: WritableSignal<User[]> = signal([]);
 
     private socketSubscriptions: Subscription[] = [];
     private isInitialized = false;
@@ -21,9 +22,6 @@ export class FriendManagerService {
         private socketService: SocketClientService,
     ) {}
 
-    /**
-     * Initialize the service - call this once when user logs in
-     */
     initialize(): void {
         if (this.isInitialized) return;
 
@@ -32,63 +30,48 @@ export class FriendManagerService {
         this.isInitialized = true;
     }
 
-    /**
-     * Clean up - call this when user logs out
-     */
     cleanup(): void {
         this.socketSubscriptions.forEach((sub) => sub.unsubscribe());
         this.socketSubscriptions = [];
         this.friends.set([]);
         this.pendingRequests.set([]);
         this.sentRequests.set([]);
+        this.blockedUsers.set([]);
         this.isInitialized = false;
     }
 
-    /**
-     * Refresh all data from server
-     */
     refresh(): void {
         this.loadAllData();
     }
 
     private loadAllData(): void {
         this.friendsService.getFriendsList().subscribe({
-            next: (friends) => {
-                console.log('👥 Friends loaded:', friends.length);
-                this.friends.set(friends);
-            },
+            next: (friends) => this.friends.set(friends),
             error: (error) => console.error('Error loading friends:', error),
         });
 
         this.friendsService.getPendingRequests().subscribe({
-            next: (requests) => {
-                console.log('📥 Pending requests loaded:', requests.length);
-                this.pendingRequests.set(requests);
-            },
+            next: (requests) => this.pendingRequests.set(requests),
             error: (error) => console.error('Error loading pending requests:', error),
         });
 
         this.friendsService.getSentRequests().subscribe({
-            next: (requests) => {
-                console.log('📤 Sent requests loaded:', requests.length);
-                this.sentRequests.set(requests);
-            },
+            next: (requests) => this.sentRequests.set(requests),
             error: (error) => console.error('Error loading sent requests:', error),
+        });
+
+        this.friendsService.getBlockedUsers().subscribe({
+            next: (users) => this.blockedUsers.set(users),
+            error: (error) => console.error('Error loading blocked users:', error),
         });
     }
 
     private setupSocketListeners(): void {
-        console.log('🔌 Setting up friend socket listeners...');
-
-        // Listen for incoming friend requests
         const requestReceivedSub = this.socketService.listen<any>('friend-request-received').subscribe((data) => {
-            console.log('🔔 Friend request received via socket:', data);
-
             const current = this.pendingRequests();
             const exists = current.some((req) => req.id === data.id);
 
             if (!exists) {
-                console.log('➕ Adding to pending requests');
                 this.pendingRequests.set([
                     ...current,
                     {
@@ -105,58 +88,59 @@ export class FriendManagerService {
                         },
                     },
                 ]);
-            } else {
-                console.log('⚠️ Request already exists in pending list');
             }
         });
 
-        // Listen for accepted friend requests
         const friendAddedSub = this.socketService.listen<any>('friend-added').subscribe((data) => {
-            console.log('✅ Friend added via socket:', data);
-
-            // Remove from sent requests
             const currentSent = this.sentRequests();
-            const filteredSent = currentSent.filter((req) => req.receiverId !== data.friend.id);
-            if (filteredSent.length !== currentSent.length) {
-                console.log('➖ Removing from sent requests');
-                this.sentRequests.set(filteredSent);
-            }
+            this.sentRequests.set(currentSent.filter((req) => req.receiverId !== data.friend.id));
 
-            // Add to friends list
             const currentFriends = this.friends();
             const exists = currentFriends.some((f) => f.id === data.friend.id);
             if (!exists) {
-                console.log('➕ Adding to friends list');
                 this.friends.set([...currentFriends, data.friend as User]);
-            } else {
-                console.log('⚠️ Friend already exists in list');
             }
         });
 
-        // Listen for rejected friend requests
         const requestRejectedSub = this.socketService.listen<any>('friend-request-rejected').subscribe((data) => {
-            console.log('❌ Friend request rejected via socket:', data);
-
-            // Remove from sent requests
             const current = this.sentRequests();
             this.sentRequests.set(current.filter((req) => req.id !== data.requestId));
         });
 
-        // Listen for removed friends
         const friendRemovedSub = this.socketService.listen<any>('friend-removed').subscribe((data) => {
-            console.log('👋 Friend removed via socket:', data);
-
-            // Remove from friends list
             const current = this.friends();
             this.friends.set(current.filter((f) => f.id !== data.friendId));
         });
 
-        this.socketSubscriptions.push(requestReceivedSub, friendAddedSub, requestRejectedSub, friendRemovedSub);
+        // FIXED: Better handling of user-blocked-you event
+        const userBlockedYouSub = this.socketService.listen<any>('user-blocked-you').subscribe((data) => {
+            // Remove the blocker from friends list
+            const currentFriends = this.friends();
+            this.friends.set(currentFriends.filter((f) => f.id !== data.blockerId));
 
-        console.log('✅ Friend socket listeners set up successfully');
+            // Remove any pending requests from the blocker
+            const pending = this.pendingRequests();
+            this.pendingRequests.set(pending.filter((req) => req.senderId !== data.blockerId));
+
+            // Remove any sent requests to the blocker
+            const sent = this.sentRequests();
+            this.sentRequests.set(sent.filter((req) => req.receiverId !== data.blockerId));
+        });
+
+        const userUnblockedYouSub = this.socketService.listen<any>('user-unblocked-you').subscribe(() => {
+            // No action needed - users can send new requests if they want
+        });
+
+        this.socketSubscriptions.push(
+            requestReceivedSub,
+            friendAddedSub,
+            requestRejectedSub,
+            friendRemovedSub,
+            userBlockedYouSub,
+            userUnblockedYouSub,
+        );
     }
 
-    // Helper methods for actions
     sendRequest(request: FriendRequest, receiverData: { id: string; username: string; avatar: string }): void {
         const current = this.sentRequests();
         const exists = current.some((req) => req.id === request.id);
@@ -167,11 +151,9 @@ export class FriendManagerService {
     }
 
     acceptRequest(requestId: string, newFriend: User): void {
-        // Remove from pending
         const current = this.pendingRequests();
         this.pendingRequests.set(current.filter((req) => req.id !== requestId));
 
-        // Add to friends
         const currentFriends = this.friends();
         const exists = currentFriends.some((f) => f.id === newFriend.id);
         if (!exists) {
@@ -192,5 +174,30 @@ export class FriendManagerService {
     removeFriend(friendId: string): void {
         const current = this.friends();
         this.friends.set(current.filter((f) => f.id !== friendId));
+    }
+
+    blockUser(user: User): void {
+        const currentBlocked = this.blockedUsers();
+        const exists = currentBlocked.some((u) => u.id === user.id);
+        if (!exists) {
+            this.blockedUsers.set([...currentBlocked, user]);
+        }
+
+        // Remove from friends list
+        const currentFriends = this.friends();
+        this.friends.set(currentFriends.filter((f) => f.id !== user.id));
+
+        // Remove from pending requests
+        const pending = this.pendingRequests();
+        this.pendingRequests.set(pending.filter((req) => req.senderId !== user.id));
+
+        // Remove from sent requests
+        const sent = this.sentRequests();
+        this.sentRequests.set(sent.filter((req) => req.receiverId !== user.id));
+    }
+
+    unblockUser(userId: string): void {
+        const current = this.blockedUsers();
+        this.blockedUsers.set(current.filter((u) => u.id !== userId));
     }
 }

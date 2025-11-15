@@ -18,9 +18,9 @@ $animation-time: 0.25s;
 .popup {
     background: $popup-bg;
     backdrop-filter: blur(6px);
-    width: 450px; // Slightly wider for better content
+    width: 450px;
     max-width: 95%;
-    height: 85%; // Slightly taller for more content
+    height: 85%;
     border-radius: 24px;
     padding: 0;
     box-shadow: -6px 0 25px rgba(0, 0, 0, 0.4);
@@ -54,29 +54,29 @@ $animation-time: 0.25s;
 }
 
 .popup-content {
-    padding: 50px 20px 20px 20px; // More top padding for close button
+    padding: 50px 20px 20px 20px;
     overflow-y: auto;
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem; // Increased gap for better spacing
+    gap: 1.5rem;
 }
 
 .tabs {
     display: flex;
     justify-content: space-between;
     gap: 8px;
-    margin-bottom: 20px; // Increased margin
+    margin-bottom: 20px;
 
     button {
         flex: 1;
-        padding: 12px 0; // More padding
+        padding: 12px 0;
         border: 3px solid transparent;
         background: rgba(230, 230, 230, 0.8);
         cursor: pointer;
         border-radius: 12px;
         font-family: 'Jaro', sans-serif;
-        font-size: 1rem; // Slightly smaller for count display
+        font-size: 1rem;
         font-weight: 600;
         transition:
             background 0.25s ease,
@@ -98,7 +98,6 @@ $animation-time: 0.25s;
     }
 }
 
-// Search bar styles
 .search-bar {
     display: flex;
     gap: 8px;
@@ -146,7 +145,6 @@ $animation-time: 0.25s;
     }
 }
 
-// Section headers for requests tab
 h4 {
     margin: 0 0 12px 0;
     color: #001d40;
@@ -169,10 +167,10 @@ ul.user-list {
         justify-content: space-between;
         align-items: center;
         background: rgba(240, 240, 240, 0.9);
-        padding: 12px 16px; // More padding
+        padding: 12px 16px;
         border-radius: 12px;
         border: 2px solid #cfdff9;
-        margin-bottom: 8px; // More spacing between items
+        margin-bottom: 8px;
         transition: transform 0.2s ease;
 
         &:hover {
@@ -187,7 +185,7 @@ ul.user-list {
             flex: 1;
 
             .avatar {
-                width: 50px; // Slightly larger
+                width: 50px;
                 height: 50px;
                 border-radius: 50%;
                 border: 3px solid #0044cc;
@@ -207,7 +205,6 @@ ul.user-list {
         }
     }
 
-    // Empty state styling
     .empty-state {
         text-align: center;
         color: #666;
@@ -225,7 +222,6 @@ ul.user-list {
     }
 }
 
-// Loading state
 .loading {
     text-align: center;
     color: #0044cc;
@@ -234,7 +230,6 @@ ul.user-list {
     font-weight: 600;
 }
 
-// Icon button variants with colors
 .icon-btn {
     background: none;
     border: none;
@@ -248,7 +243,6 @@ ul.user-list {
         background-color 0.2s ease,
         color 0.2s ease;
 
-    // Accept button (green)
     &.accept-btn {
         color: #28a745;
 
@@ -269,7 +263,6 @@ ul.user-list {
         }
     }
 
-    // Reject/Cancel button (red)
     &.reject-btn,
     &.cancel-btn {
         color: #dc3545;
@@ -281,7 +274,6 @@ ul.user-list {
         }
     }
 
-    // Add button (blue)
     &.add-btn {
         color: #0044cc;
 
@@ -292,7 +284,6 @@ ul.user-list {
         }
     }
 
-    // Remove button (orange)
     &.remove-btn {
         color: #fd7e14;
 
@@ -303,7 +294,6 @@ ul.user-list {
         }
     }
 
-    // Search button
     &.search-btn {
         color: #001d40;
 
@@ -314,7 +304,6 @@ ul.user-list {
     }
 }
 
-// Tab content animations
 .tab-content {
     flex: 1;
     display: flex;
@@ -327,7 +316,6 @@ ul.user-list {
     }
 }
 
-// Scrollbar styling for popup content
 .popup-content::-webkit-scrollbar {
     width: 6px;
 }
@@ -366,7 +354,6 @@ ul.user-list {
     }
 }
 
-// Responsive adjustments
 @media (max-height: 700px) {
     .popup {
         height: 90%;

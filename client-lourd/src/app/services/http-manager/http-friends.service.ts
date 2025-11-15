@@ -14,8 +14,6 @@ export class FriendsService {
 
     constructor(private http: HttpClient) {}
 
-    // --- 📨 Friend Requests ---
-
     sendFriendRequest(receiverId: string): Observable<FriendRequest> {
         return this.http.post<FriendRequest>(`${this.apiUrl}/requests`, { receiverId }).pipe(catchError((e) => this.handleError(e)));
     }
@@ -46,8 +44,6 @@ export class FriendsService {
         return this.http.delete<void>(`${this.apiUrl}/requests/${requestId}`).pipe(catchError((e) => this.handleError(e)));
     }
 
-    // --- 👥 Friends ---
-
     removeFriend(friendId: string): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${friendId}`).pipe(catchError((e) => this.handleError(e)));
     }
@@ -59,6 +55,18 @@ export class FriendsService {
     searchUsers(query: string): Observable<User[]> {
         const params = new HttpParams().set('query', query ?? '');
         return this.http.get<User[]>(`${this.apiUrl}/search`, { params }).pipe(catchError((e) => this.handleError(e)));
+    }
+
+    blockUser(userId: string): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/block/${userId}`, {}).pipe(catchError((e) => this.handleError(e)));
+    }
+
+    unblockUser(userId: string): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/block/${userId}`).pipe(catchError((e) => this.handleError(e)));
+    }
+
+    getBlockedUsers(): Observable<User[]> {
+        return this.http.get<User[]>(`${this.apiUrl}/blocked`).pipe(catchError((e) => this.handleError(e)));
     }
 
     private handleError(error: HttpErrorResponse) {

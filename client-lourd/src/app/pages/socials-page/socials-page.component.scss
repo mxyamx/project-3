@@ -108,7 +108,6 @@ ul.user-list {
     gap: 10px;
 }
 
-// Icon buttons matching socials popup style
 .icon-btn {
     background: none;
     border: none;
@@ -127,7 +126,6 @@ ul.user-list {
     align-items: center;
     justify-content: center;
 
-    // Remove button (orange)
     &.remove-btn {
         color: #fd7e14;
 
@@ -138,7 +136,6 @@ ul.user-list {
         }
     }
 
-    // Block button (red)
     &.block-btn {
         color: #dc3545;
 
@@ -149,7 +146,6 @@ ul.user-list {
         }
     }
 
-    // Unblock button (green)
     &.unblock-btn {
         color: #28a745;
 
@@ -161,7 +157,6 @@ ul.user-list {
     }
 }
 
-// Confirmation bubble
 .confirmation-bubble {
     position: fixed;
     top: 50%;
@@ -192,7 +187,8 @@ ul.user-list {
 
     button {
         font-family: 'Jaro', sans-serif;
-        background-color: #6398df;
+
+        background-color: #dc3545;
         color: #ffffff;
         border: none;
         padding: 12px 28px;
@@ -202,21 +198,20 @@ ul.user-list {
         transition: all 0.2s;
 
         &:hover {
-            background-color: rgb(60, 88, 148);
+            background-color: #c82333;
             transform: scale(1.05);
         }
 
         &:first-child {
-            background-color: #dc3545;
+            background-color: #6398df;
 
             &:hover {
-                background-color: #c82333;
+                background-color: rgb(60, 88, 148);
             }
         }
     }
 }
 
-// Error bubble
 .error-bubble {
     position: fixed;
     top: 50%;
@@ -269,7 +264,6 @@ ul.user-list {
     }
 }
 
-// Responsive design
 @media (max-width: 768px) {
     .socials-container {
         padding: 15px;

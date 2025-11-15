@@ -526,9 +526,9 @@
         "confirm-block-user": "Are you sure you want to block this user? They will be removed from your friends list.",
         "confirm-unblock-user": "Are you sure you want to unblock this user?",
         "errors": {
-            "remove-failed": "Failed to remove friend"
-        },
-        "block-not-implemented": "Block feature not yet implemented",
-        "unblock-not-implemented": "Unblock feature not yet implemented"
+            "remove-failed": "Failed to remove friend",
+            "block-failed": "Failed to block user",
+            "unblock-failed": "Failed to unblock user"
+        }
     }
 }

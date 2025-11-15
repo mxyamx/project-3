@@ -3,10 +3,10 @@
     <div class="friends-section">
         <h2>
             <i class="fa fa-users"></i>
-            {{ 'socials-page.my-friends' | translate }} ({{ friends.length }})
+            {{ 'socials-page.my-friends' | translate }} ({{ friendCount() }})
         </h2>
         <ul class="user-list">
-            <li *ngFor="let friend of friends">
+            <li *ngFor="let friend of friends()">
                 <div class="user-info">
                     <img class="avatar" [src]="friend.avatar" [alt]="friend.username" />
                     <span class="name">{{ friend.username }}</span>
@@ -20,7 +20,7 @@
                     </button>
                 </div>
             </li>
-            <li *ngIf="friends.length === 0" class="empty-state">
+            <li *ngIf="friendCount() === 0" class="empty-state">
                 {{ 'socials-page.empty.no-friends' | translate }}
             </li>
         </ul>
@@ -30,10 +30,10 @@
     <div class="blocked-section">
         <h2>
             <i class="fa fa-ban"></i>
-            {{ 'socials-page.blocked-users' | translate }} ({{ blockedUsers.length }})
+            {{ 'socials-page.blocked-users' | translate }} ({{ blockedCount() }})
         </h2>
         <ul class="user-list">
-            <li *ngFor="let blocked of blockedUsers">
+            <li *ngFor="let blocked of blockedUsers()">
                 <div class="user-info">
                     <img class="avatar" [src]="blocked.avatar" [alt]="blocked.username" />
                     <span class="name">{{ blocked.username }}</span>
@@ -44,7 +44,7 @@
                     </button>
                 </div>
             </li>
-            <li *ngIf="blockedUsers.length === 0" class="empty-state">
+            <li *ngIf="blockedCount() === 0" class="empty-state">
                 {{ 'socials-page.empty.no-blocked' | translate }}
             </li>
         </ul>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, OnInit } from '@angular/core';
 import { FriendManagerService } from '@app/services/friend-manager/friend-manager.service';
 import { FriendsService } from '@app/services/http-manager/http-friends.service';
 import { User } from '@common/user';
@@ -13,13 +13,13 @@ import { TranslatePipe } from '@ngx-translate/core';
     styleUrls: ['./socials-page.component.scss'],
 })
 export class SocialsPageComponent implements OnInit {
-    get friends() {
-        return this.friendManagerService.friends();
-    }
+    // Expose signals directly
+    friends = this.friendManagerService.friends;
+    blockedUsers = this.friendManagerService.blockedUsers;
 
-    blockedUsers: User[] = [];
+    friendCount = computed(() => this.friendManagerService.friends().length);
+    blockedCount = computed(() => this.friendManagerService.blockedUsers().length);
 
-    // Confirmation and error states
     showConfirmation = false;
     confirmationMessage = '';
     pendingAction: (() => void) | null = null;
@@ -33,15 +33,9 @@ export class SocialsPageComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.loadBlockedUsers();
+        this.friendManagerService.refresh();
     }
 
-    loadBlockedUsers(): void {
-        // TODO: Replace with backend call when implemented
-        this.blockedUsers = [];
-    }
-
-    // Confirmation for removing friend
     confirmRemoveFriend(friend: User): void {
         this.confirmationMessage = 'socials-page.confirm-remove-friend';
         this.pendingAction = () => this.executeRemoveFriend(friend);
@@ -53,11 +47,10 @@ export class SocialsPageComponent implements OnInit {
             next: () => {
                 this.friendManagerService.removeFriend(friend.id);
             },
-            error: (err: { message: string }) => this.showErrorMessage('socials-page.errors.remove-failed'),
+            error: () => this.showErrorMessage('socials-page.errors.remove-failed'),
         });
     }
 
-    // Confirmation for blocking user
     confirmBlockUser(friend: User): void {
         this.confirmationMessage = 'socials-page.confirm-block-user';
         this.pendingAction = () => this.executeBlockUser(friend);
@@ -65,13 +58,14 @@ export class SocialsPageComponent implements OnInit {
     }
 
     private executeBlockUser(friend: User): void {
-        // TODO: Replace with backend call when implemented
-        this.blockedUsers.push(friend);
-        this.friendManagerService.removeFriend(friend.id);
-        this.showErrorMessage('socials-page.block-not-implemented');
+        this.friendsService.blockUser(friend.id).subscribe({
+            next: () => {
+                this.friendManagerService.blockUser(friend);
+            },
+            error: () => this.showErrorMessage('socials-page.errors.block-failed'),
+        });
     }
 
-    // Confirmation for unblocking user
     confirmUnblockUser(user: User): void {
         this.confirmationMessage = 'socials-page.confirm-unblock-user';
         this.pendingAction = () => this.executeUnblockUser(user);
@@ -79,12 +73,14 @@ export class SocialsPageComponent implements OnInit {
     }
 
     private executeUnblockUser(user: User): void {
-        // TODO: Replace with backend call when implemented
-        this.blockedUsers = this.blockedUsers.filter((u) => u.id !== user.id);
-        this.showErrorMessage('socials-page.unblock-not-implemented');
+        this.friendsService.unblockUser(user.id).subscribe({
+            next: () => {
+                this.friendManagerService.unblockUser(user.id);
+            },
+            error: () => this.showErrorMessage('socials-page.errors.unblock-failed'),
+        });
     }
 
-    // Confirm action
     confirmAction(): void {
         if (this.pendingAction) {
             this.pendingAction();
@@ -92,25 +88,18 @@ export class SocialsPageComponent implements OnInit {
         this.closeConfirmation();
     }
 
-    // Cancel confirmation
     closeConfirmation(): void {
         this.showConfirmation = false;
         this.confirmationMessage = '';
         this.pendingAction = null;
     }
 
-    // Show error message
     private showErrorMessage(message: string): void {
         this.errorMessage = message;
         this.showError = true;
-
-        // Auto-hide after 3 seconds
-        setTimeout(() => {
-            this.showError = false;
-        }, 3000);
+        setTimeout(() => (this.showError = false), 3000);
     }
 
-    // Close error message manually
     closeError(): void {
         this.showError = false;
     }

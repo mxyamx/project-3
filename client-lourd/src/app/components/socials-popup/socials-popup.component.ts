@@ -46,7 +46,7 @@ export class SocialsPopupComponent implements OnInit {
     errorMessage = '';
 
     constructor(
-        private friendsService: FriendsService,
+        private friendsHttpService: FriendsService,
         private friendManagerService: FriendManagerService,
     ) {}
 
@@ -68,7 +68,7 @@ export class SocialsPopupComponent implements OnInit {
         this.hasSearched = true;
         this.isLoading = true;
 
-        this.friendsService.searchUsers(this.searchQuery).subscribe({
+        this.friendsHttpService.searchUsers(this.searchQuery).subscribe({
             next: (users: User[]) => {
                 this.searchResults = users;
                 this.isLoading = false;
@@ -82,7 +82,7 @@ export class SocialsPopupComponent implements OnInit {
     }
 
     sendFriendRequest(user: User) {
-        this.friendsService.sendFriendRequest(user.id).subscribe({
+        this.friendsHttpService.sendFriendRequest(user.id).subscribe({
             next: (request: any) => {
                 this.friendManagerService.sendRequest(request, {
                     id: user.id,
@@ -96,7 +96,7 @@ export class SocialsPopupComponent implements OnInit {
     }
 
     acceptRequest(request: FriendRequest & { sender: { id: string; username: string; avatar: string } }) {
-        this.friendsService.acceptFriendRequest(request.id).subscribe({
+        this.friendsHttpService.acceptFriendRequest(request.id).subscribe({
             next: (result: { sender: User }) => {
                 this.friendManagerService.acceptRequest(request.id, result.sender);
             },
@@ -105,14 +105,14 @@ export class SocialsPopupComponent implements OnInit {
     }
 
     rejectRequest(request: FriendRequest) {
-        this.friendsService.rejectFriendRequest(request.id).subscribe({
+        this.friendsHttpService.rejectFriendRequest(request.id).subscribe({
             next: () => this.friendManagerService.rejectRequest(request.id),
             error: () => this.showErrorMessage('socials-popup.errors.reject-failed'),
         });
     }
 
     cancelRequest(request: FriendRequest) {
-        this.friendsService.cancelFriendRequest(request.id).subscribe({
+        this.friendsHttpService.cancelFriendRequest(request.id).subscribe({
             next: () => this.friendManagerService.cancelRequest(request.id),
             error: () => this.showErrorMessage('socials-popup.errors.cancel-failed'),
         });
@@ -125,7 +125,7 @@ export class SocialsPopupComponent implements OnInit {
     }
 
     private executeRemoveFriend(friend: User) {
-        this.friendsService.removeFriend(friend.id).subscribe({
+        this.friendsHttpService.removeFriend(friend.id).subscribe({
             next: () => this.friendManagerService.removeFriend(friend.id),
             error: () => this.showErrorMessage('socials-popup.errors.remove-failed'),
         });
@@ -138,10 +138,13 @@ export class SocialsPopupComponent implements OnInit {
     }
 
     private executeBlockUser(user: User) {
-        // TODO: Implement backend block functionality
-        this.friendManagerService.removeFriend(user.id);
-        this.searchResults = this.searchResults.filter((u) => u.id !== user.id);
-        this.showErrorMessage('socials-popup.block-not-implemented');
+        this.friendsHttpService.blockUser(user.id).subscribe({
+            next: () => {
+                this.friendManagerService.blockUser(user);
+                this.searchResults = this.searchResults.filter((u) => u.id !== user.id);
+            },
+            error: () => this.showErrorMessage('socials-popup.errors.block-failed'),
+        });
     }
 
     confirmAction() {

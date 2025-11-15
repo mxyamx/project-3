@@ -526,9 +526,9 @@
         "confirm-block-user": "Êtes-vous sûr de vouloir bloquer cet utilisateur ? Il sera retiré de votre liste d'amis.",
         "confirm-unblock-user": "Êtes-vous sûr de vouloir débloquer cet utilisateur ?",
         "errors": {
-            "remove-failed": "Échec de la suppression de l'ami"
-        },
-        "block-not-implemented": "Fonctionnalité de blocage pas encore implémentée",
-        "unblock-not-implemented": "Fonctionnalité de déblocage pas encore implémentée"
+            "remove-failed": "Échec de la suppression de l'ami",
+            "block-failed": "Échec du blocage de l'utilisateur",
+            "unblock-failed": "Échec du déblocage de l'utilisateur"
+        }
     }
 }
