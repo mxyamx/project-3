@@ -66,9 +66,11 @@ export class SocketManager {
         this.userSessionController = new UserSessionController(
             this.sio,
             Container.get(UsersService),
-            this.userSessionManager, // ← ADD THIS
+            this.userSessionManager,
         );
-        this.socketGameCommunication = new SocketGameCommunication(this.sio, this.databaseService);
+        this.socketGameCommunication = new SocketGameCommunication(this.sio, this.databaseService, (socketId: string) =>
+            this.userSessionManager.getFirebaseIdBySocketId(socketId),
+        );
         this.boardGameService = Container.get(BoardGameService);
         const vpSocketAddingHandlerConfig: VpSocketAddingHandlerConfig = {
             sio: this.sio,
