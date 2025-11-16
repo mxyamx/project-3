@@ -492,3 +492,36 @@ app-chat-container {
     line-height: 1;
     cursor: pointer;
 }
+
+.entry-fee-section {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    color: #ffffff;
+
+    .entry-fee-label {
+        font-weight: 600;
+    }
+
+    .entry-fee-value {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 12px;
+        background: linear-gradient(45deg, #ffd700, #ffac00, #e0a800);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+
+        i {
+            margin: 0;
+        }
+
+        &.free {
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: none;
+        }
+    }
+}

@@ -6,7 +6,9 @@ import { LoadingComponent } from '@app/components/loading/loading.component';
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { HttpBoardGameService } from '@app/services/http-manager/http-board-game.service';
+import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
+import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { BoardGameDTO } from '@common/board-game';
 import { JoinGameAck } from '@common/current-game';
 import { GameMode } from '@common/enums/game-mode';
@@ -27,9 +29,24 @@ export class CreationPageComponent implements OnInit {
     displayedObject: BoardGameDTO | null = null;
     hasBeenClicked: boolean = false;
     gameManager: GameSessionManagerService = inject(GameSessionManagerService);
+    userManagerService: UserManagerService = inject(UserManagerService);
     httpBoardGameService = inject(HttpBoardGameService);
+    httpUserService = inject(HttpUserService);
+
     gameMode: typeof GameMode = GameMode;
     isLoading: WritableSignal<boolean> = signal(false);
+
+    selectedPollPrizeAmount: number = 0;
+
+    get maxPollPrize(): number {
+        return this.userManagerService.currentUser().money;
+    }
+
+    onPollPrizeChange(event: Event): void {
+        const value = Number((event.target as HTMLInputElement).value);
+        this.selectedPollPrizeAmount = value;
+    }
+
     private currentGameService = inject(CurrentGameManagerService);
     private playerSocketService = inject(PlayerSocketService);
     constructor(private router: Router) {}
@@ -71,7 +88,6 @@ export class CreationPageComponent implements OnInit {
         if (!this.displayedObject) return;
 
         this.currentGameService.reset();
-
         const gameId = this.displayedObject.id;
 
         this.httpBoardGameService.getBoard(gameId).subscribe({
@@ -83,7 +99,8 @@ export class CreationPageComponent implements OnInit {
 
                 this.currentGameService.updatePickedBoardGame(boardGame);
                 const currentGame = this.currentGameService.displayedCurrentGame();
-                this.playerSocketService.emitCreateGame(currentGame, (response: any) => {
+
+                this.playerSocketService.emitCreateGame({ ...currentGame, entryPrice: this.selectedPollPrizeAmount }, (response: any) => {
                     if (response?.error) {
                         switch (response.error) {
                             case 'GAME_PRIVACY_CHANGED':
@@ -91,6 +108,9 @@ export class CreationPageComponent implements OnInit {
                                 break;
                             case 'GAME_NOT_FOUND':
                                 this.showAlertConfirmation = true;
+                                break;
+                            case 'INSUFFICIENT_FUNDS':
+                                alert('Insufficient funds to create this game');
                                 break;
                             default:
                                 this.showAlertConfirmation = true;
@@ -100,6 +120,8 @@ export class CreationPageComponent implements OnInit {
                     }
 
                     if (response?.success && response?.game) {
+                        this.refreshUserData();
+
                         this.currentGameService.updateCurrentGame(response.game);
                         this.playerSocketService.emitJoinAvatarRoom(response.game.id, (response: JoinGameAck) => {
                             this.router.navigate([UrlPage.Avatar]);
@@ -113,5 +135,18 @@ export class CreationPageComponent implements OnInit {
             },
         });
         this.hasBeenClicked = true;
+    }
+
+    private refreshUserData(): void {
+        const userId = this.userManagerService.getCurrentUser().id;
+        this.httpUserService.getUser(userId).subscribe({
+            next: (user) => {
+                this.userManagerService.setMoney(user.money);
+                if (this.selectedPollPrizeAmount > user.money) {
+                    this.selectedPollPrizeAmount = user.money;
+                }
+            },
+            error: (err) => console.error('Failed to refresh user data:', err),
+        });
     }
 }

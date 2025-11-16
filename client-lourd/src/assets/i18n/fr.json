@@ -155,7 +155,8 @@
         "title": "Crée une nouvelle partie",
         "boardgame-deleted-modal": "Attention!! Ce jeu a déjà été supprimé.",
         "visibility-modal": "Attention!! Ce jeu a changé de visibilité.",
-        "create": "Créer une nouvelle partie"
+        "create": "Créer une nouvelle partie",
+        "poll-prize-title": "Sélectionnez un prix d'entrée pour la partie"
     },
     "game-list": {
         "title": "Liste des Jeux",
@@ -166,7 +167,10 @@
             "mode": "Mode",
             "last-modified": "Modifié le",
             "privacy": "Confidentialité",
-            "owner": "Propriétaire"
+            "owner": "Propriétaire",
+            "entry-price": "Prix d'entrée",
+            "free": "Gratuit",
+            "not-enough-money": "Fonds insuffisants"
         }
     },
     "admin-page": {
@@ -348,6 +352,8 @@
         "drop-in-enabled": "Drop-in activé! Les joueurs peuvent rejoindre une partie déjà en cours.",
         "drop-in-disabled": "Drop-in désactivé! Aucun joueur ne peut rejoindre en cours de partie.",
         "unlocked-room": "Salle débloquée! La partie est encore ouverte.",
+        "entry-fee-label": "Frais d'entrée ",
+        "entry-fee-free": "Salle gratuite",
         "code": "Code d'accès",
         "waiting": "En attente de joueurs ...",
         "start-game": "Lancer la partie",
@@ -359,6 +365,8 @@
         },
         "player-amount-modal": "Le nombre de joueurs doit être pair pour commencer une partie en mode CTF."
     },
+    "entry-fee-label": "Frais d'entrée",
+    "entry-fee-free": "Salle gratuite",
     "attribute-form": {
         "physical": "Attributs physiques",
         "health": {
@@ -454,17 +462,32 @@
 
     "shop-page": {
         "back-button": "Retour",
-        "Exclusive-avatars": "Avatars exclusifs",
+        "Exclusive-avatars": "Avatars de profile exclusifs",
         "avatars": {
             "Alpha-wolf": "Loup Alpha",
             "Agile-Kangaroo": "Kangourou Agile",
             "Royal-eagle": "Aigle Royal",
-            "Majestic-lion": "Lion Majestueux"
+            "Majestic-lion": "Lion Majestueux",
+            "Sweet-hippo": "Hippopotame Doux",
+            "Elegant-giraffe": "Girafe Élégante",
+            "Proud-horse": "Cheval Fier",
+            "Fierce-tiger": "Tigre Féroce",
+            "Polar-bear": "Ours Polaire Majestueux",
+            "warthog": "Sanglier à 3 cornes",
+            "Powerful-penguin": "Pingouin Puissant",
+            "Black-panther": "Panthère Noire",
+            "Cunning-crocodile": "Crocodile Rusé",
+            "panda-cuddly": "Panda Câlineux"
         },
         "Sound-effects-exclusive": "Effets sonores exclusifs",
         "effects": {
             "Sword-Clash": "Épée tranchante",
-            "Punch-of-death": "Coup de la mort"
+            "Punch-of-death": "Coup de la mort",
+            "Swift-attack": "Attaque éclair",
+            "Monster-attack": "Attaque monstrueuse",
+            "Explosion": "Explosion",
+            "Evil-laugh": "Rire maléfique",
+            "knife-cutting": "Attaque au couteau"
         },
         "Purchase": "Acheter",
         "Owned": "Possédé",

@@ -10,6 +10,7 @@ import { SocketClientService } from '@app/services/client-socket/socket-client.s
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
 import { GameEventService } from '@app/services/game-event/game-event.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
+import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { StatisticsManagerService } from '@app/services/statistics-manager/statistics-manager.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
@@ -52,6 +53,7 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
     private currentGameManager = inject(CurrentGameManagerService);
     private chatService = inject(ChatService);
     private gameEventService = inject(GameEventService);
+    private httpUserService = inject(HttpUserService);
     private gameId: string = '';
     private currentGame: CurrentGame;
     private socketManager: SocketClientService = inject(SocketClientService);
@@ -61,6 +63,7 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
     constructor(private router: Router) {}
 
     ngOnInit() {
+        this.refreshUserData();
         this.socketManager.on(SocketClientEventNames.ServerError, () => {
             this.gameSessionManager.updateGameId(EMPTY_CODE);
             this.router.navigate([UrlPage.Error]);
@@ -92,6 +95,7 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
         if (!this.joiningRoom) {
             this.deleteGameOnAdminQuit();
             this.deselectAvatarOnPlayerQuit();
+            this.refreshUserData();
         }
     }
 
@@ -266,6 +270,15 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
         }
         this.playerSocketService.onChangeLog((gameEvent: GameEvent) => {
             this.gameEventService.addLog(gameEvent);
+        });
+    }
+    private refreshUserData(): void {
+        const userId = this.userManagerService.getCurrentUser().id;
+        this.httpUserService.getUser(userId).subscribe({
+            next: (user) => {
+                this.userManagerService.setMoney(user.money);
+            },
+            error: (err) => console.error('Failed to refresh user data:', err),
         });
     }
 }

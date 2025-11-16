@@ -1,3 +1,8 @@
+/* eslint-disable complexity */
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable no-dupe-class-members */
+/* eslint-disable no-restricted-imports */
+/* eslint-disable no-unused-vars */
 import { AvatarContainer } from '@app/classes/avatar-container';
 /* eslint-disable no-console */
 /* eslint-disable max-lines */
@@ -27,7 +32,7 @@ import { AvatarManagement, RoomManagement } from '@common/socket-data-forms';
 import * as http from 'http';
 import { Collection } from 'mongodb';
 import * as io from 'socket.io';
-import Container from 'typedi';
+import { Container } from 'typedi';
 import { BoardGameService } from '../board-game/board-game.service';
 import { FriendSocketManager } from '../friends/friend-socket.manager';
 import { UsersService } from '../users/users.service';
@@ -52,6 +57,7 @@ export class SocketManager {
     private vpSocketAddingHandler: VpSocketAddingHandler;
     private socketGameCommunication: SocketGameCommunication;
     private boardGameService: BoardGameService;
+    private refundedGames = new Set<string>();
 
     constructor(
         server: http.Server,
@@ -121,6 +127,16 @@ export class SocketManager {
                             return;
                         }
                     }
+
+                    // DEBIT ENTRY FEE FOR CREATOR (NEW)
+                    if (game.entryPrice > 0) {
+                        const debitSuccess = await this.debitPlayer(userId, game.entryPrice);
+                        if (!debitSuccess) {
+                            callback({ error: 'INSUFFICIENT_FUNDS' });
+                            return;
+                        }
+                    }
+
                     game.adminId = socket.id;
                     const createdGame = await this.gameService.createGame(game);
                     this.gameScheduler.createGame(createdGame);
@@ -209,12 +225,13 @@ export class SocketManager {
 
                 socket.join(gameId);
                 this.sio.to(gameId).emit('avatar-room-joined');
-                callback({ game: game, codeError: false, limitError: false, lockedError: false });
+                callback({ game, codeError: false, limitError: false, lockedError: false });
             });
 
             socket.on('join-game', async (data: RoomManagement, callback) => {
                 const { gameId, player } = data;
                 const game = await this.gameService.getGame(gameId);
+
                 if (!game || game.phase === CurrentGamePhase.Ended) {
                     const response: JoinGameAck = { codeError: true, limitError: false, lockedError: false };
                     callback(response);
@@ -231,8 +248,24 @@ export class SocketManager {
                     callback(response);
                     return;
                 }
+
+                const isCreator = game.adminId === socket.id;
+                if (game.entryPrice > 0 && !player.virtualPlayer && !isCreator) {
+                    const debitSuccess = await this.debitPlayer(player.userId, game.entryPrice);
+                    if (!debitSuccess) {
+                        const response: JoinGameAck = {
+                            codeError: false,
+                            limitError: false,
+                            lockedError: false,
+                            insufficientFundsError: true,
+                        };
+                        callback(response);
+                        return;
+                    }
+                }
+
                 if (game.phase === CurrentGamePhase.Running) {
-                    //TODO APPY LOGIC
+                    // TODO APPY LOGIC
                     const playerWithId: Player = { ...player, socketId: socket.id };
                     await this.gameService.addPlayer(playerWithId, gameId);
                     const ans = this.gameScheduler.joinActiveGame(playerWithId, game);
@@ -267,7 +300,7 @@ export class SocketManager {
                 const joinGameAck: JoinGameAck = { game: updatedGame, player: playerWithId, codeError: false, limitError: false, lockedError: false };
                 callback(joinGameAck);
             });
-            //TODO: MAKE A SOCKET EVENT FROM SERVER TO CLIENT 'player-joined-active' and add logic client side
+            // TODO: MAKE A SOCKET EVENT FROM SERVER TO CLIENT 'player-joined-active' and add logic client side
 
             socket.on('start-game', async (gameId: string) => {
                 const game = await this.gameService.getGame(gameId);
@@ -282,33 +315,8 @@ export class SocketManager {
                     return;
                 }
 
-                for (const player of game.players) {
-                    await this.gameService.removePlayer(player, game.id);
-                    this.sio.to(game.id).emit('player-left', player);
-                    this.avatarContainer.releaseBySocket(gameId, player.socketId);
-                    this.sio.to(game.id).emit('avatar-list-updated', this.avatarContainer.getSelectedAvatars(gameId));
-
-                    if (player.virtualPlayer) {
-                        const vpManager = this.vpManagers.get(gameId);
-                        if (vpManager) {
-                            vpManager.releaseVpName(player.name);
-                        }
-                        this.gameScheduler.disconnectPlayer(player.socketId);
-                        const vpSocket = this.vpSockets.get(player.socketId);
-                        if (vpSocket) {
-                            vpSocket.clientSocket.disconnect();
-                            this.vpSockets.delete(player.socketId);
-                            this.gameVpSocketEvents.delete(player.socketId);
-                            this.fightVpSocketEvents.delete(player.socketId);
-                            this.vpGameSessionManagers.delete(player.socketId);
-                            this.vpBehaviorsInGame.delete(player.socketId);
-                            this.vpBehaviorsInFight.delete(player.socketId);
-                        }
-                    }
-                }
-                this.sio.socketsLeave(game.id);
-                await this.gameService.deleteGame(game.id);
-                this.sio.to(gameId).emit('admin-left', gameId);
+                // Use existing cancelWaitingRoom logic instead of duplicating
+                await this.cancelWaitingRoom(game, 'admin-left-waiting');
             });
 
             socket.on('leave-game', async (data: { gameId: string }) => {
@@ -335,7 +343,7 @@ export class SocketManager {
             });
 
             socket.on(SocketEventNames.GetCurrentGamePreviews, (gameId: string, callback) => {
-                //lets get all the games that are in waiting phase and not lock AND all the games that have drop in enabled but are not full yet
+                // lets get all the games that are in waiting phase and not lock AND all the games that have drop in enabled but are not full yet
                 const previews = this.gameService.getCurrentGamePreviews();
                 callback(previews);
             });
@@ -392,6 +400,7 @@ export class SocketManager {
         });
     }
 
+    // UPDATE leavePlayer to include refund logic
     private async leavePlayer(gameId: string, player: Player, reason: 'quit' | 'kick' | 'timeout' | 'admin-quit'): Promise<void> {
         const game = await this.gameService.getGame(gameId);
         if (!game) return;
@@ -403,7 +412,25 @@ export class SocketManager {
             await this.cancelWaitingRoom(game, 'admin-left-waiting');
             return;
         }
+
+        if (isWaiting && game.entryPrice > 0 && !player.virtualPlayer) {
+            await this.refundPlayer(player.userId, game.entryPrice);
+        }
+
+        if (isOrganizer && isWaiting) {
+            await this.cancelWaitingRoom(game, 'admin-left-waiting');
+            return;
+        }
+
         await this.gameService.removePlayer(player, gameId);
+
+        // MARK as abandoned if game has started (NEW)
+        if (!isWaiting) {
+            const controller = this.gameScheduler.getGameController(gameId);
+            if (controller) {
+                controller.session.markPlayerAsAbandoned(player.userId);
+            }
+        }
 
         this.gameScheduler.disconnectPlayer(player.socketId);
 
@@ -427,7 +454,6 @@ export class SocketManager {
         }
 
         this.sio.sockets.sockets.get(player.socketId)?.leave(gameId);
-
         this.sio.to(gameId).emit('player-left', player);
 
         const updatedGame = await this.gameService.getGame(gameId);
@@ -442,6 +468,7 @@ export class SocketManager {
 
         await this.maybeEndGameAndCleanup(updatedGame);
     }
+
     private async maybeEndGameAndCleanup(game: CurrentGame): Promise<void> {
         const humanPlayers = game.players.filter((p) => !p.virtualPlayer);
         if (humanPlayers.length === 0) {
@@ -475,14 +502,34 @@ export class SocketManager {
             await this.gameService.deleteGame(game.id);
         }
     }
+
     private async cancelWaitingRoom(game: CurrentGame, reason: 'admin-left-waiting'): Promise<void> {
         const { id: gameId } = game;
 
-        this.sio.to(game.id).emit('admin-left', game);
+        const existingGame = await this.gameService.getGame(gameId);
+        if (!existingGame) {
+            console.log(`Game ${gameId} already deleted, skipping cleanup`);
+            return;
+        }
 
+        // NEW: Prevent duplicate refunds
+        if (this.refundedGames.has(gameId)) {
+            console.log(`Game ${gameId} already refunded, skipping refunds`);
+        } else {
+            // Refund all players
+            if (game.entryPrice > 0) {
+                for (const player of game.players.filter((p) => !p.virtualPlayer)) {
+                    await this.refundPlayer(player.userId, game.entryPrice);
+                }
+            }
+            this.refundedGames.add(gameId);
+        }
+
+        this.sio.to(game.id).emit('admin-left', game);
         this.avatarContainer.clearGame(game.id);
         this.sio.to(game.id).emit('avatar-list-updated', []);
 
+        // Cleanup VPs
         for (const p of game.players.filter((p) => p.virtualPlayer)) {
             const vpManager = this.vpManagers.get(gameId);
             vpManager?.releaseVpName(p.name);
@@ -499,13 +546,10 @@ export class SocketManager {
             this.vpBehaviorsInFight.delete(p.socketId);
         }
 
-        for (const p of [...game.players]) {
-            await this.gameService.removePlayer(p, gameId);
-        }
-
         this.sio.socketsLeave(gameId);
         this.vpManagers.delete(gameId);
         this.gameScheduler['gameMap'].delete(gameId);
+        this.refundedGames.delete(gameId); // Clean up tracking
 
         await this.gameService.deleteGame(gameId);
     }
@@ -533,6 +577,39 @@ export class SocketManager {
             }
         } catch (err) {
             console.error('purgeChatHistoryIfRoomEmpty failed:', err);
+        }
+    }
+
+    private async debitPlayer(userId: string, amount: number): Promise<boolean> {
+        try {
+            const usersService = Container.get(UsersService);
+            const user = await usersService.getUser(userId);
+
+            if (!user || user.money < amount) {
+                console.log(`Debit failed for user ${userId}: insufficient funds (has ${user?.money}, needs ${amount})`);
+                return false;
+            }
+
+            const updatedUser = { ...user, money: user.money - amount };
+            await usersService.updateUser(updatedUser);
+            console.log(`Debited ${amount} from user ${userId}. New balance: ${updatedUser.money}`);
+            return true;
+        } catch (error) {
+            console.error(`Failed to debit user ${userId}:`, error);
+            return false;
+        }
+    }
+    private async refundPlayer(userId: string, amount: number): Promise<void> {
+        try {
+            const usersService = Container.get(UsersService);
+            const user = await usersService.getUser(userId);
+            if (!user) return;
+
+            const updatedUser = { ...user, money: user.money + amount };
+            await usersService.updateUser(updatedUser);
+            console.log(`Refunded ${amount} to user ${userId}. New balance: ${updatedUser.money}`);
+        } catch (error) {
+            console.error(`Failed to refund user ${userId}:`, error);
         }
     }
 }

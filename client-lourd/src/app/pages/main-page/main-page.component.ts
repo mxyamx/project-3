@@ -39,6 +39,7 @@ export class MainPageComponent implements OnDestroy, OnInit {
         if (!this.playerSocketService.isConnected()) {
             this.playerSocketService.connect();
         }
+        this.refreshUserData();
     }
 
     ngOnDestroy(): void {
@@ -80,6 +81,18 @@ export class MainPageComponent implements OnDestroy, OnInit {
 
     openSettings(): void {
         this.router.navigate(['/settings']);
+    }
+    private refreshUserData(): void {
+        const userId = this.userManager.getCurrentUser().id;
+        if (!userId) return;
+
+        this.httpUserService.getUser(userId).subscribe({
+            next: (user) => {
+                // Update all user fields from DB
+                this.userManager.currentUser.set(user);
+            },
+            error: (err) => console.error('Failed to refresh user data:', err),
+        });
     }
 
     openSocialsPopup() {
