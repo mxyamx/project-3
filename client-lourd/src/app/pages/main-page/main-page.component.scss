@@ -381,3 +381,10 @@ $animation-delay-1: 0.2s;
         transform: scale(1.1);
     }
 }
+
+.notification-wrapper {
+    position: fixed !important;
+    top: 25px !important;
+    left: 25px !important;
+    z-index: 2000;
+}

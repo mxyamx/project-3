@@ -6,7 +6,8 @@
             {{ 'socials-page.my-friends' | translate }} ({{ friendCount() }})
         </h2>
         <ul class="user-list">
-            <li *ngFor="let friend of friends()">
+            @for (friend of friends(); track friend.id) {
+            <li>
                 <div class="user-info">
                     <img class="avatar" [src]="friend.avatar" [alt]="friend.username" />
                     <span class="name">{{ friend.username }}</span>
@@ -20,9 +21,11 @@
                     </button>
                 </div>
             </li>
-            <li *ngIf="friendCount() === 0" class="empty-state">
+            } @empty {
+            <li class="empty-state">
                 {{ 'socials-page.empty.no-friends' | translate }}
             </li>
+            }
         </ul>
     </div>
 
@@ -33,7 +36,8 @@
             {{ 'socials-page.blocked-users' | translate }} ({{ blockedCount() }})
         </h2>
         <ul class="user-list">
-            <li *ngFor="let blocked of blockedUsers()">
+            @for (blocked of blockedUsers(); track blocked.id) {
+            <li>
                 <div class="user-info">
                     <img class="avatar" [src]="blocked.avatar" [alt]="blocked.username" />
                     <span class="name">{{ blocked.username }}</span>
@@ -44,9 +48,11 @@
                     </button>
                 </div>
             </li>
-            <li *ngIf="blockedCount() === 0" class="empty-state">
+            } @empty {
+            <li class="empty-state">
                 {{ 'socials-page.empty.no-blocked' | translate }}
             </li>
+            }
         </ul>
     </div>
 </div>

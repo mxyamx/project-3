@@ -451,3 +451,51 @@ $button-border-radius: 66px;
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+.warning-modal {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 30px;
+    font-size: 15px;
+    white-space: pre-line;
+    transition: opacity 0.2s ease-in-out;
+    width: 400px;
+    height: 200px;
+    gap: 10px;
+
+    h2 {
+        color: #d84315;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        i {
+            font-size: 1.2em;
+        }
+    }
+
+    .modal-text {
+        margin: 0.5rem 0;
+        font-size: larger;
+        text-align: center;
+    }
+
+    .buttons {
+        display: flex;
+        gap: 30px;
+    }
+
+    .proceed-button,
+    .cancel-button {
+        @extend .option-button;
+        height: 40px;
+        width: 155px;
+    }
+}

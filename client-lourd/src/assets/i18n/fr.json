@@ -156,7 +156,8 @@
         "boardgame-deleted-modal": "Attention!! Ce jeu a déjà été supprimé.",
         "visibility-modal": "Attention!! Ce jeu a changé de visibilité.",
         "create": "Créer une nouvelle partie",
-        "poll-prize-title": "Sélectionnez un prix d'entrée pour la partie"
+        "poll-prize-title": "Sélectionnez un prix d'entrée pour la partie",
+        "friends-only": "Amis seulement"
     },
     "game-list": {
         "title": "Liste des Jeux",
@@ -199,7 +200,15 @@
         "accessibility": "Accessibilité",
         "open": "Ouvert",
         "close": "Fermer",
-        "no-game": "Aucune partie en cours"
+        "no-game": "Aucune partie en cours",
+        "not-friend": "Vous devez être ami avec l'administrateur pour rejoindre cette partie.",
+        "game-full": "La partie est pleine.",
+        "you-blocked-player": "Il y a un joueur que vous avez bloqué dans cette salle.",
+        "blocked-by-player": "Vous avez été bloqué par un joueur dans cette salle.",
+        "proceed-question": "Voulez-vous toujours rejoindre cette partie ?",
+        "proceed-anyway": "Rejoindre quand même",
+        "cancel": "Annuler",
+        "warning": "Attention!"
     },
     "error-page": {
         "title": "Oups ! Une erreur est survenue. Veuillez réessayer."

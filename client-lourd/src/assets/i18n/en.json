@@ -156,7 +156,8 @@
         "boardgame-deleted-modal": "Warning!! This game has already been deleted.",
         "visibility-modal": "Warning!! This game's visibility has changed.",
         "create": "Create New Game",
-        "poll-prize-title": "Select an entry fee for the game"
+        "poll-prize-title": "Select an entry fee for the game",
+        "friends-only": "Friends only"
     },
     "game-list": {
         "title": "Game List",
@@ -199,7 +200,15 @@
         "accessibility": "Accessibility",
         "open": "Open",
         "close": "Close",
-        "no-game": "No game in progress"
+        "no-game": "No game in progress",
+        "not-friend": "You must be a friend of the administrator to join this game.",
+        "game-full": "The game is full.",
+        "you-blocked-player": "There is a player you blocked in this room.",
+        "blocked-by-player": "You have been blocked by a player in this room.",
+        "proceed-question": "Do you still want to join this game?",
+        "proceed-anyway": "Join Anyway",
+        "cancel": "Cancel",
+        "warning": "Warning!"
     },
     "error-page": {
         "title": "Oops! An error occurred. Please try again."

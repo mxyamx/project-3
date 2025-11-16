@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { ID_GENERATION } from '@app/constants/development-constants';
+import { UsersService } from '@app/services/users/users.service';
 import { CurrentGame, CurrentGamePhase, CurrentGamePreview } from '@common/current-game';
 import { PlayerLimits } from '@common/enums/players-limit';
 import { SocketEventNames } from '@common/enums/socket-events-names';
@@ -16,7 +17,11 @@ export class CurrentGamesService {
     private sio: io.Server;
     private games: Map<string, CurrentGame> = new Map();
 
-    constructor(private databaseService: DatabaseService) {}
+    constructor(
+        private databaseService: DatabaseService,
+        private usersService: UsersService,
+    ) {}
+
     async getAllGames(): Promise<CurrentGame[]> {
         const values = Array.from(this.games.values());
         return values.map(clone);
@@ -45,6 +50,7 @@ export class CurrentGamesService {
                     previewImage: game.boardGame.previewImage,
                     isJoinable,
                     entryPrice: game.entryPrice,
+                    friendsOnly: game.friendsOnly || false,
                 };
                 return preview;
             });
@@ -56,6 +62,75 @@ export class CurrentGamesService {
             ((game.phase === CurrentGamePhase.Waiting && !game.locked) || (game.phase === CurrentGamePhase.Running && game.dropInEnabled)) &&
             game.players.length < maxPlayerCount
         );
+    }
+
+    async canUserJoinGame(
+        gameId: string,
+        userId: string,
+        getFirebaseIdBySocketId: (socketId: string) => string | null,
+    ): Promise<{ canJoin: boolean; reason?: string }> {
+        try {
+            const game = this.games.get(gameId);
+            if (!game) {
+                return { canJoin: false, reason: 'GAME_NOT_FOUND' };
+            }
+
+            const adminFirebaseId = getFirebaseIdBySocketId(game.adminId) || game.adminId;
+
+            if (game.friendsOnly && adminFirebaseId !== userId) {
+                try {
+                    const admin = await this.usersService.getUser(adminFirebaseId);
+                    const adminFriends = admin.friends || [];
+
+                    if (!adminFriends.includes(userId)) {
+                        return { canJoin: false, reason: 'NOT_FRIEND_OF_ADMIN' };
+                    }
+                } catch (error) {
+                    console.error(`Error checking admin ${adminFirebaseId}:`, error);
+                    return { canJoin: false, reason: 'NOT_FRIEND_OF_ADMIN' };
+                }
+            }
+
+            if (game.players.length > 0) {
+                try {
+                    const user = await this.usersService.getUser(userId);
+                    let hasBlockedUserInRoom = false;
+
+                    for (const player of game.players) {
+                        const playerFirebaseId = player.userId;
+                        if (!playerFirebaseId) continue;
+
+                        try {
+                            const playerData = await this.usersService.getUser(playerFirebaseId);
+
+                            if (playerData.blocked?.includes(userId)) {
+                                return { canJoin: false, reason: 'BLOCKED_BY_PLAYER' };
+                            }
+
+                            if (user.blocked?.includes(playerFirebaseId)) {
+                                hasBlockedUserInRoom = true;
+                            }
+                        } catch (playerError) {
+                            console.error(`Error checking player ${playerFirebaseId}:`, playerError);
+                        }
+                    }
+
+                    if (hasBlockedUserInRoom) {
+                        return {
+                            canJoin: true,
+                            reason: 'USER_BLOCKED_PLAYER_WARNING',
+                        };
+                    }
+                } catch (userError) {
+                    console.error(`Error checking user ${userId}:`, userError);
+                }
+            }
+
+            return { canJoin: true };
+        } catch (error) {
+            console.error('Error in canUserJoinGame:', error);
+            return { canJoin: true };
+        }
     }
 
     async getGame(id: string): Promise<CurrentGame | null> {
@@ -74,6 +149,7 @@ export class CurrentGamesService {
 
         base.id = await this.generateGameId();
         base.phase = CurrentGamePhase.Waiting;
+        base.friendsOnly = base.friendsOnly || false;
 
         const toStore = clone(base);
         this.games.set(toStore.id, toStore);
@@ -121,6 +197,7 @@ export class CurrentGamesService {
             phase: patch.phase ?? existing.phase,
             dropInEnabled: patch.dropInEnabled ?? existing.dropInEnabled,
             adminId: patch.adminId ?? existing.adminId,
+            friendsOnly: patch.friendsOnly ?? existing.friendsOnly,
             boardGame: patch.boardGame !== undefined ? { ...existing.boardGame, ...patch.boardGame } : existing.boardGame,
             players: patch.players !== undefined ? patch.players.map((p) => ({ ...p })) : existing.players,
             id: existing.id,

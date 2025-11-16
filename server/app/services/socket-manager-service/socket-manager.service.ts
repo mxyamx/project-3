@@ -69,11 +69,7 @@ export class SocketManager {
         console.log('🔧 UserSessionManager created');
         this.gameService.setIo(this.sio);
         this.gameScheduler = new GameScheduler(this.sio, this.gameService);
-        this.userSessionController = new UserSessionController(
-            this.sio,
-            Container.get(UsersService),
-            this.userSessionManager,
-        );
+        this.userSessionController = new UserSessionController(this.sio, Container.get(UsersService), this.userSessionManager);
         this.socketGameCommunication = new SocketGameCommunication(this.sio, this.databaseService, (socketId: string) =>
             this.userSessionManager.getFirebaseIdBySocketId(socketId),
         );
@@ -211,6 +207,39 @@ export class SocketManager {
                     callback(response);
                     return;
                 }
+
+                const userId = this.userSessionManager.getFirebaseIdBySocketId(socket.id);
+
+                if (userId) {
+                    const joinCheck = await this.gameService.canUserJoinGame(gameId, userId, (socketId) =>
+                        this.userSessionManager.getFirebaseIdBySocketId(socketId),
+                    );
+                    if (!joinCheck.canJoin) {
+                        const response: JoinGameAck = {
+                            codeError: false,
+                            limitError: false,
+                            lockedError: false,
+
+                            notFriendError: joinCheck.reason === 'NOT_FRIEND_OF_ADMIN',
+                            blockedByPlayerError: joinCheck.reason === 'BLOCKED_BY_PLAYER',
+                        };
+                        callback(response);
+                        return;
+                    }
+
+                    if (joinCheck.reason === 'USER_BLOCKED_PLAYER_WARNING') {
+                        const response: JoinGameAck = {
+                            codeError: false,
+                            limitError: false,
+                            lockedError: false,
+                            youBlockedPlayerWarning: true,
+                            game: game,
+                        };
+                        callback(response);
+                        return;
+                    }
+                }
+
                 if ((game.phase === CurrentGamePhase.Waiting && game.locked) || (game.phase === CurrentGamePhase.Running && !game.dropInEnabled)) {
                     const response: JoinGameAck = { codeError: false, limitError: false, lockedError: true };
                     callback(response);
@@ -237,11 +266,43 @@ export class SocketManager {
                     callback(response);
                     return;
                 }
+
+                const userId = this.userSessionManager.getFirebaseIdBySocketId(socket.id);
+
+                if (!userId) {
+                    console.error('No userId found for socket', socket.id);
+                    const response: JoinGameAck = {
+                        codeError: false,
+                        limitError: false,
+                        lockedError: false,
+                        insufficientFundsError: true,
+                    };
+                    callback(response);
+                    return;
+                }
+
+                const joinCheck = await this.gameService.canUserJoinGame(gameId, userId, (socketId) =>
+                    this.userSessionManager.getFirebaseIdBySocketId(socketId),
+                );
+
+                if (!joinCheck.canJoin) {
+                    const response: JoinGameAck = {
+                        codeError: false,
+                        limitError: false,
+                        lockedError: false,
+                        notFriendError: joinCheck.reason === 'NOT_FRIEND_OF_ADMIN',
+                        blockedByPlayerError: joinCheck.reason === 'BLOCKED_BY_PLAYER',
+                    };
+                    callback(response);
+                    return;
+                }
+
                 if ((game.phase === CurrentGamePhase.Waiting && game.locked) || (game.phase === CurrentGamePhase.Running && !game.dropInEnabled)) {
                     const response: JoinGameAck = { codeError: false, limitError: false, lockedError: true };
                     callback(response);
                     return;
                 }
+
                 const maxPlayerCount = PlayerLimits[game.boardGame.size].maxPlayers;
                 if (game.players.length >= maxPlayerCount) {
                     const response: JoinGameAck = { codeError: false, limitError: true, lockedError: false };
@@ -251,7 +312,7 @@ export class SocketManager {
 
                 const isCreator = game.adminId === socket.id;
                 if (game.entryPrice > 0 && !player.virtualPlayer && !isCreator) {
-                    const debitSuccess = await this.debitPlayer(player.userId, game.entryPrice);
+                    const debitSuccess = await this.debitPlayer(userId, game.entryPrice);
                     if (!debitSuccess) {
                         const response: JoinGameAck = {
                             codeError: false,
@@ -264,9 +325,13 @@ export class SocketManager {
                     }
                 }
 
+                const playerWithId: Player = {
+                    ...player,
+                    socketId: socket.id,
+                    userId: userId,
+                };
+
                 if (game.phase === CurrentGamePhase.Running) {
-                    // TODO APPY LOGIC
-                    const playerWithId: Player = { ...player, socketId: socket.id };
                     await this.gameService.addPlayer(playerWithId, gameId);
                     const ans = this.gameScheduler.joinActiveGame(playerWithId, game);
                     socket.join(gameId);
@@ -283,21 +348,26 @@ export class SocketManager {
                     return;
                 }
 
-                const playerWithId: Player = { ...player, socketId: socket.id };
                 await this.gameService.addPlayer(playerWithId, gameId);
                 this.gameScheduler.joinGame(playerWithId, game, socket);
                 socket.join(gameId);
                 this.sio.to(gameId).emit('player-joined', playerWithId);
 
                 const maxPlayers = PlayerLimits[game.boardGame.size].maxPlayers;
-
                 if (game.players.length >= maxPlayers && !game.locked) {
                     game.locked = true;
                     await this.gameService.updateGame(game);
                     this.sio.to(gameId).emit('lock-updated', game);
                 }
+
                 const updatedGame = await this.gameService.getGame(gameId);
-                const joinGameAck: JoinGameAck = { game: updatedGame, player: playerWithId, codeError: false, limitError: false, lockedError: false };
+                const joinGameAck: JoinGameAck = {
+                    game: updatedGame,
+                    player: playerWithId,
+                    codeError: false,
+                    limitError: false,
+                    lockedError: false,
+                };
                 callback(joinGameAck);
             });
             // TODO: MAKE A SOCKET EVENT FROM SERVER TO CLIENT 'player-joined-active' and add logic client side

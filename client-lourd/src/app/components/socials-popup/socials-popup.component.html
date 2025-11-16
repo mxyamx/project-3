@@ -18,90 +18,86 @@
                 </button>
             </div>
 
-            <div class="tab-content" [ngSwitch]="activeTab">
+            <div class="tab-content">
+                @switch (activeTab) {
                 <!-- Friends Tab -->
-                <div *ngSwitchCase="'friends'">
-                    <div *ngIf="isLoading" class="loading">{{ 'socials-popup.loading' | translate }}</div>
-                    <ul class="user-list" *ngIf="!isLoading">
-                        <li *ngFor="let friend of friends">
-                            <div class="user-info">
-                                <img [src]="friend.avatar" [alt]="friend.username" class="avatar" />
-                                <span class="name">{{ friend.username }}</span>
-                            </div>
-                            <div class="actions">
-                                <button
-                                    class="icon-btn remove-btn"
-                                    (click)="confirmRemoveFriend(friend)"
-                                    [title]="'socials-popup.actions.remove' | translate"
-                                >
-                                    <i class="fa fa-user-minus"></i>
-                                </button>
-                                <button
-                                    class="icon-btn block-btn"
-                                    (click)="confirmBlockUser(friend)"
-                                    [title]="'socials-popup.actions.block' | translate"
-                                >
-                                    <i class="fa fa-ban"></i>
-                                </button>
-                            </div>
-                        </li>
-                        <li *ngIf="friendCount() === 0" class="empty-state">{{ 'socials-popup.empty.no-friends' | translate }}</li>
-                    </ul>
-                </div>
+                @case ('friends') { @if (isLoading) {
+                <div class="loading">{{ 'socials-popup.loading' | translate }}</div>
+                } @if (!isLoading) {
+                <ul class="user-list">
+                    @for (friend of friends; track friend.id) {
+                    <li>
+                        <div class="user-info">
+                            <img [src]="friend.avatar" [alt]="friend.username" class="avatar" />
+                            <span class="name">{{ friend.username }}</span>
+                        </div>
+                        <div class="actions">
+                            <button
+                                class="icon-btn remove-btn"
+                                (click)="confirmRemoveFriend(friend)"
+                                [title]="'socials-popup.actions.remove' | translate"
+                            >
+                                <i class="fa fa-user-minus"></i>
+                            </button>
+                            <button class="icon-btn block-btn" (click)="confirmBlockUser(friend)" [title]="'socials-popup.actions.block' | translate">
+                                <i class="fa fa-ban"></i>
+                            </button>
+                        </div>
+                    </li>
+                    } @empty {
+                    <li class="empty-state">{{ 'socials-popup.empty.no-friends' | translate }}</li>
+                    }
+                </ul>
+                } }
 
                 <!-- Received Requests Tab -->
-                <div *ngSwitchCase="'received'">
-                    <ul class="user-list">
-                        <li *ngFor="let request of pendingRequests">
-                            <div class="user-info">
-                                <img [src]="request.sender.avatar" [alt]="request.sender.username" class="avatar" />
-                                <span class="name">{{ request.sender.username }}</span>
-                            </div>
-                            <div class="actions">
-                                <button
-                                    class="icon-btn accept-btn"
-                                    (click)="acceptRequest(request)"
-                                    [title]="'socials-popup.actions.accept' | translate"
-                                >
-                                    <i class="fa fa-check"></i>
-                                </button>
-                                <button
-                                    class="icon-btn reject-btn"
-                                    (click)="rejectRequest(request)"
-                                    [title]="'socials-popup.actions.reject' | translate"
-                                >
-                                    <i class="fa fa-times"></i>
-                                </button>
-                            </div>
-                        </li>
-                        <li *ngIf="pendingCount() === 0" class="empty-state">{{ 'socials-popup.empty.no-pending' | translate }}</li>
-                    </ul>
-                </div>
+                @case ('received') {
+                <ul class="user-list">
+                    @for (request of pendingRequests; track request.id) {
+                    <li>
+                        <div class="user-info">
+                            <img [src]="request.sender.avatar" [alt]="request.sender.username" class="avatar" />
+                            <span class="name">{{ request.sender.username }}</span>
+                        </div>
+                        <div class="actions">
+                            <button class="icon-btn accept-btn" (click)="acceptRequest(request)" [title]="'socials-popup.actions.accept' | translate">
+                                <i class="fa fa-check"></i>
+                            </button>
+                            <button class="icon-btn reject-btn" (click)="rejectRequest(request)" [title]="'socials-popup.actions.reject' | translate">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    </li>
+                    } @empty {
+                    <li class="empty-state">{{ 'socials-popup.empty.no-pending' | translate }}</li>
+                    }
+                </ul>
+                }
 
                 <!-- Sent Requests Tab -->
-                <div *ngSwitchCase="'sent'">
-                    <ul class="user-list">
-                        <li *ngFor="let request of sentRequests">
-                            <div class="user-info">
-                                <img [src]="request.receiver.avatar" [alt]="request.receiver.username" class="avatar" />
-                                <span class="name">{{ request.receiver.username }}</span>
-                            </div>
-                            <div class="actions">
-                                <button
-                                    class="icon-btn cancel-btn"
-                                    (click)="cancelRequest(request)"
-                                    [title]="'socials-popup.actions.cancel' | translate"
-                                >
-                                    <i class="fa fa-times"></i>
-                                </button>
-                            </div>
-                        </li>
-                        <li *ngIf="sentCount() === 0" class="empty-state">{{ 'socials-popup.empty.no-sent' | translate }}</li>
-                    </ul>
-                </div>
+                @case ('sent') {
+                <ul class="user-list">
+                    @for (request of sentRequests; track request.id) {
+                    <li>
+                        <div class="user-info">
+                            <img [src]="request.receiver.avatar" [alt]="request.receiver.username" class="avatar" />
+                            <span class="name">{{ request.receiver.username }}</span>
+                        </div>
+                        <div class="actions">
+                            <button class="icon-btn cancel-btn" (click)="cancelRequest(request)" [title]="'socials-popup.actions.cancel' | translate">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    </li>
+                    } @empty {
+                    <li class="empty-state">{{ 'socials-popup.empty.no-sent' | translate }}</li>
+                    }
+                </ul>
+                }
 
                 <!-- Add Friends Tab -->
-                <div *ngSwitchCase="'add'" class="add-user">
+                @case ('add') {
+                <div class="add-user">
                     <div class="search-bar">
                         <input
                             [(ngModel)]="searchQuery"
@@ -119,10 +115,12 @@
                         </button>
                     </div>
 
-                    <div *ngIf="isLoading" class="loading">{{ 'socials-popup.searching' | translate }}</div>
-
-                    <ul class="user-list" *ngIf="!isLoading && searchResults.length > 0">
-                        <li *ngFor="let user of searchResults">
+                    @if (isLoading) {
+                    <div class="loading">{{ 'socials-popup.searching' | translate }}</div>
+                    } @if (!isLoading && searchResults.length > 0) {
+                    <ul class="user-list">
+                        @for (user of searchResults; track user.id) {
+                        <li>
                             <div class="user-info">
                                 <img [src]="user.avatar" [alt]="user.username" class="avatar" />
                                 <span class="name">{{ user.username }}</span>
@@ -140,12 +138,15 @@
                                 </button>
                             </div>
                         </li>
+                        }
                     </ul>
-
-                    <div *ngIf="!isLoading && hasSearched && searchResults.length === 0" class="empty-state">
+                    } @if (!isLoading && hasSearched && searchResults.length === 0) {
+                    <div class="empty-state">
                         {{ 'socials-popup.empty.no-results' | translate }}
                     </div>
+                    }
                 </div>
+                } }
             </div>
         </div>
     </div>

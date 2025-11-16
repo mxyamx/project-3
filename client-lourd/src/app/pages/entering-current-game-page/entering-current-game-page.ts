@@ -31,6 +31,10 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
     limitError: boolean = false;
     moneyError = false;
     hasBeenClicked: boolean = false;
+    notFriendError = false;
+    blockedByPlayerError = false;
+    showBlockedUserWarning = false;
+    pendingGameId: string | null = null;
 
     private httpUserService = inject(HttpUserService);
     private playerSocketService: PlayerSocketService = inject(PlayerSocketService);
@@ -80,6 +84,23 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
                 return;
             }
 
+            if (response.notFriendError) {
+                this.notFriendError = true;
+                return;
+            }
+
+            if (response.blockedByPlayerError) {
+                this.blockedByPlayerError = true;
+                return;
+            }
+
+            if (response.youBlockedPlayerWarning) {
+                this.showBlockedUserWarning = true;
+                this.pendingGameId = id;
+                this.currentGameManager.updateCurrentGame(response.game!);
+                return;
+            }
+
             if (response.codeError) {
                 this.codeError = response.codeError;
                 return;
@@ -126,7 +147,7 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
     }
 
     error(): boolean {
-        return this.lockedError || this.limitError || this.codeError || this.moneyError;
+        return this.lockedError || this.limitError || this.codeError || this.moneyError || this.notFriendError || this.blockedByPlayerError;
     }
 
     retry() {
@@ -134,6 +155,17 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
         this.lockedError = false;
         this.limitError = false;
         this.moneyError = false;
+    }
+
+    proceedWithBlockedUser() {
+        this.showBlockedUserWarning = false;
+        this.hasBeenClicked = true;
+        this.router.navigate([UrlPage.Avatar]);
+    }
+
+    cancelJoinBlockedUser() {
+        this.showBlockedUserWarning = false;
+        this.pendingGameId = null;
     }
 
     private refreshUserData(): void {

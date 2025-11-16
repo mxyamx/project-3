@@ -18,6 +18,7 @@ export interface CurrentGame {
     phase: CurrentGamePhase;
     dropInEnabled: boolean;
     entryPrice: number;
+    friendsOnly: boolean;
 }
 
 export interface CurrentGamePreview {
@@ -30,6 +31,7 @@ export interface CurrentGamePreview {
     previewImage: string;
     isJoinable: boolean;
     entryPrice: number;
+    friendsOnly: boolean;
 }
 
 export interface JoinGameAck {
@@ -40,4 +42,7 @@ export interface JoinGameAck {
     codeError: boolean;
     insufficientFundsError?: boolean;
     updateGamedRes?: UpdateGamedRes;
+    notFriendError?: boolean;
+    blockedByPlayerError?: boolean;
+    youBlockedPlayerWarning?: boolean;
 }
