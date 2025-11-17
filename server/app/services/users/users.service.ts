@@ -90,6 +90,7 @@ export class UsersService {
 
     async incrementVictory(userId: string): Promise<void> {
         const user = await this.getUser(userId);
+        console.log('User before incrementing victory:', user);
         if (!user) return;
 
         const updatedUser = {
@@ -97,6 +98,24 @@ export class UsersService {
             statistics: {
                 ...user.statistics,
                 victoryAmount: user.statistics.victoryAmount + 1,
+            },
+        };
+
+        await this.updateUser(updatedUser);
+    }
+
+    async addGameDuration(userId: string, durationMs: number): Promise<void> {
+        const user = await this.getUser(userId);
+        if (!user) return;
+
+        const stats = user.statistics;
+
+        const updatedUser = {
+            ...user,
+            statistics: {
+                ...stats,
+                totalGameDuration: (stats.totalGameDuration ?? 0) + durationMs,
+                gamesPlayed: (stats.gamesPlayed ?? 0) + 1,
             },
         };
 

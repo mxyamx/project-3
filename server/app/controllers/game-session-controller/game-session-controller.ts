@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable max-lines */
 import { GameClockManager } from '@app/classes/game-clock-manager/game-clock-manager';
 import { GameSession } from '@app/classes/game-session/game-session';
@@ -178,6 +179,7 @@ export class GameSessionController {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
             const remainingPlayers = this.gameSession.listOfPlayers.getValues();
             const winner = remainingPlayers.length === 1 ? remainingPlayers[0] : undefined;
+            console.log('Not enough players to continue the game. Ending game.');
             this.endGame(winner);
         }
     }
@@ -369,20 +371,38 @@ export class GameSessionController {
 
     private async endGame(winner?: Player): Promise<void> {
         // TODO I THINK I WILL SEND THE STATS HERE!
+        console.log('Game ended. END GAME WAS CALLED.');
         this.gameSession.endGame();
         this.gameService.setGameEnded(this.roomCode);
         this.clockManager.stopClock();
+
+        console.log('Game ended. Preparing to send end game data.');
+        console.log('Winner:', JSON.stringify(winner, null, 2));
+
+        // const globalStats = this.gameSession.statisticsManager.displayedGlobalStatistics;
+        // const durationMs = Math.max(0, globalStats.endTime - globalStats.startTime);
+
+        // // FIX: define usersService BEFORE using it
+        // const usersService = Container.get(UsersService);
+
+        // const players = this.gameSession.listOfPlayers.getValues().filter((p) => !p.virtualPlayer);
+
+        // for (const p of players) {
+        //     await usersService.addGameDuration(p.userId, durationMs);
+        // }
+
+        if (winner && !winner.virtualPlayer) {
+            const usersService = Container.get(UsersService);
+            // eslint-disable-next-line no-console
+            console.log('Incrementing victory for user:', winner.userId);
+            await usersService.incrementVictory(winner.userId);
+        }
 
         // Distribute prizes
         if (this.gameSession.board.gameMode === GameMode.Normal && winner) {
             await this.distributePrizes(winner);
         } else if (this.gameSession.board.gameMode === GameMode.CTF && this.winnerTeam) {
             await this.distributePrizesForCTF(this.winnerTeam);
-        }
-
-        if (winner && !winner.virtualPlayer) {
-            const usersService = Container.get(UsersService);
-            await usersService.incrementVictory(winner.userId);
         }
 
         const listOfPlayerStats: (PlayerStatistics & { name: string })[] = [];

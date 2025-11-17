@@ -17,7 +17,7 @@ export class UserSessionController {
         this.vpSocketIds = [];
     }
 
-    public handleUserConnection(socket: Socket): void {
+    handleUserConnection(socket: Socket): void {
         this.handleConnection(socket);
         this.handleDisconnection(socket);
         this.handleEvents(socket);
@@ -40,6 +40,7 @@ export class UserSessionController {
             socket.data.userId = firebaseId;
 
             if (this.userSessionManager.isUserOnline(firebaseId)) {
+                console.error('User already connected from another device');
                 socket.emit('connection-error', {
                     message: 'User is already connected from another device',
                     code: 'ALREADY_ONLINE',
@@ -144,15 +145,15 @@ export class UserSessionController {
         }
     }
 
-    public isUserOnline(firebaseId: string): boolean {
+    isUserOnline(firebaseId: string): boolean {
         return this.userSessionManager.isUserOnline(firebaseId);
     }
 
-    public getUserSession(firebaseId: string) {
+    getUserSession(firebaseId: string) {
         return this.userSessionManager.getUserSession(firebaseId);
     }
 
-    public disconnectUser(firebaseId: string): boolean {
+    disconnectUser(firebaseId: string): boolean {
         const session = this.userSessionManager.getUserSession(firebaseId);
         if (session) {
             const socket = this.sio.sockets.sockets.get(session.socketId);
