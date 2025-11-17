@@ -19,4 +19,8 @@ export interface PlayerStatistics {
     tilePercentage: number;
     totalGameDuration?: number;
     gamesPlayed?: number;
+    gamesPlayedNormal?: number;
+    gamesPlayedCTF?: number;
+    victoriesNormal?: number;
+    victoriesCTF?: number;
 }

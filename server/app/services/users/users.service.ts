@@ -4,6 +4,7 @@
 import { HttpException } from '@app/classes/http-exception/http.exception';
 import { DATABASE_COLLECTION, USER_COLLECTION } from '@app/constants/development-constants';
 import { DatabaseService } from '@app/services/database/database.service';
+import { GameMode } from '@common/enums/game-mode';
 import { InterfaceTheme } from '@common/enums/interfaceTheme';
 import { Language } from '@common/enums/language';
 import { User } from '@common/user';
@@ -88,9 +89,9 @@ export class UsersService {
         }
     }
 
-    async incrementVictory(userId: string): Promise<void> {
+    async incrementVictoryForMode(userId: string, gameMode: GameMode): Promise<void> {
         const user = await this.getUser(userId);
-        console.log('User before incrementing victory:', user);
+        console.log('User before incrementing victory for mode:', user, 'Mode:', gameMode);
         if (!user) return;
 
         const updatedUser = {
@@ -98,6 +99,9 @@ export class UsersService {
             statistics: {
                 ...user.statistics,
                 victoryAmount: user.statistics.victoryAmount + 1,
+                // Increment mode-specific victory
+                victoriesNormal: gameMode === GameMode.Normal ? (user.statistics.victoriesNormal ?? 0) + 1 : (user.statistics.victoriesNormal ?? 0),
+                victoriesCTF: gameMode === GameMode.CTF ? (user.statistics.victoriesCTF ?? 0) + 1 : (user.statistics.victoriesCTF ?? 0),
             },
         };
 
@@ -116,6 +120,27 @@ export class UsersService {
                 ...stats,
                 totalGameDuration: (stats.totalGameDuration ?? 0) + durationMs,
                 gamesPlayed: (stats.gamesPlayed ?? 0) + 1,
+            },
+        };
+
+        await this.updateUser(updatedUser);
+    }
+
+    async addGameDurationForMode(userId: string, durationMs: number, gameMode: GameMode): Promise<void> {
+        const user = await this.getUser(userId);
+        if (!user) return;
+
+        const stats = user.statistics;
+
+        const updatedUser = {
+            ...user,
+            statistics: {
+                ...stats,
+                totalGameDuration: (stats.totalGameDuration ?? 0) + durationMs,
+                gamesPlayed: (stats.gamesPlayed ?? 0) + 1,
+                // Increment mode-specific counters
+                gamesPlayedNormal: gameMode === GameMode.Normal ? (stats.gamesPlayedNormal ?? 0) + 1 : (stats.gamesPlayedNormal ?? 0),
+                gamesPlayedCTF: gameMode === GameMode.CTF ? (stats.gamesPlayedCTF ?? 0) + 1 : (stats.gamesPlayedCTF ?? 0),
             },
         };
 

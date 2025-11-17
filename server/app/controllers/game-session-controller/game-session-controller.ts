@@ -383,10 +383,25 @@ export class GameSessionController {
         console.log('Game ended. Preparing to send end game data.');
         console.log('Winner:', JSON.stringify(winner, null, 2));
 
+        // Get game mode
+        const gameMode = this.gameSession.board.gameMode;
+
+        // Calculate game duration
+        const globalStats = this.gameSession.statisticsManager.displayedGlobalStatistics;
+        const durationMs = Math.max(0, globalStats.endTime - globalStats.startTime);
+
+        // Update game duration for all human players (with mode tracking)
+        const usersService = Container.get(UsersService);
+        const players = this.gameSession.listOfPlayers.getValues().filter((p) => !p.virtualPlayer);
+
+        for (const p of players) {
+            await usersService.addGameDurationForMode(p.userId, durationMs, gameMode);
+        }
+
+        // Increment victory for winner (with mode tracking)
         if (winner && !winner.virtualPlayer) {
-            const usersService = Container.get(UsersService);
-            console.log('Incrementing victory for user:', winner.userId);
-            await usersService.incrementVictory(winner.userId);
+            console.log('Incrementing victory for user:', winner.userId, 'Mode:', gameMode);
+            await usersService.incrementVictoryForMode(winner.userId, gameMode);
         }
 
         // Distribute prizes
@@ -509,6 +524,13 @@ export class GameSessionController {
 
         // If no human players remain, no prizes to distribute
         if (winningTeamPlayers.length === 0) return;
+
+        // Increment victories for all winning team members
+        const usersService = Container.get(UsersService);
+        for (const player of winningTeamPlayers) {
+            console.log('Incrementing CTF victory for user:', player.userId);
+            await usersService.incrementVictoryForMode(player.userId, GameMode.CTF);
+        }
 
         const distribution = prizePoolService.calculatePrizeDistribution(
             game.entryPrice,
