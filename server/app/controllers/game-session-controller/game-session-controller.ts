@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable no-console */
 /* eslint-disable max-lines */
 import { GameClockManager } from '@app/classes/game-clock-manager/game-clock-manager';
@@ -45,7 +46,7 @@ export class GameSessionController {
         private gameSession: GameSession,
         private sio: io.Server,
         private clockManager: GameClockManager,
-        private fightSubController: FightSubController,
+        private fightSubController: FightSubController | null,
         private movementSubController: MovementSubController,
         private gameService: CurrentGamesService,
     ) {
@@ -69,6 +70,10 @@ export class GameSessionController {
 
     set playerMoving(newValue: boolean) {
         this.isPlayerMoving = newValue;
+    }
+
+    setFightSubController(controller: FightSubController): void {
+        this.fightSubController = controller;
     }
 
     handleCommand(socket: io.Socket): void {
@@ -180,7 +185,7 @@ export class GameSessionController {
             const remainingPlayers = this.gameSession.listOfPlayers.getValues();
             const winner = remainingPlayers.length === 1 ? remainingPlayers[0] : undefined;
             console.log('Not enough players to continue the game. Ending game.');
-            this.endGame(winner);
+            await this.endGame(winner);
         }
     }
 
@@ -369,8 +374,7 @@ export class GameSessionController {
         this.fightSubController.endFight();
     }
 
-    private async endGame(winner?: Player): Promise<void> {
-        // TODO I THINK I WILL SEND THE STATS HERE!
+    async endGame(winner?: Player): Promise<void> {
         console.log('Game ended. END GAME WAS CALLED.');
         this.gameSession.endGame();
         this.gameService.setGameEnded(this.roomCode);
@@ -379,21 +383,8 @@ export class GameSessionController {
         console.log('Game ended. Preparing to send end game data.');
         console.log('Winner:', JSON.stringify(winner, null, 2));
 
-        // const globalStats = this.gameSession.statisticsManager.displayedGlobalStatistics;
-        // const durationMs = Math.max(0, globalStats.endTime - globalStats.startTime);
-
-        // // FIX: define usersService BEFORE using it
-        // const usersService = Container.get(UsersService);
-
-        // const players = this.gameSession.listOfPlayers.getValues().filter((p) => !p.virtualPlayer);
-
-        // for (const p of players) {
-        //     await usersService.addGameDuration(p.userId, durationMs);
-        // }
-
         if (winner && !winner.virtualPlayer) {
             const usersService = Container.get(UsersService);
-            // eslint-disable-next-line no-console
             console.log('Incrementing victory for user:', winner.userId);
             await usersService.incrementVictory(winner.userId);
         }
@@ -422,7 +413,6 @@ export class GameSessionController {
         this.sio.to(this.roomCode).emit(SocketClientEventNames.EndGame, ans);
     }
 
-    // TODO MIGHT USE THIS TO INFORM THE OTHER PLAYERS
     private updateGame(): void {
         if (this.gameOver()) return;
         const ans: dataForm.UpdateGamedRes = {
@@ -459,7 +449,7 @@ export class GameSessionController {
         this.endFight();
         if (this.gameSession.getPlayerAmountOfVic(winner) >= MAX_AMOUNT_OF_VICTORIES && this.gameSession.board.gameMode === GameMode.Normal) {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
-            this.endGame(winner);
+            await this.endGame(winner);
         }
         this.fightLoserName = undefined;
         this.fightWinnerName = undefined;
@@ -545,7 +535,6 @@ export class GameSessionController {
             const updatedUser = { ...user, money: user.money + amount };
             await usersService.updateUser(updatedUser);
         } catch (error) {
-            // eslint-disable-next-line no-console
             console.error(`Failed to update money for user ${userId}:`, error);
         }
     }
