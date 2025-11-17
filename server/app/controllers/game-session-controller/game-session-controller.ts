@@ -380,6 +380,11 @@ export class GameSessionController {
             await this.distributePrizesForCTF(this.winnerTeam);
         }
 
+        if (winner && !winner.virtualPlayer) {
+            const usersService = Container.get(UsersService);
+            await usersService.incrementVictory(winner.userId);
+        }
+
         const listOfPlayerStats: (PlayerStatistics & { name: string })[] = [];
         this.gameSession.statisticsManager.playerStatisticsMap.forEach((value) => {
             const stat: PlayerStatistics & { name: string } = { ...value };

@@ -87,4 +87,19 @@ export class UsersService {
             throw new Error("Échec lors de la mise à jour de l'utilisateur.");
         }
     }
+
+    async incrementVictory(userId: string): Promise<void> {
+        const user = await this.getUser(userId);
+        if (!user) return;
+
+        const updatedUser = {
+            ...user,
+            statistics: {
+                ...user.statistics,
+                victoryAmount: user.statistics.victoryAmount + 1,
+            },
+        };
+
+        await this.updateUser(updatedUser);
+    }
 }
