@@ -75,6 +75,15 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
         return this.codeArray.every((value) => value.length === 1);
     }
 
+    closeModal() {
+        this.codeError = false;
+        this.notFriendError = false;
+        this.blockedByPlayerError = false;
+        this.lockedError = false;
+        this.limitError = false;
+        this.moneyError = false;
+    }
+
     joinGame(id: string) {
         this.playerSocketService.emitJoinAvatarRoom(id, (response: JoinGameAck) => {
             const preview = this.previews().find((p) => p.id === id);

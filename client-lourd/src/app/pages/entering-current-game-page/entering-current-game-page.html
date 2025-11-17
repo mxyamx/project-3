@@ -144,7 +144,10 @@
                 <p class="modal-text">{{ 'game-list.details.not-enough-money' | translate }}</p>
                 }
                 <div class="buttons">
-                    <button class="option-button" (click)="retry()">{{'join-game-page.try-again'| translate }}</button>
+                    <button class="option-button" (click)="(notFriendError || blockedByPlayerError) ? closeModal() : retry()">
+                        @if (notFriendError || blockedByPlayerError) { {{ 'join-game-page.understood' | translate }} } @else { {{ 'join-game-page.try-again' |
+                        translate }} }
+                    </button>
                     <button class="option-button" routerLink="/main-page">{{ 'general.button.back-home' | translate }}</button>
                 </div>
             </div>

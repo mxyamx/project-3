@@ -208,7 +208,8 @@
         "proceed-question": "Do you still want to join this game?",
         "proceed-anyway": "Join Anyway",
         "cancel": "Cancel",
-        "warning": "Warning!"
+        "warning": "Warning!",
+        "understood": "Understood"
     },
     "error-page": {
         "title": "Oops! An error occurred. Please try again."

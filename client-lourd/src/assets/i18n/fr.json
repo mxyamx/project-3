@@ -208,7 +208,8 @@
         "proceed-question": "Voulez-vous toujours rejoindre cette partie ?",
         "proceed-anyway": "Rejoindre quand même",
         "cancel": "Annuler",
-        "warning": "Attention!"
+        "warning": "Attention!",
+        "understood": "Compris"
     },
     "error-page": {
         "title": "Oups ! Une erreur est survenue. Veuillez réessayer."
