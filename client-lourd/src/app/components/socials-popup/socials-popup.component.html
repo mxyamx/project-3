@@ -1,0 +1,172 @@
+<div class="popup-overlay" (click)="onClose()">
+    <div class="popup" (click)="$event.stopPropagation()">
+        <button class="close-btn" (click)="onClose()">×</button>
+
+        <div class="popup-content">
+            <div class="tabs">
+                <button [class.active]="activeTab === 'friends'" (click)="activeTab = 'friends'">
+                    {{ 'socials-popup.tabs.friends' | translate }} ({{ friendCount() }})
+                </button>
+                <button [class.active]="activeTab === 'received'" (click)="activeTab = 'received'">
+                    {{ 'socials-popup.tabs.received' | translate }} ({{ pendingCount() }})
+                </button>
+                <button [class.active]="activeTab === 'sent'" (click)="activeTab = 'sent'">
+                    {{ 'socials-popup.tabs.sent' | translate }} ({{ sentCount() }})
+                </button>
+                <button [class.active]="activeTab === 'add'" (click)="activeTab = 'add'">
+                    {{ 'socials-popup.tabs.add' | translate }}
+                </button>
+            </div>
+
+            <div class="tab-content">
+                @switch (activeTab) {
+                <!-- Friends Tab -->
+                @case ('friends') { @if (isLoading) {
+                <div class="loading">{{ 'socials-popup.loading' | translate }}</div>
+                } @if (!isLoading) {
+                <ul class="user-list">
+                    @for (friend of friends; track friend.id) {
+                    <li>
+                        <div class="user-info">
+                            <img [src]="friend.avatar" [alt]="friend.username" class="avatar" />
+                            <span class="name">{{ friend.username }}</span>
+                        </div>
+                        <div class="actions">
+                            <button
+                                class="icon-btn remove-btn"
+                                (click)="confirmRemoveFriend(friend)"
+                                [title]="'socials-popup.actions.remove' | translate"
+                            >
+                                <i class="fa fa-user-minus"></i>
+                            </button>
+                            <button class="icon-btn block-btn" (click)="confirmBlockUser(friend)" [title]="'socials-popup.actions.block' | translate">
+                                <i class="fa fa-ban"></i>
+                            </button>
+                        </div>
+                    </li>
+                    } @empty {
+                    <li class="empty-state">{{ 'socials-popup.empty.no-friends' | translate }}</li>
+                    }
+                </ul>
+                } }
+
+                <!-- Received Requests Tab -->
+                @case ('received') {
+                <ul class="user-list">
+                    @for (request of pendingRequests; track request.id) {
+                    <li>
+                        <div class="user-info">
+                            <img [src]="request.sender.avatar" [alt]="request.sender.username" class="avatar" />
+                            <span class="name">{{ request.sender.username }}</span>
+                        </div>
+                        <div class="actions">
+                            <button class="icon-btn accept-btn" (click)="acceptRequest(request)" [title]="'socials-popup.actions.accept' | translate">
+                                <i class="fa fa-check"></i>
+                            </button>
+                            <button class="icon-btn reject-btn" (click)="rejectRequest(request)" [title]="'socials-popup.actions.reject' | translate">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    </li>
+                    } @empty {
+                    <li class="empty-state">{{ 'socials-popup.empty.no-pending' | translate }}</li>
+                    }
+                </ul>
+                }
+
+                <!-- Sent Requests Tab -->
+                @case ('sent') {
+                <ul class="user-list">
+                    @for (request of sentRequests; track request.id) {
+                    <li>
+                        <div class="user-info">
+                            <img [src]="request.receiver.avatar" [alt]="request.receiver.username" class="avatar" />
+                            <span class="name">{{ request.receiver.username }}</span>
+                        </div>
+                        <div class="actions">
+                            <button class="icon-btn cancel-btn" (click)="cancelRequest(request)" [title]="'socials-popup.actions.cancel' | translate">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    </li>
+                    } @empty {
+                    <li class="empty-state">{{ 'socials-popup.empty.no-sent' | translate }}</li>
+                    }
+                </ul>
+                }
+
+                <!-- Add Friends Tab -->
+                @case ('add') {
+                <div class="add-user">
+                    <div class="search-bar">
+                        <input
+                            [(ngModel)]="searchQuery"
+                            [placeholder]="'socials-popup.search-placeholder' | translate"
+                            (keyup.enter)="searchUsers()"
+                            (input)="onSearchChange()"
+                        />
+                        <button
+                            class="icon-btn search-btn"
+                            (click)="searchUsers()"
+                            [disabled]="isLoading"
+                            [title]="'socials-popup.actions.search' | translate"
+                        >
+                            <i class="fa fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+
+                    @if (isLoading) {
+                    <div class="loading">{{ 'socials-popup.searching' | translate }}</div>
+                    } @if (!isLoading && searchResults.length > 0) {
+                    <ul class="user-list">
+                        @for (user of searchResults; track user.id) {
+                        <li>
+                            <div class="user-info">
+                                <img [src]="user.avatar" [alt]="user.username" class="avatar" />
+                                <span class="name">{{ user.username }}</span>
+                            </div>
+                            <div class="actions">
+                                <button class="icon-btn add-btn" (click)="sendFriendRequest(user)" [title]="'socials-popup.actions.add' | translate">
+                                    <i class="fa fa-user-plus"></i>
+                                </button>
+                                <button
+                                    class="icon-btn block-btn"
+                                    (click)="confirmBlockUser(user)"
+                                    [title]="'socials-popup.actions.block' | translate"
+                                >
+                                    <i class="fa fa-ban"></i>
+                                </button>
+                            </div>
+                        </li>
+                        }
+                    </ul>
+                    } @if (!isLoading && hasSearched && searchResults.length === 0) {
+                    <div class="empty-state">
+                        {{ 'socials-popup.empty.no-results' | translate }}
+                    </div>
+                    }
+                </div>
+                } }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Dialog -->
+@if (showConfirmation) {
+<div class="confirmation-bubble" (click)="$event.stopPropagation()">
+    <p>{{ confirmationMessage | translate }}</p>
+    <div class="confirmation-buttons">
+        <button (click)="confirmAction()">{{ 'general.button.yes' | translate }}</button>
+        <button (click)="closeConfirmation()">{{ 'general.button.no' | translate }}</button>
+    </div>
+</div>
+}
+
+<!-- Error Message Bubble -->
+@if (showError) {
+<div class="error-bubble" (click)="$event.stopPropagation()">
+    <button class="close-error-btn" (click)="closeError()">×</button>
+    <p>{{ errorMessage | translate }}</p>
+</div>
+}

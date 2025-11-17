@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, WritableSignal, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { GameListComponent } from '@app/components/game-list/game-list.component';
 import { LoadingComponent } from '@app/components/loading/loading.component';
@@ -18,7 +19,7 @@ import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-creation-page',
-    imports: [RouterLink, CommonModule, GameListComponent, TranslatePipe, LoadingComponent],
+    imports: [RouterLink, CommonModule, GameListComponent, TranslatePipe, LoadingComponent, FormsModule],
     templateUrl: './creation-page.component.html',
     styleUrl: './creation-page.component.scss',
 })
@@ -35,7 +36,7 @@ export class CreationPageComponent implements OnInit {
 
     gameMode: typeof GameMode = GameMode;
     isLoading: WritableSignal<boolean> = signal(false);
-
+    friendsOnly: boolean = false;
     selectedPollPrizeAmount: number = 0;
 
     get maxPollPrize(): number {
@@ -100,34 +101,41 @@ export class CreationPageComponent implements OnInit {
                 this.currentGameService.updatePickedBoardGame(boardGame);
                 const currentGame = this.currentGameService.displayedCurrentGame();
 
-                this.playerSocketService.emitCreateGame({ ...currentGame, entryPrice: this.selectedPollPrizeAmount }, (response: any) => {
-                    if (response?.error) {
-                        switch (response.error) {
-                            case 'GAME_PRIVACY_CHANGED':
-                                this.showVisibilityAlert = true;
-                                break;
-                            case 'GAME_NOT_FOUND':
-                                this.showAlertConfirmation = true;
-                                break;
-                            case 'INSUFFICIENT_FUNDS':
-                                alert('Insufficient funds to create this game');
-                                break;
-                            default:
-                                this.showAlertConfirmation = true;
+                this.playerSocketService.emitCreateGame(
+                    {
+                        ...currentGame,
+                        entryPrice: this.selectedPollPrizeAmount,
+                        friendsOnly: this.friendsOnly,
+                    },
+                    (response: any) => {
+                        if (response?.error) {
+                            switch (response.error) {
+                                case 'GAME_PRIVACY_CHANGED':
+                                    this.showVisibilityAlert = true;
+                                    break;
+                                case 'GAME_NOT_FOUND':
+                                    this.showAlertConfirmation = true;
+                                    break;
+                                case 'INSUFFICIENT_FUNDS':
+                                    alert('Insufficient funds to create this game');
+                                    break;
+                                default:
+                                    this.showAlertConfirmation = true;
+                            }
+                            this.hasBeenClicked = false;
+                            return;
                         }
-                        this.hasBeenClicked = false;
-                        return;
-                    }
 
-                    if (response?.success && response?.game) {
-                        this.refreshUserData();
+                        if (response?.success && response?.game) {
+                            this.refreshUserData();
 
-                        this.currentGameService.updateCurrentGame(response.game);
-                        this.playerSocketService.emitJoinAvatarRoom(response.game.id, (response: JoinGameAck) => {
-                            this.router.navigate([UrlPage.Avatar]);
-                        });
-                    }
-                });
+                            this.currentGameService.updateCurrentGame(response.game);
+                            this.playerSocketService.emitJoinAvatarRoom(response.game.id, (response: JoinGameAck) => {
+                                this.router.navigate([UrlPage.Avatar]);
+                            });
+                        }
+                    },
+                );
             },
             error: () => {
                 this.showAlertConfirmation = true;

@@ -51,6 +51,14 @@
         </div>
     </section>
 
+    <section class="friends-only-container">
+        <label class="friends-only-toggle">
+            <input type="checkbox" [(ngModel)]="friendsOnly" />
+            <span class="toggle-switch"></span>
+            <span class="toggle-text">{{ 'creation-page.friends-only' | translate }}</span>
+        </label>
+    </section>
+
     <div class="creation-content" [ngClass]="{ 'no-game-selected': true, 'game-selected': true }">
         <app-game-list [gamesList]="gamesList" (gameSelected)="setDisplayedObject($event)" [theme]="'green'" [isLoading]="isLoading()">
         </app-game-list>

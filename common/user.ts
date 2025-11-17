@@ -7,8 +7,8 @@ export interface User {
     username: string;
     email: string;
     avatar: string;
-    friends: User[];
-    blocked: User[];
+    friends: string[];
+    blocked: string[];
     inventory: String[];
     money: number;
     parameters: Parameters;

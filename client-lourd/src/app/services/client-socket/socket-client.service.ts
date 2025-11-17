@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DeviceType } from '@common/enums/deviceType';
+import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 
@@ -43,6 +44,28 @@ export class SocketClientService {
         if (this.socket) {
             this.socket.on(event, action);
         }
+    }
+
+    listen<T>(event: string): Observable<T> {
+        return new Observable<T>((observer) => {
+            if (!this.socket) {
+                observer.error(new Error('Socket not initialized'));
+                return;
+            }
+
+            const handler = (data: T) => {
+                observer.next(data);
+            };
+
+            this.socket.on(event, handler);
+
+            // Cleanup function when observable is unsubscribed
+            return () => {
+                if (this.socket) {
+                    this.socket.off(event, handler);
+                }
+            };
+        });
     }
 
     off(event: string, callback?: (...args: any[]) => void): void {
