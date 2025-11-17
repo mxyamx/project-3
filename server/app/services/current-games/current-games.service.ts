@@ -177,7 +177,7 @@ export class CurrentGamesService {
         }
 
         try {
-            await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: id });
+            this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: `GAME-${id}` });
         } catch (error) {
             console.warn(`Impossible de supprimer les messages du chat pour ${id} (ignoré).`);
         }
