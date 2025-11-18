@@ -15,7 +15,8 @@
             "door": "porte",
             "water": "eau",
             "ice": "glace",
-            "grass": "gazon"
+            "grass": "gazon",
+            "teleportation": "téléportation"
         },
 
         "item": {
@@ -59,7 +60,8 @@
             "door": "- Nom: Porte.\n - Tuile de terrain ? Non.\n - Coût du déplacement: 1.\n Une porte ne peut être traversée que si elle est ouverte.\n",
             "water": "- Nom: Eau.\n - Tuile de terrain ? Oui.\n - Coût du déplacement: 2.\n Les déplacements sont plus difficiles dans l'eau.\n",
             "ice": "- Nom: Glace.\n - Tuile de terrain ? Oui.\n - Coût du déplacement: Aucun.\n Il est facile d'avancer sur la glace.\n",
-            "grass": "- Nom: Gazon.\n - Tuile de terrain ? Oui.\n - Coût du déplacement: 1.\n Une surface normale de terrain.\n"
+            "grass": "- Nom: Gazon.\n - Tuile de terrain ? Oui.\n - Coût du déplacement: 1.\n Une surface normale de terrain.\n",
+            "teleportation": "- Nom: Téléportation.\n - Tuile de terrain ? Oui.\n - Coût du déplacement: Aucun.\n Téléporte vers une autre tuile de téléportation.\n"
         },
         "game-mode": {
             "normal": "Normal",

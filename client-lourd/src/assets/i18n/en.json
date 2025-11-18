@@ -16,7 +16,8 @@
             "door": "door",
             "water": "water",
             "ice": "ice",
-            "grass": "grass"
+            "grass": "grass",
+            "teleportation": "teleportation"
         },
         "item": {
             "name": {
@@ -59,7 +60,8 @@
             "door": "- Name: Door.\n - Terrain tile? No.\n - Movement cost: 1.\n A door can only be crossed if it's open.\n",
             "water": "- Name: Water.\n - Terrain tile? Yes.\n - Movement cost: 2.\n Movement is harder in water.\n",
             "ice": "- Name: Ice.\n - Terrain tile? Yes.\n - Movement cost: None.\n Easy to move on ice.\n",
-            "grass": "- Name: Grass.\n - Terrain tile? Yes.\n - Movement cost: 1.\n A normal terrain surface.\n"
+            "grass": "- Name: Grass.\n - Terrain tile? Yes.\n - Movement cost: 1.\n A normal terrain surface.\n",
+            "teleportation": "- Name: Teleportation.\n - Terrain tile? Yes.\n - Movement cost: None.\n Teleport to another teleportation tile.\n"
         },
         "game-mode": {
             "normal": "Normal",

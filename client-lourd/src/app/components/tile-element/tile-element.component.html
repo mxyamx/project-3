@@ -1,6 +1,9 @@
 <div class="tile-element" (mouseup)="mouseUpOnTile()">
     <img [src]="getTileImage(tile)" alt="{{ tile.type }}" />
-    @if(tile.containedItem){
+
+    @if(tile.type === 'teleportation' && getTeleporterPairNumber()){
+    <div class="teleporter-id">{{ getTeleporterPairNumber() }}</div>
+    } @if(tile.containedItem){
     <app-item-element
         class="item-element"
         [item]="tile.containedItem"

@@ -47,6 +47,13 @@ export class TileElementComponent {
         return this.imageHashMap[tile.type];
     }
 
+    getTeleporterPairNumber(): string | null {
+        if (this.tile.type === TileType.Teleportation && this.tile.teleportPairId) {
+            return this.tile.teleportPairId.replace('tp-', '');
+        }
+        return null;
+    }
+
     mouseUpOnTile(): void {
         if (this.tile.containedItem) {
             return;

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router, RouterLink } from '@angular/router';
@@ -53,6 +53,11 @@ export class BoardEditionPageComponent {
             description: FROM_TILE_TYPE_TO_DESCRIPTION[TileType.Water],
         },
         { type: TileType.Ice, image: FROM_TILE_TYPE_TO_IMAGE[TileType.Ice], description: FROM_TILE_TYPE_TO_DESCRIPTION[TileType.Ice] },
+        {
+            type: TileType.Teleportation,
+            image: FROM_TILE_TYPE_TO_IMAGE[TileType.Teleportation],
+            description: FROM_TILE_TYPE_TO_DESCRIPTION[TileType.Teleportation],
+        },
     ];
 
     private tileApplicator: TileApplicatorService = inject(TileApplicatorService);
@@ -90,6 +95,14 @@ export class BoardEditionPageComponent {
 
     get boardManager(): BoardGameManagerService {
         return this.boardgameManager;
+    }
+
+    // Nouveau: Listener pour ESC
+    @HostListener('document:keydown.escape')
+    onEscapePress(): void {
+        if (this.tileApplicator.isWaitingForSecondTeleporter) {
+            this.tileApplicator.cancelTeleporterPlacement();
+        }
     }
 
     tileOnMouseEnter(tile: Tile) {

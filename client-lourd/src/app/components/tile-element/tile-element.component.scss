@@ -75,3 +75,24 @@
 p {
     color: white;
 }
+
+.teleporter-id {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #000;
+    font-weight: bold;
+    font-size: 1.5em;
+    padding: 5px 10px;
+    border-radius: 50%;
+    border: 3px solid #4a90e2;
+    min-width: 30px;
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 10;
+}
