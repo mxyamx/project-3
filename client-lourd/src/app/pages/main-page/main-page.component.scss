@@ -388,3 +388,50 @@ $animation-delay-1: 0.2s;
     left: 25px !important;
     z-index: 2000;
 }
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Both icons use the same structure */
+.notification-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Badge positioning */
+.notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    background: red;
+    color: white;
+    border-radius: 50%;
+    height: 18px;
+    min-width: 18px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+}
+
+/* Optional pulse animation for new invites */
+.new-invitation {
+    animation: pulse 0.9s ease-out 0s 3;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}

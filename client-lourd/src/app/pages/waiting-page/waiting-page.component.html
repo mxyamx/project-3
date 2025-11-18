@@ -11,6 +11,9 @@
             >
                 <i class="fas fa-robot"></i> {{ (isRoomFull() ? 'waiting-page.full-room' : 'waiting-page.vp.button') | translate }}
             </button>
+            <button class="invite-friends-button" [class.disabled]="isRoomFull()" [disabled]="isRoomFull()" (click)="openInviteFriendsPopup()">
+                <i class="fas fa-user-plus"></i> {{ 'waiting-page.invite-friends' | translate }}
+            </button>
             }
         </div>
         <div class="blocked-container">
@@ -111,6 +114,44 @@
     <div class="confirmation-buttons">
         <button (click)="selectProfile(virtualPlayerProfile.Agressive)">{{ 'waiting-page.vp.agressive' | translate }}</button>
         <button (click)="selectProfile(virtualPlayerProfile.Defensive)">{{ 'waiting-page.vp.defensive' | translate }}</button>
+    </div>
+</div>
+} @if (showInviteFriendsPopup) {
+<div class="popup-overlay" (click)="closeInviteFriendsPopup()">
+    <div class="invite-friends-popup" (click)="$event.stopPropagation()">
+        <button class="close-btn" (click)="closeInviteFriendsPopup()">×</button>
+
+        <h2><i class="fa fa-user-plus"></i> {{ 'waiting-page.invite-popup.title' | translate }}</h2>
+
+        <div class="friends-list-container">
+            @if (availableFriends.length > 0) {
+            <ul class="friends-list">
+                @for (friend of availableFriends; track friend.id) {
+                <li class="friend-item">
+                    <div class="friend-info">
+                        <div class="avatar-wrapper">
+                            <img [src]="friend.avatar" [alt]="friend.username" class="avatar" />
+                            @if (getFriendStatus(friend.id); as status) {
+                            <div class="status-badge">
+                                <i class="device-icon fa" [ngClass]="getDeviceIcon(status.status)" [style.color]="getStatusColor(status.status)"></i>
+                            </div>
+                            }
+                        </div>
+                        <span class="friend-name">{{ friend.username }}</span>
+                    </div>
+                    <button class="invite-btn" (click)="inviteFriend(friend)">
+                        <i class="fa fa-paper-plane"></i> {{ 'waiting-page.invite-popup.invite' | translate }}
+                    </button>
+                </li>
+                }
+            </ul>
+            } @else {
+            <div class="empty-state">
+                <i class="fa fa-users"></i>
+                <p>{{ 'waiting-page.invite-popup.no-friends' | translate }}</p>
+            </div>
+            }
+        </div>
     </div>
 </div>
 } @if(showPlayerAmountWarning) {

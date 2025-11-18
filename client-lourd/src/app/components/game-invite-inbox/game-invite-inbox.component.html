@@ -1,0 +1,80 @@
+<div class="invite-inbox-container">
+    <!-- Header -->
+    <div class="inbox-header">
+        <h2 class="inbox-title">
+            <i class="fas fa-gamepad"></i>
+            {{ 'game-invite.inbox-title' | translate }}
+        </h2>
+        <button class="close-btn" (click)="onClose()" [disabled]="isProcessing">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-message">
+        <div class="error-content">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>{{ errorMessage | translate }}</span>
+        </div>
+        <button class="error-close" (click)="closeError()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isProcessing" class="loading-state">
+        <div class="spinner"></div>
+        <p>{{ 'game-invite.processing' | translate }}</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="invitations.length === 0 && !isProcessing" class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <h3>{{ 'game-invite.no-invitations' | translate }}</h3>
+        <p>{{ 'game-invite.no-invitations-desc' | translate }}</p>
+    </div>
+
+    <!-- Invitations List -->
+    <div *ngIf="invitations.length > 0 && !isProcessing" class="invitations-list">
+        <div class="invitations-count">
+            {{ 'game-invite.invitations-count' | translate: { count: invitations.length } }}
+        </div>
+
+        <div class="invitation-item" *ngFor="let invitation of invitations">
+            <div class="invitation-avatar">
+                <img [src]="invitation.fromAvatar" [alt]="invitation.from + ' avatar'" class="avatar-img" />
+            </div>
+
+            <div class="invitation-content">
+                <div class="invitation-header">
+                    <h4 class="inviter-name">{{ invitation.from }}</h4>
+                    <span class="invitation-time">{{ getTimeAgo(invitation.timestamp) }}</span>
+                </div>
+
+                <p class="invitation-message">
+                    {{ 'game-invite.invitation-text' | translate: { username: invitation.from } }}
+                </p>
+
+                <div class="invitation-actions">
+                    <button class="btn-accept" (click)="acceptInvitation(invitation)" [disabled]="isProcessing">
+                        <i class="fas fa-check"></i>
+                        {{ 'game-invite.accept' | translate }}
+                    </button>
+
+                    <button class="btn-decline" (click)="declineInvitation(invitation)" [disabled]="isProcessing">
+                        <i class="fas fa-times"></i>
+                        {{ 'game-invite.decline' | translate }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="inbox-footer">
+        <p class="footer-note">
+            <i class="fas fa-info-circle"></i>
+            {{ 'game-invite.footer-note' | translate }}
+        </p>
+    </div>
+</div>

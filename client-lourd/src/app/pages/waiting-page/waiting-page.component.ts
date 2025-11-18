@@ -7,13 +7,17 @@ import { EMPTY_CODE } from '@app/constants/development-constants';
 import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
+import { FriendManagerService } from '@app/services/friend-manager/friend-manager.service';
 import { GameEventService } from '@app/services/game-event/game-event.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { StatisticsManagerService } from '@app/services/statistics-manager/statistics-manager.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
+import { UserStatusService } from '@app/services/user-status/user-status.service';
 import { CurrentGame } from '@common/current-game';
+import { DeviceType } from '@common/enums/deviceType';
+import { GameActivityStatus } from '@common/enums/game-activity-status';
 import { GameMode } from '@common/enums/game-mode';
 import { PlayerLimits } from '@common/enums/players-limit';
 import { SocketClientEventNames } from '@common/enums/socket-events-names';
@@ -22,7 +26,9 @@ import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { GameEvent } from '@common/game-event';
 import { Player } from '@common/player';
 import * as socketDataForm from '@common/socket-data-forms';
+import { User, UserStatusInfo } from '@common/user';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-waiting-page',
@@ -50,6 +56,15 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
 
     entryPrice: number = 25;
 
+    // Friend invitation popup
+    showInviteFriendsPopup: boolean = false;
+    private friendManagerService = inject(FriendManagerService);
+    private userStatusService = inject(UserStatusService);
+    private statusSubscription?: Subscription;
+    friendStatuses = new Map<string, UserStatusInfo>();
+    DeviceType = DeviceType;
+    GameActivityStatus = GameActivityStatus;
+
     private currentGameManager = inject(CurrentGameManagerService);
     private socketManager: SocketClientService = inject(SocketClientService);
     private playerSocketService = inject(PlayerSocketService);
@@ -63,7 +78,12 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        // Set user status to in-game when entering waiting room
         this.gameId = this.currentGameManager.displayedCurrentGame().id;
+        if (this.gameId) {
+            this.userStatusService.updateMyGameActivity(GameActivityStatus.inGame, this.gameId);
+        }
+
         if (this.gameId) {
             this.playerSocketService.emitGetGame(this.gameId, (response: CurrentGame) => {
                 if (response) {
@@ -110,13 +130,32 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
                 this.dropInEnabled = game.dropInEnabled;
             }
         });
+
+        // Initialize friend list and status tracking
+        this.friendManagerService.refresh();
+        const friendIds = this.friendManagerService.friends().map((f) => f.id);
+        if (friendIds.length > 0) {
+            this.userStatusService.fetchUserStatuses(friendIds);
+        }
+
+        // Subscribe to real-time status updates
+        this.statusSubscription = this.userStatusService.getAllStatuses().subscribe((statuses) => {
+            this.friendStatuses = new Map(statuses);
+        });
     }
 
     ngOnDestroy(): void {
+        // Set user status back to idle when leaving waiting room
+        if (!this.isStartingGame) {
+            this.userStatusService.updateMyGameActivity(GameActivityStatus.idle);
+        }
+
         if (!this.isStartingGame && this.gameId) {
             this.playerSocketService.emitLeaveGame(this.gameId);
             this.playerSocketService.unsubscribeGameEvents();
         }
+
+        this.statusSubscription?.unsubscribe();
     }
 
     toggleRoomState() {
@@ -250,11 +289,57 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
         this.hideVirtualPlayerProfilePopup();
     }
 
+    // Friend invitation methods
+    openInviteFriendsPopup() {
+        this.showInviteFriendsPopup = true;
+    }
+
+    closeInviteFriendsPopup() {
+        this.showInviteFriendsPopup = false;
+    }
+
+    get availableFriends(): User[] {
+        return this.friendManagerService.friends().filter((friend) => {
+            const status = this.friendStatuses.get(friend.id);
+            // Only show online friends who are idle (not in another game)
+            return status?.status !== DeviceType.offline && (!status?.gameActivity || status.gameActivity === GameActivityStatus.idle);
+        });
+    }
+
+    getFriendStatus(friendId: string): UserStatusInfo | undefined {
+        return this.friendStatuses.get(friendId);
+    }
+
+    getDeviceIcon(deviceType: DeviceType): string {
+        switch (deviceType) {
+            case DeviceType.web:
+                return 'fa-desktop';
+            case DeviceType.mobile:
+                return 'fa-tablet-alt';
+            default:
+                return 'fa-circle';
+        }
+    }
+
+    getStatusColor(deviceType: DeviceType): string {
+        if (deviceType === DeviceType.offline) return '#9e9e9e';
+        return '#4caf50';
+    }
+
+    inviteFriend(friend: User) {
+        if (this.gameId) {
+            this.userStatusService.inviteToGame(friend.id, this.gameId);
+            console.log(`Invited ${friend.username} to game ${this.gameId}`);
+            // You could show a temporary success message here
+        }
+    }
+
     private finalizeLeave() {
         // Refresh user data to get updated balance from server
         this.refreshUserData();
         this.router.navigate(['/main-page']);
     }
+
     private refreshUserData(): void {
         const userId = this.userManagerService.getCurrentUser().id;
         this.httpUserService.getUser(userId).subscribe({

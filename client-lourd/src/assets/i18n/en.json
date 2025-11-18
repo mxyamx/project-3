@@ -521,6 +521,12 @@
             "search": "Search",
             "block": "Block"
         },
+        "status": {
+            "desktop": "Online (Desktop)",
+            "mobile": "Online (Mobile)",
+            "in-game": "In Game",
+            "offline": "Offline"
+        },
         "empty": {
             "no-friends": "No friends yet",
             "no-pending": "No pending requests",

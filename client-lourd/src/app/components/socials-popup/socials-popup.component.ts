@@ -1,11 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, computed, EventEmitter, inject, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FriendManagerService } from '@app/services/friend-manager/friend-manager.service';
 import { FriendsService } from '@app/services/http-manager/http-friends.service';
+import { UserStatusService } from '@app/services/user-status/user-status.service';
+import { DeviceType } from '@common/enums/deviceType';
+import { GameActivityStatus } from '@common/enums/game-activity-status';
 import { FriendRequest } from '@common/friend-request';
-import { User } from '@common/user';
+import { User, UserStatusInfo } from '@common/user';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-socials-popup',
@@ -14,10 +18,17 @@ import { TranslatePipe } from '@ngx-translate/core';
     templateUrl: './socials-popup.component.html',
     styleUrls: ['./socials-popup.component.scss'],
 })
-export class SocialsPopupComponent implements OnInit {
+export class SocialsPopupComponent implements OnInit, OnDestroy {
     @Output() close = new EventEmitter<void>();
 
+    private userStatusService = inject(UserStatusService);
+    private statusSubscription?: Subscription;
+
     activeTab: 'friends' | 'received' | 'sent' | 'add' = 'friends';
+
+    friendStatuses = new Map<string, UserStatusInfo>();
+    DeviceType = DeviceType;
+    GameActivityStatus = GameActivityStatus;
 
     get friends() {
         return this.friendManagerService.friends();
@@ -52,6 +63,49 @@ export class SocialsPopupComponent implements OnInit {
 
     ngOnInit() {
         this.friendManagerService.refresh();
+
+        // Fetch initial statuses for all friends
+        const friendIds = this.friends.map((f) => f.id);
+        if (friendIds.length > 0) {
+            this.userStatusService.fetchUserStatuses(friendIds);
+        }
+
+        // Subscribe to real-time status updates
+        this.statusSubscription = this.userStatusService.getAllStatuses().subscribe((statuses) => {
+            this.friendStatuses = new Map(statuses);
+        });
+    }
+
+    ngOnDestroy(): void {
+        this.statusSubscription?.unsubscribe();
+    }
+
+    getFriendStatus(friendId: string): UserStatusInfo | undefined {
+        return this.friendStatuses.get(friendId);
+    }
+
+    getDeviceIcon(deviceType: DeviceType): string {
+        switch (deviceType) {
+            case DeviceType.web:
+                return 'fa-desktop';
+            case DeviceType.mobile:
+                return 'fa-tablet-alt';
+            case DeviceType.offline:
+                return 'fa-circle';
+            default:
+                return 'fa-circle';
+        }
+    }
+
+    getActivityIcon(activity?: GameActivityStatus): string {
+        if (!activity || activity === GameActivityStatus.idle) return '';
+        return 'fa-gamepad';
+    }
+
+    getStatusColor(deviceType: DeviceType, activity?: GameActivityStatus): string {
+        if (deviceType === DeviceType.offline) return '#9e9e9e';
+        if (activity === GameActivityStatus.inGame) return '#2196f3';
+        return '#4caf50';
     }
 
     onClose() {
@@ -99,6 +153,8 @@ export class SocialsPopupComponent implements OnInit {
         this.friendsHttpService.acceptFriendRequest(request.id).subscribe({
             next: (result: { sender: User }) => {
                 this.friendManagerService.acceptRequest(request.id, result.sender);
+                // Fetch status for the newly added friend
+                this.userStatusService.fetchUserStatuses([result.sender.id]);
             },
             error: () => this.showErrorMessage('socials-popup.errors.accept-failed'),
         });
