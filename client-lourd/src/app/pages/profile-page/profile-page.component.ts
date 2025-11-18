@@ -33,7 +33,7 @@ export class ProfilePageComponent {
         return this.userSig();
     }
 
-    activeTab = ActiveTab.Socials;
+    activeTab = ActiveTab.Statistics;
 
     PRESET_AVATARS: string[] = [
         'assets/profiles/bear-modified.png',

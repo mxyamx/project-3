@@ -466,6 +466,9 @@
     "shop-page": {
         "back-button": "Back",
         "Exclusive-avatars": "Exclusive profile Avatars ",
+        "Equipped": "Equipped Sound Effect",
+        "Equip": "Equip Sound Effect",
+        "playing": "Playing Sound Effect",
         "avatars": {
             "Alpha-wolf": "Alpha wolf",
             "Agile-Kangaroo": "Agile Kangourou",

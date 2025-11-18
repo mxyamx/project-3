@@ -465,6 +465,9 @@
 
     "shop-page": {
         "back-button": "Retour",
+        "Equip": "Équipé",
+        "Equipped": "Effet sonore équipé",
+        "playing": "Jouer l'effet sonore",
         "Exclusive-avatars": "Avatars de profile exclusifs",
         "avatars": {
             "Alpha-wolf": "Loup Alpha",
