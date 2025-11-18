@@ -33,6 +33,7 @@ export class CurrentGameManagerService {
         phase: CurrentGamePhase.Waiting,
         dropInEnabled: false,
         entryPrice: 0,
+        friendsOnly: false,
     });
 
     updateCurrentGame(newGame: CurrentGame): void {
@@ -64,6 +65,7 @@ export class CurrentGameManagerService {
             phase: CurrentGamePhase.Waiting,
             dropInEnabled: false,
             entryPrice: 0,
+            friendsOnly: false,
         });
     }
 

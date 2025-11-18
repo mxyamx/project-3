@@ -77,11 +77,11 @@ export class UserManagerService {
         this.currentUser.update((curr) => ({ ...curr, status }));
     }
 
-    setFriends(friends: User[]) {
+    setFriends(friends: string[]) {
         this.currentUser.update((curr) => ({ ...curr, friends }));
     }
 
-    setBlocked(blocked: User[]) {
+    setBlocked(blocked: string[]) {
         this.currentUser.update((curr) => ({ ...curr, blocked }));
     }
 
