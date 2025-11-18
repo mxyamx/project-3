@@ -130,16 +130,39 @@
         <div class="modal-overlay" (click)="retry()">
             <div class="error" (click)="$event.stopPropagation()">
                 <h2>{{'general.error'|translate}}</h2>
-                @if(codeError) {
-                <p class="modal-text">{{'join-game-page.invalid-code'|translate}}</p>
-                } @if(lockedError || limitError) {
-                <p class="modal-text">{{'join-game-page.locked-game'|translate}}</p>
+                @if (codeError) {
+                <p class="modal-text">{{ 'join-game-page.invalid-code' | translate }}</p>
+                } @if (notFriendError) {
+                <p class="modal-text">{{ 'join-game-page.not-friend' | translate }}</p>
+                } @if (blockedByPlayerError) {
+                <p class="modal-text">{{ 'join-game-page.blocked-by-player' | translate }}</p>
+                } @if (lockedError) {
+                <p class="modal-text">{{ 'join-game-page.locked-game' | translate }}</p>
+                } @if (limitError) {
+                <p class="modal-text">{{ 'join-game-page.game-full' | translate }}</p>
                 } @if (moneyError) {
                 <p class="modal-text">{{ 'game-list.details.not-enough-money' | translate }}</p>
                 }
                 <div class="buttons">
-                    <button class="option-button" (click)="retry()">{{'join-game-page.try-again'| translate }}</button>
+                    <button class="option-button" (click)="(notFriendError || blockedByPlayerError) ? closeModal() : retry()">
+                        @if (notFriendError || blockedByPlayerError) { {{ 'join-game-page.understood' | translate }} } @else { {{ 'join-game-page.try-again' |
+                        translate }} }
+                    </button>
                     <button class="option-button" routerLink="/main-page">{{ 'general.button.back-home' | translate }}</button>
+                </div>
+            </div>
+        </div>
+        } @if (showBlockedUserWarning) {
+        <div class="modal-overlay" (click)="cancelJoinBlockedUser()">
+            <div class="warning-modal" (click)="$event.stopPropagation()">
+                <h2><i class="fas fa-exclamation-triangle"></i> {{ 'join-game-page.warning' | translate }}</h2>
+                <p class="modal-text">{{ 'join-game-page.you-blocked-player' | translate }}</p>
+                <p class="modal-text">{{ 'join-game-page.proceed-question' | translate }}</p>
+                <div class="buttons">
+                    <button class="option-button proceed-button" (click)="proceedWithBlockedUser()">
+                        {{ 'join-game-page.proceed-anyway' | translate }}
+                    </button>
+                    <button class="option-button cancel-button" (click)="cancelJoinBlockedUser()">{{ 'join-game-page.cancel' | translate }}</button>
                 </div>
             </div>
         </div>

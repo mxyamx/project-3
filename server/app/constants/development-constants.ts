@@ -5,6 +5,7 @@ import { VirtualPlayer } from '@common/virtual-player';
 
 export const DATABASE_COLLECTION = 'board-games';
 export const USER_COLLECTION = 'users';
+export const FRIENDS_COLLECTION = 'friends';
 
 export const ID_GENERATION = {
     max: 10000,

@@ -156,7 +156,8 @@
         "boardgame-deleted-modal": "Warning!! This game has already been deleted.",
         "visibility-modal": "Warning!! This game's visibility has changed.",
         "create": "Create New Game",
-        "poll-prize-title": "Select an entry fee for the game"
+        "poll-prize-title": "Select an entry fee for the game",
+        "friends-only": "Friends only"
     },
     "game-list": {
         "title": "Game List",
@@ -199,7 +200,16 @@
         "accessibility": "Accessibility",
         "open": "Open",
         "close": "Close",
-        "no-game": "No game in progress"
+        "no-game": "No game in progress",
+        "not-friend": "You must be a friend of the administrator to join this game.",
+        "game-full": "The game is full.",
+        "you-blocked-player": "There is a player you blocked in this room.",
+        "blocked-by-player": "You have been blocked by a player in this room.",
+        "proceed-question": "Do you still want to join this game?",
+        "proceed-anyway": "Join Anyway",
+        "cancel": "Cancel",
+        "warning": "Warning!",
+        "understood": "Understood"
     },
     "error-page": {
         "title": "Oops! An error occurred. Please try again."
@@ -499,5 +509,65 @@
         "Owned": "Owned",
         "insufficient-balance": "Insufficient balance",
         "pre-listen": "Pre-listen"
+    },
+
+    "socials-popup": {
+        "tabs": {
+            "friends": "Friends",
+            "received": "Received",
+            "sent": "Sent",
+            "add": "Add"
+        },
+        "actions": {
+            "remove": "Remove",
+            "accept": "Accept",
+            "reject": "Reject",
+            "cancel": "Cancel",
+            "add": "Add friend",
+            "search": "Search",
+            "block": "Block"
+        },
+        "empty": {
+            "no-friends": "No friends yet",
+            "no-pending": "No pending requests",
+            "no-sent": "No sent requests",
+            "no-results": "No users found"
+        },
+        "errors": {
+            "search-failed": "Failed to search users",
+            "send-request-failed": "Failed to send friend request",
+            "accept-failed": "Failed to accept friend request",
+            "reject-failed": "Failed to reject friend request",
+            "cancel-failed": "Failed to cancel friend request",
+            "remove-failed": "Failed to remove friend"
+        },
+        "confirm-remove-friend": "Are you sure you want to remove this friend?",
+        "confirm-block-user": "Are you sure you want to block this user?",
+        "block-not-implemented": "Block feature not yet implemented",
+        "loading": "Loading...",
+        "searching": "Searching...",
+        "search-placeholder": "Search for a user..."
+    },
+
+    "socials-page": {
+        "my-friends": "My Friends",
+        "blocked-users": "Blocked Users",
+        "actions": {
+            "remove": "Remove friend",
+            "block": "Block user",
+            "unblock": "Unblock user"
+        },
+        "empty": {
+            "no-friends": "No friends yet",
+            "no-blocked": "No blocked users"
+        },
+        "confirm-remove-friend": "Are you sure you want to remove this friend?",
+        "confirm-block-user": "Are you sure you want to block this user? They will be removed from your friends list.",
+        "confirm-unblock-user": "Are you sure you want to unblock this user?",
+        "errors": {
+            "remove-failed": "Failed to remove friend",
+            "block-failed": "Failed to block user",
+            "unblock-failed": "Failed to unblock user"
+        }
     }
 }
