@@ -250,7 +250,12 @@ export class TeleportationManagerService {
     // Private helper methods
 
     private generatePairId(): string {
-        return `tp-${this.nextPairNumber}`;
+        let num = 1;
+        while (this.teleportPairs.has(`tp-${num}`)) {
+            num++;
+        }
+        this.nextPairNumber = num;
+        return `tp-${num}`;
     }
 
     private completePlacement(): void {
@@ -262,6 +267,14 @@ export class TeleportationManagerService {
     private removeTeleportTile(position: Position): void {
         const tile = this.boardManager.editedBoardGame().tiles[position.x][position.y];
         const newTile: Tile = structuredClone(tile);
+
+        if (newTile.containedItem) {
+            const itemName = newTile.containedItem.name;
+            newTile.containedItem = undefined;
+            newTile.isEntryPoint = false;
+            this.boardManager.updateItemAvailability(itemName, true);
+        }
+
         newTile.type = TileType.Grass;
         newTile.teleportPairId = undefined;
         newTile.teleportTarget = undefined;

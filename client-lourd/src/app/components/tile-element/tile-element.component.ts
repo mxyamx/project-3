@@ -103,6 +103,8 @@ export class TileElementComponent {
 
                 if (currentItem.type !== ItemType.StartingPoint && currentItem.type !== ItemType.Flag) {
                     if (this.findNumberOfItem() >= this.getItemLimit()) {
+                        console.log(`Maximum number of items (${this.getItemLimit()}) reached.`);
+                        console.log(`Current number of items: ${this.findNumberOfItem()}`);
                         this.showItemLimitWarning = true;
                         return;
                     }
@@ -163,21 +165,19 @@ export class TileElementComponent {
     }
 
     private findNumberOfItem(): number {
-        let counter: number = 0;
-        const boardGame = this.boardManager.editedBoardGame();
-        for (let idx = 0; idx < boardGame.size; idx++) {
-            for (let jdx = 0; jdx < boardGame.size; jdx++) {
-                const tile: Tile = boardGame.tiles[idx][jdx];
-                if (
-                    tile.containedItem?.type !== ItemType.RandomItem &&
-                    tile.containedItem?.type !== ItemType.StartingPoint &&
-                    tile.containedItem?.type !== ItemType.Flag
-                ) {
-                    counter++;
+        let result = 0;
+        const tiles = this.boardManager.editedBoardGame().tiles;
+        for (let i = 0; i < this.boardManager.editedBoardGame().size; ++i) {
+            for (let j = 0; j < this.boardManager.editedBoardGame().size; ++j) {
+                const containedItem = tiles[i][j].containedItem;
+                if (containedItem) {
+                    if (containedItem.type !== ItemType.Flag && containedItem.type !== ItemType.StartingPoint) {
+                        ++result;
+                    }
                 }
             }
         }
-        return counter;
+        return result;
     }
 
     protected getItemLimit(): number {
