@@ -1,8 +1,8 @@
-import { Component, inject, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, inject, OnInit, signal, WritableSignal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
-import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
+import { ChatService } from '@app/services/chat/chat.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
@@ -14,8 +14,8 @@ import { TranslatePipe } from '@ngx-translate/core';
     styleUrls: ['./main-page.component.scss'],
     imports: [RouterLink, ChatContainerComponent, TranslatePipe],
 })
-export class MainPageComponent implements OnDestroy, OnInit {
-    chatDockService: ChatDockService = inject(ChatDockService);
+export class MainPageComponent implements OnInit {
+    chatService = inject(ChatService);
     private authService: AuthentificationService = inject(AuthentificationService);
     private userManager: UserManagerService = inject(UserManagerService);
     private httpUserService: HttpUserService = inject(HttpUserService);
@@ -31,10 +31,6 @@ export class MainPageComponent implements OnDestroy, OnInit {
             this.playerSocketService.connect();
         }
         this.refreshUserData();
-    }
-
-    ngOnDestroy(): void {
-        this.chatDockService.leftGame();
     }
 
     logout() {

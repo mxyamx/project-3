@@ -9,7 +9,7 @@ import { GameInterfaceComponent } from '@app/components/game-interface/game-inte
 import { InventoryComponent } from '@app/components/inventory/inventory.component';
 import { PlayerInfoComponent } from '@app/components/player-info/player-info.component';
 import { PlayingBoardComponent } from '@app/components/playing-board/playing-board.component';
-import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
+import { ChatService } from '@app/services/chat/chat.service';
 import { CombatNotificationService } from '@app/services/combat-notification/combat-notification.service';
 import { GameInterfaceService } from '@app/services/game-interface/game-interface.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
@@ -46,7 +46,7 @@ export class GameComponent implements OnInit, OnDestroy {
     showAbandonConfirmation = false;
     showEndTurnConfirmation = false;
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
-    chatDockService: ChatDockService = inject(ChatDockService);
+    chatService = inject(ChatService);
     private router: Router;
     private subscription: Subscription;
     private gameSocketEventManager: GameSocketEventService = inject(GameSocketEventService);

@@ -9,9 +9,11 @@ import {
 } from '@app/constants/channel-constants';
 import { ChannelTab } from '@app/enums/channel-tab';
 import { ConfirmationDialogData } from '@app/interfaces/confirmation-dialog-date';
+import { PopupChatContext } from '@app/interfaces/popup-chat-context';
 import { ChannelService } from '@app/services/channel/channel.service';
+import { ChatService } from '@app/services/chat/chat.service';
 import { Channel, ChannelSummary } from '@common/channel';
-import { CHANNEL_GENERAL_ID, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
+import { CHANNEL_GENERAL_ID, CHANNEL_GENERAL_NAME, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
 import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom, take } from 'rxjs';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
@@ -27,9 +29,9 @@ import { LoadingComponent } from '../loading/loading.component';
 })
 export class ChannelNavigatorComponent implements OnInit {
     @Input() isPopup: boolean = false;
-    @Input() isExpended: boolean = false;
     @Input() gameChannel: ChannelSummary | null = null;
     @Output() openChat: EventEmitter<ChannelSummary> = new EventEmitter<ChannelSummary>();
+    @Output() openPopup: EventEmitter<PopupChatContext> = new EventEmitter<PopupChatContext>();
     selectedTab: WritableSignal<ChannelTab> = signal(ChannelTab.Joined);
     ChannelTab = ChannelTab;
     searchInput = '';
@@ -44,6 +46,7 @@ export class ChannelNavigatorComponent implements OnInit {
     readonly channelGeneralId = CHANNEL_GENERAL_ID;
 
     private channelService = inject(ChannelService);
+    private chatService: ChatService = inject(ChatService);
     async ngOnInit(): Promise<void> {
         await this.initJoinedChannels();
     }
@@ -82,10 +85,6 @@ export class ChannelNavigatorComponent implements OnInit {
         if (name !== undefined && name !== '') {
             await this.createChannel(name);
         }
-    }
-
-    openChannelPopup(): void {
-        console.log('open popup');
     }
 
     async createChannel(name: string): Promise<void> {
@@ -159,6 +158,19 @@ export class ChannelNavigatorComponent implements OnInit {
         this.selectedTab.set(ChannelTab.Joined);
     }
     private async initJoinedChannels(): Promise<void> {
+        if (this.chatService) {
+            const chan: ChannelSummary = {
+                id: CHANNEL_GENERAL_ID,
+                name: CHANNEL_GENERAL_NAME,
+                createdAt: new Date(),
+                isAdmin: false,
+                isManageable: false,
+                memberCount: 0,
+            };
+            this.joinedChannels = [chan];
+            this.filteredJoinedChannels = [chan];
+            return;
+        }
         this.isLoading.set(true);
         try {
             let channels = await firstValueFrom(this.channelService.getMyChannels());
@@ -182,5 +194,10 @@ export class ChannelNavigatorComponent implements OnInit {
 
         const confirmed = await firstValueFrom(ref.afterClosed().pipe(take(1)));
         return confirmed;
+    }
+    openChannelPopup(): void {
+        if (this.isPopup) return;
+        const context: PopupChatContext = { openChat: false, channelId: '', channelName: '' };
+        this.openPopup.emit(context);
     }
 }
