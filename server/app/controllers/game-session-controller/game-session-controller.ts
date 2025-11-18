@@ -365,6 +365,46 @@ export class GameSessionController {
         }
     }
 
+    useTeleporter(position: Position, socket: io.Socket): void {
+        if (this.gameOver()) return;
+
+        try {
+            const activePlayer = this.gameSession.activePlayerInstance;
+
+            // Validate it's the active player's socket
+            if (activePlayer.socketId !== socket.id) {
+                sendError('Not your turn', this.sio, this.roomCode);
+                return;
+            }
+
+            // Execute teleport
+            const result = this.gameSession.useTeleporter(position);
+
+            if (!result.success) {
+                sendError(result.message || 'Teleport failed', this.sio, this.roomCode);
+                return;
+            }
+
+            // Update statistics
+            this.gameSession.statisticsManager.updatePlayerTilePercentage(activePlayer.userId, activePlayer.position);
+
+            // Emit updated game state
+            const ans: dataForm.UpdateGamedRes = {
+                successful: true,
+                message: 'Teleport successful',
+                boardGame: this.gameSession.board,
+                activePlayer: this.gameSession.activePlayerInstance,
+                listOfPlayers: this.gameSession.listOfPlayers.getValues(),
+            };
+
+            this.sio.to(this.roomCode).emit(SocketClientEventNames.UpdateGame, ans);
+        } catch {
+            const ans: dataForm.StandardRes = genErrorMessage();
+            this.sio.to(this.roomCode).emit(SocketClientEventNames.UpdateGame, ans);
+            sendError(STANDARD_ERROR_MESSAGE, this.sio, this.roomCode);
+        }
+    }
+
     hasGameStarted(): boolean {
         return this.gameSession.gameStarted;
     }

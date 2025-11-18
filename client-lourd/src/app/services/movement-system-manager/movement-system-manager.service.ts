@@ -38,4 +38,13 @@ export class MovementSystemManagerService {
 
         this.socketManager.send(SocketServerEventNames.Teleport, data);
     }
+    useTeleporter(position: Position, gameId: string): void {
+        this.actionDetector.deactivateAction();
+        const data: dataForm.UseTeleporterReq = {
+            gameCode: gameId,
+            position,
+        };
+
+        this.socketManager.send(SocketServerEventNames.UseTeleporter, data);
+    }
 }

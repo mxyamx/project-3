@@ -61,6 +61,11 @@ export interface ToggleDoorStateRes extends StandardRes {
     doorState: boolean;
 }
 
+export interface UseTeleporterReq {
+    gameCode: string;
+    position: Position;
+}
+
 export interface StartFightReq extends StandardReq {
     targetPlayerPosition: Position;
 }

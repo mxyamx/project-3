@@ -106,6 +106,10 @@ export class PlayingBoardComponent {
                     this.gameSessionManager.startAttack(tile.position ?? { x: 0, y: 0 });
                     break;
                 }
+                case ActionType.Teleport: {
+                    this.gameSessionManager.executeTeleport(this.gameSessionManager.activePlayer().position ?? { x: 0, y: 0 });
+                    break;
+                }
                 default:
                     return;
             }
@@ -149,6 +153,7 @@ export class PlayingBoardComponent {
             case TileType.Water:
                 return 2;
             case TileType.Grass:
+            case TileType.Teleportation:
                 return 1;
             case TileType.Door:
                 if (tile.doorState) return 1;

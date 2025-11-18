@@ -16,6 +16,7 @@ import { Fight } from '@common/fight';
 import { Item } from '@common/item';
 import { Player } from '@common/player';
 import { Position } from '@common/position';
+import { TeleportationDataHelper } from '@common/teleportation';
 import { Tile } from '@common/tile';
 
 export class GameSession {
@@ -182,6 +183,34 @@ export class GameSession {
         );
         this.statisticsManager.updateTilePercentage(newPosition);
         this.statisticsManager.updatePlayerTilePercentage(player.userId, newPosition);
+    }
+
+    useTeleporter(playerPosition: Position): { success: boolean; message?: string } {
+        const tile = this.boardGame.tiles[playerPosition.x][playerPosition.y];
+
+        const validation = TeleportationDataHelper.validateTeleportAction(playerPosition, tile, this.boardGame.tiles);
+
+        if (!validation.isValid) {
+            return { success: false, message: validation.reason };
+        }
+
+        const player = tile.containedPlayer;
+        if (!player) {
+            return { success: false, message: 'No player at position' };
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const targetPosition = validation.targetPosition!;
+        this.boardGame.tiles[playerPosition.x][playerPosition.y].containedPlayer = undefined;
+        this.boardGame.tiles[targetPosition.x][targetPosition.y].containedPlayer = player;
+        player.position = targetPosition;
+
+        // Explicitly update active player position if this is the active player
+        if (this.activePlayer.name === player.name) {
+            this.activePlayer.position = targetPosition;
+        }
+
+        return { success: true };
     }
 
     changeActivePlayer(): void {
@@ -607,6 +636,7 @@ export class GameSession {
             case TileType.Water:
                 return 2;
             case TileType.Grass:
+            case TileType.Teleportation:
                 return 1;
             case TileType.Door:
                 if (tile.doorState) return 1;

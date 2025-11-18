@@ -88,7 +88,8 @@
         "action-type": {
             "open-door": "Ouvrir la porte",
             "close-door": "Fermer la porte",
-            "attack-player": "Attaquer le joueur"
+            "attack-player": "Attaquer le joueur",
+            "teleport": "Utiliser le téléporteur"
         },
         "game-privacy": {
             "public": "Public",

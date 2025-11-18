@@ -148,6 +148,11 @@ export class GameScheduler {
             this.toggleDoorState(data.gameCode, data.doorPosition);
         });
 
+        socket.on(SocketServerEventNames.UseTeleporter, (data: dataForm.UseTeleporterReq) => {
+            this.checkController(data.gameCode, socket);
+            this.useTeleporter(data.gameCode, data.position, socket);
+        });
+
         socket.on(SocketServerEventNames.StartFight, (data: dataForm.StartFightReq) => {
             this.checkController(data.gameCode, socket);
             this.startFight(data.gameCode, data.targetPlayerPosition);
@@ -194,6 +199,13 @@ export class GameScheduler {
         const controller: GameSessionController = this.gameMap.get(gameId);
         if (controller) {
             controller.getActivePlayer();
+        }
+    }
+
+    private useTeleporter(gameId: string, position: Position, socket: io.Socket): void {
+        const controller: GameSessionController = this.gameMap.get(gameId);
+        if (controller) {
+            controller.useTeleporter(position, socket);
         }
     }
 

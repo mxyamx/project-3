@@ -273,6 +273,10 @@ export class GameSessionManagerService {
         this.movementSystemManager.toggleDoorState(doorPosition, this.gameId());
     }
 
+    executeTeleport(position: Position): void {
+        this.movementSystemManager.useTeleporter(position, this.gameId());
+    }
+
     attackPlayer(): void {
         const playerNames = [this.defendingPlayer().name, this.attackingPlayer().name];
         this.playerSocket.emitJoinCombatLogRoom(this.gameId(), playerNames);

@@ -168,6 +168,7 @@ export class BoardGameGraph {
             case TileType.Water:
                 return 2;
             case TileType.Grass:
+            case TileType.Teleportation:
                 return 1;
             case TileType.Door:
                 if (tile.doorState || this.ignoreDoorStateForVP) return 1;

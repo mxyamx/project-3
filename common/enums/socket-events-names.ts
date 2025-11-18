@@ -11,6 +11,7 @@ export enum SocketServerEventNames {
     ToggleDebugMode = 'toggleDebugMode',
     DeactivateDebugMode = 'deactivateDebugMode',
     Teleport = 'teleport',
+    UseTeleporter = 'use-teleporter',
     PickUpItem = 'pickUpItem',
     DropItem = 'dropItem',
     GetActivePlayer = 'getActivePlayer',

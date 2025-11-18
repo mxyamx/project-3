@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { BoardGameGraph, BoardGameNode } from '@app/classes/board-game-graph/board-game-graph';
 import { getDirections, inBounds, isDefinedAndFinite } from '@app/classes/vp-path-board-game-helpers/vp-path-board-game-helpers';
 import { VpSocketManager } from '@app/classes/vp-socket-manager/vp-socket-manager';
@@ -21,12 +22,14 @@ export abstract class BaseVpBehaviorInGame {
     constructor(protected readonly vpState: VpState) {}
 
     protected getTileCost(tile: Tile, ignoreDoorStateForVP: boolean): number {
+        console.log(`Getting cost for tile at position with type: ${tile.type}`);
         switch (tile.type) {
             case TileType.Ice:
                 return 0;
             case TileType.Water:
                 return 2;
             case TileType.Grass:
+            case TileType.Teleportation:
                 return 1;
             case TileType.Door:
                 if (tile.doorState || ignoreDoorStateForVP) return 1;
@@ -84,8 +87,11 @@ export abstract class BaseVpBehaviorInGame {
                 }
             }
 
+            console.log(`Path truncated due to movement points. Original cost: ${totalCost}, Truncated cost: ${currentCost}`);
+
             return truncatedPath;
         } else {
+            console.log(`Path cost within movement points. Total cost: ${totalCost}`);
             return path;
         }
     }
