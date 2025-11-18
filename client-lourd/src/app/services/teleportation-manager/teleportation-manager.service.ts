@@ -6,9 +6,24 @@ import { Tile } from '@common/tile';
 
 export interface TeleportPair {
     pairId: string;
-    positionA: Position | null;
-    positionB: Position | null;
+    positionA: Position;
+    positionB: Position;
+    color: string; // Visual distinction color
 }
+
+// Define colors for visual distinction between pairs
+const TELEPORT_COLORS = [
+    '#FF6B6B', // Red
+    '#4ECDC4', // Teal
+    '#45B7D1', // Blue
+    '#FFA07A', // Light Salmon
+    '#98D8C8', // Mint
+    '#F7DC6F', // Yellow
+    '#BB8FCE', // Purple
+    '#85C1E2', // Sky Blue
+    '#F8B739', // Orange
+    '#52B788', // Green
+];
 
 @Injectable({
     providedIn: 'root',
@@ -16,140 +31,252 @@ export interface TeleportPair {
 export class TeleportationManagerService {
     private boardManager: BoardGameManagerService = inject(BoardGameManagerService);
 
-    // État du placement de téléportation en cours
+    // State for current teleport placement
     isPlacingTeleport: WritableSignal<boolean> = signal(false);
     firstTeleportPosition: WritableSignal<Position | null> = signal(null);
     currentPairId: WritableSignal<string> = signal('');
-    nextPairNumber: number = 1;
 
+    // Track all pairs for management
+    private teleportPairs: Map<string, TeleportPair> = new Map();
+    private nextPairNumber: number = 1;
+    private usedColors: Set<string> = new Set();
+
+    /**
+     * Initialize the service and scan existing teleport tiles
+     */
+    initializeFromBoard(): void {
+        this.teleportPairs.clear();
+        this.usedColors.clear();
+        this.nextPairNumber = 1;
+
+        const tiles = this.boardManager.editedBoardGame().tiles;
+        const foundPairs = new Map<string, Position[]>();
+
+        // Scan board for existing teleport tiles
+        for (let i = 0; i < tiles.length; i++) {
+            for (let j = 0; j < tiles[i].length; j++) {
+                const tile = tiles[i][j];
+                if (tile.type === TileType.Teleportation && tile.teleportPairId) {
+                    if (!foundPairs.has(tile.teleportPairId)) {
+                        foundPairs.set(tile.teleportPairId, []);
+                    }
+                    foundPairs.get(tile.teleportPairId)!.push({ x: i, y: j });
+                }
+            }
+        }
+
+        // Reconstruct pairs and assign colors
+        foundPairs.forEach((positions, pairId) => {
+            if (positions.length === 2) {
+                const color = this.getNextAvailableColor();
+                this.teleportPairs.set(pairId, {
+                    pairId,
+                    positionA: positions[0],
+                    positionB: positions[1],
+                    color,
+                });
+                this.usedColors.add(color);
+
+                // Update pair number counter
+                const pairNum = parseInt(pairId.replace('tp-', ''));
+                if (pairNum >= this.nextPairNumber) {
+                    this.nextPairNumber = pairNum + 1;
+                }
+            }
+        });
+    }
+
+    /**
+     * Start placing a new teleport pair
+     */
     startTeleportPlacement(): void {
         this.isPlacingTeleport.set(true);
         this.currentPairId.set(this.generatePairId());
         this.firstTeleportPosition.set(null);
     }
 
-    placeFirstTeleport(position: Position): void {
-        const newTile: Tile = structuredClone(this.boardManager.editedBoardGame().tiles[position.x][position.y]);
+    /**
+     * Place the first teleport tile
+     */
+    placeFirstTeleport(position: Position): boolean {
+        const tile = this.boardManager.editedBoardGame().tiles[position.x][position.y];
 
-        // Vérifier que la tuile est de base (Grass)
-        if (newTile.type !== TileType.Grass) {
-            return;
+        // Can only place on grass tiles
+        if (tile.type !== TileType.Grass) {
+            return false;
         }
 
+        // Can't place on tiles with items
+        if (tile.containedItem) {
+            return false;
+        }
+
+        const newTile: Tile = structuredClone(tile);
         newTile.type = TileType.Teleportation;
         newTile.teleportPairId = this.currentPairId();
 
         this.boardManager.updateTile(position.x, position.y, newTile);
         this.firstTeleportPosition.set(position);
+
+        return true;
     }
 
-    placeSecondTeleport(position: Position): void {
+    /**
+     * Place the second teleport tile and complete the pair
+     */
+    placeSecondTeleport(position: Position): boolean {
         const firstPos = this.firstTeleportPosition();
 
-        if (!firstPos) return;
+        if (!firstPos) return false;
 
-        // Vérifier qu'on ne place pas sur la même position
+        // Can't place on the same position
         if (firstPos.x === position.x && firstPos.y === position.y) {
-            return;
+            return false;
         }
 
-        const newTile: Tile = structuredClone(this.boardManager.editedBoardGame().tiles[position.x][position.y]);
+        const tile = this.boardManager.editedBoardGame().tiles[position.x][position.y];
 
-        // Vérifier que la tuile est de base (Grass)
-        if (newTile.type !== TileType.Grass) {
-            this.cancelTeleportPlacement();
-            return;
+        // Can only place on grass tiles
+        if (tile.type !== TileType.Grass) {
+            return false;
         }
 
-        newTile.type = TileType.Teleportation;
-        newTile.teleportPairId = this.currentPairId();
-        newTile.teleportDestination = firstPos;
+        // Can't place on tiles with items
+        if (tile.containedItem) {
+            return false;
+        }
 
-        // Mettre à jour la deuxième tuile
-        this.boardManager.updateTile(position.x, position.y, newTile);
+        const pairId = this.currentPairId();
 
-        // Mettre à jour la première tuile avec la destination
+        // Update first tile with target
         const firstTile: Tile = structuredClone(this.boardManager.editedBoardGame().tiles[firstPos.x][firstPos.y]);
-        firstTile.teleportDestination = position;
+        firstTile.teleportTarget = position;
         this.boardManager.updateTile(firstPos.x, firstPos.y, firstTile);
 
-        // Réinitialiser l'état
-        this.completeTeleportPlacement();
+        // Place second tile
+        const secondTile: Tile = structuredClone(tile);
+        secondTile.type = TileType.Teleportation;
+        secondTile.teleportPairId = pairId;
+        secondTile.teleportTarget = firstPos;
+        this.boardManager.updateTile(position.x, position.y, secondTile);
+
+        // Store the pair with color
+        const color = this.getNextAvailableColor();
+        this.teleportPairs.set(pairId, {
+            pairId,
+            positionA: firstPos,
+            positionB: position,
+            color,
+        });
+        this.usedColors.add(color);
+
+        // Reset state
+        this.nextPairNumber++;
+        this.completePlacement();
+
+        return true;
     }
 
-    cancelTeleportPlacement(): void {
+    /**
+     * Cancel current teleport placement
+     */
+    cancelPlacement(): void {
         const firstPos = this.firstTeleportPosition();
 
         if (firstPos) {
-            // Restaurer la première tuile en Grass
-            const newTile: Tile = structuredClone(this.boardManager.editedBoardGame().tiles[firstPos.x][firstPos.y]);
+            // Remove the first placed tile
+            const tile = this.boardManager.editedBoardGame().tiles[firstPos.x][firstPos.y];
+            const newTile: Tile = structuredClone(tile);
             newTile.type = TileType.Grass;
             newTile.teleportPairId = undefined;
-            newTile.teleportDestination = undefined;
-
+            newTile.teleportTarget = undefined;
             this.boardManager.updateTile(firstPos.x, firstPos.y, newTile);
         }
 
-        this.isPlacingTeleport.set(false);
-        this.firstTeleportPosition.set(null);
-        this.currentPairId.set('');
+        this.completePlacement();
     }
 
-    completeTeleportPlacement(): void {
-        this.isPlacingTeleport.set(false);
-        this.firstTeleportPosition.set(null);
-        this.currentPairId.set('');
-        this.nextPairNumber++;
-    }
+    /**
+     * Remove a complete teleport pair
+     */
+    removeTeleportPair(pairId: string): void {
+        const pair = this.teleportPairs.get(pairId);
 
-    removeTeleportPair(position: Position): void {
-        const tile = this.boardManager.editedBoardGame().tiles[position.x][position.y];
+        if (pair) {
+            // Remove both tiles
+            this.removeTeleportTile(pair.positionA);
+            this.removeTeleportTile(pair.positionB);
 
-        if (tile.type !== TileType.Teleportation || !tile.teleportPairId) {
-            return;
-        }
+            // Free up the color
+            this.usedColors.delete(pair.color);
 
-        const pairId = tile.teleportPairId;
-        const destination = tile.teleportDestination;
-
-        // Supprimer la première tuile
-        const newTile: Tile = structuredClone(tile);
-        newTile.type = TileType.Grass;
-        newTile.teleportPairId = undefined;
-        newTile.teleportDestination = undefined;
-        this.boardManager.updateTile(position.x, position.y, newTile);
-
-        // Supprimer la deuxième tuile si elle existe
-        if (destination) {
-            const destTile: Tile = structuredClone(this.boardManager.editedBoardGame().tiles[destination.x][destination.y]);
-
-            if (destTile.type === TileType.Teleportation && destTile.teleportPairId === pairId) {
-                destTile.type = TileType.Grass;
-                destTile.teleportPairId = undefined;
-                destTile.teleportDestination = undefined;
-                this.boardManager.updateTile(destination.x, destination.y, destTile);
+            // Remove from tracking
+            this.teleportPairs.delete(pairId);
+        } else {
+            // Fallback: scan board for this pair ID
+            const tiles = this.boardManager.editedBoardGame().tiles;
+            for (let i = 0; i < tiles.length; i++) {
+                for (let j = 0; j < tiles[i].length; j++) {
+                    if (tiles[i][j].teleportPairId === pairId) {
+                        this.removeTeleportTile({ x: i, y: j });
+                    }
+                }
             }
         }
     }
 
-    private generatePairId(): string {
-        return `teleport-pair-${this.nextPairNumber}`;
+    /**
+     * Get color for a specific pair
+     */
+    getPairColor(pairId: string): string {
+        const pair = this.teleportPairs.get(pairId);
+        return pair?.color || TELEPORT_COLORS[0];
     }
 
-    getTeleportPairColor(pairId: string): string {
-        // Générer une couleur basée sur l'ID de la paire
-        const colors = [
-            '#FF6B6B', // Rouge
-            '#4ECDC4', // Cyan
-            '#45B7D1', // Bleu
-            '#FFA07A', // Saumon
-            '#98D8C8', // Vert menthe
-            '#F7DC6F', // Jaune
-            '#BB8FCE', // Violet
-            '#85C1E2', // Bleu clair
-        ];
+    /**
+     * Get all teleport pairs
+     */
+    getAllPairs(): TeleportPair[] {
+        return Array.from(this.teleportPairs.values());
+    }
 
-        const pairNumber = parseInt(pairId.split('-').pop() || '1');
-        return colors[(pairNumber - 1) % colors.length];
+    /**
+     * Check if currently waiting for second teleport
+     */
+    isWaitingForSecondTeleport(): boolean {
+        return this.isPlacingTeleport() && this.firstTeleportPosition() !== null;
+    }
+
+    // Private helper methods
+
+    private generatePairId(): string {
+        return `tp-${this.nextPairNumber}`;
+    }
+
+    private completePlacement(): void {
+        this.isPlacingTeleport.set(false);
+        this.firstTeleportPosition.set(null);
+        this.currentPairId.set('');
+    }
+
+    private removeTeleportTile(position: Position): void {
+        const tile = this.boardManager.editedBoardGame().tiles[position.x][position.y];
+        const newTile: Tile = structuredClone(tile);
+        newTile.type = TileType.Grass;
+        newTile.teleportPairId = undefined;
+        newTile.teleportTarget = undefined;
+        this.boardManager.updateTile(position.x, position.y, newTile);
+    }
+
+    private getNextAvailableColor(): string {
+        // Find first unused color
+        for (const color of TELEPORT_COLORS) {
+            if (!this.usedColors.has(color)) {
+                return color;
+            }
+        }
+
+        // If all colors used, cycle through them
+        return TELEPORT_COLORS[this.teleportPairs.size % TELEPORT_COLORS.length];
     }
 }

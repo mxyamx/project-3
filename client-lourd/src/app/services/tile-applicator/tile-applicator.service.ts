@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { BoardGameManagerService } from '@app/services/board-game-manager/board-game-manager.service';
+import { TeleportationManagerService } from '@app/services/teleportation-manager/teleportation-manager.service';
 import { TileType } from '@common/enums/tile-type';
 import { Position } from '@common/position';
 import { Tile } from '@common/tile';
@@ -9,130 +10,132 @@ import { Tile } from '@common/tile';
 })
 export class TileApplicatorService {
     boardManager: BoardGameManagerService = inject(BoardGameManagerService);
+    teleportationManager: TeleportationManagerService = inject(TeleportationManagerService);
+
     isActivated: boolean = false;
-    currentTileType: TileType;
+    currentTileType: TileType = TileType.Grass;
     mouseClicked: boolean = false;
     rightButtonPressed: boolean = false;
-
-    // Nouveaux états pour téléporteurs
-    isWaitingForSecondTeleporter: boolean = false;
-    firstTeleporterPosition?: Position;
-    nextTeleporterPairId: number = 1;
 
     activate(tileType: TileType): void {
         this.isActivated = true;
         this.currentTileType = tileType;
+
+        // If activating teleportation, start the placement process
+        if (tileType === TileType.Teleportation) {
+            this.teleportationManager.startTeleportPlacement();
+        }
     }
 
     deactivate(): void {
         this.isActivated = false;
         this.currentTileType = TileType.Grass;
-        this.cancelTeleporterPlacement(); // Nouveau
+
+        // Cancel any ongoing teleport placement
+        if (this.teleportationManager.isPlacingTeleport()) {
+            this.teleportationManager.cancelPlacement();
+        }
     }
 
+    /**
+     * Change a tile to a specific type (for non-teleportation tiles)
+     */
     changeTile(xPosition: number, yPosition: number, tileType: TileType): void {
+        // Don't allow direct tile changes during teleport placement
+        if (this.teleportationManager.isPlacingTeleport()) {
+            return;
+        }
+
         const newTile: Tile = structuredClone(this.boardManager.editedBoardGame().tiles[xPosition][yPosition]);
+
+        // Clear teleport data if changing away from teleportation
+        if (newTile.type === TileType.Teleportation && tileType !== TileType.Teleportation) {
+            if (newTile.teleportPairId) {
+                this.teleportationManager.removeTeleportPair(newTile.teleportPairId);
+            }
+        }
+
         newTile.type = tileType;
         this.boardManager.updateTile(xPosition, yPosition, newTile);
     }
 
+    /**
+     * Reset a tile to grass (handles teleportation pairs)
+     */
     resetTile(xPosition: number, yPosition: number): void {
         const tile = this.boardManager.editedBoardGame().tiles[xPosition][yPosition];
 
-        // Si c'est un téléporteur, supprimer la paire complète
+        // If it's a teleportation tile, remove the entire pair
         if (tile.type === TileType.Teleportation && tile.teleportPairId) {
-            this.removeTeleporterPair(tile.teleportPairId);
+            this.teleportationManager.removeTeleportPair(tile.teleportPairId);
+        } else {
+            // Normal tile reset
+            this.changeTile(xPosition, yPosition, TileType.Grass);
         }
 
         this.deactivate();
-        this.changeTile(xPosition, yPosition, TileType.Grass);
     }
 
+    /**
+     * Toggle door state
+     */
     toggleDoorState(xPosition: number, yPosition: number): void {
         const newTile: Tile = structuredClone(this.boardManager.editedBoardGame().tiles[xPosition][yPosition]);
         newTile.doorState = !newTile.doorState;
         this.boardManager.updateTile(xPosition, yPosition, newTile);
     }
 
-    // Nouvelles méthodes pour téléporteurs
-    placeTeleporter(xPosition: number, yPosition: number): void {
-        const currentTile = this.boardManager.editedBoardGame().tiles[xPosition][yPosition];
+    /**
+     * Handle tile click during placement
+     */
+    handleTileClick(xPosition: number, yPosition: number): boolean {
+        const position: Position = { x: xPosition, y: yPosition };
 
-        // Ne pas placer sur une tuile avec item ou sur un téléporteur existant
-        if (currentTile.containedItem || currentTile.type === TileType.Teleportation) {
+        // Handle teleportation placement
+        if (this.currentTileType === TileType.Teleportation && this.teleportationManager.isPlacingTeleport()) {
+            if (this.teleportationManager.isWaitingForSecondTeleport()) {
+                // Place second teleport
+                const success = this.teleportationManager.placeSecondTeleport(position);
+                if (success) {
+                    this.deactivate();
+                }
+                return success;
+            } else {
+                // Place first teleport
+                return this.teleportationManager.placeFirstTeleport(position);
+            }
+        }
+
+        // Handle normal tile placement (with sliding)
+        if (this.isActivated && this.currentTileType !== TileType.Teleportation) {
+            this.changeTile(xPosition, yPosition, this.currentTileType);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Handle tile drag (for sliding placement - not supported for teleportation)
+     */
+    handleTileDrag(xPosition: number, yPosition: number): void {
+        // Teleportation doesn't support sliding
+        if (this.currentTileType === TileType.Teleportation) {
             return;
         }
 
-        if (!this.isWaitingForSecondTeleporter) {
-            // Première tuile
-            this.firstTeleporterPosition = { x: xPosition, y: yPosition };
-            this.isWaitingForSecondTeleporter = true;
-
-            const pairId = `tp-${this.nextTeleporterPairId}`;
-            const newTile: Tile = {
-                ...currentTile,
-                type: TileType.Teleportation,
-                teleportPairId: pairId,
-            };
-            this.boardManager.updateTile(xPosition, yPosition, newTile);
-        } else {
-            // Deuxième tuile
-            if (!this.firstTeleporterPosition) {
-                return;
-            }
-
-            if (xPosition === this.firstTeleporterPosition.x && yPosition === this.firstTeleporterPosition.y) {
-                // Même position, annuler
-                this.cancelTeleporterPlacement();
-                return;
-            }
-
-            const pairId = `tp-${this.nextTeleporterPairId}`;
-            const secondPosition: Position = { x: xPosition, y: yPosition };
-
-            // Mettre à jour la première tuile avec la cible
-            const firstTile: Tile = {
-                ...this.boardManager.editedBoardGame().tiles[this.firstTeleporterPosition.x][this.firstTeleporterPosition.y],
-                teleportTarget: secondPosition,
-            };
-            this.boardManager.updateTile(this.firstTeleporterPosition.x, this.firstTeleporterPosition.y, firstTile);
-
-            // Placer la deuxième tuile
-            const secondTile: Tile = {
-                ...currentTile,
-                type: TileType.Teleportation,
-                teleportPairId: pairId,
-                teleportTarget: this.firstTeleporterPosition,
-            };
-            this.boardManager.updateTile(xPosition, yPosition, secondTile);
-
-            // Réinitialiser l'état
-            this.nextTeleporterPairId++;
-            this.isWaitingForSecondTeleporter = false;
-            this.firstTeleporterPosition = undefined;
+        if (this.isActivated && this.mouseClicked) {
+            this.changeTile(xPosition, yPosition, this.currentTileType);
         }
     }
 
-    cancelTeleporterPlacement(): void {
-        if (this.isWaitingForSecondTeleporter && this.firstTeleporterPosition) {
-            // Supprimer la première tuile placée
-            this.changeTile(this.firstTeleporterPosition.x, this.firstTeleporterPosition.y, TileType.Grass);
-            this.isWaitingForSecondTeleporter = false;
-            this.firstTeleporterPosition = undefined;
+    /**
+     * Cancel current operation (for ESC key)
+     */
+    cancel(): void {
+        if (this.teleportationManager.isPlacingTeleport()) {
+            this.teleportationManager.cancelPlacement();
         }
-    }
-
-    removeTeleporterPair(pairId: string): void {
-        const tiles = this.boardManager.editedBoardGame().tiles;
-
-        // Trouver et supprimer les deux tuiles de la paire
-        for (let i = 0; i < tiles.length; i++) {
-            for (let j = 0; j < tiles[i].length; j++) {
-                const tile = tiles[i][j];
-                if (tile.teleportPairId === pairId) {
-                    this.changeTile(i, j, TileType.Grass);
-                }
-            }
-        }
+        this.deactivate();
     }
 }

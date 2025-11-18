@@ -1,4 +1,4 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, HostListener, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router, RouterLink } from '@angular/router';
@@ -7,6 +7,7 @@ import { SaveBoardDialogComponent } from '@app/components/save-board-dialog/save
 import { BoardGameManagerService } from '@app/services/board-game-manager/board-game-manager.service';
 import { HttpBoardGameService } from '@app/services/http-manager/http-board-game.service';
 import { ItemApplicatorService } from '@app/services/item-applicator/item-applicator.service';
+import { TeleportationManagerService } from '@app/services/teleportation-manager/teleportation-manager.service';
 import { TileApplicatorService } from '@app/services/tile-applicator/tile-applicator.service';
 
 import { ItemDescriptionComponent } from '@app/components/item-description/item-description.component';
@@ -32,7 +33,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     templateUrl: './board-edition-page.component.html',
     styleUrl: './board-edition-page.component.scss',
 })
-export class BoardEditionPageComponent {
+export class BoardEditionPageComponent implements OnInit {
     hoveredTile: Tile | null = null;
     hoveredItem: Item | null = null;
     mouseX: number = 0;
@@ -65,6 +66,7 @@ export class BoardEditionPageComponent {
     private boardgameManager: BoardGameManagerService = inject(BoardGameManagerService);
     private httpBoardGameService: HttpBoardGameService = inject(HttpBoardGameService);
     private previewImageGenerationService: PreviewImageGenerationService = inject(PreviewImageGenerationService);
+    private teleportationManager: TeleportationManagerService = inject(TeleportationManagerService);
 
     private itemImageCorrespondance: { [key: string]: string };
     private itemDescriptionCorrespondance: { [key: string]: string };
@@ -75,6 +77,11 @@ export class BoardEditionPageComponent {
     ) {
         this.itemImageCorrespondance = FROM_ITEM_TO_IMAGE;
         this.itemDescriptionCorrespondance = FROM_ITEM_NAME_TO_DESCRIPTION;
+    }
+
+    ngOnInit(): void {
+        // Initialize teleportation manager from existing board data
+        this.teleportationManager.initializeFromBoard();
     }
 
     get itemApplicatorService(): ItemApplicatorService {
@@ -97,12 +104,19 @@ export class BoardEditionPageComponent {
         return this.boardgameManager;
     }
 
-    // Nouveau: Listener pour ESC
     @HostListener('document:keydown.escape')
     onEscapePress(): void {
-        if (this.tileApplicator.isWaitingForSecondTeleporter) {
-            this.tileApplicator.cancelTeleporterPlacement();
+        // Handle new teleportation manager
+        if (this.teleportationManager.isPlacingTeleport()) {
+            this.teleportationManager.cancelPlacement();
+            this.tileApplicator.deactivate();
+            return;
         }
+
+        // Fallback to old property if it exists (backward compatibility)
+        // if (this.tileApplicator.isWaitingForSecondTeleporter) {
+        //     this.tileApplicator.cancelTeleporterPlacement();
+        // }
     }
 
     tileOnMouseEnter(tile: Tile) {
@@ -132,6 +146,7 @@ export class BoardEditionPageComponent {
         this.mouseX = event.clientX - followerData.followerWidth / 2;
         this.mouseY = event.clientY - followerData.followerHeight / 2;
     }
+
     onInputDescription(event: Event): void {
         const target = event.target as HTMLTextAreaElement;
         this.boardgameManager.updateDescription(target.value);
@@ -149,9 +164,15 @@ export class BoardEditionPageComponent {
             return;
         }
 
+        // Cancel ongoing teleportation if switching tools
+        if (this.teleportationManager.isPlacingTeleport() && tileType !== TileType.Teleportation) {
+            this.teleportationManager.cancelPlacement();
+        }
+
         this.itemApplicator.deactivate();
         this.tileApplicator.activate(tileType);
     }
+
     async saveBoard(): Promise<void> {
         const newBoard = await this.modifyBoard();
         const boardId = this.boardgameManager.editedBoardGame().id;
@@ -225,6 +246,8 @@ export class BoardEditionPageComponent {
         this.boardgameManager.updateDisplayedBoardGame(structuredClone(this.boardgameManager.loadedBoardGame()));
         this.tileApplicator.deactivate();
         this.itemApplicator.deactivate();
+        // Reinitialize teleportation from reloaded board
+        this.teleportationManager.initializeFromBoard();
     }
 
     private async generatePreview(): Promise<string> {
