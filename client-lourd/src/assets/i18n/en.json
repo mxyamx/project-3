@@ -314,9 +314,12 @@
         "delete-account-modal": "Are you sure you want to delete your account? This action is irreversible.",
         "friends": "Friends",
         "blocked-users": "Blocked Users",
-        "victories": "Victories",
+        "victories": "Number of victories",
         "defeats": "Defeats",
         "combats": "Combats",
+        "average-game-time": "Average Game Time",
+        "total-game-normal": "Total Normal Mode Games Played",
+        "total-game-ctf": "Total CTF Mode Games Played",
         "edit-modal": {
             "title": "Edit Account",
             "username": "Username",

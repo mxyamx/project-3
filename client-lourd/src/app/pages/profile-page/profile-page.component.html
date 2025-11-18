@@ -60,7 +60,11 @@
                 <li>Placeholder items</li>
             </ul>
             } @case (ActiveTab.Statistics) {
-            <p>{{ 'profil-page.victories' | translate }}: {{ user.statistics.victoryAmount }}</p>
+            <p>{{ 'profil-page.victories' | translate }}: {{ user.statistics.victoryAmount ?? 0 }}</p>
+            <p>{{ 'profil-page.average-game-time' | translate }}: {{ averageGameTimeSeconds | number: '1.0-2' }} s</p>
+            <p>{{ 'profil-page.total-game-normal' | translate }}: {{ user.statistics.gamesPlayedNormal ?? 0 | number: '1.0-2' }}</p>
+            <p>{{ 'profil-page.total-game-ctf' | translate }}: {{ user.statistics.gamesPlayedCTF ?? 0 | number: '1.0-2' }}</p>
+
             } }
         </div>
     </div>

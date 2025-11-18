@@ -375,7 +375,7 @@ export class GameSessionController {
     }
 
     async endGame(winner?: Player): Promise<void> {
-        console.log('Game ended. END GAME WAS CALLED.');
+        console.log('Game ended. END GAME WAS CALLED. with the following winner ', winner ? JSON.stringify(winner, null, 2) : 'No winner');
         this.gameSession.endGame();
         this.gameService.setGameEnded(this.roomCode);
         this.clockManager.stopClock();
@@ -511,9 +511,10 @@ export class GameSessionController {
     }
 
     private async distributePrizesForCTF(winningTeam: CtfTeam): Promise<void> {
+        console.log('Distributing prizes for CTF winning team:', winningTeam);
         const prizePoolService = Container.get(PrizePoolService);
         const game = await this.gameService.getGame(this.roomCode);
-        if (!game || game.entryPrice === 0) return;
+        if (!game) return;
 
         const activePlayers = this.gameSession.getActivePlayers();
         const humanPlayers = activePlayers.filter((p) => !p.virtualPlayer);
@@ -522,6 +523,14 @@ export class GameSessionController {
         const winningTeamPlayers = humanPlayers.filter((p) => p.ctfTeam === winningTeam && !this.gameSession.hasPlayerAbandoned(p.userId));
         const losingTeamPlayers = humanPlayers.filter((p) => p.ctfTeam !== winningTeam && !this.gameSession.hasPlayerAbandoned(p.userId));
 
+        console.log(
+            'Winning team players:',
+            winningTeamPlayers.map((p) => p.name),
+        );
+        console.log(
+            'Losing team players:',
+            losingTeamPlayers.map((p) => p.name),
+        );
         // If no human players remain, no prizes to distribute
         if (winningTeamPlayers.length === 0) return;
 

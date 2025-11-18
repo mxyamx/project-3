@@ -314,9 +314,12 @@
         "delete-account-modal": "Êtes-vous sûr de vouloir supprimer votre compte? Cette action est irréversible",
         "friends": "Amis",
         "blocked-users": "Utilisateurs Bloqués",
-        "victories": "Victoires",
+        "victories": "Nombre de victoires",
         "defeats": "Défaites",
         "combats": "Combats",
+        "total-game-normal": "Total des parties en mode normal",
+        "total-game-ctf": "Total des parties en mode CTF",
+        "average-game-time": "Durée moyenne des parties",
         "edit-modal": {
             "title": "Modifier le compte",
             "username": "Nom d'utilisateur",
