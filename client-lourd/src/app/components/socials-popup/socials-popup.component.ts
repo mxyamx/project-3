@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, EventEmitter, inject, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FriendManagerService } from '@app/services/friend-manager/friend-manager.service';
+import { GameInvitation, GameInviteService } from '@app/services/game-invite/game-invite.service';
 import { FriendsService } from '@app/services/http-manager/http-friends.service';
 import { UserStatusService } from '@app/services/user-status/user-status.service';
 import { DeviceType } from '@common/enums/deviceType';
@@ -22,13 +23,17 @@ export class SocialsPopupComponent implements OnInit, OnDestroy {
     @Output() close = new EventEmitter<void>();
 
     private userStatusService = inject(UserStatusService);
+    private gameInviteService = inject(GameInviteService);
     private statusSubscription?: Subscription;
+    private inviteSubscription?: Subscription;
 
-    activeTab: 'friends' | 'received' | 'sent' | 'add' = 'friends';
+    activeTab: 'friends' | 'received' | 'sent' | 'add' | 'invites' = 'friends';
 
     friendStatuses = new Map<string, UserStatusInfo>();
     DeviceType = DeviceType;
     GameActivityStatus = GameActivityStatus;
+
+    gameInvites: GameInvitation[] = [];
 
     get friends() {
         return this.friendManagerService.friends();
@@ -43,6 +48,7 @@ export class SocialsPopupComponent implements OnInit, OnDestroy {
     friendCount = computed(() => this.friendManagerService.friends().length);
     pendingCount = computed(() => this.friendManagerService.pendingRequests().length);
     sentCount = computed(() => this.friendManagerService.sentRequests().length);
+    invitesCount = computed(() => this.gameInvites.length);
 
     searchQuery = '';
     searchResults: User[] = [];
@@ -64,21 +70,27 @@ export class SocialsPopupComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.friendManagerService.refresh();
 
-        // Fetch initial statuses for all friends
         const friendIds = this.friends.map((f) => f.id);
         if (friendIds.length > 0) {
             this.userStatusService.fetchUserStatuses(friendIds);
         }
 
-        // Subscribe to real-time status updates
         this.statusSubscription = this.userStatusService.getAllStatuses().subscribe((statuses) => {
             this.friendStatuses = new Map(statuses);
+        });
+
+        // 🔥 Listen to game invites
+        this.inviteSubscription = this.gameInviteService.getPendingInvitations().subscribe((invites) => {
+            this.gameInvites = invites;
         });
     }
 
     ngOnDestroy(): void {
         this.statusSubscription?.unsubscribe();
+        this.inviteSubscription?.unsubscribe();
     }
+
+    // ========== STATUS ==========
 
     getFriendStatus(friendId: string): UserStatusInfo | undefined {
         return this.friendStatuses.get(friendId);
@@ -111,6 +123,18 @@ export class SocialsPopupComponent implements OnInit, OnDestroy {
     onClose() {
         this.close.emit();
     }
+
+    // ========== GAME INVITES ==========
+
+    acceptGameInvite(invite: GameInvitation) {
+        this.gameInviteService.acceptInvitation(invite);
+    }
+
+    declineGameInvite(invite: GameInvitation) {
+        this.gameInviteService.declineInvitation(invite);
+    }
+
+    // ========== FRIEND SYSTEM ==========
 
     searchUsers() {
         if (!this.searchQuery.trim()) {
@@ -153,7 +177,6 @@ export class SocialsPopupComponent implements OnInit, OnDestroy {
         this.friendsHttpService.acceptFriendRequest(request.id).subscribe({
             next: (result: { sender: User }) => {
                 this.friendManagerService.acceptRequest(request.id, result.sender);
-                // Fetch status for the newly added friend
                 this.userStatusService.fetchUserStatuses([result.sender.id]);
             },
             error: () => this.showErrorMessage('socials-popup.errors.accept-failed'),

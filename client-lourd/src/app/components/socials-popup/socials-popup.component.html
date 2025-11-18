@@ -16,6 +16,9 @@
                 <button [class.active]="activeTab === 'add'" (click)="activeTab = 'add'">
                     {{ 'socials-popup.tabs.add' | translate }}
                 </button>
+                <button [class.active]="activeTab === 'invites'" (click)="activeTab = 'invites'">
+                    {{ 'socials-popup.tabs.invites' | translate }} ({{ invitesCount() }})
+                </button>
             </div>
 
             <div class="tab-content">
@@ -169,7 +172,35 @@
                     </div>
                     }
                 </div>
-                } }
+                } @case ('invites') {
+                <ul class="user-list">
+                    @for (invite of gameInvites; track invite.gameId + invite.fromId) {
+                    <li>
+                        <div class="user-info">
+                            <img [src]="invite.fromAvatar" [alt]="invite.from" class="avatar" />
+                            <span class="name">{{ invite.from }}</span>
+                            <span class="sub">{{ invite.timestamp | date:'shortTime' }}</span>
+                        </div>
+
+                        <div class="actions">
+                            <button class="icon-btn accept-btn"
+                                    (click)="acceptGameInvite(invite)"
+                                    [title]="'socials-popup.actions.accept' | translate">
+                                <i class="fa fa-check"></i>
+                            </button>
+
+                            <button class="icon-btn reject-btn"
+                                    (click)="declineGameInvite(invite)"
+                                    [title]="'socials-popup.actions.reject' | translate">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    </li>
+                    } @empty {
+                    <li class="empty-state">{{ 'socials-popup.empty.no-invites' | translate }}</li>
+                    }
+                </ul>
+            } }
             </div>
         </div>
     </div>
