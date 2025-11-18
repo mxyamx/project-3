@@ -371,13 +371,11 @@ export class GameSessionController {
         try {
             const activePlayer = this.gameSession.activePlayerInstance;
 
-            // Validate it's the active player's socket
             if (activePlayer.socketId !== socket.id) {
                 sendError('Not your turn', this.sio, this.roomCode);
                 return;
             }
 
-            // Execute teleport
             const result = this.gameSession.useTeleporter(position);
 
             if (!result.success) {
@@ -385,10 +383,9 @@ export class GameSessionController {
                 return;
             }
 
-            // Update statistics
             this.gameSession.statisticsManager.updatePlayerTilePercentage(activePlayer.userId, activePlayer.position);
 
-            // Emit updated game state
+            activePlayer.attributes.speedValue -= 1;
             const ans: dataForm.UpdateGamedRes = {
                 successful: true,
                 message: 'Teleport successful',
@@ -396,6 +393,7 @@ export class GameSessionController {
                 activePlayer: this.gameSession.activePlayerInstance,
                 listOfPlayers: this.gameSession.listOfPlayers.getValues(),
             };
+            this.sio.to(this.roomCode).emit(SocketClientEventNames.Teleport, ans);
 
             this.sio.to(this.roomCode).emit(SocketClientEventNames.UpdateGame, ans);
         } catch {
