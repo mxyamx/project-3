@@ -376,7 +376,13 @@
             "agressive": "Agressif",
             "defensive": "Défensif"
         },
-        "player-amount-modal": "Le nombre de joueurs doit être pair pour commencer une partie en mode CTF."
+        "player-amount-modal": "Le nombre de joueurs doit être pair pour commencer une partie en mode CTF.",
+        "invite-friends": "Inviter des amis",
+        "invite-popup": {
+            "title": "Inviter des amis",
+            "invite": "Inviter",
+            "no-friends": "Aucun ami disponible"
+        }
     },
     "entry-fee-label": "Frais d'entrée",
     "entry-fee-free": "Salle gratuite",

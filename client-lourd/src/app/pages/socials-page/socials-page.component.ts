@@ -20,7 +20,6 @@ export class SocialsPageComponent implements OnInit, OnDestroy {
     private userStatusService = inject(UserStatusService);
     private statusSubscription?: Subscription;
 
-    // Expose signals directly
     friends = this.friendManagerService.friends;
     blockedUsers = this.friendManagerService.blockedUsers;
 
@@ -46,13 +45,11 @@ export class SocialsPageComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.friendManagerService.refresh();
 
-        // Fetch initial statuses for all friends
         const friendIds = this.friends().map((f) => f.id);
         if (friendIds.length > 0) {
             this.userStatusService.fetchUserStatuses(friendIds);
         }
 
-        // Subscribe to real-time status updates
         this.statusSubscription = this.userStatusService.getAllStatuses().subscribe((statuses) => {
             this.friendStatuses = new Map(statuses);
         });

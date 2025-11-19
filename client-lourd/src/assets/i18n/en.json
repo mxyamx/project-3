@@ -378,7 +378,13 @@
             "agressive": "Aggressive",
             "defensive": "Defensive"
         },
-        "player-amount-modal": "The number of players must be even to start a game in CTF mode."
+        "player-amount-modal": "The number of players must be even to start a game in CTF mode.",
+        "invite-friends": "Invite Friends",
+        "invite-popup": {
+            "title": "Invite Friends",
+            "invite": "Invite",
+            "no-friends": "No available friends"
+        }
     },
     "attribute-form": {
         "physical": "Physical Attributes",
