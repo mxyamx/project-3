@@ -31,7 +31,8 @@ export class VpSocketManager {
 
     joinRoom(roomId: string): void {
         if (this.clientSocket && this.clientSocket.connected) {
-            this.clientSocket.emit('join-room', roomId, (response: JoinGameAck) => {});
+            const data: { gameId: string; isVirtual: boolean } = { gameId: roomId, isVirtual: true };
+            this.clientSocket.emit('join-room', data, (response: JoinGameAck) => {});
         }
     }
 }

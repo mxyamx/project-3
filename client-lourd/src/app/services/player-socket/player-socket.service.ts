@@ -129,7 +129,8 @@ export class PlayerSocketService {
     }
 
     emitJoinAvatarRoom(gameId: string, callback: (response: JoinGameAck) => void): void {
-        this.clientSocketService.emit('join-room', gameId, callback);
+        const data: { gameId: string; isVirtual: boolean } = { gameId, isVirtual: false };
+        this.clientSocketService.emit('join-room', data, callback);
     }
 
     onAvatarRoomJoined(callback: (playerId: string) => void): void {
