@@ -21,4 +21,5 @@ export interface Player {
     statistic?: PlayerStatistics;
     ctfTeam?: CtfTeam;
     startPosition?: Position;
+    hasIlluminationBonus?: boolean;
 }

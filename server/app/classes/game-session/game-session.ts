@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/prefer-for-of */
 /* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable max-lines */
 import { DynamicPlayerList } from '@app/classes/dynamic-player-list/dynamic-player-list';
@@ -18,6 +19,7 @@ import { Player } from '@common/player';
 import { Position } from '@common/position';
 import { TeleportationDataHelper } from '@common/teleportation';
 import { Tile } from '@common/tile';
+import { BoardGameGraph } from '../board-game-graph/board-game-graph';
 
 export class GameSession {
     statisticsManager: StatisticsManager;
@@ -122,6 +124,9 @@ export class GameSession {
         this.itemEffectApplicator.removeEffect(this.activePlayer, item.name);
         this.activePlayer.inventory = newInventory;
         this.boardGame.tiles[position.x][position.y].containedItem = item;
+
+        this.updateIllumination();
+        this.updatePlayerBonuses();
     }
 
     pickUpItem(player: Player): void {
@@ -143,6 +148,9 @@ export class GameSession {
         this.activePlayer.inventory.push(item);
         this.itemEffectApplicator.applyEffect(this.activePlayer, item.name);
         this.boardGame.tiles[position.x][position.y].containedItem = undefined;
+
+        this.updateIllumination();
+        this.updatePlayerBonuses();
     }
 
     validItemPresent(position: Position): boolean {
@@ -183,6 +191,9 @@ export class GameSession {
         );
         this.statisticsManager.updateTilePercentage(newPosition);
         this.statisticsManager.updatePlayerTilePercentage(player.userId, newPosition);
+
+        this.updateIllumination();
+        this.updatePlayerBonuses();
     }
 
     useTeleporter(playerPosition: Position): { success: boolean; message?: string } {
@@ -252,6 +263,8 @@ export class GameSession {
         if (tile.type === TileType.Door) {
             tile.doorState = !tile.doorState;
         }
+        this.updateIllumination();
+        this.updatePlayerBonuses();
         return tile.doorState;
     }
 
@@ -292,6 +305,8 @@ export class GameSession {
         const temp = this.ongoingFight.attackingPlayer;
         this.ongoingFight.attackingPlayer = this.ongoingFight.defendingPlayer;
         this.ongoingFight.defendingPlayer = temp;
+        this.updateIllumination();
+        this.updatePlayerBonuses();
     }
     attemptEscape(): boolean {
         const oldEscapeAttempts = this.escapeMAp.get(this.ongoingFight.attackingPlayer.name);
@@ -335,6 +350,8 @@ export class GameSession {
         if (this.itemEffectApplicator.hasItem(defendingPlayer, ItemName.AttributeEditor2)) {
             this.itemEffectApplicator.applyEffect(defendingPlayer, ItemName.AttributeEditor2);
         }
+        this.updateIllumination();
+        this.updatePlayerBonuses();
     }
 
     registerVictory(player: Player): void {
@@ -668,6 +685,88 @@ export class GameSession {
                 : false;
         }
         return false;
+    }
+
+    /**
+     * Update board illumination based on torch positions
+     */
+    private updateIllumination(): void {
+        const tiles = this.boardGame.tiles;
+        // const players = Array.from(this.listOfPlayers.values());
+        const players = this.players.getValues();
+        // Clear all illumination
+        for (let i = 0; i < tiles.length; i++) {
+            for (let j = 0; j < tiles[i].length; j++) {
+                tiles[i][j].isIlluminated = false;
+            }
+        }
+
+        // Illuminate from map torches (2-block range)
+        for (let i = 0; i < tiles.length; i++) {
+            for (let j = 0; j < tiles[i].length; j++) {
+                const tile = tiles[i][j];
+                if (tile.containedItem?.name === ItemName.Torch) {
+                    if (tile.type !== TileType.Water && tile.type !== TileType.Ice) {
+                        this.illuminateFromPosition(tiles, { x: i, y: j });
+                    }
+                }
+            }
+        }
+
+        // Illuminate for players holding torches (only their tile)
+        for (const player of players) {
+            const hasTorch = player.inventory?.some((item) => item.name === ItemName.Torch);
+            if (hasTorch && player.position) {
+                const pos = player.position;
+                if (pos.x >= 0 && pos.x < tiles.length && pos.y >= 0 && pos.y < tiles[0].length) {
+                    tiles[pos.x][pos.y].isIlluminated = true;
+                }
+            }
+        }
+    }
+
+    /**
+     * Illuminate tiles within 2-block range from position
+     */
+    private illuminateFromPosition(tiles: Tile[][], position: Position): void {
+        const graph = new BoardGameGraph(tiles, false, true);
+        const reachableNodes = graph.findReachableNodes(position, 2);
+
+        tiles[position.x][position.y].isIlluminated = true;
+
+        for (const node of reachableNodes) {
+            const pos = node.tilePosition;
+            tiles[pos.x][pos.y].isIlluminated = true;
+        }
+    }
+
+    /**
+     * Update illumination bonuses for all players
+     */
+    private updatePlayerBonuses(): void {
+        // const players = Array.from(this.players.values());
+        const players = this.players.getValues();
+        const tiles = this.boardGame.tiles;
+
+        for (const player of players) {
+            if (!player.position) continue;
+
+            const pos = player.position;
+            const isIlluminated = tiles[pos.x]?.[pos.y]?.isIlluminated ?? false;
+
+            // Apply bonus if on illuminated tile
+            if (isIlluminated && !player.hasIlluminationBonus) {
+                player.attributes.attackValue += 1;
+                player.attributes.defenseValue += 1;
+                player.hasIlluminationBonus = true;
+            }
+            // Remove bonus if not on illuminated tile
+            else if (!isIlluminated && player.hasIlluminationBonus) {
+                player.attributes.attackValue -= 1;
+                player.attributes.defenseValue -= 1;
+                player.hasIlluminationBonus = false;
+            }
+        }
     }
 
     get initialPlayers(): number {

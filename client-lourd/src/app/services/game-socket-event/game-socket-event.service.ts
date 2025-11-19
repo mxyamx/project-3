@@ -24,6 +24,7 @@ import { SocketClientEventNames } from '@common/enums/socket-events-names';
 import { UrlPage } from '@common/enums/url-page';
 import * as dataForm from '@common/socket-data-forms';
 import { CurrentGameManagerService } from '../current-game-manager/current-game-manager.service';
+import { TorchIlluminationService } from '../torch-illumination/torch-illumination.service';
 
 @Injectable({
     providedIn: 'root',
@@ -38,6 +39,7 @@ export class GameSocketEventService {
     private gameInterfaceService: GameInterfaceService = inject(GameInterfaceService);
     private statisticsService: StatisticsManagerService = inject(StatisticsManagerService);
     private currentGamesService: CurrentGameManagerService = inject(CurrentGameManagerService);
+    private torchIlluminationService: TorchIlluminationService = inject(TorchIlluminationService);
     private limitOfItems: number = MAXIMUM_AMOUNT_OF_ITEM;
     private gameEventService: GameEventService = inject(GameEventService);
     gameEnding: boolean = false;
@@ -274,6 +276,10 @@ export class GameSocketEventService {
             this.gameSessionManager.updateBoardGame(data.boardGame);
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
 
+            // Refresh illumination using the data we just received
+            this.torchIlluminationService.updateBoardIllumination(data.boardGame.tiles, data.listOfPlayers);
+            this.gameSessionManager.updateBoardGame(data.boardGame); // This triggers the UI update
+
             this.gameSessionManager.updateCanPickUpItem(true);
 
             if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
@@ -311,6 +317,10 @@ export class GameSocketEventService {
             this.gameSessionManager.updateBoardGame(data.boardGame);
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
 
+            // Refresh illumination using the data we just received
+            this.torchIlluminationService.updateBoardIllumination(data.boardGame.tiles, data.listOfPlayers);
+            this.gameSessionManager.updateBoardGame(data.boardGame); // This triggers the UI update
+
             this.gameSessionManager.updateCanDropItem(true);
 
             if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
@@ -329,7 +339,6 @@ export class GameSocketEventService {
             }
         });
     }
-
     private checkInventoryLimit() {
         const inventory = this.gameSessionManager.chosenPlayer().inventory;
         if (inventory && inventory.length >= this.limitOfItems) {
