@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/member-ordering */
+/* eslint-disable no-console */
 /* eslint-disable max-lines */
 import { GameClockManager } from '@app/classes/game-clock-manager/game-clock-manager';
 import { GameSession } from '@app/classes/game-session/game-session';
@@ -44,7 +46,7 @@ export class GameSessionController {
         private gameSession: GameSession,
         private sio: io.Server,
         private clockManager: GameClockManager,
-        private fightSubController: FightSubController,
+        private fightSubController: FightSubController | null,
         private movementSubController: MovementSubController,
         private gameService: CurrentGamesService,
     ) {
@@ -68,6 +70,10 @@ export class GameSessionController {
 
     set playerMoving(newValue: boolean) {
         this.isPlayerMoving = newValue;
+    }
+
+    setFightSubController(controller: FightSubController): void {
+        this.fightSubController = controller;
     }
 
     handleCommand(socket: io.Socket): void {
@@ -178,7 +184,8 @@ export class GameSessionController {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
             const remainingPlayers = this.gameSession.listOfPlayers.getValues();
             const winner = remainingPlayers.length === 1 ? remainingPlayers[0] : undefined;
-            this.endGame(winner);
+            console.log('Not enough players to continue the game. Ending game.');
+            await this.endGame(winner);
         }
     }
 
@@ -367,11 +374,35 @@ export class GameSessionController {
         this.fightSubController.endFight();
     }
 
-    private async endGame(winner?: Player): Promise<void> {
-        // TODO I THINK I WILL SEND THE STATS HERE!
+    async endGame(winner?: Player): Promise<void> {
+        console.log('Game ended. END GAME WAS CALLED. with the following winner ', winner ? JSON.stringify(winner, null, 2) : 'No winner');
         this.gameSession.endGame();
         this.gameService.setGameEnded(this.roomCode);
         this.clockManager.stopClock();
+
+        console.log('Game ended. Preparing to send end game data.');
+        console.log('Winner:', JSON.stringify(winner, null, 2));
+
+        // Get game mode
+        const gameMode = this.gameSession.board.gameMode;
+
+        // Calculate game duration
+        const globalStats = this.gameSession.statisticsManager.displayedGlobalStatistics;
+        const durationMs = Math.max(0, globalStats.endTime - globalStats.startTime);
+
+        // Update game duration for all human players (with mode tracking)
+        const usersService = Container.get(UsersService);
+        const players = this.gameSession.listOfPlayers.getValues().filter((p) => !p.virtualPlayer);
+
+        for (const p of players) {
+            await usersService.addGameDurationForMode(p.userId, durationMs, gameMode);
+        }
+
+        // Increment victory for winner (with mode tracking)
+        if (winner && !winner.virtualPlayer) {
+            console.log('Incrementing victory for user:', winner.userId, 'Mode:', gameMode);
+            await usersService.incrementVictoryForMode(winner.userId, gameMode);
+        }
 
         // Distribute prizes
         if (this.gameSession.board.gameMode === GameMode.Normal && winner) {
@@ -397,7 +428,6 @@ export class GameSessionController {
         this.sio.to(this.roomCode).emit(SocketClientEventNames.EndGame, ans);
     }
 
-    // TODO MIGHT USE THIS TO INFORM THE OTHER PLAYERS
     private updateGame(): void {
         if (this.gameOver()) return;
         const ans: dataForm.UpdateGamedRes = {
@@ -434,7 +464,7 @@ export class GameSessionController {
         this.endFight();
         if (this.gameSession.getPlayerAmountOfVic(winner) >= MAX_AMOUNT_OF_VICTORIES && this.gameSession.board.gameMode === GameMode.Normal) {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
-            this.endGame(winner);
+            await this.endGame(winner);
         }
         this.fightLoserName = undefined;
         this.fightWinnerName = undefined;
@@ -481,9 +511,10 @@ export class GameSessionController {
     }
 
     private async distributePrizesForCTF(winningTeam: CtfTeam): Promise<void> {
+        console.log('Distributing prizes for CTF winning team:', winningTeam);
         const prizePoolService = Container.get(PrizePoolService);
         const game = await this.gameService.getGame(this.roomCode);
-        if (!game || game.entryPrice === 0) return;
+        if (!game) return;
 
         const activePlayers = this.gameSession.getActivePlayers();
         const humanPlayers = activePlayers.filter((p) => !p.virtualPlayer);
@@ -492,8 +523,23 @@ export class GameSessionController {
         const winningTeamPlayers = humanPlayers.filter((p) => p.ctfTeam === winningTeam && !this.gameSession.hasPlayerAbandoned(p.userId));
         const losingTeamPlayers = humanPlayers.filter((p) => p.ctfTeam !== winningTeam && !this.gameSession.hasPlayerAbandoned(p.userId));
 
+        console.log(
+            'Winning team players:',
+            winningTeamPlayers.map((p) => p.name),
+        );
+        console.log(
+            'Losing team players:',
+            losingTeamPlayers.map((p) => p.name),
+        );
         // If no human players remain, no prizes to distribute
         if (winningTeamPlayers.length === 0) return;
+
+        // Increment victories for all winning team members
+        const usersService = Container.get(UsersService);
+        for (const player of winningTeamPlayers) {
+            console.log('Incrementing CTF victory for user:', player.userId);
+            await usersService.incrementVictoryForMode(player.userId, GameMode.CTF);
+        }
 
         const distribution = prizePoolService.calculatePrizeDistribution(
             game.entryPrice,
@@ -520,7 +566,6 @@ export class GameSessionController {
             const updatedUser = { ...user, money: user.money + amount };
             await usersService.updateUser(updatedUser);
         } catch (error) {
-            // eslint-disable-next-line no-console
             console.error(`Failed to update money for user ${userId}:`, error);
         }
     }

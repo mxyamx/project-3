@@ -34,7 +34,7 @@ export class ProfilePageComponent {
         return this.userSig();
     }
 
-    activeTab = ActiveTab.Socials;
+    activeTab = ActiveTab.Statistics;
 
     PRESET_AVATARS: string[] = [
         'assets/profiles/bear-modified.png',
@@ -68,6 +68,38 @@ export class ProfilePageComponent {
         const purchasedAssets = purchasedIds.map((id) => assetFromId(id)).filter((x): x is string => !!x);
         const set = new Set<string>([...this.PRESET_AVATARS, ...purchasedAssets]);
         this.ALL_AVATARS.set([...set]);
+    }
+
+    // ========= Statistics Helpers =========
+    get totalVictories(): number {
+        return this.user.statistics?.victoryAmount ?? 0;
+    }
+
+    get normalVictories(): number {
+        return this.user.statistics?.victoriesNormal ?? 0;
+    }
+
+    get ctfVictories(): number {
+        return this.user.statistics?.victoriesCTF ?? 0;
+    }
+
+    get totalGamesPlayed(): number {
+        return this.user.statistics?.gamesPlayed ?? 0;
+    }
+
+    get normalGamesPlayed(): number {
+        return this.user.statistics?.gamesPlayedNormal ?? 0;
+    }
+
+    get ctfGamesPlayed(): number {
+        return this.user.statistics?.gamesPlayedCTF ?? 0;
+    }
+
+    get averageGameTimeSeconds(): number {
+        const stats = this.user?.statistics;
+        if (!stats || !stats.gamesPlayed) return 0;
+
+        return (stats.totalGameDuration ?? 0) / stats.gamesPlayed / 1000;
     }
 
     // ========= Navigation =========

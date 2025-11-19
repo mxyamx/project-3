@@ -19,6 +19,7 @@ export interface User {
     purchasedSounds?: string[];
     gameActivity?: GameActivityStatus;
     currentGameId?: string;
+    selectedSound?: string;
 }
 
 export interface UserStatusInfo {

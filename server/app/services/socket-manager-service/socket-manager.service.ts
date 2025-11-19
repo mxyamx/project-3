@@ -58,6 +58,7 @@ export class SocketManager {
     private socketGameCommunication: SocketGameCommunication;
     private boardGameService: BoardGameService;
     private refundedGames = new Set<string>();
+    private preCurrentGames = new Set<string>();
 
     constructor(
         server: http.Server,
@@ -134,7 +135,9 @@ export class SocketManager {
                     }
 
                     game.adminId = socket.id;
+
                     const createdGame = await this.gameService.createGame(game);
+                    this.preCurrentGames.add(createdGame.id);
                     this.gameScheduler.createGame(createdGame);
                     socket.join(createdGame.id);
                     this.vpManagers.set(createdGame.id, new VirtualPlayerManager());
@@ -200,18 +203,25 @@ export class SocketManager {
                 callback(this.avatarContainer.getSelectedAvatars(gameId));
             });
 
-            socket.on('join-room', async (gameId: string, callback) => {
-                const game = await this.gameService.getGame(gameId);
+            socket.on('join-room', async (data: { gameId: string; isVirtual: boolean }, callback) => {
+                const game = await this.gameService.getGame(data.gameId);
                 if (!game || game.phase === CurrentGamePhase.Ended) {
                     const response: JoinGameAck = { codeError: true, limitError: false, lockedError: false };
                     callback(response);
                     return;
                 }
 
+                if (data.isVirtual) {
+                    socket.join(data.gameId);
+                    this.sio.to(data.gameId).emit('avatar-room-joined');
+                    callback({ game, codeError: false, limitError: false, lockedError: false });
+                    return;
+                }
+
                 const userId = this.userSessionManager.getFirebaseIdBySocketId(socket.id);
 
                 if (userId) {
-                    const joinCheck = await this.gameService.canUserJoinGame(gameId, userId, (socketId) =>
+                    const joinCheck = await this.gameService.canUserJoinGame(data.gameId, userId, (socketId) =>
                         this.userSessionManager.getFirebaseIdBySocketId(socketId),
                     );
                     if (!joinCheck.canJoin) {
@@ -251,9 +261,11 @@ export class SocketManager {
                     callback(response);
                     return;
                 }
-
-                socket.join(gameId);
-                this.sio.to(gameId).emit('avatar-room-joined');
+                console.log(`socket join room ${socket.id}`);
+                socket.join(data.gameId);
+                const rooms: Set<string> = socket.rooms;
+                rooms.forEach((r) => console.log(r));
+                this.sio.to(data.gameId).emit('avatar-room-joined');
                 callback({ game, codeError: false, limitError: false, lockedError: false });
             });
 
@@ -265,6 +277,9 @@ export class SocketManager {
                     const response: JoinGameAck = { codeError: true, limitError: false, lockedError: false };
                     callback(response);
                     return;
+                }
+                if (game.adminId === socket.id && this.preCurrentGames.has(gameId)) {
+                    this.preCurrentGames.delete(gameId);
                 }
 
                 const userId = this.userSessionManager.getFirebaseIdBySocketId(socket.id);
@@ -420,8 +435,15 @@ export class SocketManager {
 
             socket.on('delete-game', async (gameId: string) => {
                 const game = await this.gameService.getGame(gameId);
+
                 if (!game) {
                     return;
+                }
+
+                if (this.preCurrentGames.has(gameId) && socket.id === game.adminId) {
+                    const userId = this.userSessionManager.getFirebaseIdBySocketId(socket.id);
+                    this.refundPlayer(userId, game.entryPrice);
+                    this.preCurrentGames.delete(gameId);
                 }
                 this.cancelWaitingRoom(game, 'admin-left-waiting');
             });
@@ -434,7 +456,6 @@ export class SocketManager {
 
                 const socketId = socket.id;
                 await this.purgeChatHistoryIfRoomEmpty(socketId, roomsWithSize);
-                // await this.purgeCurrentGames(socketId, roomsWithSize);
             });
 
             socket.on('leave-active-game', async (data: { gameId: string }) => {
@@ -455,6 +476,12 @@ export class SocketManager {
                 for (const game of games) {
                     this.avatarContainer.releaseBySocket(game.id, socket.id);
                     this.sio.to(game.id).emit('avatar-list-updated', this.avatarContainer.getSelectedAvatars(game.id));
+
+                    if (this.preCurrentGames.has(game.id) && game.phase === CurrentGamePhase.Waiting && socket.id === game.adminId) {
+                        const userId = this.userSessionManager.getFirebaseIdBySocketId(socket.id);
+                        this.refundPlayer(userId, game.entryPrice);
+                        this.preCurrentGames.delete(game.id);
+                    }
 
                     if (game.players.length === 0 && game.adminId === socket.id && game.phase === CurrentGamePhase.Waiting) {
                         this.cancelWaitingRoom(game, 'admin-left-waiting');
