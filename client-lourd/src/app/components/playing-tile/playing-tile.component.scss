@@ -72,3 +72,77 @@
 .main-area:hover .tooltip {
     opacity: 1;
 }
+
+// Teleporter visual styling
+.teleporter-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.3;
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.main-area:hover .teleporter-overlay {
+    opacity: 0.5;
+}
+
+.teleporter-id {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2em;
+    font-weight: bold;
+    text-shadow:
+        -2px -2px 0 #000,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000,
+        0 0 8px rgba(0, 0, 0, 0.8);
+    z-index: 10; // Higher than player and item elements
+    pointer-events: none;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.teleporter-border {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+    border: 3px solid;
+    border-radius: 4px;
+    z-index: 3;
+    pointer-events: none;
+    box-shadow:
+        inset 0 0 10px rgba(255, 255, 255, 0.5),
+        0 0 10px currentColor;
+    animation: glow 2s ease-in-out infinite;
+}
+
+// Animations
+@keyframes pulse {
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+@keyframes glow {
+    0%,
+    100% {
+        opacity: 1;
+        filter: brightness(1);
+    }
+    50% {
+        opacity: 0.8;
+        filter: brightness(1.3);
+    }
+}

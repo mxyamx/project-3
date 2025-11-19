@@ -3,6 +3,7 @@ import { PlayerElementComponent } from '@app/components/player-element/player-el
 import { PlayingItemComponent } from '@app/components/playing-item/playing-item.component';
 import { FROM_TILE_TYPE_TO_IMAGE } from '@app/constants/objects-constants';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
+import { GameplayTeleportationHelperService } from '@app/services/gameplay-teleportation-helper/gameplay-teleportation-helper.service';
 import { TileType } from '@common/enums/tile-type';
 import { Position } from '@common/position';
 import { Tile } from '@common/tile';
@@ -21,6 +22,21 @@ export class PlayingTileComponent {
     @Input() yPosition: number;
     private imageHashMap: { [key in TileType]: string } = FROM_TILE_TYPE_TO_IMAGE;
     private gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
+    private teleportHelper: GameplayTeleportationHelperService = inject(GameplayTeleportationHelperService);
+
+    getTeleporterPairNumber(): string | null {
+        if (this.tile.type === TileType.Teleportation && this.tile.teleportPairId) {
+            return this.teleportHelper.getPairNumber(this.tile.teleportPairId);
+        }
+        return null;
+    }
+
+    getTeleporterColor(): string {
+        if (this.tile.type === TileType.Teleportation && this.tile.teleportPairId) {
+            return this.teleportHelper.getPairColor(this.tile.teleportPairId);
+        }
+        return '#FFFFFF';
+    }
 
     getTileImage(tile: Tile): string {
         if (tile.type === TileType.Door) {

@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Signal } from '@angular/core';
+import { Component, effect, inject, Signal } from '@angular/core';
 import { PlayingBoardCanvasComponent } from '@app/components/playing-board-canvas/playing-board-canvas.component';
 import { PlayingTileComponent } from '@app/components/playing-tile/playing-tile.component';
 import { FROM_ITEM_NAME_TO_VP_PREFERENCE, FROM_ITEM_TO_IMAGE_ON_BOARD, RIGHT_CLICK } from '@app/constants/objects-constants';
 import { BoardGameManagerService } from '@app/services/board-game-manager/board-game-manager.service';
 import { CanvasManagerService } from '@app/services/canvas-manager/canvas-manager.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
+import { GameplayTeleportationHelperService } from '@app/services/gameplay-teleportation-helper/gameplay-teleportation-helper.service';
 import { restrictEvent } from '@app/utils/functions/dom-related-functions';
 import { BoardGame } from '@common/board-game';
 import { ActionType } from '@common/enums/action-type';
@@ -34,10 +35,17 @@ export class PlayingBoardComponent {
     private boardManager: BoardGameManagerService = inject(BoardGameManagerService);
     private gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     private canvasManager: CanvasManagerService = inject(CanvasManagerService);
+    private teleportHelper: GameplayTeleportationHelperService = inject(GameplayTeleportationHelperService);
     private itemImageCorrespondance: { [key: string]: string } = FROM_ITEM_TO_IMAGE_ON_BOARD;
 
     constructor() {
         this.boardgame = this.boardManager.playingBoardGame.asReadonly();
+        effect(() => {
+            const board = this.boardgame();
+            if (board && board.tiles) {
+                this.teleportHelper.initializeFromTiles(board.tiles);
+            }
+        });
     }
 
     get imageCorrespondance(): { [key: string]: string } {
