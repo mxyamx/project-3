@@ -22,6 +22,7 @@ import { ItemName } from '@common/enums/item-name';
 import { PlayerState } from '@common/enums/player-state';
 import { SocketClientEventNames } from '@common/enums/socket-events-names';
 import { UrlPage } from '@common/enums/url-page';
+import { Player } from '@common/player';
 import * as dataForm from '@common/socket-data-forms';
 import { CurrentGameManagerService } from '../current-game-manager/current-game-manager.service';
 import { TorchIlluminationService } from '../torch-illumination/torch-illumination.service';
@@ -43,6 +44,9 @@ export class GameSocketEventService {
     private limitOfItems: number = MAXIMUM_AMOUNT_OF_ITEM;
     private gameEventService: GameEventService = inject(GameEventService);
     gameEnding: boolean = false;
+
+    private previousPlayerIds: string[] = [];
+    private previousPlayers: Player[] = [];
 
     configureBaseSocket(router: Router): void {
         if (this.socketManager.isSocketAlive()) {
@@ -196,7 +200,6 @@ export class GameSocketEventService {
             }, ENDGAME_COOL_DOWN_MSEC);
         });
     }
-
     private handleUpdateGame(): void {
         this.socketManager.on(SocketClientEventNames.UpdateGame, (data: dataForm.UpdateGamedRes) => {
             if (!data.successful) {
@@ -210,12 +213,37 @@ export class GameSocketEventService {
             if (this.gameSessionManager.playerState() === PlayerState.WaitingForAction) {
                 this.gameSessionManager.changeState(PlayerState.WaitingForAction);
             }
-            if (this.gameSessionManager.listOfPlayers.length !== this.gameEventService.numberOfPlayersInit) {
-                this.gameEventService.showLogAbandonNotification(data.activePlayer);
+
+            // FIX: Properly detect when a player has actually left
+            // Only show abandon notification if a player count decreased
+            const currentPlayerIds = data.listOfPlayers.map((p) => p.userId);
+
+            // Initialize previousPlayerIds on first call
+            if (this.previousPlayerIds.length === 0) {
+                this.previousPlayerIds = currentPlayerIds;
+                this.previousPlayers = data.listOfPlayers;
+                return;
             }
+
+            // Check if a player actually left (player count decreased)
+            if (currentPlayerIds.length < this.previousPlayerIds.length) {
+                // Find which player left
+                const leftPlayerId = this.previousPlayerIds.find((id) => !currentPlayerIds.includes(id));
+
+                if (leftPlayerId) {
+                    const leftPlayer = this.previousPlayers.find((p) => p.userId === leftPlayerId);
+
+                    if (leftPlayer) {
+                        this.gameEventService.showLogAbandonNotification(leftPlayer);
+                    }
+                }
+            }
+
+            // Update previous state for next comparison
+            this.previousPlayerIds = currentPlayerIds;
+            this.previousPlayers = [...data.listOfPlayers];
         });
     }
-
     private handleEndFightNotification(): void {
         this.socketManager.on(SocketClientEventNames.ShowEndFightNotification, (data: dataForm.endFightNotification) => {
             if (!data.successful) {

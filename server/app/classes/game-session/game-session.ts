@@ -196,10 +196,10 @@ export class GameSession {
         this.updateIllumination();
         this.updatePlayerBonuses();
     }
-
     useTeleporter(playerPosition: Position): { success: boolean; message?: string } {
         const tile = this.boardGame.tiles[playerPosition.x][playerPosition.y];
 
+        // Validate the teleportation action
         const validation = TeleportationDataHelper.validateTeleportAction(playerPosition, tile, this.boardGame.tiles);
 
         if (!validation.isValid) {
@@ -211,20 +211,36 @@ export class GameSession {
             return { success: false, message: 'No player at position' };
         }
 
+        // Get the target position (validated above)
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const targetPosition = validation.targetPosition!;
+
+        // Clear player from current tile
         this.boardGame.tiles[playerPosition.x][playerPosition.y].containedPlayer = undefined;
+
+        // Place player at target tile
         this.boardGame.tiles[targetPosition.x][targetPosition.y].containedPlayer = player;
+
+        // Update player's position
         player.position = targetPosition;
 
-        // Explicitly update active player position if this is the active player
-        if (this.activePlayer.name === player.name) {
+        // Update active player if this is the active player
+        if (this.activePlayer.userId === player.userId) {
             this.activePlayer.position = targetPosition;
+            // Deduct speed cost for using teleporter
+            this.activePlayer.attributes.speedValue -= 1;
         }
+
+        // Update statistics
+        this.statisticsManager.updateTilePercentage(targetPosition);
+        this.statisticsManager.updatePlayerTilePercentage(player.userId, targetPosition);
+
+        // Update illumination and bonuses
+        this.updateIllumination();
+        this.updatePlayerBonuses();
 
         return { success: true };
     }
-
     changeActivePlayer(): void {
         // Remove illumination bonuses before resetting
         for (const player of this.players.getValues()) {

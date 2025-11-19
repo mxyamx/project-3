@@ -387,11 +387,13 @@ export class GameSessionController {
         try {
             const activePlayer = this.gameSession.activePlayerInstance;
 
+            // Check if it's the player's turn
             if (activePlayer.socketId !== socket.id) {
                 sendError('Not your turn', this.sio, this.roomCode);
                 return;
             }
 
+            // Execute teleportation (this moves the player AND updates their speed)
             const result = this.gameSession.useTeleporter(position);
 
             if (!result.success) {
@@ -399,22 +401,30 @@ export class GameSessionController {
                 return;
             }
 
-            this.gameSession.statisticsManager.updatePlayerTilePercentage(activePlayer.userId, activePlayer.position);
+            // Update statistics AFTER teleportation (using updated position)
+            this.gameSession.statisticsManager.updatePlayerTilePercentage(
+                this.gameSession.activePlayerInstance.userId,
+                this.gameSession.activePlayerInstance.position,
+            );
 
-            activePlayer.attributes.speedValue -= 1;
+            // Get FRESH references after teleportation
             const ans: dataForm.UpdateGamedRes = {
                 successful: true,
                 message: 'Teleport successful',
                 boardGame: this.gameSession.board,
-                activePlayer: this.gameSession.activePlayerInstance,
-                listOfPlayers: this.gameSession.listOfPlayers.getValues(),
+                activePlayer: this.gameSession.activePlayerInstance, // Fresh reference
+                listOfPlayers: this.gameSession.listOfPlayers.getValues(), // Fresh list
             };
+
+            // FIX: Only emit Teleport event, NOT both Teleport and UpdateGame
             this.sio.to(this.roomCode).emit(SocketClientEventNames.Teleport, ans);
 
-            this.sio.to(this.roomCode).emit(SocketClientEventNames.UpdateGame, ans);
-        } catch {
+            // REMOVED: this.sio.to(this.roomCode).emit(SocketClientEventNames.UpdateGame, ans);
+            // The double emission was causing the client to process teleportation twice
+        } catch (error) {
+            console.error('Error in useTeleporter:', error);
             const ans: dataForm.StandardRes = genErrorMessage();
-            this.sio.to(this.roomCode).emit(SocketClientEventNames.UpdateGame, ans);
+            this.sio.to(this.roomCode).emit(SocketClientEventNames.Teleport, ans);
             sendError(STANDARD_ERROR_MESSAGE, this.sio, this.roomCode);
         }
     }
