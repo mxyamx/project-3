@@ -1,4 +1,10 @@
-<div class="tile-element" (mousedown)="mouseDownOnTile($event)" (mouseenter)="mouseEnterTile()" (mouseup)="mouseUpOnTile()">
+<div
+    class="tile-element"
+    [ngClass]="{ 'trap-tile': tile.type === 'trap' }"
+    (mousedown)="mouseDownOnTile($event)"
+    (mouseenter)="mouseEnterTile()"
+    (mouseup)="mouseUpOnTile()"
+>
     <img [src]="getTileImage(tile)" alt="{{ tile.type }}" />
 
     <!-- Teleportation visual indicators -->

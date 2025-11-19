@@ -16,7 +16,8 @@
             "water": "eau",
             "ice": "glace",
             "grass": "gazon",
-            "teleportation": "téléportation"
+            "teleportation": "téléportation",
+            "trap": "piège"
         },
 
         "item": {

@@ -102,6 +102,7 @@ export const FROM_TILE_TYPE_TO_IMAGE: { [key in TileType]: string } = {
     [TileType.Ice]: 'assets/tiles/glace.png',
     [TileType.Grass]: 'assets/tiles/gazon.png',
     [TileType.Teleportation]: 'assets/tiles/teleportation.png',
+    [TileType.Trap]: 'assets/tiles/gazon.png',
 };
 
 export const FROM_ITEM_NAME_TO_TYPE: { [key in string]: ItemType } = {
@@ -145,6 +146,7 @@ export const FROM_TILE_TYPE_TO_DESCRIPTION: { [key in TileType]: string } = {
     [TileType.Ice]: 'ice',
     [TileType.Grass]: 'grass',
     [TileType.Teleportation]: 'teleportation',
+    [TileType.Trap]: 'trap',
 };
 
 export const NB_ITEM_SMALL_MAP = 2;

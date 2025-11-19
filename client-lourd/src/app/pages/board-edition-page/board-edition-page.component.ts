@@ -59,6 +59,11 @@ export class BoardEditionPageComponent implements OnInit {
             image: FROM_TILE_TYPE_TO_IMAGE[TileType.Teleportation],
             description: FROM_TILE_TYPE_TO_DESCRIPTION[TileType.Teleportation],
         },
+        {
+            type: TileType.Trap,
+            image: FROM_TILE_TYPE_TO_IMAGE[TileType.Trap],
+            description: FROM_TILE_TYPE_TO_DESCRIPTION[TileType.Trap],
+        },
     ];
 
     private tileApplicator: TileApplicatorService = inject(TileApplicatorService);

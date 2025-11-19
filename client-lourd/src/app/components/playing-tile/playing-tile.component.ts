@@ -1,3 +1,4 @@
+import { NgClass } from '@angular/common';
 import { Component, inject, Input } from '@angular/core';
 import { PlayerElementComponent } from '@app/components/player-element/player-element.component';
 import { PlayingItemComponent } from '@app/components/playing-item/playing-item.component';
@@ -11,7 +12,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-playing-tile',
-    imports: [PlayingItemComponent, PlayerElementComponent, TranslatePipe],
+    imports: [PlayingItemComponent, PlayerElementComponent, TranslatePipe, NgClass],
     templateUrl: './playing-tile.component.html',
     styleUrl: './playing-tile.component.scss',
 })

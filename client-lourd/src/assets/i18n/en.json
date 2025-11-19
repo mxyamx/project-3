@@ -17,7 +17,8 @@
             "water": "water",
             "ice": "ice",
             "grass": "grass",
-            "teleportation": "teleportation"
+            "teleportation": "teleportation",
+            "trap": "trap"
         },
         "item": {
             "name": {

@@ -1,3 +1,4 @@
+import { NgClass } from '@angular/common';
 import { Component, inject, Input } from '@angular/core';
 import { ItemElementComponent } from '@app/components/item-element/item-element.component';
 import { FROM_TILE_TYPE_TO_IMAGE } from '@app/constants/objects-constants';
@@ -15,7 +16,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-tile-element',
-    imports: [ItemElementComponent, TranslatePipe],
+    imports: [ItemElementComponent, TranslatePipe, NgClass],
     templateUrl: './tile-element.component.html',
     styleUrl: './tile-element.component.scss',
 })

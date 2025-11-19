@@ -5,4 +5,5 @@ export enum TileType {
     Ice = 'ice',
     Grass = 'grass',
     Teleportation = 'teleportation',
+    Trap = 'trap',
 }
