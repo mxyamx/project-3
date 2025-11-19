@@ -1,6 +1,9 @@
 <div
     class="tile-element"
-    [ngClass]="{ 'trap-tile': tile.type === 'trap' }"
+    [ngClass]="{
+        'trap-tile': tile.type === 'trap',
+        illuminated: tile.isIlluminated
+    }"
     (mousedown)="mouseDownOnTile($event)"
     (mouseenter)="mouseEnterTile()"
     (mouseup)="mouseUpOnTile()"
@@ -26,6 +29,7 @@
     <app-item-element
         class="item-element"
         [item]="tile.containedItem"
+        [tileType]="tile.type"
         (mousedown)="mouseDownOnItem($event, tile.containedItem)"
         [style.cursor]="this.itemApplicator.isActivated ? 'grabbing' : this.tileApplicator.isActivated ? 'crosshair' : 'grab'"
     ></app-item-element>

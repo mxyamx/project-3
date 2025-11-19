@@ -109,6 +109,12 @@ export class BoardEditionPageComponent implements OnInit {
         return this.boardgameManager;
     }
 
+    // ADD: Helper method to get item image (handles torch dynamic selection in follower)
+    getItemImageForFollower(itemName: string): string {
+        // For the mouse follower, torch always shows as lit since it's being carried
+        return this.itemImageCorrespondance[itemName];
+    }
+
     @HostListener('document:keydown.escape')
     onEscapePress(): void {
         // Handle new teleportation manager
@@ -249,6 +255,7 @@ export class BoardEditionPageComponent implements OnInit {
 
     reinitialize(): void {
         this.boardgameManager.updateDisplayedBoardGame(structuredClone(this.boardgameManager.loadedBoardGame()));
+        this.boardgameManager.refreshIllumination();
         this.tileApplicator.deactivate();
         this.itemApplicator.deactivate();
         // Reinitialize teleportation from reloaded board

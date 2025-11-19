@@ -30,7 +30,8 @@
                 "game-editor-2": "Retourneur de Temps",
                 "random-item": "Pierre de Résurrection",
                 "starting-point": "Point de Départ",
-                "flag": "Drapeau"
+                "flag": "Drapeau",
+                "torch": "Torche"
             },
             "type": {
                 "attribute-editor-1": "Modificateur d'attributs",
@@ -41,7 +42,8 @@
                 "game-editor-2": "Modificateur de jeu",
                 "random-item": "Aléatoire",
                 "starting-point": "C'est la position initiale de chaque joueur",
-                "flag": "Disponible uniquement en mode CTF"
+                "flag": "Disponible uniquement en mode CTF",
+                "torch": "Utilitaire"
             },
             "effect": {
                 "attribute-editor-1": "Donne +1 Vitesse et +1 Attaque",
@@ -52,7 +54,8 @@
                 "game-editor-2": "Donne 2 actions possibles par tour",
                 "random-item": "Non spécifique",
                 "starting-point": "",
-                "flag": "Ramenez-le à votre point de départ pour faire gagner votre équipe"
+                "flag": "Ramenez-le à votre point de départ pour faire gagner votre équipe",
+                "torch": "+1 aux attributs Attaque et Défense."
             }
         },
 

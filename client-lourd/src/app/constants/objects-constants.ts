@@ -33,6 +33,7 @@ export const ITEM_NAMES = {
     gameEditor2: ItemName.GameEditor2,
     randomItem: ItemName.RandomItem,
     startingPoint: ItemName.StartingPoint,
+    torch: ItemName.Torch,
     flag: ItemName.Flag,
 };
 
@@ -74,7 +75,13 @@ export const FROM_ITEM_TO_IMAGE: { [key: string]: string } = {
     [ItemName.GameEditor2]: 'assets/items/retourneurDeTemps.png',
     [ItemName.RandomItem]: 'assets/items/pierreDeResurrection.png',
     [ItemName.StartingPoint]: 'assets/items/startPoint.png',
+    [ItemName.Torch]: 'assets/items/torch_allume.png',
     [ItemName.Flag]: 'assets/items/flag.png',
+};
+
+export const TORCH_ASSETS = {
+    lit: 'assets/items/torch_allume.png',
+    extinguished: 'assets/items/torch_etein.png',
 };
 
 export const FROM_ITEM_TO_IMAGE_ON_BOARD: { [key: string]: string } = {
@@ -87,6 +94,7 @@ export const FROM_ITEM_TO_IMAGE_ON_BOARD: { [key: string]: string } = {
     [ItemName.RandomItem]: 'assets/items/pierreDeResurrectionTerrain.png',
     [ItemName.StartingPoint]: 'assets/items/startPoint.png',
     [ItemName.Flag]: 'assets/items/flagTerrain.png',
+    [ItemName.Torch]: 'assets/items/torch_allume.png',
 };
 
 export const FROM_BOARD_SIZE_TO_LABEL: { [key: string]: string } = {
@@ -114,6 +122,7 @@ export const FROM_ITEM_NAME_TO_TYPE: { [key in string]: ItemType } = {
     [ITEM_NAMES.gameEditor1]: ItemType.GameEditor,
     [ITEM_NAMES.gameEditor2]: ItemType.GameEditor,
     [ITEM_NAMES.randomItem]: ItemType.RandomItem,
+    [ITEM_NAMES.torch]: ItemType.Torch,
     [ITEM_NAMES.startingPoint]: ItemType.StartingPoint,
 };
 
@@ -126,6 +135,7 @@ export const FROM_ITEM_NAME_TO_DESCRIPTION: { [key in string]: string } = {
     [ITEM_NAMES.gameEditor2]: 'game-editor-2',
     [ITEM_NAMES.randomItem]: 'random-item',
     [ITEM_NAMES.startingPoint]: 'starting-point',
+    [ITEM_NAMES.torch]: 'torch',
     [ITEM_NAMES.flag]: 'flag',
 };
 
@@ -166,3 +176,23 @@ export const DEFAULT_BOARD: BoardGame = {
     itemInfos: [],
     ownerId: '',
 };
+
+/**
+ * Get the correct torch asset based on tile type
+ */
+export function getTorchImageForTile(tileType: TileType): string {
+    if (tileType === TileType.Water || tileType === TileType.Ice) {
+        return TORCH_ASSETS.extinguished;
+    }
+    return TORCH_ASSETS.lit;
+}
+
+/**
+ * Get item image for rendering on board (handles dynamic torch selection)
+ */
+export function getTorchImageOnBoard(itemName: string, tileType?: TileType): string {
+    if (itemName === ItemName.Torch && tileType) {
+        return getTorchImageForTile(tileType);
+    }
+    return FROM_ITEM_TO_IMAGE_ON_BOARD[itemName] || FROM_ITEM_TO_IMAGE[itemName];
+}

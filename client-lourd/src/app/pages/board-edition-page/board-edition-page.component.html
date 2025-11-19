@@ -137,14 +137,16 @@
                             }
                         </div>
                         }
+                        <!-- Mouse follower for dragging items -->
                         <div
                             class="mouse-follower"
                             [style.left]="mouseX + 'px'"
                             [style.top]="mouseY + 'px'"
                             [style.display]="this.itemApplicatorService.isActivated ? 'block' : 'none'"
                         >
+                            <!-- Torch always shows as lit when being carried/dragged -->
                             <img
-                                [src]="itemImage[this.itemApplicatorService.currentItemSelected.name]"
+                                [src]="getItemImageForFollower(this.itemApplicatorService.currentItemSelected.name)"
                                 [alt]="this.itemApplicatorService.currentItemSelected.name"
                             />
                         </div>

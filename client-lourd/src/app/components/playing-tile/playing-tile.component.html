@@ -6,8 +6,8 @@
     <div class="teleporter-overlay" [style.background-color]="getTeleporterColor()"></div>
     <div class="teleporter-border" [style.border-color]="getTeleporterColor()"></div>
     } @if((tile.containedItem && !tile.containedItem.disabled)||(tile.containedItem && this.tileIsStartingPosition())){
-    <app-playing-item class="item-element" [item]="tile.containedItem" (mousedown)="mouseDownOnItem($event)"></app-playing-item>}
-    @if(tile.containedPlayer){
+    <app-playing-item class="item-element" [tileType]="tile.type" [item]="tile.containedItem" (mousedown)="mouseDownOnItem($event)"></app-playing-item
+    >} @if(tile.containedPlayer){
     <app-player-element class="player-element" [player]="tile.containedPlayer" (mousedown)="mouseDownOnPlayer($event)"></app-player-element>
     } @if(tile.reachable){
     <div class="reachable-filter"></div>
