@@ -3,6 +3,7 @@ import { TrapPopupComponent } from '@app/components/trap-popup/trap-popup.compon
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { GameEventService } from '@app/services/game-event/game-event.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
+import { PlayerStateManagerService } from '@app/services/player-state-manager/player-state-manager.service';
 import { GameMode } from '@common/enums/game-mode';
 import { ItemType } from '@common/enums/item-type';
 import { PlayerState } from '@common/enums/player-state';
@@ -19,6 +20,7 @@ export class MovementEventsHandlerService {
     private gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     private socketManager: SocketClientService = inject(SocketClientService);
     private gameEventService: GameEventService = inject(GameEventService);
+    private playerStateManager: PlayerStateManagerService = inject(PlayerStateManagerService);
 
     configureBaseSocket(): void {
         this.handleMovePlayer();
@@ -55,9 +57,6 @@ export class MovementEventsHandlerService {
                     this.gameSessionManager.pickUpItem();
                 } else {
                     this.gameSessionManager.changeState(PlayerState.WaitingForAction);
-                    if (this.gameSessionManager.shouldChangeTurn()) {
-                        this.gameSessionManager.endTurn();
-                    }
                 }
             }
         });
@@ -69,71 +68,59 @@ export class MovementEventsHandlerService {
                 return;
             }
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
-
             this.gameSessionManager.updateBoardGame(data.boardGame);
+            this.gameSessionManager.updateChosenPlayer(data.activePlayer);
 
-            if (this.gameSessionManager.playerState() === PlayerState.OpeningDoor) {
-                this.gameSessionManager.updateChosenPlayer(data.activePlayer);
+            this.gameEventService.showLogToggleDoorNotification(data);
+
+            if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
                 this.gameSessionManager.changeState(PlayerState.WaitingForAction);
-                if (this.gameSessionManager.shouldChangeTurn()) {
-                    this.gameSessionManager.endTurn();
-                }
-                this.gameEventService.showLogToggleDoorNotification(data);
             }
-            this.gameSessionManager.updateCanToggleDoor(true);
         });
     }
+
     private handleTeleportPlayer(): void {
         this.socketManager.on(SocketClientEventNames.Teleport, (data: dataForm.TeleportPlayerRes) => {
             if (!data.successful) {
                 return;
             }
-
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
-
-            if (this.gameSessionManager.playerState() === PlayerState.Teleporting) {
-                this.gameSessionManager.updateChosenPlayer(data.activePlayer);
-            }
             this.gameSessionManager.updateBoardGame(data.boardGame);
+            this.gameSessionManager.updateChosenPlayer(data.activePlayer);
 
-            if (this.gameSessionManager.playerState() === PlayerState.Teleporting) {
+            if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
                 this.gameSessionManager.changeState(PlayerState.WaitingForAction);
-            }
-            this.gameSessionManager.updateCanTelePort(true);
-
-            if (this.ctfIsOver()) {
-                this.gameSessionManager.changeState(PlayerState.EndGame);
             }
         });
     }
 
     private ctfIsOver(): boolean {
-        if (this.gameSessionManager.gameMode !== GameMode.CTF) return false;
-        return (
-            this.activePlayerHasFlag() &&
-            JSON.stringify(this.gameSessionManager.activePlayer().position) === JSON.stringify(this.gameSessionManager.activePlayer().startPosition)
-        );
+        return this.gameSessionManager.gameMode === GameMode.CTF && this.activePlayerHasFlag() && this.isAtStartPosition();
     }
 
     private activePlayerHasFlag(): boolean {
-        const activePlayerInventory = this.gameSessionManager.activePlayer().inventory;
-        if (!activePlayerInventory) return false;
-
-        return activePlayerInventory.find((i: Item) => {
-            return i.type === ItemType.Flag;
-        })
-            ? true
-            : false;
+        return this.gameSessionManager.activePlayer()?.inventory?.some((item: Item) => item.type === ItemType.Flag) ?? false;
     }
+
+    private isAtStartPosition(): boolean {
+        const startPosition = this.gameSessionManager.activePlayer().startPosition;
+        const currentPosition = this.gameSessionManager.activePlayer().position;
+        return startPosition?.x === currentPosition?.x && startPosition?.y === currentPosition?.y;
+    }
+
     private handleTrapEncountered(): void {
         this.socketManager.on(SocketClientEventNames.TrapEncountered, (data: dataForm.TrapEncounteredData) => {
             if (!data.successful) return;
 
-            this.gameSessionManager.changeState(PlayerState.InteractingWithTrap);
+            // FIX #1: Only show popup for the active player
+            const isActivePlayer = this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name;
 
-            if (this.trapPopupComponent) {
-                // Changed from trapPopup
-                this.trapPopupComponent.showPopup(data.playerMovementPoints);
+            if (isActivePlayer) {
+                this.gameSessionManager.changeState(PlayerState.InteractingWithTrap);
+
+                if (this.trapPopupComponent) {
+                    this.trapPopupComponent.showPopup(data.playerMovementPoints);
+                }
             }
         });
     }
@@ -146,12 +133,19 @@ export class MovementEventsHandlerService {
             this.gameSessionManager.updateBoardGame(data.boardGame);
             this.gameSessionManager.updateChosenPlayer(data.activePlayer);
 
+            // FIX #2: Enhanced notification showing clear outcome
             this.gameEventService.showLogTrapNotification(data);
+
+            const isActivePlayer = this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name;
 
             if (data.turnEnded) {
                 this.gameSessionManager.changeState(PlayerState.WaitingForTurn);
-            } else {
+            } else if (isActivePlayer) {
+                // FIX #3: Force recalculation of reachable tiles with new movement points
                 this.gameSessionManager.changeState(PlayerState.WaitingForAction);
+
+                // Trigger state recalculation to update reachable tiles
+                this.playerStateManager.changeState(PlayerState.WaitingForAction, this.gameSessionManager.chosenPlayer());
             }
         });
     }

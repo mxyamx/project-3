@@ -91,7 +91,6 @@ export class MovementSubController {
                 message: 'Player landed on trap',
                 trapPosition: position,
                 playerMovementPoints: movementPoints,
-                gameCode: this.roomCode,
             };
 
             this.sio.to(this.roomCode).emit(SocketClientEventNames.TrapEncountered, ans);
@@ -99,11 +98,14 @@ export class MovementSubController {
         }
         return false;
     }
+    // movement-sub-controller.ts - Updated handleTrapChoice method
+
     handleTrapChoice(choice: dataForm.HandleTrapChoice): void {
         try {
             const activePlayer = this.gameSession.activePlayerInstance;
             let trapActivated = false;
             let turnEnded = false;
+            const avoided = choice.avoid; // Track if player avoided the trap
 
             if (choice.avoid) {
                 // Avoid trap - costs 3 movement points
@@ -128,6 +130,7 @@ export class MovementSubController {
                 message: 'Trap resolved',
                 trapActivated,
                 turnEnded,
+                avoided, // FIX #2: Add this field to show what player chose
                 boardGame: this.gameSession.board,
                 listOfPlayers: this.gameSession.listOfPlayers.getValues(),
                 activePlayer: this.gameSession.activePlayerInstance,

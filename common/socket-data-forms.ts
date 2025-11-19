@@ -257,6 +257,7 @@ export interface TrapEncounteredData extends StandardRes {
 
 export interface TrapResolvedData extends StandardRes {
     trapActivated: boolean;
+    avoided: boolean;
     turnEnded: boolean;
     boardGame: BoardGame;
     listOfPlayers: Player[];
