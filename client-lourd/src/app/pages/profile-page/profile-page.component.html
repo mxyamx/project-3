@@ -28,8 +28,12 @@
         </div>
 
         <div class="profile-actions">
-            <button class="button" (click)="editAccount()">{{ 'profil-page.modify' | translate }}</button>
-            <button class="button" (click)="showDeletePopup()">{{ 'profil-page.delete' | translate }}</button>
+            <button class="button" (click)="editAccount()">
+                {{ 'profil-page.modify' | translate }}
+            </button>
+            <button class="button" (click)="showDeletePopup()">
+                {{ 'profil-page.delete' | translate }}
+            </button>
         </div>
     </div>
 
@@ -48,8 +52,12 @@
         <div class="confirmation-bubble">
             <p>{{ 'profil-page.delete-account-modal' | translate }}</p>
             <div class="confirmation-buttons">
-                <button (click)="deleteAccount()">{{ 'general.button.yes' | translate }}</button>
-                <button (click)="hideDeletePopup()">{{ 'general.button.no' | translate }}</button>
+                <button (click)="deleteAccount()">
+                    {{ 'general.button.yes' | translate }}
+                </button>
+                <button (click)="hideDeletePopup()">
+                    {{ 'general.button.no' | translate }}
+                </button>
             </div>
         </div>
         }
@@ -58,10 +66,59 @@
             @switch (activeTab) { @case (ActiveTab.Socials) {
             <app-socials-page></app-socials-page>
             } @case (ActiveTab.Statistics) {
-            <p>{{ 'profil-page.victories' | translate }}: {{ user.statistics.victoryAmount ?? 0 }}</p>
-            <p>{{ 'profil-page.average-game-time' | translate }}: {{ averageGameTimeSeconds | number: '1.0-2' }} s</p>
-            <p>{{ 'profil-page.total-game-normal' | translate }}: {{ user.statistics.gamesPlayedNormal ?? 0 | number: '1.0-2' }}</p>
-            <p>{{ 'profil-page.total-game-ctf' | translate }}: {{ user.statistics.gamesPlayedCTF ?? 0 | number: '1.0-2' }}</p>
+            <div class="stats-wrapper">
+                <h3 class="stats-title">
+                    {{ 'profil-page.stats' | translate }}
+                </h3>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🏆</div>
+                        <div class="stat-text">
+                            <span class="stat-label">
+                                {{ 'profil-page.victories' | translate }}
+                            </span>
+                            <span class="stat-value">
+                                {{ user.statistics.victoryAmount ?? 0 }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-text">
+                            <span class="stat-label">
+                                {{ 'profil-page.average-game-time' | translate }}
+                            </span>
+                            <span class="stat-value"> {{ averageGameTimeSeconds | number: '1.0-2' }} s </span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">🌤️</div>
+                        <div class="stat-text">
+                            <span class="stat-label">
+                                {{ 'profil-page.total-game-normal' | translate }}
+                            </span>
+                            <span class="stat-value">
+                                {{ user.statistics.gamesPlayedNormal ?? 0 }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">⚔️</div>
+                        <div class="stat-text">
+                            <span class="stat-label">
+                                {{ 'profil-page.total-game-ctf' | translate }}
+                            </span>
+                            <span class="stat-value">
+                                {{ user.statistics.gamesPlayedCTF ?? 0 }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
             } }
         </div>
     </div>
@@ -76,17 +133,23 @@
 
             <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
                 <div class="form-row">
-                    <label for="username">{{ 'profil-page.edit-modal.username' | translate }}</label>
+                    <label for="username">
+                        {{ 'profil-page.edit-modal.username' | translate }}
+                    </label>
                     <input id="username" type="text" formControlName="username" />
                 </div>
 
                 <div class="form-row">
-                    <label for="email">{{ 'profil-page.edit-modal.email' | translate }}</label>
+                    <label for="email">
+                        {{ 'profil-page.edit-modal.email' | translate }}
+                    </label>
                     <input id="email" type="email" formControlName="email" />
                 </div>
 
                 <div class="form-row">
-                    <label>{{ 'profil-page.edit-modal.avatar' | translate }}</label>
+                    <label>
+                        {{ 'profil-page.edit-modal.avatar' | translate }}
+                    </label>
                     <div class="avatar-grid">
                         @for (avatar of ALL_AVATARS(); track $index) {
                         <div class="avatar-chip" [class.selected]="selectedAvatarIndex() === $index" (click)="chooseAvatar($index)">
