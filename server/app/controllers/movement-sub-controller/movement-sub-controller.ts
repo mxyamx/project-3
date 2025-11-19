@@ -93,7 +93,7 @@ export class MovementSubController {
                 playerMovementPoints: movementPoints,
             };
 
-            this.sio.to(this.roomCode).emit(SocketClientEventNames.TrapEncountered, ans);
+            this.sio.to(activePlayer.socketId).emit(SocketClientEventNames.TrapEncountered, ans);
             return true; // Indicate trap was found
         }
         return false;

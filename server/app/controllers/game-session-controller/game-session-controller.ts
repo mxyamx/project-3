@@ -147,6 +147,11 @@ export class GameSessionController {
         }
     }
 
+    handleTrapChoice(choice: dataForm.HandleTrapChoice): void {
+        if (this.gameOver()) return;
+        this.movementSubController.handleTrapChoice(choice);
+    }
+
     async removePlayer(player: Player): Promise<void> {
         if (this.gameSession.gameOver) return;
         if (!this.gameSession.playerIsInSession(player)) return;

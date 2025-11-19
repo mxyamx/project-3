@@ -189,6 +189,10 @@ export class GameScheduler {
             this.checkController(data.gameCode, socket);
             this.dropItem(data.player, data.item, data.gameCode);
         });
+        socket.on(SocketServerEventNames.HandleTrap, (data: dataForm.HandleTrapChoice) => {
+            this.checkController(data.gameCode, socket);
+            this.handleTrapChoice(data.gameCode, data);
+        });
         socket.on(SocketServerEventNames.GetActivePlayer, (data: dataForm.GetActivePlayerReq) => {
             this.checkController(data.gameCode, socket);
             this.getActivePlayer(data.gameCode);
@@ -319,6 +323,12 @@ export class GameScheduler {
         const controller: GameSessionController = this.gameMap.get(gameId);
         if (controller) {
             controller.dropItem(player, item);
+        }
+    }
+    private handleTrapChoice(gameId: string, choice: dataForm.HandleTrapChoice): void {
+        const controller: GameSessionController = this.gameMap.get(gameId);
+        if (controller) {
+            controller.handleTrapChoice(choice);
         }
     }
 }

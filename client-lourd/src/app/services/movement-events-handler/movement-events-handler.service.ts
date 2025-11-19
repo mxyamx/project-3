@@ -139,12 +139,14 @@ export class MovementEventsHandlerService {
             const isActivePlayer = this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name;
 
             if (data.turnEnded) {
-                this.gameSessionManager.changeState(PlayerState.WaitingForTurn);
+                if (isActivePlayer) {
+                    this.gameSessionManager.changeState(PlayerState.WaitingForAction);
+                    this.gameSessionManager.endTurn();
+                } else {
+                    this.gameSessionManager.changeState(PlayerState.WaitingForTurn);
+                }
             } else if (isActivePlayer) {
-                // FIX #3: Force recalculation of reachable tiles with new movement points
                 this.gameSessionManager.changeState(PlayerState.WaitingForAction);
-
-                // Trigger state recalculation to update reachable tiles
                 this.playerStateManager.changeState(PlayerState.WaitingForAction, this.gameSessionManager.chosenPlayer());
             }
         });
