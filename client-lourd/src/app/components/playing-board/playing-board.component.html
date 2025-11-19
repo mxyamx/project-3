@@ -1,5 +1,6 @@
 <div class="main-container" (contextmenu)="$event.preventDefault()">
     <canvas #lineCanvas class="line-canvas"> </canvas>
+    <app-trap-popup></app-trap-popup>
     <app-playing-board-canvas [canvasElement]="lineCanvas" class="canvas-component"></app-playing-board-canvas>
     @for(tileGroup of boardgame().tiles; track $index; let idx = $index) { @for(tile of tileGroup; track $index; let jdx = $index){
     <app-playing-tile

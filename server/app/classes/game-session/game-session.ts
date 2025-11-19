@@ -637,6 +637,7 @@ export class GameSession {
                 return 2;
             case TileType.Grass:
             case TileType.Teleportation:
+            case TileType.Trap:
                 return 1;
             case TileType.Door:
                 if (tile.doorState) return 1;

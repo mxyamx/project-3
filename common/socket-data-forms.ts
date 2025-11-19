@@ -43,6 +43,7 @@ export interface MovePlayer extends StandardRes {
     listOfPlayers: Player[];
     activePlayer: Player;
     isMovingToItem?: boolean;
+    hasTrap?: boolean;
 }
 
 export interface ChangeActivePlayer {
@@ -247,4 +248,21 @@ export interface GameEventLog {
 export interface CombatLog {
     gameId: string;
     playerName: string;
+}
+
+export interface TrapEncounteredData extends StandardRes {
+    trapPosition: Position;
+    playerMovementPoints: number;
+}
+
+export interface TrapResolvedData extends StandardRes {
+    trapActivated: boolean;
+    turnEnded: boolean;
+    boardGame: BoardGame;
+    listOfPlayers: Player[];
+    activePlayer: Player;
+}
+
+export interface HandleTrapChoice extends StandardReq {
+    avoid: boolean;
 }

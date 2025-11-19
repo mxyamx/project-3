@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { TrapPopupComponent } from '@app/components/trap-popup/trap-popup.component';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { GameEventService } from '@app/services/game-event/game-event.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
@@ -13,6 +14,8 @@ import * as dataForm from '@common/socket-data-forms';
     providedIn: 'root',
 })
 export class MovementEventsHandlerService {
+    trapPopupComponent?: TrapPopupComponent;
+
     private gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     private socketManager: SocketClientService = inject(SocketClientService);
     private gameEventService: GameEventService = inject(GameEventService);
@@ -22,6 +25,8 @@ export class MovementEventsHandlerService {
         this.handleMovementOver();
         this.handleToggleDoorState();
         this.handleTeleportPlayer();
+        this.handleTrapEncountered();
+        this.handleTrapResolved();
     }
 
     private handleMovePlayer(): void {
@@ -119,5 +124,35 @@ export class MovementEventsHandlerService {
         })
             ? true
             : false;
+    }
+    private handleTrapEncountered(): void {
+        this.socketManager.on(SocketClientEventNames.TrapEncountered, (data: dataForm.TrapEncounteredData) => {
+            if (!data.successful) return;
+
+            this.gameSessionManager.changeState(PlayerState.InteractingWithTrap);
+
+            if (this.trapPopupComponent) {
+                // Changed from trapPopup
+                this.trapPopupComponent.showPopup(data.playerMovementPoints);
+            }
+        });
+    }
+
+    private handleTrapResolved(): void {
+        this.socketManager.on(SocketClientEventNames.TrapResolved, (data: dataForm.TrapResolvedData) => {
+            if (!data.successful) return;
+
+            this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
+            this.gameSessionManager.updateBoardGame(data.boardGame);
+            this.gameSessionManager.updateChosenPlayer(data.activePlayer);
+
+            this.gameEventService.showLogTrapNotification(data);
+
+            if (data.turnEnded) {
+                this.gameSessionManager.changeState(PlayerState.WaitingForTurn);
+            } else {
+                this.gameSessionManager.changeState(PlayerState.WaitingForAction);
+            }
+        });
     }
 }

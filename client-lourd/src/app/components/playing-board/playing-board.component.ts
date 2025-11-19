@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject, Signal } from '@angular/core';
+import { Component, effect, inject, Signal, ViewChild } from '@angular/core';
 import { PlayingBoardCanvasComponent } from '@app/components/playing-board-canvas/playing-board-canvas.component';
 import { PlayingTileComponent } from '@app/components/playing-tile/playing-tile.component';
 import { FROM_ITEM_NAME_TO_VP_PREFERENCE, FROM_ITEM_TO_IMAGE_ON_BOARD, RIGHT_CLICK } from '@app/constants/objects-constants';
@@ -20,13 +20,16 @@ import { Position } from '@common/position';
 import { Tile } from '@common/tile';
 import { VirtualPlayer } from '@common/virtual-player';
 import { TranslatePipe } from '@ngx-translate/core';
+import { TrapPopupComponent } from '../trap-popup/trap-popup.component';
 @Component({
     selector: 'app-playing-board',
-    imports: [CommonModule, PlayingTileComponent, PlayingBoardCanvasComponent, TranslatePipe],
+    imports: [CommonModule, PlayingTileComponent, PlayingBoardCanvasComponent, TranslatePipe, TrapPopupComponent],
     templateUrl: './playing-board.component.html',
     styleUrl: './playing-board.component.scss',
 })
 export class PlayingBoardComponent {
+    @ViewChild(TrapPopupComponent) trapPopup?: TrapPopupComponent;
+
     boardgame: Signal<BoardGame>;
     selectedTile: Tile | undefined = { type: TileType.Grass };
     showInfoNotification: boolean = false;
@@ -162,6 +165,7 @@ export class PlayingBoardComponent {
                 return 2;
             case TileType.Grass:
             case TileType.Teleportation:
+            case TileType.Trap:
                 return 1;
             case TileType.Door:
                 if (tile.doorState) return 1;

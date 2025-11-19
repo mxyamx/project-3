@@ -19,6 +19,7 @@ import { genErrorMessage, sendError } from '@app/utils/functions/socket-error-fu
 import { CtfTeam } from '@common/enums/ctf-team';
 import { GameMode } from '@common/enums/game-mode';
 import { SocketClientEventNames, SocketServerEventNames } from '@common/enums/socket-events-names';
+import { TileType } from '@common/enums/tile-type';
 import { Item } from '@common/item';
 import { Player } from '@common/player';
 import { Position } from '@common/position';
@@ -216,17 +217,27 @@ export class GameSessionController {
         if (this.gameSession.gameOver) return;
         let index = 0;
         const positions = path;
+        let trapEncountered = false;
 
         const interval = setInterval(async () => {
             const itemIsBlocking = this.gameSession.validItemPresent(positions[index]) && index > 0;
-            if (index < positions.length - 1 && socket.connected && !itemIsBlocking && !this.gameSession.ctfIsOver()) {
+            if (index < positions.length - 1 && socket.connected && !itemIsBlocking && !this.gameSession.ctfIsOver() && !trapEncountered) {
                 this.movementSubController.movePlayer(positions[index], positions[index + 1], isMovingToItem);
+
+                // Check if this tile has a trap - if so, stop movement
+                const currentTile = this.gameSession.board.tiles[positions[index + 1].x][positions[index + 1].y];
+                if (currentTile.type === TileType.Trap) {
+                    trapEncountered = true;
+                }
+
                 this.playerMoving = true;
                 ++index;
             } else {
                 clearInterval(interval);
                 this.playerMoving = false;
-                this.endMovement();
+                if (!trapEncountered) {
+                    this.endMovement();
+                }
                 if (this.gameSession.ctfIsOver()) {
                     await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
                     this.winnerTeam = this.gameSession.activePlayerInstance.ctfTeam;

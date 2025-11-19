@@ -204,6 +204,21 @@ export class GameEventService {
         this.playerSocketService.emitLog(this.gameSessionManagerService.gameId(), gameEvent);
     }
 
+    showLogTrapNotification(data: dataForm.TrapResolvedData) {
+        const message = data.trapActivated
+            ? `${this.colorLogName(data.activePlayer.name)} a activé un piège et son tour est terminé!`
+            : `${this.colorLogName(data.activePlayer.name)} a traversé le piège avec succès`;
+
+        const gameEvent: GameEvent = {
+            message,
+            timestamp: new Date(),
+            type: GameEventType.Trap, // You'll need to add this to GameEventType enum
+            player: [data.activePlayer.name],
+        };
+
+        this.playerSocketService.emitLog(this.gameSessionManagerService.gameId(), gameEvent);
+    }
+
     setFilter(isFiltered: boolean, playerName: string) {
         this.isFiltered = isFiltered;
         this.playerName = playerName;

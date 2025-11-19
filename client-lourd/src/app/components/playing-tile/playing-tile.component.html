@@ -1,4 +1,4 @@
-<div class="main-area" [style.cursor]="tile.reachable ? 'pointer' : ''">
+<div class="main-area" [ngClass]="{ 'trap-tile': tile.type === 'trap' }" [style.cursor]="tile.reachable ? 'pointer' : ''">
     <img [src]="getTileImage(tile)" alt="{{ tile.type }}" />
 
     <!-- Teleportation visual indicators (without number) -->
