@@ -131,23 +131,22 @@ export class MovementEventsHandlerService {
 
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
             this.gameSessionManager.updateBoardGame(data.boardGame);
-            this.gameSessionManager.updateChosenPlayer(data.activePlayer);
-
-            // FIX #2: Enhanced notification showing clear outcome
-            this.gameEventService.showLogTrapNotification(data);
 
             const isActivePlayer = this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name;
 
-            if (data.turnEnded) {
-                if (isActivePlayer) {
-                    this.gameSessionManager.changeState(PlayerState.WaitingForAction);
-                    this.gameSessionManager.endTurn();
-                } else {
-                    this.gameSessionManager.changeState(PlayerState.WaitingForTurn);
-                }
-            } else if (isActivePlayer) {
+            this.gameEventService.showLogTrapNotification(data);
+
+            if (isActivePlayer) {
+                this.gameSessionManager.updateChosenPlayer(data.activePlayer);
                 this.gameSessionManager.changeState(PlayerState.WaitingForAction);
                 this.playerStateManager.changeState(PlayerState.WaitingForAction, this.gameSessionManager.chosenPlayer());
+
+                // Use the SAME pattern as all other actions
+                if (this.gameSessionManager.shouldChangeTurn()) {
+                    this.gameSessionManager.endTurn();
+                }
+            } else {
+                this.gameSessionManager.changeState(PlayerState.WaitingForTurn);
             }
         });
     }
