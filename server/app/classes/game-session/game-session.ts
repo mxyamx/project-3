@@ -225,6 +225,15 @@ export class GameSession {
     }
 
     changeActivePlayer(): void {
+        // Remove illumination bonuses before resetting
+        for (const player of this.players.getValues()) {
+            if (player.hasIlluminationBonus) {
+                player.attributes.attackValue -= 1;
+                player.attributes.defenseValue -= 1;
+            }
+            player.hasIlluminationBonus = false;
+        }
+
         this.resetSpeed(this.activePlayer);
         this.resetHealth(this.activePlayer);
         this.resetDefense(this.activePlayer);
@@ -235,6 +244,9 @@ export class GameSession {
 
         this.players.moveFirstToBack();
         this.activePlayer = this.players.getFirst();
+
+        this.updateIllumination();
+        this.updatePlayerBonuses();
     }
 
     startGame(): void {
