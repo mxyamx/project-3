@@ -31,6 +31,7 @@ export class ShoppingPageComponent {
     money = computed(() => this.user().money ?? 0);
     owned = computed(() => new Set(this.user().purchasedAvatars ?? []));
     ownedSfx = computed(() => new Set(this.user().purchasedSounds ?? []));
+    selectedSound = computed(() => this.user().selectedSound);
 
     constructor() {
         // Preload sounds so preview is instant
@@ -50,6 +51,22 @@ export class ShoppingPageComponent {
 
     goBack() {
         this.router.navigate(['/home']);
+    }
+
+    isEquippedSfx(s: SfxDef): boolean {
+        return this.selectedSound() === s.id;
+    }
+
+    async equipSfx(s: SfxDef) {
+        if (!this.isOwnedSfx(s)) return;
+
+        this.errorMsg.set('');
+        try {
+            this.userManager.setSelectedSound(s.id);
+            await this.httpUser.updateUser(this.userManager.getCurrentUser()).toPromise();
+        } catch (e: any) {
+            this.errorMsg.set(e?.error?.error || e?.message || "Erreur lors de l'équipement.");
+        }
     }
 
     async buy(item: AvatarDef) {
@@ -107,7 +124,6 @@ export class ShoppingPageComponent {
         const a = this.audioMap.get(s.id);
         if (a) a.pause();
     }
-
     async buySfx(s: SfxDef) {
         this.errorMsg.set('');
         if (this.isOwnedSfx(s)) return;
@@ -118,13 +134,28 @@ export class ShoppingPageComponent {
 
         this.buying.set(s.id);
         try {
+            // Get current user state
+            const currentUser = this.userManager.getCurrentUser();
+            const currentSounds = currentUser.purchasedSounds || [];
+
+            // Update money
             this.userManager.setMoney(this.money() - s.price);
-            const next = Array.from(this.ownedSfx());
-            next.push(s.id);
-            this.userManager.setPurchasedSounds(next);
+
+            // Add new sound to array
+            const updatedSounds = [...currentSounds, s.id];
+            this.userManager.setPurchasedSounds(updatedSounds);
+
+            // Auto-equip if first sound
+            if (updatedSounds.length === 1) {
+                this.userManager.setSelectedSound(s.id);
+            }
+
+            // Persist to database
             await this.httpUser.updateUser(this.userManager.getCurrentUser()).toPromise();
         } catch (e: any) {
-            this.errorMsg.set(e?.error?.error || e?.message || 'Erreur lors de l’achat.');
+            // Rollback on error
+            this.errorMsg.set(e?.error?.error || e?.message || "Erreur lors de l'achat.");
+            // TODO: reload user from server to reset state
         } finally {
             this.buying.set(null);
         }

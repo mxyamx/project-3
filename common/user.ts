@@ -16,6 +16,7 @@ export interface User {
     status: DeviceType;
     purchasedAvatars?: string[];
     purchasedSounds?: string[];
+    selectedSound?: string;
 }
 
 export interface UserDTO {

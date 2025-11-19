@@ -40,23 +40,30 @@ export class GameScheduler {
 
         const usersService = Container.get(UsersService);
 
+        const newMovementSubController: MovementSubController = new MovementSubController(newGameSession, game.id, this.sio);
+
+        // Create controller first without FightSubController
+        const newController: GameSessionController = new GameSessionController(
+            newGameSession,
+            this.sio,
+            newClockManager,
+            null, // Will be set after
+            newMovementSubController,
+            this.gameService,
+        );
+
+        // Now create FightSubController with controller reference
         const newFightSubController: FightSubController = new FightSubController(
             newClockManager,
             newGameSession,
             game.id,
             this.sio,
             usersService,
-            game.entryPrice,
+            newController, // Pass the controller
         );
-        const newMovementSubController: MovementSubController = new MovementSubController(newGameSession, game.id, this.sio);
-        const newController: GameSessionController = new GameSessionController(
-            newGameSession,
-            this.sio,
-            newClockManager,
-            newFightSubController,
-            newMovementSubController,
-            this.gameService,
-        );
+
+        // Set the fight controller on the game controller
+        newController.setFightSubController(newFightSubController);
 
         newController.gameId = game.id;
 
