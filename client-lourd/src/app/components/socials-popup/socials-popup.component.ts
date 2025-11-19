@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, EventEmitter, inject, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, computed, EventEmitter, inject, OnDestroy, OnInit, Output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FriendManagerService } from '@app/services/friend-manager/friend-manager.service';
 import { GameInvitation, GameInviteService } from '@app/services/game-invite/game-invite.service';
@@ -33,7 +33,8 @@ export class SocialsPopupComponent implements OnInit, OnDestroy {
     DeviceType = DeviceType;
     GameActivityStatus = GameActivityStatus;
 
-    gameInvites: GameInvitation[] = [];
+    gameInvites = signal<GameInvitation[]>([]);
+    isProcessingInvite = false;
 
     get friends() {
         return this.friendManagerService.friends();
@@ -48,7 +49,7 @@ export class SocialsPopupComponent implements OnInit, OnDestroy {
     friendCount = computed(() => this.friendManagerService.friends().length);
     pendingCount = computed(() => this.friendManagerService.pendingRequests().length);
     sentCount = computed(() => this.friendManagerService.sentRequests().length);
-    invitesCount = computed(() => this.gameInvites.length);
+    invitesCount = computed(() => this.gameInvites().length);
 
     searchQuery = '';
     searchResults: User[] = [];
@@ -79,9 +80,12 @@ export class SocialsPopupComponent implements OnInit, OnDestroy {
             this.friendStatuses = new Map(statuses);
         });
 
-        // 🔥 Listen to game invites
         this.inviteSubscription = this.gameInviteService.getPendingInvitations().subscribe((invites) => {
-            this.gameInvites = invites;
+            this.gameInvites.set(invites);
+        });
+
+        this.gameInviteService.getProcessingState().subscribe((processing) => {
+            this.isProcessingInvite = processing;
         });
     }
 
@@ -132,6 +136,14 @@ export class SocialsPopupComponent implements OnInit, OnDestroy {
 
     declineGameInvite(invite: GameInvitation) {
         this.gameInviteService.declineInvitation(invite);
+    }
+
+    getTimeAgo(timestamp: number): string {
+        const seconds = Math.floor((Date.now() - timestamp) / 1000);
+        if (seconds < 60) return 'just now';
+        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+        return `${Math.floor(seconds / 86400)}d ago`;
     }
 
     // ========== FRIEND SYSTEM ==========

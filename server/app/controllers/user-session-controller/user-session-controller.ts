@@ -174,7 +174,6 @@ export class UserSessionController {
             }
         });
 
-        // Handle game activity updates
         socket.on('update-game-activity', async (data: { gameActivity: GameActivityStatus; gameId?: string }) => {
             const firebaseId = socket.data.userId;
             if (!firebaseId) return;
@@ -190,7 +189,6 @@ export class UserSessionController {
             }
         });
 
-        // Handle game invitations
         socket.on('invite-to-game', async (data: { friendId: string; gameId: string }) => {
             const firebaseId = socket.data.userId;
             if (!firebaseId) return;
@@ -204,13 +202,11 @@ export class UserSessionController {
                     return;
                 }
 
-                // Check if they're friends
                 if (!user.friends?.includes(data.friendId)) {
                     socket.emit('invite-failed', { reason: 'Not friends' });
                     return;
                 }
 
-                // Send invitation to friend
                 const friendSocketId = this.userSessionManager.getSocketIdByFirebaseId(data.friendId);
                 if (friendSocketId) {
                     this.sio.to(friendSocketId).emit('game-invite-received', {
@@ -234,7 +230,6 @@ export class UserSessionController {
             try {
                 const user = await this.usersService.getUser(userId);
 
-                // Notify the inviter that their invitation was accepted
                 const inviterSocketId = this.userSessionManager.getSocketIdByFirebaseId(data.inviterId);
                 if (inviterSocketId && user) {
                     this.sio.to(inviterSocketId).emit('invite-accepted', {
@@ -244,8 +239,6 @@ export class UserSessionController {
                         gameId: data.gameId,
                     });
                 }
-
-                console.log(`User ${userId} accepted invitation to game ${data.gameId}`);
             } catch (error) {
                 console.error('Error handling invite acceptance:', error);
             }
@@ -258,7 +251,6 @@ export class UserSessionController {
             try {
                 const user = await this.usersService.getUser(userId);
 
-                // Notify the inviter that their invitation was declined
                 const inviterSocketId = this.userSessionManager.getSocketIdByFirebaseId(data.inviterId);
                 if (inviterSocketId && user) {
                     this.sio.to(inviterSocketId).emit('invite-declined', {
@@ -267,8 +259,6 @@ export class UserSessionController {
                         gameId: data.gameId,
                     });
                 }
-
-                console.log(`User ${userId} declined invitation to game ${data.gameId}`);
             } catch (error) {
                 console.error('Error handling invite decline:', error);
             }
@@ -300,7 +290,6 @@ export class UserSessionController {
             const user = await this.usersService.getUser(firebaseId);
             if (!user || !user.friends || user.friends.length === 0) return;
 
-            // Notify each friend
             for (const friendId of user.friends) {
                 const friendSocketId = this.userSessionManager.getSocketIdByFirebaseId(friendId);
                 if (friendSocketId) {

@@ -56,7 +56,6 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
 
     entryPrice: number = 25;
 
-    // Friend invitation popup
     showInviteFriendsPopup: boolean = false;
     private friendManagerService = inject(FriendManagerService);
     private userStatusService = inject(UserStatusService);
@@ -78,7 +77,6 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        // Set user status to in-game when entering waiting room
         this.gameId = this.currentGameManager.displayedCurrentGame().id;
         if (this.gameId) {
             this.userStatusService.updateMyGameActivity(GameActivityStatus.inGame, this.gameId);
@@ -131,22 +129,21 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
             }
         });
 
-        // Initialize friend list and status tracking
         this.friendManagerService.refresh();
         const friendIds = this.friendManagerService.friends().map((f) => f.id);
         if (friendIds.length > 0) {
             this.userStatusService.fetchUserStatuses(friendIds);
         }
 
-        // Subscribe to real-time status updates
         this.statusSubscription = this.userStatusService.getAllStatuses().subscribe((statuses) => {
             this.friendStatuses = new Map(statuses);
         });
     }
 
     ngOnDestroy(): void {
-        // Set user status back to idle when leaving waiting room
-        if (!this.isStartingGame) {
+        const shouldUpdateStatus = !this.isStartingGame;
+
+        if (shouldUpdateStatus) {
             this.userStatusService.updateMyGameActivity(GameActivityStatus.idle);
         }
 
@@ -215,6 +212,8 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     }
 
     leaveGame() {
+        this.userStatusService.updateMyGameActivity(GameActivityStatus.idle);
+
         if (this.isOrganizer()) {
             this.playerSocketService.emitAdminLeaving(this.currentGame.id);
         }
@@ -289,7 +288,6 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
         this.hideVirtualPlayerProfilePopup();
     }
 
-    // Friend invitation methods
     openInviteFriendsPopup() {
         this.showInviteFriendsPopup = true;
     }
@@ -301,7 +299,6 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     get availableFriends(): User[] {
         return this.friendManagerService.friends().filter((friend) => {
             const status = this.friendStatuses.get(friend.id);
-            // Only show online friends who are idle (not in another game)
             return status?.status !== DeviceType.offline && (!status?.gameActivity || status.gameActivity === GameActivityStatus.idle);
         });
     }
@@ -329,13 +326,10 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     inviteFriend(friend: User) {
         if (this.gameId) {
             this.userStatusService.inviteToGame(friend.id, this.gameId);
-            console.log(`Invited ${friend.username} to game ${this.gameId}`);
-            // You could show a temporary success message here
         }
     }
 
     private finalizeLeave() {
-        // Refresh user data to get updated balance from server
         this.refreshUserData();
         this.router.navigate(['/main-page']);
     }

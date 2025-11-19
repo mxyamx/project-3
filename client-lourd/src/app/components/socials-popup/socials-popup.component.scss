@@ -455,3 +455,43 @@ ul.user-list {
     align-items: center;
     justify-content: center;
 }
+
+.invite-item {
+    .user-info {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+
+        .invite-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            .name {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: #001d40;
+            }
+
+            .invite-message {
+                font-size: 0.9rem;
+                color: #555;
+            }
+
+            .time-ago {
+                font-size: 0.8rem;
+                color: #999;
+                font-style: italic;
+            }
+        }
+    }
+}
+
+.empty-state {
+    i.fa-inbox {
+        display: block;
+        font-size: 3rem;
+        margin-bottom: 10px;
+        opacity: 0.3;
+    }
+}

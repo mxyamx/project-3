@@ -39,7 +39,11 @@ export class GameInviteService {
 
     private setupInvitationListener(): void {
         this.socketService.on('game-invite-received', (data: GameInvitation) => {
-            console.log('🎮 Game invitation received:', data);
+
+            const currentUserId = this.userManagerService.getCurrentUser().id;
+            if (data.fromId === currentUserId) {
+                return;
+            }
 
             const invitation: GameInvitation = {
                 ...data,
@@ -48,7 +52,6 @@ export class GameInviteService {
 
             const current = this.pendingInvitations.value;
 
-            // Check if invitation already exists (avoid duplicates)
             if (!current.find((inv) => inv.gameId === invitation.gameId && inv.fromId === invitation.fromId)) {
                 this.pendingInvitations.next([invitation, ...current]);
                 this.hasNewInvitations.next(true);
@@ -57,12 +60,12 @@ export class GameInviteService {
 
         this.socketService.on('invite-sent', (data: { success: boolean }) => {
             if (data.success) {
-                console.log('✅ Invitation sent successfully');
+                console.log('Invitation sent successfully');
             }
         });
 
         this.socketService.on('invite-failed', (data: { reason: string }) => {
-            console.log('❌ Invitation failed:', data.reason);
+            console.log('Invitation failed:', data.reason);
         });
     }
 
@@ -91,22 +94,18 @@ export class GameInviteService {
     }
 
     acceptInvitation(invitation: GameInvitation): void {
-        console.log('✅ Accepting invitation to game:', invitation.gameId);
 
         this.processingInvitation.next(true);
         this.invitationError.next(null);
 
-        // Send acceptance to server
         this.socketService.send('accept-game-invite', {
             gameId: invitation.gameId,
             inviterId: invitation.fromId,
         });
 
-        // Use the same join game logic
         this.playerSocketService.emitJoinAvatarRoom(invitation.gameId, (response: JoinGameAck) => {
             this.processingInvitation.next(false);
 
-            // Handle all possible error cases
             if (response.notFriendError) {
                 this.invitationError.next('game-invite.errors.not-friend');
                 return;
@@ -147,7 +146,6 @@ export class GameInviteService {
                 return;
             }
 
-            // Success! Remove invitation and join the game
             this.removeInvitation(invitation);
             this.refreshUserData();
             this.currentGameManager.updateCurrentGame(response.game);
@@ -156,7 +154,6 @@ export class GameInviteService {
     }
 
     declineInvitation(invitation: GameInvitation): void {
-        console.log('❌ Declining invitation from:', invitation.from);
 
         this.socketService.send('decline-game-invite', {
             gameId: invitation.gameId,
@@ -187,6 +184,15 @@ export class GameInviteService {
                 this.userManagerService.setMoney(user.money);
             },
             error: (err) => console.error('Failed to refresh user data:', err),
+        });
+    }
+
+    getInvitationCountObservable(): Observable<number> {
+        return new Observable((observer) => {
+            const subscription = this.pendingInvitations.subscribe((invites) => {
+                observer.next(invites.length);
+            });
+            return () => subscription.unsubscribe();
         });
     }
 }
