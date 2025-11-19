@@ -55,15 +55,18 @@ export class ServerIlluminationHelper {
      */
     private illuminatePlayerTorches(tiles: Tile[][], players: Player[]): void {
         for (const player of players) {
-            // Check if player has torch in inventory
             const hasTorch = player.inventory?.some((item) => item.name === ItemName.Torch);
 
             if (hasTorch && player.position) {
                 const pos = player.position;
 
-                // Only illuminate the tile the player is standing on
+                // Check if player is on water or ice - if so, torch doesn't illuminate
                 if (this.isValidPosition(tiles, pos)) {
-                    tiles[pos.x][pos.y].isIlluminated = true;
+                    const tileType = tiles[pos.x][pos.y].type;
+                    // Only illuminate if NOT on water or ice
+                    if (tileType !== TileType.Water && tileType !== TileType.Ice) {
+                        tiles[pos.x][pos.y].isIlluminated = true;
+                    }
                 }
             }
         }

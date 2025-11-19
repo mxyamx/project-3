@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, effect, inject, Signal, ViewChild } from '@angular/core';
 import { PlayingBoardCanvasComponent } from '@app/components/playing-board-canvas/playing-board-canvas.component';
 import { PlayingTileComponent } from '@app/components/playing-tile/playing-tile.component';
-import { FROM_ITEM_NAME_TO_VP_PREFERENCE, FROM_ITEM_TO_IMAGE_ON_BOARD, RIGHT_CLICK } from '@app/constants/objects-constants';
+import { FROM_ITEM_NAME_TO_VP_PREFERENCE, FROM_ITEM_TO_IMAGE_ON_BOARD, RIGHT_CLICK, TORCH_ASSETS } from '@app/constants/objects-constants';
 import { BoardGameManagerService } from '@app/services/board-game-manager/board-game-manager.service';
 import { CanvasManagerService } from '@app/services/canvas-manager/canvas-manager.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
@@ -11,6 +11,7 @@ import { MovementEventsHandlerService } from '@app/services/movement-events-hand
 import { restrictEvent } from '@app/utils/functions/dom-related-functions';
 import { BoardGame } from '@common/board-game';
 import { ActionType } from '@common/enums/action-type';
+import { ItemName } from '@common/enums/item-name';
 import { PlayerState } from '@common/enums/player-state';
 import { TileType } from '@common/enums/tile-type';
 import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
@@ -157,6 +158,33 @@ export class PlayingBoardComponent implements AfterViewInit {
 
     contextMenuOnInfoPopUp(event: MouseEvent): void {
         if (event.button === RIGHT_CLICK) event.preventDefault();
+    }
+
+    getItemImage(itemName: string): string {
+        // Special handling for torch - check if player is on water/ice
+        if (itemName === ItemName.Torch) {
+            const player = this.gameSessionManager.chosenPlayer();
+            if (player && player.position) {
+                // Access tiles through boardGameManager
+                const tiles = this.boardManager.playingBoardGame().tiles;
+                const pos = player.position;
+
+                // Check if position is valid
+                if (pos.x >= 0 && pos.x < tiles.length && pos.y >= 0 && pos.y < tiles[0].length) {
+                    const tileType = tiles[pos.x][pos.y].type;
+
+                    // If player is on water or ice, show extinguished torch
+                    if (tileType === TileType.Water || tileType === TileType.Ice) {
+                        return TORCH_ASSETS.extinguished;
+                    }
+                }
+            }
+            // Otherwise show lit torch
+            return TORCH_ASSETS.lit;
+        }
+
+        // For all other items, use the standard mapping
+        return FROM_ITEM_TO_IMAGE_ON_BOARD[itemName];
     }
 
     protected isAggressive(player: Player): boolean {

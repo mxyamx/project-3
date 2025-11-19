@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /* eslint-disable @typescript-eslint/prefer-for-of */
 /* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable max-lines */
@@ -731,7 +732,11 @@ export class GameSession {
             if (hasTorch && player.position) {
                 const pos = player.position;
                 if (pos.x >= 0 && pos.x < tiles.length && pos.y >= 0 && pos.y < tiles[0].length) {
-                    tiles[pos.x][pos.y].isIlluminated = true;
+                    const tileType = tiles[pos.x][pos.y].type;
+                    // Only illuminate if NOT on water or ice
+                    if (tileType !== TileType.Water && tileType !== TileType.Ice) {
+                        tiles[pos.x][pos.y].isIlluminated = true;
+                    }
                 }
             }
         }

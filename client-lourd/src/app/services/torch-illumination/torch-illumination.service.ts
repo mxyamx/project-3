@@ -34,10 +34,14 @@ export class TorchIlluminationService {
         if (players) {
             for (const player of players) {
                 if (this.playerHasTorch(player) && player.position) {
-                    // Only illuminate the tile the player is on
+                    // Check if player is on water or ice - if so, torch doesn't illuminate
                     const pos = player.position;
                     if (this.isValidPosition(tiles, pos)) {
-                        tiles[pos.x][pos.y].isIlluminated = true;
+                        const tileType = tiles[pos.x][pos.y].type;
+                        // Only illuminate if NOT on water or ice
+                        if (tileType !== TileType.Water && tileType !== TileType.Ice) {
+                            tiles[pos.x][pos.y].isIlluminated = true;
+                        }
                     }
                 }
             }
