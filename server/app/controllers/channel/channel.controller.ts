@@ -1,3 +1,4 @@
+import { HttpException } from '@app/classes/http-exception/http.exception';
 import { AuthedRequest } from '@app/middlewares/auth.middleware';
 import { ChannelService } from '@app/services/channel/channel.service';
 import { Channel } from '@common/channel';
@@ -32,13 +33,22 @@ export class ChannelController {
                 const userId = req.user?.uid;
                 const payload: Channel = req.body;
                 if (!payload || !payload.name) {
-                    res.status(httpStatus.BAD_REQUEST).json({ error: 'Le corps de la requête est invalide.' });
-                    return;
+                    const err = new HttpException('invalid-request-body');
+                    err.status = httpStatus.BAD_REQUEST;
+                    throw err;
                 }
                 const created = await this.channelService.createChannel(payload, userId);
                 res.status(httpStatus.CREATED).json(created);
             } catch (error: unknown) {
-                res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: (error as Error).message || 'Une erreur serveur est survenue.' });
+                let message = 'unknown';
+                let status = httpStatus.INTERNAL_SERVER_ERROR;
+
+                if (error instanceof HttpException) {
+                    message = error.message || 'unknown';
+                    status = error.status;
+                }
+
+                res.status(status).json({ error: message });
             }
         });
 
@@ -56,7 +66,8 @@ export class ChannelController {
         //DELETE /channels/:id
         this.router.delete('/:id', async (req: AuthedRequest, res: Response) => {
             try {
-                await this.channelService.deleteChannel(req.params.id);
+                const userId = req.user?.uid;
+                await this.channelService.deleteChannel(req.params.id, userId);
                 res.status(httpStatus.NO_CONTENT).send();
             } catch (error: unknown) {
                 res.status(httpStatus.NOT_FOUND).json({ error: (error as Error).message });
@@ -72,7 +83,15 @@ export class ChannelController {
                 await this.channelService.joinChannel(channelId, userId);
                 res.status(httpStatus.NO_CONTENT).send();
             } catch (error: unknown) {
-                res.status(httpStatus.NOT_FOUND).json({ error: (error as Error).message });
+                let message = 'unknown';
+                let status = httpStatus.INTERNAL_SERVER_ERROR;
+
+                if (error instanceof HttpException) {
+                    message = error.message || 'unknown';
+                    status = error.status;
+                }
+
+                res.status(status).json({ error: message });
             }
         });
 

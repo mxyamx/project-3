@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, EventEmitter, inject, Input, OnInit, Output, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -6,14 +7,16 @@ import {
     DELETE_CHANNEL_CONFIRM_DIALOG_DATA,
     JOIN_CHANNEL_CONFIRM_DIALOG_DATA,
     LEAVE_CHANNEL_CONFIRM_DIALOG_DATA,
+    SERVER_ERROR_CONFIRM_DIALOG_DATA,
 } from '@app/constants/channel-constants';
 import { ChannelTab } from '@app/enums/channel-tab';
 import { ConfirmationDialogData } from '@app/interfaces/confirmation-dialog-date';
 import { PopupChatContext } from '@app/interfaces/popup-chat-context';
 import { ChannelService } from '@app/services/channel/channel.service';
 import { ChatService } from '@app/services/chat/chat.service';
+import { PopupChatBridgeService } from '@app/services/popup-chat-bridge/popup-chat-bridge.service';
 import { Channel, ChannelSummary } from '@common/channel';
-import { CHANNEL_GENERAL_ID, CHANNEL_GENERAL_NAME, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
+import { CHANNEL_GENERAL_ID, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
 import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom, take } from 'rxjs';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
@@ -47,6 +50,7 @@ export class ChannelNavigatorComponent implements OnInit {
 
     private channelService = inject(ChannelService);
     private chatService: ChatService = inject(ChatService);
+    private popupChatBridgeService = inject(PopupChatBridgeService);
     async ngOnInit(): Promise<void> {
         await this.initJoinedChannels();
     }
@@ -60,10 +64,22 @@ export class ChannelNavigatorComponent implements OnInit {
             let regex = new RegExp(this.searchInput.trim());
             this.filteredJoinedChannels = this.joinedChannels.filter((channel: ChannelSummary) => channel.name.match(regex));
         } else {
+            if (this.chatService.chatDetache()) {
+                this.popupChatBridgeService.onSearchChannels((channels) => {
+                    this.directoryChannels = channels;
+                    this.isLoading.set(false);
+                    return;
+                });
+                this.isLoading.set(true);
+                this.popupChatBridgeService.requestSearchChannels(this.searchInput);
+                return;
+            }
             this.isLoading.set(true);
             try {
                 const channels = await firstValueFrom(this.channelService.searchChannelsByPattern(this.searchInput));
                 this.directoryChannels = channels;
+            } catch (err: unknown) {
+                this.openConfirm(this.handleServerError(err));
             } finally {
                 this.isLoading.set(false);
             }
@@ -89,10 +105,15 @@ export class ChannelNavigatorComponent implements OnInit {
 
     async createChannel(name: string): Promise<void> {
         const channel: Channel = { id: '', name: name, createdAt: new Date() };
+
+        if (this.chatService.chatDetache()) {
+        }
         try {
             const newChannel: ChannelSummary = await firstValueFrom(this.channelService.createChannel(channel));
 
             this.joinedChannels.push(newChannel);
+        } catch (err: unknown) {
+            this.openConfirm(this.handleServerError(err));
         } finally {
             this.resetSearchInput();
         }
@@ -110,9 +131,17 @@ export class ChannelNavigatorComponent implements OnInit {
         if (!confirmed) {
             return;
         }
+
+        if (this.chatService.chatDetache()) {
+            this.isLoading.set(true);
+            this.popupChatBridgeService.requestDelete(channelId);
+            return;
+        }
         try {
             this.isLoading.set(true);
             await firstValueFrom(this.channelService.deleteChannel(channelId));
+        } catch (err: unknown) {
+            this.openConfirm(this.handleServerError(err));
         } finally {
             this.isLoading.set(false);
             this.resetSearchInput();
@@ -124,9 +153,16 @@ export class ChannelNavigatorComponent implements OnInit {
         if (!confirmed) {
             return;
         }
+        if (this.chatService.chatDetache()) {
+            this.isLoading.set(true);
+            this.popupChatBridgeService.requestLeave(channelId);
+            return;
+        }
         try {
             this.isLoading.set(true);
             await firstValueFrom(this.channelService.leaveChannel(channelId));
+        } catch (err: unknown) {
+            this.openConfirm(this.handleServerError(err));
         } finally {
             this.isLoading.set(false);
             this.resetSearchInput();
@@ -138,14 +174,21 @@ export class ChannelNavigatorComponent implements OnInit {
         this.openChat.emit(channel);
     }
 
-    async joinChannel(channelId: string, channelName: string): Promise<void> {
-        const data: ConfirmationDialogData = { ...JOIN_CHANNEL_CONFIRM_DIALOG_DATA, title: `Rejoindre « ${channelName} » ?` };
+    async joinChannel(channelId: string): Promise<void> {
+        const data: ConfirmationDialogData = { ...JOIN_CHANNEL_CONFIRM_DIALOG_DATA };
         const confirmed = await this.openConfirm(data);
         if (!confirmed) {
             return;
         }
+        if (this.chatService.chatDetache()) {
+            this.isLoading.set(true);
+            this.popupChatBridgeService.requestJoin(channelId);
+            return;
+        }
         try {
             await firstValueFrom(this.channelService.joinChannel(channelId));
+        } catch (err: unknown) {
+            this.openConfirm(this.handleServerError(err));
         } finally {
             this.resetSearchInput();
             await this.initJoinedChannels();
@@ -157,18 +200,29 @@ export class ChannelNavigatorComponent implements OnInit {
         this.directoryChannels = [];
         this.selectedTab.set(ChannelTab.Joined);
     }
+
+    private instanceOfConfirmationDialogData(object: any): object is ConfirmationDialogData {
+        return 'confirmButtonLabel' in object;
+    }
     private async initJoinedChannels(): Promise<void> {
-        if (this.chatService) {
-            const chan: ChannelSummary = {
-                id: CHANNEL_GENERAL_ID,
-                name: CHANNEL_GENERAL_NAME,
-                createdAt: new Date(),
-                isAdmin: false,
-                isManageable: false,
-                memberCount: 0,
-            };
-            this.joinedChannels = [chan];
-            this.filteredJoinedChannels = [chan];
+        if (this.chatService.chatDetache()) {
+            this.popupChatBridgeService.onServerError((data: any) => {
+                this.isLoading.set(false);
+                if (this.instanceOfConfirmationDialogData(data)) {
+                    this.openConfirm(data);
+                } else {
+                    this.openConfirm(SERVER_ERROR_CONFIRM_DIALOG_DATA);
+                }
+            });
+            this.popupChatBridgeService.onChannels((channels) => {
+                this.isLoading.set(false);
+                this.joinedChannels = channels;
+                this.filteredJoinedChannels = channels;
+                this.resetSearchInput();
+                return;
+            });
+            this.isLoading.set(true);
+            this.popupChatBridgeService.requestChannels();
             return;
         }
         this.isLoading.set(true);
@@ -177,6 +231,8 @@ export class ChannelNavigatorComponent implements OnInit {
             if (this.gameChannel) channels.push(this.gameChannel);
             this.joinedChannels = channels;
             this.filteredJoinedChannels = [...channels];
+        } catch (err: unknown) {
+            this.openConfirm(this.handleServerError(err));
         } finally {
             this.isLoading.set(false);
         }
@@ -199,5 +255,25 @@ export class ChannelNavigatorComponent implements OnInit {
         if (this.isPopup) return;
         const context: PopupChatContext = { openChat: false, channelId: '', channelName: '' };
         this.openPopup.emit(context);
+    }
+
+    private handleServerError(err: unknown): ConfirmationDialogData {
+        let serverKey = 'unknown';
+
+        if (err instanceof HttpErrorResponse) {
+            const payload = err.error;
+
+            if (payload && typeof payload === 'object' && 'error' in payload) {
+                serverKey = (payload as { error: string }).error;
+            }
+        }
+
+        const i18nKey = `dialog.server-error.server-errors.${serverKey}`;
+
+        const data: ConfirmationDialogData = {
+            ...SERVER_ERROR_CONFIRM_DIALOG_DATA,
+            text: i18nKey,
+        };
+        return data;
     }
 }

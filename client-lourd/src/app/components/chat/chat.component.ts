@@ -1,5 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, inject, Input, OnDestroy, OnInit, Output, signal, ViewChild, WritableSignal } from '@angular/core';
+import {
+    AfterViewChecked,
+    Component,
+    ElementRef,
+    EventEmitter,
+    inject,
+    Input,
+    OnDestroy,
+    OnInit,
+    Output,
+    signal,
+    ViewChild,
+    WritableSignal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAX_LENGTH_MESSAGE } from '@app/constants/objects-constants';
 import { ChatMessageContext, PopupChatContext } from '@app/interfaces/popup-chat-context';
@@ -18,7 +31,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     templateUrl: './chat.component.html',
     styleUrl: './chat.component.scss',
 })
-export class ChatComponent implements OnInit, OnDestroy {
+export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     @Input() roomId: string;
     @Input() chatName: string;
     @Input() isPopup: boolean = false;
@@ -26,6 +39,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     @ViewChild('input') input!: ElementRef;
     @Output() closeChat: EventEmitter<void> = new EventEmitter<void>();
     @Output() openPopup: EventEmitter<PopupChatContext> = new EventEmitter<PopupChatContext>();
+    needScroll = false;
     playerName: string = '';
     playerId: string = '';
     messageInput: string = '';
@@ -50,13 +64,12 @@ export class ChatComponent implements OnInit, OnDestroy {
             });
             this.popupChatBridgeService.onChatHistory((messages) => {
                 this.chatService.roomMessages = messages;
-                console.log('helloe');
-                setTimeout(() => this.scrollToBottom(), 0);
+                this.needScroll = true;
                 return;
             });
             this.popupChatBridgeService.onNewMessage((msg) => {
                 this.chatService.addMessage(msg);
-                setTimeout(() => this.scrollToBottom(), 0);
+                this.needScroll = true;
                 return;
             });
             this.popupChatBridgeService.sendChatOnInit(this.roomId);
@@ -67,15 +80,30 @@ export class ChatComponent implements OnInit, OnDestroy {
 
         this.playerSocketService.onChatHistory((msgs) => {
             this.chatService.roomMessages = msgs;
-            setTimeout(() => this.scrollToBottom(), 0);
+            this.needScroll = true;
         });
 
         this.joinRoom();
         this.configureBaseSocketFeatures();
     }
 
+    ngAfterViewChecked() {
+        if (this.needScroll) {
+            this.needScroll = false;
+            this.scrollToBottom();
+        }
+    }
+
     ngOnDestroy(): void {
+        if (this.chatService.chatDetache()) {
+            this.popupChatBridgeService.sendChatOnDestroy(this.roomId);
+            return;
+        }
+
         this.playerSocketService.unsubscribeChat();
+        if (this.roomId) {
+            this.playerSocketService.emitLeaveChatRoom(this.roomId);
+        }
     }
 
     joinRoom() {
@@ -87,7 +115,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     configureBaseSocketFeatures() {
         this.playerSocketService.onNewMessage((roomMessage: ChatMessage) => {
             this.chatService.addMessage(roomMessage);
-            setTimeout(() => this.scrollToBottom(), 0);
+            this.needScroll = true;
         });
     }
 
@@ -116,6 +144,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     private scrollToBottom(): void {
         console.log('test 1');
+        this.needScroll = false;
         try {
             console.log('test 2');
             this.chatMessagesContainer.nativeElement.scrollTop = this.chatMessagesContainer.nativeElement.scrollHeight;

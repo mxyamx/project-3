@@ -5,9 +5,11 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
+    @if(!data.confirmOnly){
     <button mat-stroked-button class="cd-ghost" [mat-dialog-close]="false" type="button">
         {{ data.cancelButtonLabel | translate }}
     </button>
+    }
     <button mat-flat-button class="cd-cta" [mat-dialog-close]="true" cdkFocusInitial type="button">
         {{ data.confirmButtonLabel | translate }}
     </button>

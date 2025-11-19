@@ -153,6 +153,9 @@ export class PlayerSocketService {
     emitJoinChatRoom(gameId: string): void {
         this.clientSocketService.emit('join-room-chat', gameId);
     }
+    emitLeaveChatRoom(roomId: string): void {
+        this.clientSocketService.emit('leave-room-chat', roomId);
+    }
 
     emitSendMessage(gameId: string, message: ChatMessage, callback?: (response: unknown) => void): void {
         this.clientSocketService.emit('room-message', { gameId, message }, callback);

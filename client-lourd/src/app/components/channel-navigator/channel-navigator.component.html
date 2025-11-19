@@ -76,7 +76,7 @@
     } @if(selectedTab() === ChannelTab.Directory && !isLoading()){
     <div class="channels" id="panel-directory">
         @for(channel of directoryChannels; track channel.id){
-        <div class="channel-item" (click)="joinChannel(channel.id, channel.name)">
+        <div class="channel-item" (click)="joinChannel(channel.id)">
             <h3>{{ channel.name }}</h3>
         </div>
         } @empty{

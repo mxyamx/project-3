@@ -1,4 +1,3 @@
-// main.js
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
@@ -22,7 +21,6 @@ function initWindow() {
 
     appWindow.setMenuBarVisibility(false);
 
-    // Quand la fenêtre principale se ferme, on ferme aussi le popup
     appWindow.on('close', () => {
         isQuitting = true;
         if (popupWindow && !popupWindow.isDestroyed()) {
@@ -79,23 +77,48 @@ function createPopup(context) {
     });
 }
 
-// ----- IPC RELAY ------
-
-// Ouvrir le popup (main window → main process)
 ipcMain.on('popup:open', (_event, context) => {
     createPopup(context);
 });
 
-// POPUP → MAIN WINDOW : "donne-moi les channels"
 ipcMain.on('popup:request-channels', () => {
     if (appWindow && !appWindow.isDestroyed()) {
         appWindow.webContents.send('main:get-channels');
     }
 });
 
+ipcMain.on('popup:request-search-channels', (_event, input) => {
+    if (appWindow && !appWindow.isDestroyed()) {
+        appWindow.webContents.send('main:get-search-channels', input);
+    }
+});
+
+ipcMain.on('popup:request-delete-channel', (_event, id) => {
+    if (appWindow && !appWindow.isDestroyed()) {
+        appWindow.webContents.send('main:delete-channel', id);
+    }
+});
+
+ipcMain.on('popup:request-leave-channel', (_event, id) => {
+    if (appWindow && !appWindow.isDestroyed()) {
+        appWindow.webContents.send('main:leave-channel', id);
+    }
+});
+ipcMain.on('popup:request-join-channel', (_event, id) => {
+    if (appWindow && !appWindow.isDestroyed()) {
+        appWindow.webContents.send('main:join-channel', id);
+    }
+});
+
 ipcMain.on('popup:request-chat-on-init', (_event, roomId) => {
     if (appWindow && !appWindow.isDestroyed()) {
         appWindow.webContents.send('main:set-chat-on-init', roomId);
+    }
+});
+
+ipcMain.on('popup:request-chat-on-destroy', (_event, roomId) => {
+    if (appWindow && !appWindow.isDestroyed()) {
+        appWindow.webContents.send('main:set-chat-on-destroy', roomId);
     }
 });
 
@@ -110,28 +133,36 @@ ipcMain.on('main:send-chat-history', (_event, messages) => {
         popupWindow.webContents.send('popup:chat-history', messages);
     }
 });
-// MAIN WINDOW → POPUP : "voilà les channels"
+
 ipcMain.on('main:reply-channels', (_event, channels) => {
     if (popupWindow && !popupWindow.isDestroyed()) {
         popupWindow.webContents.send('popup:channels', channels);
     }
 });
 
-// POPUP → MAIN WINDOW : "envoie ce message au serveur"
+ipcMain.on('main:reply-search-channels', (_event, channels) => {
+    if (popupWindow && !popupWindow.isDestroyed()) {
+        popupWindow.webContents.send('popup:search-channels', channels);
+    }
+});
+
+ipcMain.on('main:server-error', (_event, data) => {
+    if (popupWindow && !popupWindow.isDestroyed()) {
+        popupWindow.webContents.send('popup:popup:server-error', data);
+    }
+});
+
 ipcMain.on('popup:send-message', (_event, context) => {
     if (appWindow && !appWindow.isDestroyed()) {
         appWindow.webContents.send('main:send-message-from-popup', context);
     }
 });
 
-// MAIN WINDOW → POPUP : "nouveau message reçu du serveur"
 ipcMain.on('main:new-message', (_event, message) => {
     if (popupWindow && !popupWindow.isDestroyed()) {
         popupWindow.webContents.send('popup:new-message', message);
     }
 });
-
-// ---- CYCLE APP ----
 
 app.on('ready', initWindow);
 

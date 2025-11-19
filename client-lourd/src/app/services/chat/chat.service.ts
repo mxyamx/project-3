@@ -1,6 +1,11 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
+import { SERVER_ERROR_CONFIRM_DIALOG_DATA } from '@app/constants/channel-constants';
+import { ConfirmationDialogData } from '@app/interfaces/confirmation-dialog-date';
 import { ChatOnInitContext, PopupChatContext } from '@app/interfaces/popup-chat-context';
 import { ChatMessage } from '@common/chat-message';
+import { firstValueFrom } from 'rxjs';
+import { ChannelService } from '../channel/channel.service';
 import { PlayerSocketService } from '../player-socket/player-socket.service';
 import { UserManagerService } from '../user-manager/user-manager.service';
 
@@ -18,7 +23,7 @@ export class ChatService {
     chatDetache = signal(false);
     private userManager = inject(UserManagerService);
     private playerSocketService = inject(PlayerSocketService);
-
+    private channelService = inject(ChannelService);
     popupContext = signal<PopupChatContext | null>(null);
 
     constructor() {
@@ -34,15 +39,69 @@ export class ChatService {
 
     private initIpc() {
         try {
-            console.log('window.require =', (window as any).require);
             const w = window as any;
             if (w && w.require) {
                 const { ipcRenderer } = w.require('electron');
                 this.ipc = ipcRenderer;
 
                 ipcRenderer.on('main:get-channels', async () => {
-                    const channels = await this.getChannelsFromAngular();
-                    ipcRenderer.send('main:reply-channels', channels);
+                    try {
+                        const channels = await firstValueFrom(this.channelService.getMyChannels());
+                        ipcRenderer.send('main:reply-channels', channels);
+                    } catch (err: unknown) {
+                        this.handleServerError(err);
+                    }
+                });
+
+                ipcRenderer.on('main:get-search-channels', async (_event: any, input: any) => {
+                    try {
+                        const channels = await firstValueFrom(this.channelService.searchChannelsByPattern(input));
+                        ipcRenderer.send('main:reply-search-channels', channels);
+                    } catch (err: unknown) {
+                        this.handleServerError(err);
+                    }
+                });
+
+                ipcRenderer.on('main:delete-channel', async (_event: any, id: any) => {
+                    try {
+                        await firstValueFrom(this.channelService.deleteChannel(id));
+                        try {
+                            const channels = await firstValueFrom(this.channelService.getMyChannels());
+                            ipcRenderer.send('main:reply-channels', channels);
+                        } catch (err: unknown) {
+                            this.handleServerError(err);
+                        }
+                    } catch (err: unknown) {
+                        this.handleServerError(err);
+                    }
+                });
+
+                ipcRenderer.on('main:leave-channel', async (_event: any, id: any) => {
+                    try {
+                        await firstValueFrom(this.channelService.leaveChannel(id));
+                        try {
+                            const channels = await firstValueFrom(this.channelService.getMyChannels());
+                            ipcRenderer.send('main:reply-channels', channels);
+                        } catch (err: unknown) {
+                            this.handleServerError(err);
+                        }
+                    } catch (err: unknown) {
+                        this.handleServerError(err);
+                    }
+                });
+
+                ipcRenderer.on('main:join-channel', async (_event: any, id: any) => {
+                    try {
+                        await firstValueFrom(this.channelService.joinChannel(id));
+                        try {
+                            const channels = await firstValueFrom(this.channelService.getMyChannels());
+                            ipcRenderer.send('main:reply-channels', channels);
+                        } catch (err: unknown) {
+                            this.handleServerError(err);
+                        }
+                    } catch (err: unknown) {
+                        this.handleServerError(err);
+                    }
                 });
 
                 ipcRenderer.on('main:send-message-from-popup', (_event: any, context: any) => {
@@ -53,6 +112,10 @@ export class ChatService {
                     this.chatOnInit(roomId);
                 });
 
+                ipcRenderer.on('main:set-chat-on-destroy', (_event: any, roomId: any) => {
+                    this.chatOnDestroy(roomId);
+                });
+
                 ipcRenderer.on('popup:closed', () => {
                     this.chatDetache.set(false);
                 });
@@ -60,6 +123,27 @@ export class ChatService {
         } catch (e) {
             console.warn('IPC non dispo (mode web ?)', e);
         }
+    }
+
+    private handleServerError(err: unknown) {
+        let serverKey = 'unknown';
+
+        if (err instanceof HttpErrorResponse) {
+            const payload = err.error;
+
+            if (payload && typeof payload === 'object' && 'error' in payload) {
+                serverKey = (payload as { error: string }).error;
+            }
+        }
+
+        const i18nKey = `dialog.server-error.server-errors.${serverKey}`;
+
+        const data: ConfirmationDialogData = {
+            ...SERVER_ERROR_CONFIRM_DIALOG_DATA,
+            text: i18nKey,
+        };
+
+        this.ipc?.send('main:server-error', data);
     }
 
     chatOnInit(roomId: string) {
@@ -85,18 +169,12 @@ export class ChatService {
         this.ipc?.send('main:send-chat-on-init-done', context);
     }
 
-    private async getChannelsFromAngular(): Promise<any[]> {
-        // ici tu appelles ton ChannelService Angular
-        // return await firstValueFrom(this.channelService.getMyChannels());
-        return [
-            { id: '1', name: 'general' },
-            { id: '2', name: 'dev' },
-        ];
+    chatOnDestroy(roomId: string) {
+        this.playerSocketService.unsubscribeChat();
+        this.playerSocketService.emitLeaveChatRoom(roomId);
     }
 
-    // Quand TON chat Angular (main window) reçoit un message du serveur,
-    // tu broadcast au popup en passant par le main process :
-    public notifyNewMessageToPopup(message: any) {
+    notifyNewMessageToPopup(message: any) {
         this.ipc?.send('main:new-message', message);
     }
 

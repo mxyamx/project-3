@@ -3,4 +3,5 @@ export interface ConfirmationDialogData {
     text: string;
     cancelButtonLabel: string;
     confirmButtonLabel: string;
+    confirmOnly: boolean;
 }

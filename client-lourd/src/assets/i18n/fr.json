@@ -425,6 +425,17 @@
             "label": "Nom du canal",
             "cancel-button-label": "Annuler",
             "create-button-label": "Créer"
+        },
+        "server-error": {
+            "title": "Erreur du serveur",
+            "confirm-button-label": "OK",
+            "server-errors": {
+                "channel-already-exists": "Impossible de créer ce canal car un autre porte déjà ce nom.",
+                "unknown": "Une erreur inattendue est survenue.",
+                "channel-not-found": "Ce canal est introuvable ou n'existe plus.",
+                "invalid-request-body": "Le corps de la requête est invalide.",
+                "channel-delete-forbidden": "Vous n'avez pas les droits pour supprimer ce canal."
+            }
         }
     },
     "event-log": {

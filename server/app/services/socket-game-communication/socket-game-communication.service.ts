@@ -65,6 +65,10 @@ export class SocketGameCommunication {
             socket.emit(SocketEventNames.ChatHistory, history);
         });
 
+        socket.on('leave-room-chat', async (roomId: string) => {
+            socket.leave(roomId);
+        });
+
         socket.on('room-message', async (data: RoomMessage) => {
             const roomId: string = data.gameId;
             const now = new Date();

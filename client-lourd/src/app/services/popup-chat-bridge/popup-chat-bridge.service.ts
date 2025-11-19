@@ -30,6 +30,9 @@ export class PopupChatBridgeService {
     sendChatOnInit(roomId: any): void {
         this.ipc?.send('popup:request-chat-on-init', roomId);
     }
+    sendChatOnDestroy(roomId: any): void {
+        this.ipc?.send('popup:request-chat-on-destroy', roomId);
+    }
 
     openPopupFromMainWindow(): void {
         this.ipc?.send('popup:open');
@@ -41,6 +44,29 @@ export class PopupChatBridgeService {
 
     onChannels(cb: (channels: any[]) => void): void {
         this.ipc?.on('popup:channels', (_event, channels) => cb(channels));
+    }
+
+    onSearchChannels(cb: (channels: any[]) => void): void {
+        this.ipc?.on('popup:search-channels', (_event, channels) => cb(channels));
+    }
+    requestSearchChannels(input: string): void {
+        this.ipc?.send('popup:request-search-channels', input);
+    }
+
+    requestDelete(id: string): void {
+        this.ipc?.send('popup:request-delete-channel', id);
+    }
+
+    requestLeave(id: string): void {
+        this.ipc?.send('popup:request-leave-channel', id);
+    }
+
+    requestJoin(id: string): void {
+        this.ipc?.send('popup:request-join-channel', id);
+    }
+
+    onServerError(cb: (data: any) => void): void {
+        this.ipc?.on('popup:server-error', (_event, data) => cb(data));
     }
 
     onChatOnInit(cb: (context: any) => void): void {
