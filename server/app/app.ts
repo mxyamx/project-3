@@ -10,6 +10,7 @@ import { HttpException } from './classes/http-exception/http.exception';
 import { ChannelController } from './controllers/channel/channel.controller';
 import { UsersController } from './controllers/users/users.controller';
 import { verifyFirebaseToken } from './middlewares/auth.middleware';
+import { FriendsController } from './controllers/friends/friends.controller';
 
 @Service()
 export class Application {
@@ -21,6 +22,7 @@ export class Application {
         private readonly boardGameController: BoardGameController,
         private readonly usersController: UsersController,
         private readonly channelController: ChannelController,
+        private readonly friendsController: FriendsController,
     ) {
         this.app = express();
 
@@ -45,6 +47,7 @@ export class Application {
         this.app.use('/api/board-games', verifyFirebaseToken, this.boardGameController.router);
         this.app.use('/api/users', this.usersController.router);
         this.app.use('/api/channels', verifyFirebaseToken, this.channelController.router);
+        this.app.use('/api/friends', verifyFirebaseToken, this.friendsController.router);
         this.app.use('/', (req, res) => {
             res.redirect('/api/docs');
         });

@@ -83,13 +83,7 @@ export class FightSubController {
             }
             let soundEffect = '';
             if (user) {
-                const sounds = user.purchasedSounds ?? [];
-                if (sounds.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * sounds.length);
-                    soundEffect = sounds[randomIndex];
-                } else {
-                    soundEffect = '';
-                }
+                soundEffect = user.selectedSound ?? '';
             }
             if (damageDoneAttackingPlayer && damageTakenDefendingPlayer) {
                 this.gameSession.statisticsManager.addLifePointsLost(defendingPlayer.userId, damageTakenDefendingPlayer);

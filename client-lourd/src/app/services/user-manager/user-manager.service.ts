@@ -77,11 +77,11 @@ export class UserManagerService {
         this.currentUser.update((curr) => ({ ...curr, status }));
     }
 
-    setFriends(friends: User[]) {
+    setFriends(friends: string[]) {
         this.currentUser.update((curr) => ({ ...curr, friends }));
     }
 
-    setBlocked(blocked: User[]) {
+    setBlocked(blocked: string[]) {
         this.currentUser.update((curr) => ({ ...curr, blocked }));
     }
 
@@ -96,6 +96,10 @@ export class UserManagerService {
     setPurchasedSounds(ids: string[]) {
         const u = this.getCurrentUser();
         this.currentUser.set({ ...u, purchasedSounds: ids });
+    }
+
+    setSelectedSound(soundId: string) {
+        this.currentUser.update((curr) => ({ ...curr, selectedSound: soundId }));
     }
 
     setPurchasedAvatars(ids: string[]) {

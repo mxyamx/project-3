@@ -5,6 +5,7 @@ import { VirtualPlayer } from '@common/virtual-player';
 
 export const DATABASE_COLLECTION = 'board-games';
 export const USER_COLLECTION = 'users';
+export const FRIENDS_COLLECTION = 'friends';
 
 export const ID_GENERATION = {
     max: 10000,
@@ -26,7 +27,7 @@ export const MOVEMENT_TIME_INTERVAL_MSEC = 150;
 
 export const TRANSITION_TIME_INTERVAL_SEC = 3;
 
-export const MAX_AMOUNT_OF_VICTORIES = 1;
+export const MAX_AMOUNT_OF_VICTORIES = 3;
 
 export const WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC = 150;
 

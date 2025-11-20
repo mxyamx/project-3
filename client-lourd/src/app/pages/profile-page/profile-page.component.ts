@@ -9,10 +9,11 @@ import { UserManagerService } from '@app/services/user-manager/user-manager.serv
 import { DeviceType } from '@common/enums/deviceType';
 import { ActiveTab } from '@common/enums/profile-tabs';
 import { TranslatePipe } from '@ngx-translate/core';
+import { SocialsPageComponent } from "../socials-page/socials-page.component";
 
 @Component({
     selector: 'app-profile-page',
-    imports: [CommonModule, TranslatePipe, ReactiveFormsModule],
+    imports: [CommonModule, TranslatePipe, ReactiveFormsModule, SocialsPageComponent],
     templateUrl: './profile-page.component.html',
     styleUrl: './profile-page.component.scss',
 })
@@ -33,7 +34,7 @@ export class ProfilePageComponent {
         return this.userSig();
     }
 
-    activeTab = ActiveTab.Socials;
+    activeTab = ActiveTab.Statistics;
 
     PRESET_AVATARS: string[] = [
         'assets/profiles/bear-modified.png',

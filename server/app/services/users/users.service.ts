@@ -80,6 +80,7 @@ export class UsersService {
                     status: user.status,
                     purchasedAvatars: user.purchasedAvatars,
                     purchasedSounds: user.purchasedSounds,
+                    selectedSound: user.selectedSound,
                 },
             },
         );
