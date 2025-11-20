@@ -147,6 +147,7 @@ export const FROM_ITEM_NAME_TO_VP_PREFERENCE: { [key in string]: VpPreferenceIte
     [ITEM_NAMES.gameEditor1]: VpPreferenceItem.Defensive,
     [ITEM_NAMES.gameEditor2]: VpPreferenceItem.Aggressive,
     [ITEM_NAMES.randomItem]: VpPreferenceItem.Defensive,
+    [ITEM_NAMES.torch]: VpPreferenceItem.Aggressive,
 };
 
 export const FROM_TILE_TYPE_TO_DESCRIPTION: { [key in TileType]: string } = {
