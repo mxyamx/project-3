@@ -76,9 +76,17 @@
             }
             <div class="actions">
                 @if (channel.isManageable) {
-                <i class="fa-solid fa-x delete-icon" title="Quitter" (click)="leaveChannel(channel.id); $event.stopPropagation()"></i>
+                <i
+                    class="fa-solid fa-x delete-icon"
+                    [attr.title]="'chat.leave' | translate"
+                    (click)="leaveChannel(channel.id); $event.stopPropagation()"
+                ></i>
                 } @if (channel.isAdmin) {
-                <i class="fa-solid fa-trash delete-icon" title="Supprimer" (click)="deleteChannel(channel.id); $event.stopPropagation()"></i>
+                <i
+                    class="fa-solid fa-trash delete-icon"
+                    [attr.title]="'chat.delete' | translate"
+                    (click)="deleteChannel(channel.id); $event.stopPropagation()"
+                ></i>
                 }
             </div>
         </div>

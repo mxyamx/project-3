@@ -1,19 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { assetFromId } from '@app/constants/avatar-catalog';
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
+import { ChatService } from '@app/services/chat/chat.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { DeviceType } from '@common/enums/deviceType';
 import { ActiveTab } from '@common/enums/profile-tabs';
 import { TranslatePipe } from '@ngx-translate/core';
-import { SocialsPageComponent } from "../socials-page/socials-page.component";
+import { SocialsPageComponent } from '../socials-page/socials-page.component';
 
 @Component({
     selector: 'app-profile-page',
-    imports: [CommonModule, TranslatePipe, ReactiveFormsModule, SocialsPageComponent],
+    imports: [CommonModule, TranslatePipe, ReactiveFormsModule, SocialsPageComponent, ChatContainerComponent],
     templateUrl: './profile-page.component.html',
     styleUrl: './profile-page.component.scss',
 })
@@ -23,6 +25,9 @@ export class ProfilePageComponent {
     private httpUserService: HttpUserService = inject(HttpUserService);
     private fb: FormBuilder = inject(FormBuilder);
     private router: Router = inject(Router);
+
+    chatService: ChatService = inject(ChatService);
+    showChat: WritableSignal<boolean> = signal(false);
 
     DeviceType = DeviceType;
     ActiveTab = ActiveTab;
@@ -34,7 +39,7 @@ export class ProfilePageComponent {
         return this.userSig();
     }
 
-    activeTab = ActiveTab.Socials;
+    activeTab = ActiveTab.Statistics;
 
     PRESET_AVATARS: string[] = [
         'assets/profiles/bear-modified.png',
@@ -68,6 +73,38 @@ export class ProfilePageComponent {
         const purchasedAssets = purchasedIds.map((id) => assetFromId(id)).filter((x): x is string => !!x);
         const set = new Set<string>([...this.PRESET_AVATARS, ...purchasedAssets]);
         this.ALL_AVATARS.set([...set]);
+    }
+
+    // ========= Statistics Helpers =========
+    get totalVictories(): number {
+        return this.user.statistics?.victoryAmount ?? 0;
+    }
+
+    get normalVictories(): number {
+        return this.user.statistics?.victoriesNormal ?? 0;
+    }
+
+    get ctfVictories(): number {
+        return this.user.statistics?.victoriesCTF ?? 0;
+    }
+
+    get totalGamesPlayed(): number {
+        return this.user.statistics?.gamesPlayed ?? 0;
+    }
+
+    get normalGamesPlayed(): number {
+        return this.user.statistics?.gamesPlayedNormal ?? 0;
+    }
+
+    get ctfGamesPlayed(): number {
+        return this.user.statistics?.gamesPlayedCTF ?? 0;
+    }
+
+    get averageGameTimeSeconds(): number {
+        const stats = this.user?.statistics;
+        if (!stats || !stats.gamesPlayed) return 0;
+
+        return (stats.totalGameDuration ?? 0) / stats.gamesPlayed / 1000;
     }
 
     // ========= Navigation =========
@@ -174,5 +211,9 @@ export class ProfilePageComponent {
         } finally {
             this.saving = false;
         }
+    }
+
+    openChat() {
+        this.showChat.set(!this.showChat());
     }
 }

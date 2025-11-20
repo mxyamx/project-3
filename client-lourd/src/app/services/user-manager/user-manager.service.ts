@@ -98,6 +98,10 @@ export class UserManagerService {
         this.currentUser.set({ ...u, purchasedSounds: ids });
     }
 
+    setSelectedSound(soundId: string) {
+        this.currentUser.update((curr) => ({ ...curr, selectedSound: soundId }));
+    }
+
     setPurchasedAvatars(ids: string[]) {
         this.currentUser.update((curr) => ({ ...curr, purchasedAvatars: [...ids] }));
     }

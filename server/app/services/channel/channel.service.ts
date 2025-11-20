@@ -71,21 +71,33 @@ export class ChannelService {
         channelSummarys.push(generalChannel);
         return channelSummarys;
     }
+    normalizeName(name: string): string {
+        return name
+            .trim()
+            .toLocaleLowerCase('fr-CA')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    }
 
     async createChannel(payload: Channel, userId: string): Promise<ChannelSummary> {
         const session = this.databaseService.mongo.startSession();
-        const channelDoc: ChannelDoc = {
-            _id: new ObjectId(),
-            id: crypto.randomUUID(),
-            name: payload.name.trim(),
-            createdAt: new Date(),
-        };
+        const rawName = payload.name.trim();
+        const normalizedName = this.normalizeName(rawName);
 
-        if (channelDoc.name in FORBIDDEN_CHANNEL_NAMES) {
+        const normalizedForbidden = FORBIDDEN_CHANNEL_NAMES.map((name) => this.normalizeName(name));
+
+        if (normalizedForbidden.includes(normalizedName)) {
             const err = new HttpException('channel-already-exists');
             err.status = httpStatus.BAD_REQUEST;
             throw err;
         }
+
+        const channelDoc: ChannelDoc = {
+            _id: new ObjectId(),
+            id: crypto.randomUUID(),
+            name: rawName,
+            createdAt: new Date(),
+        };
 
         const existingChannel = await this.channelCollection.findOne({ name: payload.name.trim() });
 

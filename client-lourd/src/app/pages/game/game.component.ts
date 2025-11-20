@@ -47,6 +47,7 @@ export class GameComponent implements OnInit, OnDestroy {
     showEndTurnConfirmation = false;
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     chatService = inject(ChatService);
+    gameIdCopy: string = '';
     private router: Router;
     private subscription: Subscription;
     private gameSocketEventManager: GameSocketEventService = inject(GameSocketEventService);
@@ -83,6 +84,7 @@ export class GameComponent implements OnInit, OnDestroy {
                 this.router.navigate([UrlPage.Home]);
             }
         });
+        this.gameIdCopy = this.gameSessionManager.gameId();
     }
 
     ngOnDestroy() {
@@ -92,9 +94,10 @@ export class GameComponent implements OnInit, OnDestroy {
 
         if (!this.gameSocketEventManager.gameEnding) {
             this.playerSocketService.emitLeaveGame(this.gameSessionManager.gameId());
+
             this.playerSocketService.unsubscribeGameEvents();
             if (this.chatService.chatDetache()) {
-                this.chatService.leaveGameChat(this.gameSessionManager.gameId());
+                this.chatService.leaveGameChat(this.gameIdCopy);
             }
         }
     }

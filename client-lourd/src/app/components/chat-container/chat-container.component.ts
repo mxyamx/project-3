@@ -64,7 +64,9 @@ export class ChatContainerComponent implements OnInit {
                         isManageable: false,
                         memberCount: 0,
                     };
-                    this.channelComponent.initJoinedChannels();
+                    if (this.showChannelNavigator()) {
+                        this.channelComponent.initJoinedChannels();
+                    }
                 }
                 return;
             });
@@ -78,6 +80,12 @@ export class ChatContainerComponent implements OnInit {
                 if (roomId && roomId === this.gameId && this.gameChannel.id === `GAME-${roomId}`) {
                     this.gameChannel = null;
                     this.gameId = null;
+                    if (!this.showChannelNavigator() && this.channelId === `GAME-${roomId}`) {
+                        this.channelId = '';
+                        this.channelName = '';
+                        this.showChannelNavigator.set(true);
+                        return;
+                    }
                     this.channelComponent.initJoinedChannels();
                 }
                 return;

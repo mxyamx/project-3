@@ -155,7 +155,9 @@
             "text": "This channel was deleted by its administrator. You can no longer send messages.",
             "close": "Leave channel",
             "placeholder": "This channel no longer accepts messages."
-        }
+        },
+        "leave": "Leave",
+        "delete": "Delete"
     },
     "channels": {
         "deleted": "A channel you were subscribed to has been deleted.",
@@ -334,9 +336,12 @@
         "delete-account-modal": "Are you sure you want to delete your account? This action is irreversible.",
         "friends": "Friends",
         "blocked-users": "Blocked Users",
-        "victories": "Victories",
+        "victories": "Number of victories",
         "defeats": "Defeats",
         "combats": "Combats",
+        "average-game-time": "Average Game Time",
+        "total-game-normal": "Total Normal Mode Games Played",
+        "total-game-ctf": "Total CTF Mode Games Played",
         "edit-modal": {
             "title": "Edit Account",
             "username": "Username",
@@ -494,6 +499,9 @@
     "shop-page": {
         "back-button": "Back",
         "Exclusive-avatars": "Exclusive profile Avatars ",
+        "Equipped": "Equipped Sound Effect",
+        "Equip": "Equip Sound Effect",
+        "playing": "Playing Sound Effect",
         "avatars": {
             "Alpha-wolf": "Alpha wolf",
             "Agile-Kangaroo": "Agile Kangourou",

@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, WritableSignal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { AvatarDef, avatarList } from '@app/constants/avatar-catalog';
 import { SfxDef, sfxList } from '@app/constants/sound-catalog';
+import { ChatService } from '@app/services/chat/chat.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -11,7 +13,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 @Component({
     selector: 'app-shop-page',
     standalone: true,
-    imports: [CommonModule, TranslatePipe, ReactiveFormsModule],
+    imports: [CommonModule, TranslatePipe, ReactiveFormsModule, ChatContainerComponent],
     templateUrl: './shop-page.component.html',
     styleUrl: './shop-page.component.scss',
 })
@@ -20,6 +22,9 @@ export class ShoppingPageComponent {
     private userManager = inject(UserManagerService);
     private httpUser = inject(HttpUserService);
     private audioMap = new Map<string, HTMLAudioElement>();
+
+    chatService: ChatService = inject(ChatService);
+    showChat: WritableSignal<boolean> = signal(false);
 
     user = this.userManager.currentUser.asReadonly();
     catalog: AvatarDef[] = avatarList;
@@ -31,6 +36,7 @@ export class ShoppingPageComponent {
     money = computed(() => this.user().money ?? 0);
     owned = computed(() => new Set(this.user().purchasedAvatars ?? []));
     ownedSfx = computed(() => new Set(this.user().purchasedSounds ?? []));
+    selectedSound = computed(() => this.user().selectedSound);
 
     constructor() {
         // Preload sounds so preview is instant
@@ -50,6 +56,22 @@ export class ShoppingPageComponent {
 
     goBack() {
         this.router.navigate(['/home']);
+    }
+
+    isEquippedSfx(s: SfxDef): boolean {
+        return this.selectedSound() === s.id;
+    }
+
+    async equipSfx(s: SfxDef) {
+        if (!this.isOwnedSfx(s)) return;
+
+        this.errorMsg.set('');
+        try {
+            this.userManager.setSelectedSound(s.id);
+            await this.httpUser.updateUser(this.userManager.getCurrentUser()).toPromise();
+        } catch (e: any) {
+            this.errorMsg.set(e?.error?.error || e?.message || "Erreur lors de l'équipement.");
+        }
     }
 
     async buy(item: AvatarDef) {
@@ -107,7 +129,9 @@ export class ShoppingPageComponent {
         const a = this.audioMap.get(s.id);
         if (a) a.pause();
     }
-
+    openChat() {
+        this.showChat.set(!this.showChat());
+    }
     async buySfx(s: SfxDef) {
         this.errorMsg.set('');
         if (this.isOwnedSfx(s)) return;
@@ -118,13 +142,28 @@ export class ShoppingPageComponent {
 
         this.buying.set(s.id);
         try {
+            // Get current user state
+            const currentUser = this.userManager.getCurrentUser();
+            const currentSounds = currentUser.purchasedSounds || [];
+
+            // Update money
             this.userManager.setMoney(this.money() - s.price);
-            const next = Array.from(this.ownedSfx());
-            next.push(s.id);
-            this.userManager.setPurchasedSounds(next);
+
+            // Add new sound to array
+            const updatedSounds = [...currentSounds, s.id];
+            this.userManager.setPurchasedSounds(updatedSounds);
+
+            // Auto-equip if first sound
+            if (updatedSounds.length === 1) {
+                this.userManager.setSelectedSound(s.id);
+            }
+
+            // Persist to database
             await this.httpUser.updateUser(this.userManager.getCurrentUser()).toPromise();
         } catch (e: any) {
-            this.errorMsg.set(e?.error?.error || e?.message || 'Erreur lors de l’achat.');
+            // Rollback on error
+            this.errorMsg.set(e?.error?.error || e?.message || "Erreur lors de l'achat.");
+            // TODO: reload user from server to reset state
         } finally {
             this.buying.set(null);
         }

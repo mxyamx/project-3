@@ -99,13 +99,13 @@ ipcMain.on('popup:request-search-channels', (_event, input) => {
 });
 
 ipcMain.on('main:leave-game-chat', (_event, roomId) => {
-    if (appWindow && !appWindow.isDestroyed()) {
-        appWindow.webContents.send('popup:leave-game-chat', roomId);
+    if (popupWindow && !popupWindow.isDestroyed()) {
+        popupWindow.webContents.send('popup:leave-game-chat', roomId);
     }
 });
 ipcMain.on('main:join-game-chat', (_event, roomId) => {
-    if (appWindow && !appWindow.isDestroyed()) {
-        appWindow.webContents.send('popup:join-game-chat', roomId);
+    if (popupWindow && !popupWindow.isDestroyed()) {
+        popupWindow.webContents.send('popup:join-game-chat', roomId);
     }
 });
 ipcMain.on('popup:request-create-channel', (_event, name) => {

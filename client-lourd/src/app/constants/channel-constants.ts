@@ -26,7 +26,7 @@ export const LEAVE_CHANNEL_CONFIRM_DIALOG_DATA: ConfirmationDialogData = {
 
 export const SERVER_ERROR_CONFIRM_DIALOG_DATA: ConfirmationDialogData = {
     title: 'dialog.server-error.title',
-    text: 'dialog.server-error.server-errors.unknown', // remplacé dynamiquement
+    text: 'dialog.server-error.server-errors.unknown',
     cancelButtonLabel: '',
     confirmButtonLabel: 'dialog.server-error.confirm-button-label',
     confirmOnly: true,

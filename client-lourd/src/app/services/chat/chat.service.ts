@@ -225,6 +225,7 @@ export class ChatService {
     }
 
     closePopup(): void {
+        this.chatDetache.set(false);
         this.ipc?.send('popup:close');
     }
 
