@@ -86,7 +86,7 @@ export class MovementEventsHandlerService {
             }
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
             this.gameSessionManager.updateBoardGame(data.boardGame);
-            this.gameSessionManager.updateChosenPlayer(data.activePlayer);
+            // REMOVED: this.gameSessionManager.updateChosenPlayer(data.activePlayer);
 
             if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
                 this.gameSessionManager.changeState(PlayerState.WaitingForAction);

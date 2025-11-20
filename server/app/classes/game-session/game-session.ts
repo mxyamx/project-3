@@ -206,9 +206,15 @@ export class GameSession {
             return { success: false, message: validation.reason };
         }
 
-        const player = tile.containedPlayer;
-        if (!player) {
+        // CRITICAL: Get the player from the tile
+        const tilePlayer = tile.containedPlayer;
+        if (!tilePlayer) {
             return { success: false, message: 'No player at position' };
+        }
+
+        // Verify this is the active player
+        if (tilePlayer.userId !== this.activePlayer.userId) {
+            return { success: false, message: 'Only the active player can use teleporter' };
         }
 
         // Get the target position (validated above)
@@ -218,24 +224,29 @@ export class GameSession {
         // Clear player from current tile
         this.boardGame.tiles[playerPosition.x][playerPosition.y].containedPlayer = undefined;
 
-        // Place player at target tile
-        this.boardGame.tiles[targetPosition.x][targetPosition.y].containedPlayer = player;
+        // CRITICAL FIX: Update the activePlayer position (single source of truth)
+        this.activePlayer.position = targetPosition;
 
-        // Update player's position
-        player.position = targetPosition;
+        // Deduct speed cost for using teleporter (same as movePlayer pattern)
+        this.activePlayer.attributes.speedValue -= 1;
 
-        // Update active player if this is the active player
-        if (this.activePlayer.userId === player.userId) {
-            this.activePlayer.position = targetPosition;
-            // Deduct speed cost for using teleporter
-            this.activePlayer.attributes.speedValue -= 1;
+        // Place activePlayer reference at target tile (ensures same object reference everywhere)
+        this.boardGame.tiles[targetPosition.x][targetPosition.y].containedPlayer = this.activePlayer;
+
+        // CRITICAL: Update staticPlayerMap to preserve state for next turn
+        // This ensures when changeActivePlayer() resets stats, it uses the updated position
+        const staticPlayer = this.staticPlayerMap.get(this.activePlayer.name);
+        if (staticPlayer) {
+            staticPlayer.position = targetPosition;
+            // Also update the static player's speed to match (important for turn changes)
+            // staticPlayer.attributes.speedValue = this.activePlayer.attributes.speedValue;
         }
 
-        // Update statistics
+        // Update statistics (same as movePlayer)
         this.statisticsManager.updateTilePercentage(targetPosition);
-        this.statisticsManager.updatePlayerTilePercentage(player.userId, targetPosition);
+        this.statisticsManager.updatePlayerTilePercentage(this.activePlayer.userId, targetPosition);
 
-        // Update illumination and bonuses
+        // Update illumination and bonuses (same as movePlayer)
         this.updateIllumination();
         this.updatePlayerBonuses();
 
