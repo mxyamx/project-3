@@ -1,10 +1,13 @@
 import { HttpException } from '@app/classes/http-exception/http.exception';
+import { friendEvents } from '@app/events/friendEvents';
+import { ChannelDeletedPayload } from '@app/interfaces/channel-deleted-payload';
 import { ChannelDoc } from '@app/interfaces/channel-doc';
 import { ChannelMemberDoc } from '@app/interfaces/channel-member-doc';
 import { ChatMessageDoc } from '@app/interfaces/chat-message-doc';
 import { DatabaseService } from '@app/services/database/database.service';
 import { Channel, ChannelSummary } from '@common/channel';
 import { CHANNEL_GENERAL_ID, CHANNEL_GENERAL_NAME, FORBIDDEN_CHANNEL_NAMES } from '@common/constants/chat.constants';
+import { ChannelEventType } from '@common/enums/channel-event-type';
 import { ChannelRole } from '@common/enums/channel-role';
 import httpStatus from 'http-status-codes';
 import { Collection, Filter, ObjectId } from 'mongodb';
@@ -227,7 +230,19 @@ export class ChannelService {
             err.status = httpStatus.FORBIDDEN;
             throw err;
         }
+        const links: ChannelMemberDoc[] = await this.memberCollection.find({ channelId }).toArray();
 
+        const users: string[] = links.map((link) => {
+            const id = link.userId;
+            return id;
+        });
+
+        const payload: ChannelDeletedPayload = {
+            users,
+            roomId: channelId,
+        };
+
+        friendEvents.emit(ChannelEventType.DELETED, payload);
         const session = this.databaseService.mongo.startSession();
         try {
             await session.withTransaction(async () => {

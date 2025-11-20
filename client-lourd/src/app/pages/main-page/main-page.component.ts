@@ -47,7 +47,7 @@ export class MainPageComponent implements OnInit {
         user.status = DeviceType.offline;
         this.playerSocketService.disconnect();
         this.friendService.cleanup();
-
+        this.chatService.closePopup();
         this.httpUserService.updateUser(user).subscribe({
             next: () => {
                 this.authService.logout();

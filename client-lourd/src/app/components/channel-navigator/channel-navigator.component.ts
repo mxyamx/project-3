@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, EventEmitter, inject, Input, OnInit, Output, signal, WritableSignal } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import {
@@ -14,10 +14,11 @@ import { ConfirmationDialogData } from '@app/interfaces/confirmation-dialog-date
 import { PopupChatContext } from '@app/interfaces/popup-chat-context';
 import { ChannelService } from '@app/services/channel/channel.service';
 import { ChatService } from '@app/services/chat/chat.service';
+import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { PopupChatBridgeService } from '@app/services/popup-chat-bridge/popup-chat-bridge.service';
 import { Channel, ChannelSummary } from '@common/channel';
 import { CHANNEL_GENERAL_ID, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, take } from 'rxjs';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { CreateChannelDialogComponent } from '../create-channel-dialog/create-channel-dialog.component';
@@ -30,7 +31,7 @@ import { LoadingComponent } from '../loading/loading.component';
     templateUrl: './channel-navigator.component.html',
     styleUrl: './channel-navigator.component.scss',
 })
-export class ChannelNavigatorComponent implements OnInit {
+export class ChannelNavigatorComponent implements OnInit, OnDestroy {
     @Input() isPopup: boolean = false;
     @Input() gameChannel: ChannelSummary | null = null;
     @Output() openChat: EventEmitter<ChannelSummary> = new EventEmitter<ChannelSummary>();
@@ -39,6 +40,7 @@ export class ChannelNavigatorComponent implements OnInit {
     ChannelTab = ChannelTab;
     searchInput = '';
     isLoading: WritableSignal<boolean> = signal(false);
+    channelRemovedMessage: WritableSignal<string | null> = signal(null);
 
     joinedChannels: ChannelSummary[] = [];
     filteredJoinedChannels: ChannelSummary[] = [];
@@ -51,8 +53,84 @@ export class ChannelNavigatorComponent implements OnInit {
     private channelService = inject(ChannelService);
     private chatService: ChatService = inject(ChatService);
     private popupChatBridgeService = inject(PopupChatBridgeService);
+    private playerSocketService = inject(PlayerSocketService);
+    private translate = inject(TranslateService);
     async ngOnInit(): Promise<void> {
+        if (this.chatService.chatDetache()) {
+            this.popupChatBridgeService.onServerError((data: any) => {
+                this.isLoading.set(false);
+                if (this.instanceOfConfirmationDialogData(data)) {
+                    this.openConfirm(data);
+                } else {
+                    this.openConfirm(SERVER_ERROR_CONFIRM_DIALOG_DATA);
+                }
+            });
+            this.popupChatBridgeService.onChannels((channels) => {
+                let result = channels;
+                if (this.gameChannel) {
+                    const alreadyPresent = channels.some((ch) => {
+                        if (this.gameChannel) {
+                            ch.id === this.gameChannel.id;
+                        }
+                    });
+                    if (!alreadyPresent) {
+                        result = [...channels, this.gameChannel];
+                    }
+                }
+
+                this.isLoading.set(false);
+                this.joinedChannels = result;
+                this.filteredJoinedChannels = [...result];
+                this.resetSearchInput();
+                return;
+            });
+            this.popupChatBridgeService.onSearchChannels((channels) => {
+                this.directoryChannels = channels;
+                this.isLoading.set(false);
+                return;
+            });
+        }
         await this.initJoinedChannels();
+        if (this.chatService.chatDetache()) {
+            this.popupChatBridgeService.onChannelRemoved((channelId) => {
+                const removedChannel = this.joinedChannels.find((ch) => ch.id === channelId) ?? null;
+
+                this.joinedChannels = this.joinedChannels.filter((ch) => ch.id !== channelId);
+                this.filteredJoinedChannels = this.filteredJoinedChannels.filter((ch) => ch.id !== channelId);
+
+                const msg = removedChannel
+                    ? this.translate.instant('channels.deleted-with-name', { name: removedChannel.name })
+                    : this.translate.instant('channels.deleted');
+
+                this.channelRemovedMessage.set(msg);
+
+                setTimeout(() => this.channelRemovedMessage.set(null), 3000);
+                return;
+            });
+            this.popupChatBridgeService.sendChannelOnInit();
+            return;
+        }
+        this.playerSocketService.onChannelRemoved(({ channelId }) => {
+            const removedChannel = this.joinedChannels.find((ch) => ch.id === channelId) ?? null;
+
+            this.joinedChannels = this.joinedChannels.filter((ch) => ch.id !== channelId);
+            this.filteredJoinedChannels = this.filteredJoinedChannels.filter((ch) => ch.id !== channelId);
+
+            const msg = removedChannel
+                ? this.translate.instant('channels.deleted-with-name', { name: removedChannel.name })
+                : this.translate.instant('channels.deleted');
+
+            this.channelRemovedMessage.set(msg);
+
+            setTimeout(() => this.channelRemovedMessage.set(null), 3000);
+        });
+    }
+    ngOnDestroy(): void {
+        if (this.chatService.chatDetache()) {
+            this.popupChatBridgeService.sendChannelOnDestroy();
+            return;
+        }
+        this.playerSocketService.unsubscribeChannel();
     }
     async searchChannel(): Promise<void> {
         if (!this.searchInput.trim()) {
@@ -65,11 +143,6 @@ export class ChannelNavigatorComponent implements OnInit {
             this.filteredJoinedChannels = this.joinedChannels.filter((channel: ChannelSummary) => channel.name.match(regex));
         } else {
             if (this.chatService.chatDetache()) {
-                this.popupChatBridgeService.onSearchChannels((channels) => {
-                    this.directoryChannels = channels;
-                    this.isLoading.set(false);
-                    return;
-                });
                 this.isLoading.set(true);
                 this.popupChatBridgeService.requestSearchChannels(this.searchInput);
                 return;
@@ -107,6 +180,9 @@ export class ChannelNavigatorComponent implements OnInit {
         const channel: Channel = { id: '', name: name, createdAt: new Date() };
 
         if (this.chatService.chatDetache()) {
+            this.popupChatBridgeService.requestCreate(name);
+            this.isLoading.set(true);
+            return;
         }
         try {
             const newChannel: ChannelSummary = await firstValueFrom(this.channelService.createChannel(channel));
@@ -204,23 +280,8 @@ export class ChannelNavigatorComponent implements OnInit {
     private instanceOfConfirmationDialogData(object: any): object is ConfirmationDialogData {
         return 'confirmButtonLabel' in object;
     }
-    private async initJoinedChannels(): Promise<void> {
+    async initJoinedChannels(): Promise<void> {
         if (this.chatService.chatDetache()) {
-            this.popupChatBridgeService.onServerError((data: any) => {
-                this.isLoading.set(false);
-                if (this.instanceOfConfirmationDialogData(data)) {
-                    this.openConfirm(data);
-                } else {
-                    this.openConfirm(SERVER_ERROR_CONFIRM_DIALOG_DATA);
-                }
-            });
-            this.popupChatBridgeService.onChannels((channels) => {
-                this.isLoading.set(false);
-                this.joinedChannels = channels;
-                this.filteredJoinedChannels = channels;
-                this.resetSearchInput();
-                return;
-            });
             this.isLoading.set(true);
             this.popupChatBridgeService.requestChannels();
             return;

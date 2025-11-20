@@ -175,9 +175,12 @@ export class CurrentGamesService {
             console.log(`Game ${id} not found for deletion (already deleted)`);
             return; // Don't throw, just return
         }
+        const chatRoomId = `GAME-${id}`;
+        this.sio.to(chatRoomId).emit('channel-deleted', { channelId: chatRoomId });
+        this.sio.in(chatRoomId).socketsLeave(chatRoomId);
 
         try {
-            await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: id });
+            await this.databaseService.database.collection(process.env.CHAT_COLLECTION_NAME).deleteMany({ roomId: chatRoomId });
         } catch (error) {
             console.warn(`Impossible de supprimer les messages du chat pour ${id} (ignoré).`);
         }

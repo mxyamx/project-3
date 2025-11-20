@@ -149,7 +149,17 @@
         "general": "General",
         "game": "Game Chat",
         "send": "Send",
-        "send-placeholder": "Send a message"
+        "send-placeholder": "Send a message",
+        "channel-deleted": {
+            "title": "Channel deleted",
+            "text": "This channel was deleted by its administrator. You can no longer send messages.",
+            "close": "Leave channel",
+            "placeholder": "This channel no longer accepts messages."
+        }
+    },
+    "channels": {
+        "deleted": "A channel you were subscribed to has been deleted.",
+        "deleted-with-name": "Channel \"{{name}}\" has been deleted."
     },
     "creation-page": {
         "title": "Create a New Game",

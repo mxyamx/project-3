@@ -3,6 +3,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { SERVER_ERROR_CONFIRM_DIALOG_DATA } from '@app/constants/channel-constants';
 import { ConfirmationDialogData } from '@app/interfaces/confirmation-dialog-date';
 import { ChatOnInitContext, PopupChatContext } from '@app/interfaces/popup-chat-context';
+import { Channel } from '@common/channel';
 import { ChatMessage } from '@common/chat-message';
 import { firstValueFrom } from 'rxjs';
 import { ChannelService } from '../channel/channel.service';
@@ -12,6 +13,7 @@ import { UserManagerService } from '../user-manager/user-manager.service';
 type IpcRenderer = {
     send: (channel: string, ...args: any[]) => void;
     on: (channel: string, listener: (event: any, ...args: any[]) => void) => void;
+    removeAllListeners: (channel: string) => void;
 };
 
 @Injectable({
@@ -24,7 +26,6 @@ export class ChatService {
     private userManager = inject(UserManagerService);
     private playerSocketService = inject(PlayerSocketService);
     private channelService = inject(ChannelService);
-    popupContext = signal<PopupChatContext | null>(null);
 
     constructor() {
         this.initIpc();
@@ -57,6 +58,21 @@ export class ChatService {
                     try {
                         const channels = await firstValueFrom(this.channelService.searchChannelsByPattern(input));
                         ipcRenderer.send('main:reply-search-channels', channels);
+                    } catch (err: unknown) {
+                        this.handleServerError(err);
+                    }
+                });
+
+                ipcRenderer.on('main:create-channel', async (_event: any, name: any) => {
+                    try {
+                        const channel: Channel = { id: '', name: name, createdAt: new Date() };
+                        await firstValueFrom(this.channelService.createChannel(channel));
+                        try {
+                            const channels = await firstValueFrom(this.channelService.getMyChannels());
+                            ipcRenderer.send('main:reply-channels', channels);
+                        } catch (err: unknown) {
+                            this.handleServerError(err);
+                        }
                     } catch (err: unknown) {
                         this.handleServerError(err);
                     }
@@ -112,8 +128,15 @@ export class ChatService {
                     this.chatOnInit(roomId);
                 });
 
+                ipcRenderer.on('main:set-channel-on-init', (_event: any, roomId: any) => {
+                    this.channelOnInit();
+                });
+
                 ipcRenderer.on('main:set-chat-on-destroy', (_event: any, roomId: any) => {
                     this.chatOnDestroy(roomId);
+                });
+                ipcRenderer.on('main:set-channel-on-destroy', () => {
+                    this.channelOnDestroy();
                 });
 
                 ipcRenderer.on('popup:closed', () => {
@@ -151,17 +174,24 @@ export class ChatService {
         const userId = this.userManager.getCurrentUser().id;
 
         this.playerSocketService.onChatHistory((msgs) => {
-            console.log('onChatHistory');
             this.roomMessages = msgs;
-            console.log(msgs[0]);
             this.ipc?.send('main:send-chat-history', msgs);
         });
+        this.playerSocketService.onChannelDeleted((response: { channelId: string }) => {
+            if (response.channelId === roomId) {
+                this.ipc?.send('main:channel-deleted');
+                return;
+            }
+        });
 
-        this.playerSocketService.emitJoinChatRoom(roomId);
+        this.playerSocketService.emitJoinChatRoom(roomId, (response) => {
+            if (response.roomDeleted) {
+                this.ipc?.send('main:channel-deleted');
+                return;
+            }
+        });
 
         this.playerSocketService.onNewMessage((roomMessage: ChatMessage) => {
-            console.log('onNewmessage');
-            console.log(roomMessage);
             this.addMessage(roomMessage);
             this.ipc?.send('main:new-message', roomMessage);
         });
@@ -174,18 +204,35 @@ export class ChatService {
         this.playerSocketService.emitLeaveChatRoom(roomId);
     }
 
-    notifyNewMessageToPopup(message: any) {
-        this.ipc?.send('main:new-message', message);
+    channelOnDestroy() {
+        this.playerSocketService.unsubscribeChannel();
+    }
+
+    channelOnInit(): void {
+        this.playerSocketService.onChannelRemoved(({ channelId }) => {
+            this.ipc?.send('main:channel-removed', channelId);
+        });
     }
 
     detachChat(context: PopupChatContext): void {
         this.chatDetache.set(true);
-        this.popupContext.set(context);
 
         if (this.ipc) {
             this.ipc.send('popup:open', context);
         } else {
             console.warn('detachChat() sans ipcRenderer (pas d’Electron)');
         }
+    }
+
+    closePopup(): void {
+        this.ipc?.send('popup:close');
+    }
+
+    joinGameChat(gamedId: string): void {
+        this.ipc?.send('main:join-game-chat', gamedId);
+    }
+
+    leaveGameChat(gamedId: string): void {
+        this.ipc?.send('main:leave-game-chat', gamedId);
     }
 }

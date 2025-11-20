@@ -23,11 +23,12 @@ import { UserManagerService } from '@app/services/user-manager/user-manager.serv
 import { ChatMessage } from '@common/chat-message';
 import { CHANNEL_GENERAL_ID, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
 import { TranslatePipe } from '@ngx-translate/core';
+import { LoadingComponent } from '../loading/loading.component';
 
 @Component({
     selector: 'app-chat',
     standalone: true,
-    imports: [CommonModule, FormsModule, TranslatePipe],
+    imports: [CommonModule, FormsModule, TranslatePipe, LoadingComponent],
     templateUrl: './chat.component.html',
     styleUrl: './chat.component.scss',
 })
@@ -44,6 +45,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     playerId: string = '';
     messageInput: string = '';
     nCharacters: WritableSignal<number> = signal(0);
+    isLoading: WritableSignal<boolean> = signal(false);
+    channelDeleted: WritableSignal<boolean> = signal(false);
     maxNCharacters: number = MAX_LENGTH_MESSAGE;
 
     chatService = inject(ChatService);
@@ -54,6 +57,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     readonly channelGeneralId = CHANNEL_GENERAL_ID;
 
     ngOnInit() {
+        this.isLoading.set(true);
         if (this.chatService.chatDetache()) {
             this.popupChatBridgeService.onChatOnInit((context) => {
                 this.userManager.setId(context?.userId);
@@ -65,6 +69,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
             this.popupChatBridgeService.onChatHistory((messages) => {
                 this.chatService.roomMessages = messages;
                 this.needScroll = true;
+                this.isLoading.set(false);
                 return;
             });
             this.popupChatBridgeService.onNewMessage((msg) => {
@@ -72,6 +77,12 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
                 this.needScroll = true;
                 return;
             });
+            this.popupChatBridgeService.onChannelDeleted(() => {
+                this.channelDeleted.set(true);
+                this.isLoading.set(false);
+                return;
+            });
+
             this.popupChatBridgeService.sendChatOnInit(this.roomId);
             return;
         }
@@ -81,6 +92,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
         this.playerSocketService.onChatHistory((msgs) => {
             this.chatService.roomMessages = msgs;
             this.needScroll = true;
+            this.isLoading.set(false);
         });
 
         this.joinRoom();
@@ -108,7 +120,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     joinRoom() {
         if (this.roomId) {
-            this.playerSocketService.emitJoinChatRoom(this.roomId);
+            this.playerSocketService.emitJoinChatRoom(this.roomId, (response) => {
+                if (response.roomDeleted) {
+                    this.channelDeleted.set(true);
+                    this.isLoading.set(false);
+                    return;
+                }
+            });
         }
     }
 
@@ -116,6 +134,12 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
         this.playerSocketService.onNewMessage((roomMessage: ChatMessage) => {
             this.chatService.addMessage(roomMessage);
             this.needScroll = true;
+        });
+        this.playerSocketService.onChannelDeleted((response: { channelId: string }) => {
+            if (response.channelId === this.roomId) {
+                this.channelDeleted.set(true);
+                this.isLoading.set(false);
+            }
         });
     }
 
@@ -143,13 +167,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     private scrollToBottom(): void {
-        console.log('test 1');
         this.needScroll = false;
         try {
-            console.log('test 2');
             this.chatMessagesContainer.nativeElement.scrollTop = this.chatMessagesContainer.nativeElement.scrollHeight;
         } catch (err) {
-            console.log('test 3');
             return;
         }
     }

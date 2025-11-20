@@ -16,7 +16,6 @@ export class PopupChatBridgeService {
 
     private initIpc() {
         try {
-            console.log('window.require =', (window as any).require);
             const w = window as any;
             if (w && w.require) {
                 const { ipcRenderer } = w.require('electron');
@@ -30,8 +29,16 @@ export class PopupChatBridgeService {
     sendChatOnInit(roomId: any): void {
         this.ipc?.send('popup:request-chat-on-init', roomId);
     }
+
+    sendChannelOnInit(): void {
+        this.ipc?.send('popup:request-channel-on-init');
+    }
     sendChatOnDestroy(roomId: any): void {
         this.ipc?.send('popup:request-chat-on-destroy', roomId);
+    }
+
+    sendChannelOnDestroy(): void {
+        this.ipc?.send('popup:request-channel-on-destroy');
     }
 
     openPopupFromMainWindow(): void {
@@ -45,12 +52,28 @@ export class PopupChatBridgeService {
     onChannels(cb: (channels: any[]) => void): void {
         this.ipc?.on('popup:channels', (_event, channels) => cb(channels));
     }
+    onChannelDeleted(cb: () => void): void {
+        this.ipc?.on('popup:channel-deleted', () => cb());
+    }
+    onChannelRemoved(cb: (channelId: any) => void): void {
+        this.ipc?.on('popup:channel-removed', (_event, channelId) => cb(channelId));
+    }
+    onJoinGameChat(cb: (roomId: any) => void): void {
+        this.ipc?.on('popup:join-game-chat', (_event, roomId) => cb(roomId));
+    }
+    onLeaveGameChat(cb: (roomId: any) => void): void {
+        this.ipc?.on('popup:leave-game-chat', (_event, roomId) => cb(roomId));
+    }
 
     onSearchChannels(cb: (channels: any[]) => void): void {
         this.ipc?.on('popup:search-channels', (_event, channels) => cb(channels));
     }
     requestSearchChannels(input: string): void {
         this.ipc?.send('popup:request-search-channels', input);
+    }
+
+    requestCreate(name: string): void {
+        this.ipc?.send('popup:request-create-channel', name);
     }
 
     requestDelete(id: string): void {

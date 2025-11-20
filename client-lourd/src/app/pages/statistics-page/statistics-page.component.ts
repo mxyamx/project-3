@@ -55,5 +55,8 @@ export class StatisticsPageComponent implements OnDestroy {
     ngOnDestroy(): void {
         this.playerSocketService.emitLeaveGame(this.gameId);
         this.playerSocketService.unsubscribeGameEvents();
+        if (this.chatService.chatDetache()) {
+            this.chatService.leaveGameChat(this.gameId);
+        }
     }
 }

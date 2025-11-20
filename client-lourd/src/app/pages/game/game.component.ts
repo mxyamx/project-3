@@ -93,6 +93,9 @@ export class GameComponent implements OnInit, OnDestroy {
         if (!this.gameSocketEventManager.gameEnding) {
             this.playerSocketService.emitLeaveGame(this.gameSessionManager.gameId());
             this.playerSocketService.unsubscribeGameEvents();
+            if (this.chatService.chatDetache()) {
+                this.chatService.leaveGameChat(this.gameSessionManager.gameId());
+            }
         }
     }
 

@@ -64,6 +64,9 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.gameId = this.currentGameManager.displayedCurrentGame().id;
+        if (this.chatService.chatDetache()) {
+            this.chatService.joinGameChat(this.gameId);
+        }
         if (this.gameId) {
             this.playerSocketService.emitGetGame(this.gameId, (response: CurrentGame) => {
                 if (response) {
@@ -115,6 +118,9 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
         if (!this.isStartingGame && this.gameId) {
             this.playerSocketService.emitLeaveGame(this.gameId);
             this.playerSocketService.unsubscribeGameEvents();
+            if (this.chatService.chatDetache()) {
+                this.chatService.leaveGameChat(this.gameId);
+            }
         }
     }
 

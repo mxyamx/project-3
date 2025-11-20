@@ -149,7 +149,17 @@
         "general": "Général",
         "game": "Chat de jeu",
         "send": "Envoyer",
-        "send-placeholder": "Envoyer un message"
+        "send-placeholder": "Envoyer un message",
+        "channel-deleted": {
+            "title": "Canal supprimé",
+            "text": "Ce canal a été supprimé par son administrateur. Vous ne pouvez plus envoyer de messages.",
+            "close": "Quitter le canal",
+            "placeholder": "Ce canal n'accepte plus de messages."
+        }
+    },
+    "channels": {
+        "deleted": "Un canal auquel vous étiez abonné a été supprimé.",
+        "deleted-with-name": "Le canal \"{{name}}\" a été supprimé."
     },
     "creation-page": {
         "title": "Crée une nouvelle partie",

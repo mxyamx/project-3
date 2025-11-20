@@ -34,6 +34,7 @@ import { Collection } from 'mongodb';
 import * as io from 'socket.io';
 import { Container } from 'typedi';
 import { BoardGameService } from '../board-game/board-game.service';
+import { ChannelSocketManager } from '../channel/channel-socket-manager';
 import { FriendSocketManager } from '../friends/friend-socket.manager';
 import { UsersService } from '../users/users.service';
 export class SocketManager {
@@ -42,6 +43,7 @@ export class SocketManager {
     private sio: io.Server;
     private gameScheduler: GameScheduler;
     private friendSocketManager: FriendSocketManager;
+    private channelSocketManager: ChannelSocketManager;
     private userSessionController: UserSessionController;
     private userSessionManager: UserSessionManager;
     private avatarContainer = new AvatarContainer();
@@ -70,8 +72,11 @@ export class SocketManager {
         this.gameService.setIo(this.sio);
         this.gameScheduler = new GameScheduler(this.sio, this.gameService);
         this.userSessionController = new UserSessionController(this.sio, Container.get(UsersService), this.userSessionManager);
-        this.socketGameCommunication = new SocketGameCommunication(this.sio, this.databaseService, (socketId: string) =>
-            this.userSessionManager.getFirebaseIdBySocketId(socketId),
+        this.socketGameCommunication = new SocketGameCommunication(
+            this.sio,
+            this.databaseService,
+            (socketId: string) => this.userSessionManager.getFirebaseIdBySocketId(socketId),
+            this.gameService,
         );
         this.boardGameService = Container.get(BoardGameService);
         const vpSocketAddingHandlerConfig: VpSocketAddingHandlerConfig = {
@@ -89,6 +94,7 @@ export class SocketManager {
         };
         this.vpSocketAddingHandler = new VpSocketAddingHandler(vpSocketAddingHandlerConfig);
         this.friendSocketManager = new FriendSocketManager(this.sio, this.userSessionManager);
+        this.channelSocketManager = new ChannelSocketManager(this.sio, this.userSessionManager, this.databaseService);
     }
 
     handleSockets(): void {
@@ -102,6 +108,7 @@ export class SocketManager {
             this.gameScheduler.handleCommand(socket);
             this.socketGameCommunication.handleSockets(socket);
             this.friendSocketManager.handleUserConnection(socket);
+            this.channelSocketManager.handleUserConnection(socket);
 
             socket.on('create-game', async (game: CurrentGame, callback) => {
                 try {

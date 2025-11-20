@@ -1,8 +1,12 @@
 <div class="admin-container justified">
     <section class="navigation">
-        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}</button>
+        <div class="right-group">
+            <i class="fa-solid fa-message chat-button" aria-hidden="true" (click)="openChat()"></i>
+            <button class="navigation-button" routerLink="/main-page">
+                <i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}
+            </button>
+        </div>
     </section>
-
     <section class="header-item">
         <h1>{{ 'admin-page.title' | translate }}</h1>
     </section>
@@ -78,4 +82,9 @@
             } }
         </section>
     </div>
+    @if(showChat() && !this.chatService.chatDetache()){
+    <div class="chat-container">
+        <app-chat-container></app-chat-container>
+    </div>
+    }
 </div>

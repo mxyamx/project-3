@@ -13,6 +13,7 @@ function initWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
+            partition: 'persist:main',
         },
     });
 
@@ -76,7 +77,11 @@ function createPopup(context) {
         }
     });
 }
-
+ipcMain.on('popup:close', () => {
+    if (popupWindow && !popupWindow.isDestroyed()) {
+        popupWindow.close();
+    }
+});
 ipcMain.on('popup:open', (_event, context) => {
     createPopup(context);
 });
@@ -90,6 +95,22 @@ ipcMain.on('popup:request-channels', () => {
 ipcMain.on('popup:request-search-channels', (_event, input) => {
     if (appWindow && !appWindow.isDestroyed()) {
         appWindow.webContents.send('main:get-search-channels', input);
+    }
+});
+
+ipcMain.on('main:leave-game-chat', (_event, roomId) => {
+    if (appWindow && !appWindow.isDestroyed()) {
+        appWindow.webContents.send('popup:leave-game-chat', roomId);
+    }
+});
+ipcMain.on('main:join-game-chat', (_event, roomId) => {
+    if (appWindow && !appWindow.isDestroyed()) {
+        appWindow.webContents.send('popup:join-game-chat', roomId);
+    }
+});
+ipcMain.on('popup:request-create-channel', (_event, name) => {
+    if (appWindow && !appWindow.isDestroyed()) {
+        appWindow.webContents.send('main:create-channel', name);
     }
 });
 
@@ -116,15 +137,39 @@ ipcMain.on('popup:request-chat-on-init', (_event, roomId) => {
     }
 });
 
+ipcMain.on('popup:request-channel-on-init', () => {
+    if (appWindow && !appWindow.isDestroyed()) {
+        appWindow.webContents.send('main:set-channel-on-init');
+    }
+});
+
 ipcMain.on('popup:request-chat-on-destroy', (_event, roomId) => {
     if (appWindow && !appWindow.isDestroyed()) {
         appWindow.webContents.send('main:set-chat-on-destroy', roomId);
     }
 });
 
+ipcMain.on('popup:request-channel-on-destroy', () => {
+    if (appWindow && !appWindow.isDestroyed()) {
+        appWindow.webContents.send('main:set-channel-on-destroy');
+    }
+});
+
 ipcMain.on('main:send-chat-on-init-done', (_event, context) => {
     if (popupWindow && !popupWindow.isDestroyed()) {
         popupWindow.webContents.send('popup:chat-on-init-context', context);
+    }
+});
+
+ipcMain.on('main:channel-deleted', () => {
+    if (popupWindow && !popupWindow.isDestroyed()) {
+        popupWindow.webContents.send('popup:channel-deleted');
+    }
+});
+
+ipcMain.on('main:channel-removed', (_event, channelId) => {
+    if (popupWindow && !popupWindow.isDestroyed()) {
+        popupWindow.webContents.send('popup:channel-removed', channelId);
     }
 });
 

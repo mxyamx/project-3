@@ -37,6 +37,17 @@
         </div>
     </div>
 
+    @if (channelRemovedMessage()) {
+    <div class="channel-removed-banner">
+        <span class="icon">
+            <i class="fa fa-info-circle"></i>
+        </span>
+        <span class="text">
+            {{ channelRemovedMessage() }}
+        </span>
+    </div>
+    }
+
     <div class="search-input">
         @if(selectedTab() === ChannelTab.Joined){
         <i class="fa-solid fa-filter search-icon"></i>

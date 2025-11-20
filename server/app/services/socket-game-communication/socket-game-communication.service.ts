@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable no-restricted-imports */
+import { ChannelDoc } from '@app/interfaces/channel-doc';
 import { ChatMessageDoc } from '@app/interfaces/chat-message-doc';
 import { ChatMessage } from '@common/chat-message';
+import { CHANNEL_GENERAL_ID, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
 import { SocketEventNames } from '@common/enums/socket-events-names';
 import { CombatLog, GameEventLog, RoomMessage } from '@common/socket-data-forms';
 import { Collection } from 'mongodb';
 import * as io from 'socket.io';
+import { CurrentGamesService } from '../current-games/current-games.service';
 import { DatabaseService } from '../database/database.service';
 
 interface UserDoc {
@@ -21,6 +24,7 @@ export class SocketGameCommunication {
         private sio: io.Server,
         private databaseService: DatabaseService,
         private getFirebaseIdBySocketId: (socketId: string) => string | null,
+        private gameService: CurrentGamesService,
     ) {}
 
     get collection(): Collection<ChatMessageDoc> {
@@ -31,8 +35,26 @@ export class SocketGameCommunication {
         return this.databaseService.database.collection(process.env.USER_COLLECTION_NAME ?? 'users');
     }
 
+    get channelCollection(): Collection<ChannelDoc> {
+        return this.databaseService.database.collection(process.env.CHANNEL_COLLECTION_NAME);
+    }
+
     handleSockets(socket: io.Socket): void {
-        socket.on('join-room-chat', async (roomId: string) => {
+        socket.on('join-room-chat', async (roomId: string, callback) => {
+            if (!GAME_ROOM_REGEX.test(roomId) && roomId !== CHANNEL_GENERAL_ID) {
+                const channel = await this.channelCollection.findOne({ id: roomId });
+                if (!channel) {
+                    callback({ roomDeleted: true });
+                    return;
+                }
+            }
+            if (GAME_ROOM_REGEX.test(roomId)) {
+                const game = await this.gameService.getGame(roomId.split('-')[1]);
+                if (!game) {
+                    callback({ roomDeleted: true });
+                    return;
+                }
+            }
             socket.join(roomId);
 
             const pipeline = [
@@ -63,6 +85,7 @@ export class SocketGameCommunication {
             }
 
             socket.emit(SocketEventNames.ChatHistory, history);
+            callback({ roomDeleted: false });
         });
 
         socket.on('leave-room-chat', async (roomId: string) => {

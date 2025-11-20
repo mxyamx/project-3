@@ -1,6 +1,8 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
+import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { DropdownComponent } from '@app/components/dropdown/dropdown.component';
+import { ChatService } from '@app/services/chat/chat.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { LanguageService } from '@app/services/language/language.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
@@ -13,7 +15,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 @Component({
     selector: 'app-settings-page',
     standalone: true,
-    imports: [DropdownComponent, TranslatePipe],
+    imports: [DropdownComponent, TranslatePipe, ChatContainerComponent],
     templateUrl: './settings-page.component.html',
     styleUrl: './settings-page.component.scss',
 })
@@ -24,6 +26,8 @@ export class SettingsPageComponent implements OnInit {
     readonly themes = [InterfaceTheme.Light, InterfaceTheme.Dark];
     selectedLanguage: Language;
     selectedTheme: InterfaceTheme;
+    showChat: WritableSignal<boolean> = signal(false);
+    chatService: ChatService = inject(ChatService);
 
     initialLanguage: Language;
     initialTheme: InterfaceTheme;
@@ -64,5 +68,8 @@ export class SettingsPageComponent implements OnInit {
                 },
             });
         }
+    }
+    openChat() {
+        this.showChat.set(!this.showChat());
     }
 }
