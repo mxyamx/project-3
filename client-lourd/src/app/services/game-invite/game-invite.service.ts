@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
@@ -7,7 +7,7 @@ import { PlayerSocketService } from '@app/services/player-socket/player-socket.s
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { JoinGameAck } from '@common/current-game';
 import { UrlPage } from '@common/enums/url-page';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
 export interface GameInvitation {
     from: string;
@@ -20,7 +20,7 @@ export interface GameInvitation {
 @Injectable({
     providedIn: 'root',
 })
-export class GameInviteService {
+export class GameInviteService implements OnDestroy {
     private socketService = inject(SocketClientService);
     private playerSocketService = inject(PlayerSocketService);
     private router = inject(Router);
@@ -33,12 +33,32 @@ export class GameInviteService {
     private invitationError = new BehaviorSubject<string | null>(null);
     private hasNewInvitations = new BehaviorSubject<boolean>(false);
 
+    private socketSubscriptions: Subscription[] = [];
+
     constructor() {
         this.setupInvitationListener();
+        this.setupReconnectionHandler();
     }
 
-    private setupInvitationListener(): void {
-        this.socketService.on('game-invite-received', (data: GameInvitation) => {
+    ngOnDestroy(): void {
+        this.socketSubscriptions.forEach((sub) => sub.unsubscribe());
+        this.socketSubscriptions = [];
+    }
+
+    private setupReconnectionHandler(): void {
+        this.socketService.on('connect', () => {
+            
+            this.setupInvitationListener();
+        });
+    }
+
+    setupInvitationListener(): void {
+
+        this.socketSubscriptions.forEach((sub) => sub.unsubscribe());
+        this.socketSubscriptions = [];
+
+        const inviteReceivedSub = this.socketService.listen<GameInvitation>('game-invite-received').subscribe((data) => {
+            
 
             const currentUserId = this.userManagerService.getCurrentUser().id;
             if (data.fromId === currentUserId) {
@@ -58,15 +78,17 @@ export class GameInviteService {
             }
         });
 
-        this.socketService.on('invite-sent', (data: { success: boolean }) => {
+        const inviteSentSub = this.socketService.listen<{ success: boolean }>('invite-sent').subscribe((data) => {
             if (data.success) {
                 console.log('Invitation sent successfully');
             }
         });
 
-        this.socketService.on('invite-failed', (data: { reason: string }) => {
+        const inviteFailedSub = this.socketService.listen<{ reason: string }>('invite-failed').subscribe((data) => {
             console.log('Invitation failed:', data.reason);
         });
+
+        this.socketSubscriptions.push(inviteReceivedSub, inviteSentSub, inviteFailedSub);
     }
 
     getPendingInvitations(): Observable<GameInvitation[]> {
@@ -94,7 +116,6 @@ export class GameInviteService {
     }
 
     acceptInvitation(invitation: GameInvitation): void {
-
         this.processingInvitation.next(true);
         this.invitationError.next(null);
 
@@ -154,7 +175,6 @@ export class GameInviteService {
     }
 
     declineInvitation(invitation: GameInvitation): void {
-
         this.socketService.send('decline-game-invite', {
             gameId: invitation.gameId,
             inviterId: invitation.fromId,

@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { DeviceType } from '@common/enums/deviceType';
 import { GameActivityStatus } from '@common/enums/game-activity-status';
 import { UserStatusInfo } from '@common/user';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { SocketClientService } from '../client-socket/socket-client.service';
 
 @Injectable({
@@ -11,30 +11,40 @@ import { SocketClientService } from '../client-socket/socket-client.service';
 export class UserStatusService {
     private socketService = inject(SocketClientService);
     private userStatuses = new BehaviorSubject<Map<string, UserStatusInfo>>(new Map());
+    private socketSubscriptions: Subscription[] = [];
 
     constructor() {
         this.listenToStatusChanges();
+        this.setupReconnectionHandler();
     }
 
-    private listenToStatusChanges(): void {
-        // Listen for real-time status changes
-        this.socketService.on('user-game-activity-changed', (data: UserStatusInfo) => {
+    private setupReconnectionHandler(): void {
+        this.socketService.on('connect', () => {
+            
+        });
+    }
+
+    listenToStatusChanges(): void {
+        this.socketSubscriptions.forEach((sub) => sub.unsubscribe());
+        this.socketSubscriptions = [];
+
+        const statusChangeSub = this.socketService.listen<UserStatusInfo>('user-game-activity-changed').subscribe((data) => {
             const statuses = this.userStatuses.value;
             statuses.set(data.userId, data);
             this.userStatuses.next(new Map(statuses));
         });
 
-        // Listen for bulk status responses
-        this.socketService.on('users-status-response', (data: { statuses: UserStatusInfo[] }) => {
+        const statusResponseSub = this.socketService.listen<{ statuses: UserStatusInfo[] }>('users-status-response').subscribe((data) => {
             const statuses = new Map(this.userStatuses.value);
             data.statuses.forEach((status) => {
                 statuses.set(status.userId, status);
             });
             this.userStatuses.next(statuses);
         });
+
+        this.socketSubscriptions.push(statusChangeSub, statusResponseSub);
     }
 
-    // Fetch initial statuses for a list of users
     fetchUserStatuses(userIds: string[]): void {
         if (userIds.length === 0) return;
         this.socketService.send('get-users-status', { userIds });
@@ -72,5 +82,10 @@ export class UserStatusService {
 
     removeInvitationListener(): void {
         this.socketService.off('game-invite-received');
+    }
+
+    ngOnDestroy(): void {
+        this.socketSubscriptions.forEach((sub) => sub.unsubscribe());
+        this.socketSubscriptions = [];
     }
 }
