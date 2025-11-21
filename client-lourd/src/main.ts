@@ -44,7 +44,7 @@ const routes: Routes = [
     { path: 'editor', component: BoardEditionPageComponent },
     { path: 'editor/:id', component: BoardEditionPageComponent },
     { path: 'game', component: GameComponent },
-    { path: 'chat', component: ChatPageComponent },
+    { path: 'popup', component: ChatPageComponent },
     { path: 'game-code', component: EnteringCurrentGamePageComponent },
     { path: 'statistics', component: StatisticsPageComponent },
     { path: 'error-page', component: ErrorPageComponent },

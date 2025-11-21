@@ -1,10 +1,13 @@
 <div class="shop-page">
-    <div class="toolbar">
-        <button class="btn" (click)="goBack()"><i class="fas fa-arrow-left"></i> {{ 'shop-page.back-button' | translate }}</button>
-        <div class="balance">
-            <i class="fa-solid fa-coins"></i><span>{{ money() }}</span>
+    <section class="navigation">
+        <div class="right-group">
+            <i class="fa-solid fa-message chat-button" aria-hidden="true" (click)="openChat()"></i>
+            <div class="balance">
+                <i class="fa-solid fa-coins"></i><span>{{ money() }}</span>
+            </div>
+            <button class="navigation-button" (click)="goBack()"><i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}</button>
         </div>
-    </div>
+    </section>
 
     <div class="section">
         <h2>{{ 'shop-page.Exclusive-avatars' | translate }}</h2>
@@ -78,4 +81,10 @@
         </div>
     </div>
     <p class="error" *ngIf="errorMsg()">{{ errorMsg() }}</p>
+
+    @if(showChat() && !this.chatService.chatDetache()){
+    <div class="chat-container">
+        <app-chat-container></app-chat-container>
+    </div>
+    }
 </div>

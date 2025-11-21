@@ -1,10 +1,15 @@
+import { HttpException } from '@app/classes/http-exception/http.exception';
+import { friendEvents } from '@app/events/friendEvents';
+import { ChannelDeletedPayload } from '@app/interfaces/channel-deleted-payload';
 import { ChannelDoc } from '@app/interfaces/channel-doc';
 import { ChannelMemberDoc } from '@app/interfaces/channel-member-doc';
 import { ChatMessageDoc } from '@app/interfaces/chat-message-doc';
 import { DatabaseService } from '@app/services/database/database.service';
 import { Channel, ChannelSummary } from '@common/channel';
 import { CHANNEL_GENERAL_ID, CHANNEL_GENERAL_NAME, FORBIDDEN_CHANNEL_NAMES } from '@common/constants/chat.constants';
+import { ChannelEventType } from '@common/enums/channel-event-type';
 import { ChannelRole } from '@common/enums/channel-role';
+import httpStatus from 'http-status-codes';
 import { Collection, Filter, ObjectId } from 'mongodb';
 import { Service } from 'typedi';
 
@@ -66,24 +71,40 @@ export class ChannelService {
         channelSummarys.push(generalChannel);
         return channelSummarys;
     }
+    normalizeName(name: string): string {
+        return name
+            .trim()
+            .toLocaleLowerCase('fr-CA')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    }
 
     async createChannel(payload: Channel, userId: string): Promise<ChannelSummary> {
         const session = this.databaseService.mongo.startSession();
+        const rawName = payload.name.trim();
+        const normalizedName = this.normalizeName(rawName);
+
+        const normalizedForbidden = FORBIDDEN_CHANNEL_NAMES.map((name) => this.normalizeName(name));
+
+        if (normalizedForbidden.includes(normalizedName)) {
+            const err = new HttpException('channel-already-exists');
+            err.status = httpStatus.BAD_REQUEST;
+            throw err;
+        }
+
         const channelDoc: ChannelDoc = {
             _id: new ObjectId(),
             id: crypto.randomUUID(),
-            name: payload.name.trim(),
-            createdAt: payload.createdAt,
+            name: rawName,
+            createdAt: new Date(),
         };
-
-        if (channelDoc.name in FORBIDDEN_CHANNEL_NAMES) {
-            throw new Error('CHANNEL_ALREADY_EXISTS');
-        }
 
         const existingChannel = await this.channelCollection.findOne({ name: payload.name.trim() });
 
         if (existingChannel) {
-            throw new Error('CHANNEL_ALREADY_EXISTS');
+            const err = new HttpException('channel-already-exists');
+            err.status = httpStatus.BAD_REQUEST;
+            throw err;
         }
 
         try {
@@ -109,7 +130,9 @@ export class ChannelService {
     async joinChannel(channelId: string, userId: string): Promise<void> {
         const channel = await this.channelCollection.findOne({ id: channelId });
         if (!channel) {
-            throw new Error('CHANNEL_NOT_FOUND');
+            const err = new HttpException('channel-not-found');
+            err.status = httpStatus.NOT_FOUND;
+            throw err;
         }
 
         const existing = await this.memberCollection.findOne({ channelId, userId });
@@ -123,12 +146,21 @@ export class ChannelService {
     }
 
     async leaveChannel(channelId: string, userId: string): Promise<void> {
-        if (channelId === CHANNEL_GENERAL_ID) throw new Error('Le canal général ne peut pas être supprimé.');
+        const channel = await this.channelCollection.findOne({ id: channelId });
+        if (!channel) {
+            const err = new HttpException('channel-not-found');
+            err.status = httpStatus.NOT_FOUND;
+            throw err;
+        }
         const session = this.databaseService.mongo.startSession();
         try {
             await session.withTransaction(async () => {
                 const membership = await this.memberCollection.findOne({ channelId, userId }, { session });
-                if (!membership) throw new Error("L'utilisateur n'était pas membre de ce canal.");
+                if (!membership) {
+                    const err = new HttpException('channel-not-found');
+                    err.status = httpStatus.NOT_FOUND;
+                    throw err;
+                }
 
                 const isAdminLeaving = membership.role === ChannelRole.Admin;
 
@@ -184,14 +216,51 @@ export class ChannelService {
         return [...prefix, ...others];
     }
 
-    async deleteChannel(channelId: string): Promise<void> {
-        if (channelId === CHANNEL_GENERAL_ID) throw new Error('Le canal général ne peut pas être supprimé.');
+    async deleteChannel(channelId: string, userId: string): Promise<void> {
+        if (channelId === CHANNEL_GENERAL_ID) {
+            const err = new HttpException('channel-delete-forbidden');
+            err.status = httpStatus.FORBIDDEN;
+            throw err;
+        }
+
+        const channel = await this.channelCollection.findOne({ id: channelId });
+        if (!channel) {
+            const err = new HttpException('channel-not-found');
+            err.status = httpStatus.NOT_FOUND;
+            throw err;
+        }
+
+        const membership = await this.memberCollection.findOne({ channelId, userId });
+        if (!membership) {
+            const err = new HttpException('channel-delete-forbidden');
+            err.status = httpStatus.FORBIDDEN;
+            throw err;
+        }
+
+        if (membership.role !== ChannelRole.Admin) {
+            const err = new HttpException('channel-delete-forbidden');
+            err.status = httpStatus.FORBIDDEN;
+            throw err;
+        }
+        const links: ChannelMemberDoc[] = await this.memberCollection.find({ channelId }).toArray();
+
+        const users: string[] = links.map((link) => {
+            const id = link.userId;
+            return id;
+        });
+
+        const payload: ChannelDeletedPayload = {
+            users,
+            roomId: channelId,
+        };
+
+        friendEvents.emit(ChannelEventType.DELETED, payload);
         const session = this.databaseService.mongo.startSession();
         try {
             await session.withTransaction(async () => {
                 await this.memberCollection.deleteMany({ channelId }, { session });
                 await this.channelCollection.deleteOne({ id: channelId }, { session });
-                await this.chatCollection.deleteMany({ roomId: channelId });
+                await this.chatCollection.deleteMany({ roomId: channelId }, { session });
             });
         } finally {
             await session.endSession();

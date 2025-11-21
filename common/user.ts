@@ -1,4 +1,5 @@
 import { DeviceType } from '@common/enums/deviceType';
+import { GameActivityStatus } from '@common/enums/game-activity-status';
 import { Parameters } from '@common/parameters';
 import { PlayerStatistics } from '@common/statistics';
 
@@ -16,12 +17,16 @@ export interface User {
     status: DeviceType;
     purchasedAvatars?: string[];
     purchasedSounds?: string[];
+    gameActivity?: GameActivityStatus;
+    currentGameId?: string;
     selectedSound?: string;
 }
 
-export interface UserDTO {
-    id: string;
+export interface UserStatusInfo {
+    userId: string;
     username: string;
-    email: string;
     avatar: string;
+    status: DeviceType;
+    gameActivity?: GameActivityStatus;
+    gameId?: string;
 }
