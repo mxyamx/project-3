@@ -1,6 +1,7 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
 import { ProfileAvatar } from '@common/enums/avatar';
 import { DeviceType } from '@common/enums/deviceType';
+import { GameActivityStatus } from '@common/enums/game-activity-status';
 import { InterfaceTheme } from '@common/enums/interfaceTheme';
 import { Language } from '@common/enums/language';
 import { PlayerStatistics } from '@common/statistics';
@@ -27,6 +28,8 @@ export class UserManagerService {
             parameters: { language: Language.french, theme: InterfaceTheme.Light },
             statistics: this.getDefaultStatistics(),
             status: DeviceType.web,
+            gameActivity: GameActivityStatus.idle,
+            currentGameId: '',
         };
     }
 
@@ -119,5 +122,13 @@ export class UserManagerService {
 
     resetUser() {
         this.currentUser.set(this.getDefaultUser());
+    }
+
+    setGameActivity(gameActivity?: GameActivityStatus) {
+        this.currentUser.update((curr) => ({ ...curr, gameActivity }));
+    }
+
+    setCurrentGameId(currentGameId?: string) {
+        this.currentUser.update((curr) => ({ ...curr, currentGameId }));
     }
 }

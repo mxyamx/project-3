@@ -388,7 +388,13 @@
             "agressive": "Agressif",
             "defensive": "Défensif"
         },
-        "player-amount-modal": "Le nombre de joueurs doit être pair pour commencer une partie en mode CTF."
+        "player-amount-modal": "Le nombre de joueurs doit être pair pour commencer une partie en mode CTF.",
+        "invite-friends": "Inviter des amis",
+        "invite-popup": {
+            "title": "Inviter des amis",
+            "invite": "Inviter",
+            "no-friends": "Aucun ami disponible"
+        }
     },
     "entry-fee-label": "Frais d'entrée",
     "entry-fee-free": "Salle gratuite",
@@ -539,21 +545,30 @@
             "friends": "Amis",
             "received": "Reçues",
             "sent": "Envoyées",
-            "add": "Ajouter"
+            "add": "Ajouter",
+            "invites": "Invitations"
         },
         "actions": {
-            "remove": "Supprimer",
             "accept": "Accepter",
-            "reject": "Refuser",
+            "decline": "Refuser",
+            "reject": "Rejeter",
             "cancel": "Annuler",
-            "add": "Ajouter ami",
-            "search": "Rechercher",
-            "block": "Bloquer"
+            "remove": "Retirer",
+            "block": "Bloquer",
+            "add": "Ajouter",
+            "search": "Rechercher"
+        },
+        "status": {
+            "offline": "Hors ligne",
+            "desktop": "En ligne (Ordinateur)",
+            "mobile": "En ligne (Mobile)",
+            "in-game": "En jeu"
         },
         "empty": {
             "no-friends": "Aucun ami pour le moment",
             "no-pending": "Aucune demande reçue",
             "no-sent": "Aucune demande envoyée",
+            "no-invites": "Aucune invitation de jeu",
             "no-results": "Aucun utilisateur trouvé"
         },
         "errors": {
@@ -564,12 +579,25 @@
             "cancel-failed": "Échec de l'annulation de la demande",
             "remove-failed": "Échec de la suppression de l'ami"
         },
+        "game-invite": {
+            "errors": {
+                "not-friend": "Vous devez être amis pour rejoindre cette partie",
+                "blocked-by-player": "Vous êtes bloqué par un joueur dans cette partie",
+                "you-blocked-player": "Vous avez bloqué un joueur dans cette partie",
+                "game-not-found": "Cette partie n'existe plus",
+                "game-locked": "Cette partie est verrouillée",
+                "game-full": "Cette partie est complète",
+                "insufficient-funds": "Vous n'avez pas assez d'argent",
+                "unknown": "Échec de la connexion. Veuillez réessayer."
+            }
+        },
         "confirm-remove-friend": "Êtes-vous sûr de vouloir supprimer cet ami ?",
         "confirm-block-user": "Êtes-vous sûr de vouloir bloquer cet utilisateur ?",
         "block-not-implemented": "Fonctionnalité de blocage pas encore implémentée",
         "loading": "Chargement...",
         "searching": "Recherche...",
-        "search-placeholder": "Chercher un utilisateur..."
+        "search-placeholder": "Chercher un utilisateur...",
+        "invite-message": "vous invite à rejoindre sa partie"
     },
 
     "socials-page": {

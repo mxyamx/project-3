@@ -390,7 +390,13 @@
             "agressive": "Aggressive",
             "defensive": "Defensive"
         },
-        "player-amount-modal": "The number of players must be even to start a game in CTF mode."
+        "player-amount-modal": "The number of players must be even to start a game in CTF mode.",
+        "invite-friends": "Invite Friends",
+        "invite-popup": {
+            "title": "Invite Friends",
+            "invite": "Invite",
+            "no-friends": "No available friends"
+        }
     },
     "attribute-form": {
         "physical": "Physical Attributes",
@@ -539,21 +545,30 @@
             "friends": "Friends",
             "received": "Received",
             "sent": "Sent",
-            "add": "Add"
+            "add": "Add",
+            "invites": "Game Invites"
         },
         "actions": {
-            "remove": "Remove",
             "accept": "Accept",
+            "decline": "Decline",
             "reject": "Reject",
             "cancel": "Cancel",
+            "remove": "Remove",
+            "block": "Block",
             "add": "Add friend",
-            "search": "Search",
-            "block": "Block"
+            "search": "Search"
+        },
+        "status": {
+            "offline": "Offline",
+            "desktop": "Online (Desktop)",
+            "mobile": "Online (Mobile)",
+            "in-game": "In Game"
         },
         "empty": {
             "no-friends": "No friends yet",
             "no-pending": "No pending requests",
             "no-sent": "No sent requests",
+            "no-invites": "No game invites",
             "no-results": "No users found"
         },
         "errors": {
@@ -564,12 +579,25 @@
             "cancel-failed": "Failed to cancel friend request",
             "remove-failed": "Failed to remove friend"
         },
+        "game-invite": {
+            "errors": {
+                "not-friend": "You must be friends to join this game",
+                "blocked-by-player": "You are blocked by a player in this game",
+                "you-blocked-player": "You have blocked a player in this game",
+                "game-not-found": "This game no longer exists",
+                "game-locked": "This game is locked",
+                "game-full": "This game is full",
+                "insufficient-funds": "You do not have enough money",
+                "unknown": "Connection failed. Please try again."
+            }
+        },
         "confirm-remove-friend": "Are you sure you want to remove this friend?",
         "confirm-block-user": "Are you sure you want to block this user?",
         "block-not-implemented": "Block feature not yet implemented",
         "loading": "Loading...",
         "searching": "Searching...",
-        "search-placeholder": "Search for a user..."
+        "search-placeholder": "Search for a user...",
+        "invite-message": "invites you to join their game"
     },
 
     "socials-page": {

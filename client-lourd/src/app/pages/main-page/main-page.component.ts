@@ -5,11 +5,13 @@ import { SocialsPopupComponent } from '@app/components/socials-popup/socials-pop
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
 import { ChatService } from '@app/services/chat/chat.service';
 import { FriendManagerService } from '@app/services/friend-manager/friend-manager.service';
+import { GameInviteService } from '@app/services/game-invite/game-invite.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { DeviceType } from '@common/enums/deviceType';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-main-page',
@@ -24,6 +26,9 @@ export class MainPageComponent implements OnInit {
     private httpUserService: HttpUserService = inject(HttpUserService);
     private playerSocketService = inject(PlayerSocketService);
     private friendService = inject(FriendManagerService);
+    private gameInviteService = inject(GameInviteService);
+
+    private inviteCountSubscription?: Subscription;
 
     constructor(private router: Router) {}
 
@@ -32,14 +37,23 @@ export class MainPageComponent implements OnInit {
     showChat: WritableSignal<boolean> = signal(false);
     showSocialsPopup: WritableSignal<boolean> = signal(false);
 
-    // Computed signal for pending request count (notification badge)
-    pendingRequestCount = computed(() => this.friendService.pendingRequests().length);
+    gameInviteCount = signal(0);
+
+    totalNotificationCount = computed(() => this.friendService.pendingRequests().length + this.gameInviteCount());
 
     ngOnInit() {
         if (!this.playerSocketService.isConnected()) {
             this.playerSocketService.connect();
         }
         this.refreshUserData();
+
+        this.inviteCountSubscription = this.gameInviteService.getInvitationCountObservable().subscribe((count) => {
+            this.gameInviteCount.set(count);
+        });
+    }
+
+    ngOnDestroy(): void {
+        this.inviteCountSubscription?.unsubscribe();
     }
 
     logout() {
@@ -78,6 +92,7 @@ export class MainPageComponent implements OnInit {
     openSettings(): void {
         this.router.navigate(['/settings']);
     }
+
     private refreshUserData(): void {
         const userId = this.userManager.getCurrentUser().id;
         if (!userId) return;
