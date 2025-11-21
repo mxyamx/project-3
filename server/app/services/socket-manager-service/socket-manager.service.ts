@@ -342,6 +342,7 @@ export class SocketManager {
 
                 const playerWithId: Player = {
                     ...player,
+                    eliminated: false,
                     socketId: socket.id,
                     userId: userId,
                 };
@@ -362,7 +363,6 @@ export class SocketManager {
                     callback(joinGameAck);
                     return;
                 }
-
                 await this.gameService.addPlayer(playerWithId, gameId);
                 this.gameScheduler.joinGame(playerWithId, game, socket);
                 socket.join(gameId);

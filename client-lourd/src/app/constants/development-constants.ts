@@ -21,6 +21,7 @@ export const STANDARD_PLAYER: Player = {
     organizer: false,
     socketId: '',
     userId: '',
+    eliminated: false,
 };
 export const STANDARD_GAME_NAME = 'Partie Test';
 export const MAX_ESCAPE_ATTEMPTS = 3;
@@ -75,6 +76,7 @@ export const STANDARD_PLAYERS: Player[] = [
         victories: 0,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
     {
         name: 'player-test2',
@@ -92,6 +94,7 @@ export const STANDARD_PLAYERS: Player[] = [
         victories: 0,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
     {
         name: 'player-test3',
@@ -109,6 +112,7 @@ export const STANDARD_PLAYERS: Player[] = [
         victories: 0,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
 ];
 export const STANDARD_LIST_PLAYERS: Player[] = [
@@ -129,6 +133,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         position: { x: 0, y: 0 },
         socketId: '',
         userId: '',
+        eliminated: false,
     },
     {
         name: 'player-test2',
@@ -145,6 +150,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         color: 'green',
         socketId: '',
         userId: '',
+        eliminated: false,
     },
     {
         name: 'player-test3',
@@ -161,6 +167,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         color: 'red',
         socketId: '',
         userId: '',
+        eliminated: false,
     },
     {
         name: 'player-test4',
@@ -178,6 +185,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         victories: undefined,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
 ];
 
@@ -201,6 +209,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         virtualPlayer: true,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
     {
         name: 'vp2',
@@ -219,6 +228,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         virtualPlayer: true,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
     {
         name: 'vp3',
@@ -237,6 +247,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         virtualPlayer: true,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
     {
         name: 'vp4',
@@ -256,5 +267,6 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         virtualPlayer: true,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
 ];

@@ -29,7 +29,6 @@
         <div class="poll-prize-header">
             <h3 class="poll-prize-title">
                 {{ 'creation-page.poll-prize-title' | translate }}
-                <!-- or hardcode a string for now -->
             </h3>
 
             <div class="poll-prize-values">
@@ -56,6 +55,11 @@
             <input type="checkbox" [(ngModel)]="friendsOnly" />
             <span class="toggle-switch"></span>
             <span class="toggle-text">{{ 'creation-page.friends-only' | translate }}</span>
+        </label>
+        <label class="friends-only-toggle">
+            <input type="checkbox" [(ngModel)]="isRapidElim" />
+            <span class="toggle-switch"></span>
+            <span class="toggle-text">{{ 'creation-page.rapid-elimination' | translate }}</span>
         </label>
     </section>
 

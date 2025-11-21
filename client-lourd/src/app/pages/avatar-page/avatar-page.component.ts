@@ -207,6 +207,7 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
             victories: 0,
             color: 'red',
             socketId: this.socketManager.socket?.id || '',
+            eliminated: false,
         };
 
         this.playerSocketService.emitJoinGame(this.gameId, player, (response: JoinGameAck) => {

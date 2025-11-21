@@ -221,7 +221,8 @@ export class FightSubController {
 
         if (
             this.gameSession.getPlayerAmountOfVic(attackingPlayer) >= MAX_AMOUNT_OF_VICTORIES &&
-            this.gameSession.board.gameMode === GameMode.Normal
+            this.gameSession.board.gameMode === GameMode.Normal &&
+            !this.gameSession.isRapidElim
         ) {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
             await this.gameSessionController.endGame(attackingPlayer);

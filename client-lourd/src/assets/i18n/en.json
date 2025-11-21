@@ -157,7 +157,8 @@
         "visibility-modal": "Warning!! This game's visibility has changed.",
         "create": "Create New Game",
         "poll-prize-title": "Select an entry fee for the game",
-        "friends-only": "Friends only"
+        "friends-only": "Friends only",
+        "rapid-elimination": "Rapid elimination"
     },
     "game-list": {
         "title": "Game List",
@@ -209,7 +210,9 @@
         "proceed-anyway": "Join Anyway",
         "cancel": "Cancel",
         "warning": "Warning!",
-        "understood": "Understood"
+        "understood": "Understood",
+        "mode": "Mode",
+        "rapid-elim": "Rapid elimination"
     },
     "error-page": {
         "title": "Oops! An error occurred. Please try again."

@@ -34,6 +34,7 @@ export class CurrentGameManagerService {
         dropInEnabled: false,
         entryPrice: 0,
         friendsOnly: false,
+        isRapidElim: false,
     });
 
     updateCurrentGame(newGame: CurrentGame): void {
@@ -66,6 +67,7 @@ export class CurrentGameManagerService {
             dropInEnabled: false,
             entryPrice: 0,
             friendsOnly: false,
+            isRapidElim: false,
         });
     }
 

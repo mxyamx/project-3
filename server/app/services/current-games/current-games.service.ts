@@ -51,6 +51,7 @@ export class CurrentGamesService {
                     isJoinable,
                     entryPrice: game.entryPrice,
                     friendsOnly: game.friendsOnly || false,
+                    isRapidElim: game.isRapidElim,
                 };
                 return preview;
             });

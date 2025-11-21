@@ -157,7 +157,8 @@
         "visibility-modal": "Attention!! Ce jeu a changé de visibilité.",
         "create": "Créer une nouvelle partie",
         "poll-prize-title": "Sélectionnez un prix d'entrée pour la partie",
-        "friends-only": "Amis seulement"
+        "friends-only": "Amis seulement",
+        "rapid-elimination": "Élimination rapide"
     },
     "game-list": {
         "title": "Liste des Jeux",
@@ -209,7 +210,9 @@
         "proceed-anyway": "Rejoindre quand même",
         "cancel": "Annuler",
         "warning": "Attention!",
-        "understood": "Compris"
+        "understood": "Compris",
+        "mode": "Mode",
+        "rapid-elim": "Élimination rapide"
     },
     "error-page": {
         "title": "Oups ! Une erreur est survenue. Veuillez réessayer."

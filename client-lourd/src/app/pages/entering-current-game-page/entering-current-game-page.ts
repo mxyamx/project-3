@@ -9,6 +9,7 @@ import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { CurrentGame, CurrentGamePhase, CurrentGamePreview, JoinGameAck } from '@common/current-game';
+import { GameMode } from '@common/enums/game-mode';
 import { SocketEventNames } from '@common/enums/socket-events-names';
 import { UrlPage } from '@common/enums/url-page';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -41,7 +42,7 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
     private clientSocketService: SocketClientService = inject(SocketClientService);
     private userManagerService = inject(UserManagerService);
     private currentGameManager = inject(CurrentGameManagerService);
-
+    protected readonly gameMode = GameMode;
     constructor(private router: Router) {}
 
     ngOnInit(): void {

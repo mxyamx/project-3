@@ -55,6 +55,7 @@ export class VirtualPlayerManager {
             profile,
             color: 'red',
             socketId: '',
+            eliminated: false,
         };
 
         return virtualPlayer;

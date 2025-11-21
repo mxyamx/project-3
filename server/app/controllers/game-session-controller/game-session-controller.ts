@@ -462,7 +462,11 @@ export class GameSessionController {
         this.gameSession.registerVictory(winner);
         await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
         this.endFight();
-        if (this.gameSession.getPlayerAmountOfVic(winner) >= MAX_AMOUNT_OF_VICTORIES && this.gameSession.board.gameMode === GameMode.Normal) {
+        if (
+            this.gameSession.getPlayerAmountOfVic(winner) >= MAX_AMOUNT_OF_VICTORIES &&
+            this.gameSession.board.gameMode === GameMode.Normal &&
+            !this.gameSession.isRapidElim
+        ) {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
             await this.endGame(winner);
         }

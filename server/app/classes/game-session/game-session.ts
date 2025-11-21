@@ -11,15 +11,18 @@ import { DiceBonus } from '@common/enums/dice-bonus';
 import { GameMode } from '@common/enums/game-mode';
 import { ItemName } from '@common/enums/item-name';
 import { ItemType } from '@common/enums/item-type';
+import { PlayerLimits } from '@common/enums/players-limit';
 import { TileType } from '@common/enums/tile-type';
 import { Fight } from '@common/fight';
 import { Item } from '@common/item';
 import { Player } from '@common/player';
 import { Position } from '@common/position';
 import { Tile } from '@common/tile';
+import { PlayerSlotManager } from '../player-slot-manager/player-slot-manager';
 
 export class GameSession {
     statisticsManager: StatisticsManager;
+    playerSlotManager: PlayerSlotManager;
 
     private players: DynamicPlayerList;
     private activePlayer: Player;
@@ -43,8 +46,12 @@ export class GameSession {
 
     private initialPlayerCount: number = 0;
     private abandonedPlayers: Set<string> = new Set();
+    isRapidElim: boolean = false;
 
-    constructor(private boardGame: BoardGame) {
+    constructor(
+        private boardGame: BoardGame,
+        isRapidElim: boolean,
+    ) {
         this.players = new DynamicPlayerList();
         this.staticPlayerMap = new Map();
         this.statisticsManager = new StatisticsManager(boardGame.tiles);
@@ -57,6 +64,12 @@ export class GameSession {
         this.itemEffectApplicator = new ItemEffectApplicator();
         this.escapeMAp = new Map();
         this.originalBoardGame = structuredClone(boardGame);
+        this.isRapidElim = isRapidElim;
+
+        if (isRapidElim) {
+            const maxPlayers = PlayerLimits[this.boardGame.size].maxPlayers;
+            this.playerSlotManager = new PlayerSlotManager(maxPlayers);
+        }
     }
 
     get board(): BoardGame {
@@ -475,6 +488,10 @@ export class GameSession {
                         (this.staticPlayerMap.get(player.name) ?? STANDARD_LIST_PLAYERS[0]).startPosition = { x: i, y: j };
 
                         playerIsInFirstTeam = !playerIsInFirstTeam;
+
+                        if (this.isRapidElim) {
+                            this.playerSlotManager.registerInitialPlayer(player);
+                        }
                     }
                 }
             }

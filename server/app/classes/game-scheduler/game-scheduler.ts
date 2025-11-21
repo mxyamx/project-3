@@ -35,7 +35,7 @@ export class GameScheduler {
 
     createGame(game: CurrentGame): void {
         const newBoard: BoardGame = game.boardGame;
-        const newGameSession: GameSession = new GameSession(newBoard);
+        const newGameSession: GameSession = new GameSession(newBoard, game.isRapidElim);
         const newClockManager: GameClockManager = new GameClockManager(newGameSession, this.sio, game.id);
 
         const usersService = Container.get(UsersService);
