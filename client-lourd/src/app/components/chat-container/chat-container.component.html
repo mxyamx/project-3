@@ -1,10 +1,18 @@
 @if(this.showChannelNavigator()){
 <app-channel-navigator
+    class="channel-container"
+    (openPopup)="openPopup($event)"
     (openChat)="openChat($event)"
     [isPopup]="isPopup"
     [gameChannel]="gameChannel"
-    [isExpended]="isExpended"
 ></app-channel-navigator>
 } @else {
-<app-chat [roomId]="channelId" [isPopup]="isPopup" (closeChat)="closeChat()" [isExpended]="isExpended" [chatName]="channelName"></app-chat>
+<app-chat
+    class="channel-container"
+    [roomId]="channelId"
+    [isPopup]="isPopup"
+    (closeChat)="closeChat()"
+    [chatName]="channelName"
+    (openPopup)="openPopup($event)"
+></app-chat>
 }

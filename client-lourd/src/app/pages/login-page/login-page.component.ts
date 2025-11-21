@@ -6,10 +6,12 @@ import { DropdownComponent } from '@app/components/dropdown/dropdown.component';
 import { ProfileAvatarImgComponent } from '@app/components/profile-avatar-img/profile-avatar-img.component';
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
 import { FriendManagerService } from '@app/services/friend-manager/friend-manager.service';
+import { GameInviteService } from '@app/services/game-invite/game-invite.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { LanguageService } from '@app/services/language/language.service';
 import { SessionManagerService } from '@app/services/session-manager/session-manager.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
+import { UserStatusService } from '@app/services/user-status/user-status.service';
 import { DeviceType } from '@common/enums/deviceType';
 import { Language } from '@common/enums/language';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -34,6 +36,8 @@ export class LoginPageComponent implements OnInit {
     private sessionManager: SessionManagerService = inject(SessionManagerService);
     private languageService = inject(LanguageService);
     private friendManagerService = inject(FriendManagerService);
+    private gameInviteService = inject(GameInviteService);
+    private userStatusService = inject(UserStatusService);
     constructor(private router: Router) {}
 
     selectedAvatars: Set<string> = new Set();
@@ -119,6 +123,12 @@ export class LoginPageComponent implements OnInit {
             const sessionResult = await this.sessionManager.establishUserSession(userId);
             if (sessionResult === 'SUCCESS') {
                 this.friendManagerService.initialize();
+                this.gameInviteService.setupInvitationListener();
+                this.userStatusService.listenToStatusChanges();
+                const friendIds = this.friendManagerService.friends().map((f) => f.id);
+                if (friendIds.length > 0) {
+                    this.userStatusService.fetchUserStatuses(friendIds);
+                }
                 this.router.navigate(['/home']);
             }
             if (sessionResult === 'ALREADY_ONLINE') {
@@ -202,6 +212,8 @@ export class LoginPageComponent implements OnInit {
             }
 
             this.friendManagerService.initialize();
+            this.gameInviteService.setupInvitationListener();
+            this.userStatusService.listenToStatusChanges();
             this.router.navigate(['/home']);
         } catch (err: any) {
             const fbCode = err?.code as string | undefined;

@@ -120,6 +120,15 @@ export class FriendsService {
 
         friendEvents.emit(FriendEventType.REQUEST_ACCEPTED, payload);
 
+        friendEvents.emit(FriendEventType.FRIEND_ADDED, {
+            userId: sender.id,
+            friendId: receiver.id,
+        });
+        friendEvents.emit(FriendEventType.FRIEND_ADDED, {
+            userId: receiver.id,
+            friendId: sender.id,
+        });
+
         return { sender, receiver };
     }
 

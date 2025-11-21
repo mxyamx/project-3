@@ -9,12 +9,14 @@ import { GameInterfaceComponent } from '@app/components/game-interface/game-inte
 import { InventoryComponent } from '@app/components/inventory/inventory.component';
 import { PlayerInfoComponent } from '@app/components/player-info/player-info.component';
 import { PlayingBoardComponent } from '@app/components/playing-board/playing-board.component';
-import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
+import { ChatService } from '@app/services/chat/chat.service';
 import { CombatNotificationService } from '@app/services/combat-notification/combat-notification.service';
 import { GameInterfaceService } from '@app/services/game-interface/game-interface.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { GameSocketEventService } from '@app/services/game-socket-event/game-socket-event.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
+import { UserStatusService } from '@app/services/user-status/user-status.service';
+import { GameActivityStatus } from '@common/enums/game-activity-status';
 import { PlayerState } from '@common/enums/player-state';
 import { UrlPage } from '@common/enums/url-page';
 import { Player } from '@common/player';
@@ -46,13 +48,15 @@ export class GameComponent implements OnInit, OnDestroy {
     showAbandonConfirmation = false;
     showEndTurnConfirmation = false;
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
-    chatDockService: ChatDockService = inject(ChatDockService);
+    chatService = inject(ChatService);
+    gameIdCopy: string = '';
     private router: Router;
     private subscription: Subscription;
     private gameSocketEventManager: GameSocketEventService = inject(GameSocketEventService);
     private playerSocketService: PlayerSocketService = inject(PlayerSocketService);
     private notificationService: CombatNotificationService = inject(CombatNotificationService);
     private gameInterfaceService: GameInterfaceService = inject(GameInterfaceService);
+    private userStatusService: UserStatusService = inject(UserStatusService);
 
     constructor() {
         this.router = new Router();
@@ -80,9 +84,11 @@ export class GameComponent implements OnInit, OnDestroy {
 
         this.playerSocketService.onPlayerLeft((player: Player) => {
             if (this.gameSessionManager.isCurrentPlayer(player)) {
+                this.userStatusService.updateMyGameActivity(GameActivityStatus.idle);
                 this.router.navigate([UrlPage.Home]);
             }
         });
+        this.gameIdCopy = this.gameSessionManager.gameId();
     }
 
     ngOnDestroy() {
@@ -92,7 +98,11 @@ export class GameComponent implements OnInit, OnDestroy {
 
         if (!this.gameSocketEventManager.gameEnding) {
             this.playerSocketService.emitLeaveGame(this.gameSessionManager.gameId());
+            this.userStatusService.updateMyGameActivity(GameActivityStatus.idle);
             this.playerSocketService.unsubscribeGameEvents();
+            if (this.chatService.chatDetache()) {
+                this.chatService.leaveGameChat(this.gameIdCopy);
+            }
         }
     }
 
@@ -141,6 +151,7 @@ export class GameComponent implements OnInit, OnDestroy {
         const player = this.gameSessionManager.chosenPlayer();
         if (player) {
             this.playerSocketService.emitLeaveGame(this.gameSessionManager.gameId());
+            this.userStatusService.updateMyGameActivity(GameActivityStatus.idle);
         }
         this.gameSessionManager.leaveGame();
         setTimeout(() => {

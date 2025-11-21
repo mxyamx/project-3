@@ -4,16 +4,20 @@ import { Router } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { PlayersListComponent } from '@app/components/players-list/players-list';
 import { EMPTY_CODE } from '@app/constants/development-constants';
-import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
+import { ChatService } from '@app/services/chat/chat.service';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
+import { FriendManagerService } from '@app/services/friend-manager/friend-manager.service';
 import { GameEventService } from '@app/services/game-event/game-event.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { StatisticsManagerService } from '@app/services/statistics-manager/statistics-manager.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
+import { UserStatusService } from '@app/services/user-status/user-status.service';
 import { CurrentGame } from '@common/current-game';
+import { DeviceType } from '@common/enums/deviceType';
+import { GameActivityStatus } from '@common/enums/game-activity-status';
 import { GameMode } from '@common/enums/game-mode';
 import { PlayerLimits } from '@common/enums/players-limit';
 import { SocketClientEventNames } from '@common/enums/socket-events-names';
@@ -22,7 +26,9 @@ import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { GameEvent } from '@common/game-event';
 import { Player } from '@common/player';
 import * as socketDataForm from '@common/socket-data-forms';
+import { User, UserStatusInfo } from '@common/user';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-waiting-page',
@@ -43,12 +49,20 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     hasToggleStateDropIn: boolean = false;
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     showPlayerAmountWarning = false;
-    chatDockService: ChatDockService = inject(ChatDockService);
+    chatService = inject(ChatService);
     isStartingGame: boolean = false;
     protected showVirtualPlayerProfile: boolean = false;
     protected virtualPlayerProfile = VirtualPlayerProfile;
 
     entryPrice: number = 25;
+
+    showInviteFriendsPopup: boolean = false;
+    private friendManagerService = inject(FriendManagerService);
+    private userStatusService = inject(UserStatusService);
+    private statusSubscription?: Subscription;
+    friendStatuses = new Map<string, UserStatusInfo>();
+    DeviceType = DeviceType;
+    GameActivityStatus = GameActivityStatus;
 
     private currentGameManager = inject(CurrentGameManagerService);
     private socketManager: SocketClientService = inject(SocketClientService);
@@ -64,6 +78,13 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.gameId = this.currentGameManager.displayedCurrentGame().id;
+        if (this.chatService.chatDetache()) {
+            this.chatService.joinGameChat(this.gameId);
+        }
+        if (this.gameId) {
+            this.userStatusService.updateMyGameActivity(GameActivityStatus.inGame, this.gameId);
+        }
+
         if (this.gameId) {
             this.playerSocketService.emitGetGame(this.gameId, (response: CurrentGame) => {
                 if (response) {
@@ -90,7 +111,6 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
         });
 
         this.playerSocketService.onKicked((player: Player) => {
-            this.chatDockService.leftGame();
             this.currentGame.players = this.currentGame.players.filter((kickedPlayer) => kickedPlayer.name !== player.name);
             this.playersLimitReached = this.playerlimit();
         });
@@ -110,13 +130,34 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
                 this.dropInEnabled = game.dropInEnabled;
             }
         });
+
+        this.friendManagerService.refresh();
+        const friendIds = this.friendManagerService.friends().map((f) => f.id);
+        if (friendIds.length > 0) {
+            this.userStatusService.fetchUserStatuses(friendIds);
+        }
+
+        this.statusSubscription = this.userStatusService.getAllStatuses().subscribe((statuses) => {
+            this.friendStatuses = new Map(statuses);
+        });
     }
 
     ngOnDestroy(): void {
+        const shouldUpdateStatus = !this.isStartingGame;
+
+        if (shouldUpdateStatus) {
+            this.userStatusService.updateMyGameActivity(GameActivityStatus.idle);
+        }
+
         if (!this.isStartingGame && this.gameId) {
             this.playerSocketService.emitLeaveGame(this.gameId);
             this.playerSocketService.unsubscribeGameEvents();
+            if (this.chatService.chatDetache()) {
+                this.chatService.leaveGameChat(this.gameId);
+            }
         }
+
+        this.statusSubscription?.unsubscribe();
     }
 
     toggleRoomState() {
@@ -176,6 +217,8 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     }
 
     leaveGame() {
+        this.userStatusService.updateMyGameActivity(GameActivityStatus.idle);
+
         if (this.isOrganizer()) {
             this.playerSocketService.emitAdminLeaving(this.currentGame.id);
         }
@@ -250,11 +293,52 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
         this.hideVirtualPlayerProfilePopup();
     }
 
+    openInviteFriendsPopup() {
+        this.showInviteFriendsPopup = true;
+    }
+
+    closeInviteFriendsPopup() {
+        this.showInviteFriendsPopup = false;
+    }
+
+    get availableFriends(): User[] {
+        return this.friendManagerService.friends().filter((friend) => {
+            const status = this.friendStatuses.get(friend.id);
+            return status?.status !== DeviceType.offline && (!status?.gameActivity || status.gameActivity === GameActivityStatus.idle);
+        });
+    }
+
+    getFriendStatus(friendId: string): UserStatusInfo | undefined {
+        return this.friendStatuses.get(friendId);
+    }
+
+    getDeviceIcon(deviceType: DeviceType): string {
+        switch (deviceType) {
+            case DeviceType.web:
+                return 'fa-desktop';
+            case DeviceType.mobile:
+                return 'fa-tablet-alt';
+            default:
+                return 'fa-circle';
+        }
+    }
+
+    getStatusColor(deviceType: DeviceType): string {
+        if (deviceType === DeviceType.offline) return '#9e9e9e';
+        return '#4caf50';
+    }
+
+    inviteFriend(friend: User) {
+        if (this.gameId) {
+            this.userStatusService.inviteToGame(friend.id, this.gameId);
+        }
+    }
+
     private finalizeLeave() {
-        // Refresh user data to get updated balance from server
         this.refreshUserData();
         this.router.navigate(['/main-page']);
     }
+
     private refreshUserData(): void {
         const userId = this.userManagerService.getCurrentUser().id;
         this.httpUserService.getUser(userId).subscribe({

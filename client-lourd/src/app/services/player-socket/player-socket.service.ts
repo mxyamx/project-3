@@ -92,6 +92,10 @@ export class PlayerSocketService {
         this.clientSocketService.on<Player>('player-joined', callback);
     }
 
+    onChannelRemoved(cb: (payload: { channelId: string }) => void): void {
+        this.clientSocketService.on('channel-removed', cb);
+    }
+
     onPlayerLeft(callback: (player: Player) => void): void {
         this.clientSocketService.on<Player>('player-left', callback);
     }
@@ -150,9 +154,17 @@ export class PlayerSocketService {
             callback(avatars);
         });
     }
+    onChannelDeleted(callback: (response: { channelId: string }) => void) {
+        this.clientSocketService.on<{ channelId: string }>('channel-deleted', (response: { channelId: string }) => {
+            callback(response);
+        });
+    }
 
-    emitJoinChatRoom(gameId: string): void {
-        this.clientSocketService.emit('join-room-chat', gameId);
+    emitJoinChatRoom(gameId: string, callback: (response: { roomDeleted: boolean }) => void): void {
+        this.clientSocketService.emit('join-room-chat', gameId, callback);
+    }
+    emitLeaveChatRoom(roomId: string): void {
+        this.clientSocketService.emit('leave-room-chat', roomId);
     }
 
     emitSendMessage(gameId: string, message: ChatMessage, callback?: (response: unknown) => void): void {
@@ -216,6 +228,10 @@ export class PlayerSocketService {
     unsubscribeChat(): void {
         this.clientSocketService.off('message-sent');
         this.clientSocketService.off(SocketEventNames.ChatHistory);
+        this.clientSocketService.off('channel-deleted');
+    }
+    unsubscribeChannel(): void {
+        this.clientSocketService.off('channel-removed');
     }
 
     unsubscribeGameEvents(): void {

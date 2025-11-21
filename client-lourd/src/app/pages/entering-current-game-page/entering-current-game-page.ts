@@ -2,7 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { ToastFightComponent } from '@app/components/toast-fight/toast-fight.component';
+import { ChatService } from '@app/services/chat/chat.service';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
@@ -16,7 +18,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 @Component({
     selector: 'app-entering-current-game-page',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, ToastFightComponent],
+    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, ToastFightComponent, ChatContainerComponent],
     templateUrl: './entering-current-game-page.html',
     styleUrls: ['./entering-current-game-page.scss'],
 })
@@ -35,6 +37,8 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
     blockedByPlayerError = false;
     showBlockedUserWarning = false;
     pendingGameId: string | null = null;
+    showChat: WritableSignal<boolean> = signal(false);
+    chatService: ChatService = inject(ChatService);
 
     private httpUserService = inject(HttpUserService);
     private playerSocketService: PlayerSocketService = inject(PlayerSocketService);
@@ -185,5 +189,8 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
             },
             error: (err) => console.error('Failed to refresh user data:', err),
         });
+    }
+    openChat() {
+        this.showChat.set(!this.showChat());
     }
 }

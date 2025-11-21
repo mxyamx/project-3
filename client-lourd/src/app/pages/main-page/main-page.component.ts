@@ -1,15 +1,17 @@
-import { Component, computed, inject, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, WritableSignal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { SocialsPopupComponent } from '@app/components/socials-popup/socials-popup.component';
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
-import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
+import { ChatService } from '@app/services/chat/chat.service';
 import { FriendManagerService } from '@app/services/friend-manager/friend-manager.service';
+import { GameInviteService } from '@app/services/game-invite/game-invite.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { DeviceType } from '@common/enums/deviceType';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-main-page',
@@ -17,13 +19,16 @@ import { TranslatePipe } from '@ngx-translate/core';
     styleUrls: ['./main-page.component.scss'],
     imports: [RouterLink, ChatContainerComponent, TranslatePipe, SocialsPopupComponent],
 })
-export class MainPageComponent implements OnDestroy, OnInit {
-    chatDockService: ChatDockService = inject(ChatDockService);
+export class MainPageComponent implements OnInit {
+    chatService = inject(ChatService);
     private authService: AuthentificationService = inject(AuthentificationService);
     private userManager: UserManagerService = inject(UserManagerService);
     private httpUserService: HttpUserService = inject(HttpUserService);
     private playerSocketService = inject(PlayerSocketService);
     private friendService = inject(FriendManagerService);
+    private gameInviteService = inject(GameInviteService);
+
+    private inviteCountSubscription?: Subscription;
 
     constructor(private router: Router) {}
 
@@ -32,18 +37,23 @@ export class MainPageComponent implements OnDestroy, OnInit {
     showChat: WritableSignal<boolean> = signal(false);
     showSocialsPopup: WritableSignal<boolean> = signal(false);
 
-    // Computed signal for pending request count (notification badge)
-    pendingRequestCount = computed(() => this.friendService.pendingRequests().length);
+    gameInviteCount = signal(0);
+
+    totalNotificationCount = computed(() => this.friendService.pendingRequests().length + this.gameInviteCount());
 
     ngOnInit() {
         if (!this.playerSocketService.isConnected()) {
             this.playerSocketService.connect();
         }
         this.refreshUserData();
+
+        this.inviteCountSubscription = this.gameInviteService.getInvitationCountObservable().subscribe((count) => {
+            this.gameInviteCount.set(count);
+        });
     }
 
     ngOnDestroy(): void {
-        this.chatDockService.leftGame();
+        this.inviteCountSubscription?.unsubscribe();
     }
 
     logout() {
@@ -51,7 +61,7 @@ export class MainPageComponent implements OnDestroy, OnInit {
         user.status = DeviceType.offline;
         this.playerSocketService.disconnect();
         this.friendService.cleanup();
-
+        this.chatService.closePopup();
         this.httpUserService.updateUser(user).subscribe({
             next: () => {
                 this.authService.logout();
@@ -82,6 +92,7 @@ export class MainPageComponent implements OnDestroy, OnInit {
     openSettings(): void {
         this.router.navigate(['/settings']);
     }
+
     private refreshUserData(): void {
         const userId = this.userManager.getCurrentUser().id;
         if (!userId) return;

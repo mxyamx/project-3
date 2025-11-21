@@ -9,8 +9,8 @@
                 <i class="fa-solid fa-message logout-button" aria-hidden="true" (click)="openGeneralChat()"></i>
                 <div class="notification-wrapper">
                     <i class="fa-solid fa-user-group logout-button" aria-hidden="true" (click)="openSocialsPopup()"></i>
-                    @if (pendingRequestCount() > 0) {
-                    <span class="notification-badge">{{ pendingRequestCount() }}</span>
+                    @if (totalNotificationCount() > 0) {
+                    <span class="notification-badge">{{ totalNotificationCount() }}</span>
                     }
                 </div>
 
@@ -37,7 +37,7 @@
         </p>
     </footer>
 
-    @if(showChat() && !this.chatDockService.chatDetache()){
+    @if(showChat() && !this.chatService.chatDetache()){
     <div class="chat-container">
         <app-chat-container></app-chat-container>
     </div>

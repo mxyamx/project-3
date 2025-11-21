@@ -1,9 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, OnInit } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit } from '@angular/core';
 import { FriendManagerService } from '@app/services/friend-manager/friend-manager.service';
 import { FriendsService } from '@app/services/http-manager/http-friends.service';
-import { User } from '@common/user';
+import { UserStatusService } from '@app/services/user-status/user-status.service';
+import { DeviceType } from '@common/enums/deviceType';
+import { GameActivityStatus } from '@common/enums/game-activity-status';
+import { User, UserStatusInfo } from '@common/user';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-socials-page',
@@ -12,13 +16,19 @@ import { TranslatePipe } from '@ngx-translate/core';
     templateUrl: './socials-page.component.html',
     styleUrls: ['./socials-page.component.scss'],
 })
-export class SocialsPageComponent implements OnInit {
-    // Expose signals directly
+export class SocialsPageComponent implements OnInit, OnDestroy {
+    private userStatusService = inject(UserStatusService);
+    private statusSubscription?: Subscription;
+
     friends = this.friendManagerService.friends;
     blockedUsers = this.friendManagerService.blockedUsers;
 
     friendCount = computed(() => this.friendManagerService.friends().length);
     blockedCount = computed(() => this.friendManagerService.blockedUsers().length);
+
+    friendStatuses = new Map<string, UserStatusInfo>();
+    DeviceType = DeviceType;
+    GameActivityStatus = GameActivityStatus;
 
     showConfirmation = false;
     confirmationMessage = '';
@@ -34,6 +44,47 @@ export class SocialsPageComponent implements OnInit {
 
     ngOnInit(): void {
         this.friendManagerService.refresh();
+
+        const friendIds = this.friends().map((f) => f.id);
+        if (friendIds.length > 0) {
+            this.userStatusService.fetchUserStatuses(friendIds);
+        }
+
+        this.statusSubscription = this.userStatusService.getAllStatuses().subscribe((statuses) => {
+            this.friendStatuses = new Map(statuses);
+        });
+    }
+
+    ngOnDestroy(): void {
+        this.statusSubscription?.unsubscribe();
+    }
+
+    getFriendStatus(friendId: string): UserStatusInfo | undefined {
+        return this.friendStatuses.get(friendId);
+    }
+
+    getDeviceIcon(deviceType: DeviceType): string {
+        switch (deviceType) {
+            case DeviceType.web:
+                return 'fa-desktop';
+            case DeviceType.mobile:
+                return 'fa-tablet-alt';
+            case DeviceType.offline:
+                return 'fa-circle';
+            default:
+                return 'fa-circle';
+        }
+    }
+
+    getActivityIcon(activity?: GameActivityStatus): string {
+        if (!activity || activity === GameActivityStatus.idle) return '';
+        return 'fa-gamepad';
+    }
+
+    getStatusColor(deviceType: DeviceType, activity?: GameActivityStatus): string {
+        if (deviceType === DeviceType.offline) return '#9e9e9e';
+        if (activity === GameActivityStatus.inGame) return '#2196f3';
+        return '#4caf50';
     }
 
     confirmRemoveFriend(friend: User): void {
