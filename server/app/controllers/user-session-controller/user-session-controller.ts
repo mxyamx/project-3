@@ -1,6 +1,8 @@
 import { UserSessionManager } from '@app/classes/user-session-manager/user-session-manager';
+import { friendEvents } from '@app/events/friendEvents';
 import { UsersService } from '@app/services/users/users.service';
 import { DeviceType } from '@common/enums/deviceType';
+import { FriendEventType } from '@common/enums/friend-event-type';
 import { GameActivityStatus } from '@common/enums/game-activity-status';
 import { UserStatusInfo } from '@common/user';
 import { Server, Socket } from 'socket.io';
@@ -18,6 +20,7 @@ export class UserSessionController {
     ) {
         this.userSessionManager = userSessionManager || new UserSessionManager();
         this.vpSocketIds = [];
+        this.setupFriendEventListeners();
     }
 
     handleUserConnection(socket: Socket): void {
@@ -326,5 +329,47 @@ export class UserSessionController {
             return this.userSessionManager.disconnectByFirebaseId(firebaseId);
         }
         return false;
+    }
+
+    private setupFriendEventListeners(): void {
+        friendEvents.on(FriendEventType.FRIEND_ADDED, (data: { userId: string; friendId: string }) => {
+            try {
+                const userSession = this.userSessionManager.getUserSession(data.userId);
+                const friendSession = this.userSessionManager.getUserSession(data.friendId);
+
+                if (userSession && friendSession) {
+                    const userSocketId = this.userSessionManager.getSocketIdByFirebaseId(data.userId);
+                    const friendSocketId = this.userSessionManager.getSocketIdByFirebaseId(data.friendId);
+
+                    this.usersService.getUser(data.userId).then((user) => {
+                        if (user && friendSocketId) {
+                            this.sio.to(friendSocketId).emit('user-game-activity-changed', {
+                                userId: user.id,
+                                username: user.username,
+                                avatar: user.avatar,
+                                status: user.status,
+                                gameActivity: user.gameActivity,
+                                gameId: user.currentGameId,
+                            });
+                        }
+                    });
+
+                    this.usersService.getUser(data.friendId).then((friend) => {
+                        if (friend && userSocketId) {
+                            this.sio.to(userSocketId).emit('user-game-activity-changed', {
+                                userId: friend.id,
+                                username: friend.username,
+                                avatar: friend.avatar,
+                                status: friend.status,
+                                gameActivity: friend.gameActivity,
+                                gameId: friend.currentGameId,
+                            });
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error handling friend added event:', error);
+            }
+        });
     }
 }
