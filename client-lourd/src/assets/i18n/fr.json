@@ -248,6 +248,7 @@
             }
         },
         "inventory": "Inventaire",
+        "deposit-torch": "Déposer la torche",
         "playing-board": {
             "type": "type",
             "cost": "coût",

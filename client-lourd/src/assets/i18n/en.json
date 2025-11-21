@@ -234,6 +234,7 @@
         "players": "Players",
         "team": "Team",
         "victories": "Victories",
+        "deposit-torch": "Deposit Torch",
         "combat": {
             "remaining-escape-attemps": "Remaining escape attempts",
             "attack-dice": "Attack Die",
