@@ -81,6 +81,8 @@ export class UsersService {
                     purchasedAvatars: user.purchasedAvatars,
                     purchasedSounds: user.purchasedSounds,
                     selectedSound: user.selectedSound,
+                    gameActivity: user.gameActivity,
+                    currentGameId: user.currentGameId,
                 },
             },
         );

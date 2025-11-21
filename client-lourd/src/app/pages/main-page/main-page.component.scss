@@ -328,11 +328,12 @@ $animation-delay-1: 0.2s;
 .chat-container {
     position: fixed;
     right: 20px;
-    top: 25%;
+    top: 16%;
     z-index: 1;
+    border-radius: 25px !important;
 
-    width: 400px;
-    max-height: 70vh;
+    width: 500px;
+    height: 75vh;
 
     border-radius: 12px;
     overflow: hidden;

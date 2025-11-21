@@ -111,11 +111,19 @@ $animation-delay-1: 0.25s;
 }
 
 .navigation {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 90%;
+    top: 5%;
     position: absolute;
-    top: 20px;
-    right: 20px;
 }
 
+.right-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 .navigation-button {
     font-family: $font-primary;
     padding: $button-padding-y $button-padding-x;
@@ -527,5 +535,41 @@ $animation-delay-1: 0.25s;
 
     &:hover {
         transform: translateY(-1px);
+    }
+}
+
+.chat-button {
+    font-size: 2.5rem;
+    color: transparent;
+    background: linear-gradient(90deg, #000000, #0044cc, #1a1a1a, #0044cc);
+    background-size: 300%;
+    -webkit-background-clip: text;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+.chat-button:hover {
+    transform: scale(1.2);
+}
+
+.chat-container {
+    position: fixed;
+    right: 20px;
+    top: 16%;
+    z-index: 1;
+    border-radius: 25px !important;
+
+    width: 500px;
+    height: 75vh;
+
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.8);
+
+    display: flex;
+    flex-direction: column;
+    app-chat-container {
+        height: 100%;
+        width: 100%;
     }
 }

@@ -2,8 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, WritableSignal, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { GameListComponent } from '@app/components/game-list/game-list.component';
 import { LoadingComponent } from '@app/components/loading/loading.component';
+import { ChatService } from '@app/services/chat/chat.service';
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { HttpBoardGameService } from '@app/services/http-manager/http-board-game.service';
@@ -19,7 +21,7 @@ import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-creation-page',
-    imports: [RouterLink, CommonModule, GameListComponent, TranslatePipe, LoadingComponent, FormsModule],
+    imports: [RouterLink, CommonModule, GameListComponent, TranslatePipe, LoadingComponent, FormsModule, ChatContainerComponent],
     templateUrl: './creation-page.component.html',
     styleUrl: './creation-page.component.scss',
 })
@@ -31,11 +33,13 @@ export class CreationPageComponent implements OnInit {
     hasBeenClicked: boolean = false;
     gameManager: GameSessionManagerService = inject(GameSessionManagerService);
     userManagerService: UserManagerService = inject(UserManagerService);
+    chatService = inject(ChatService);
     httpBoardGameService = inject(HttpBoardGameService);
     httpUserService = inject(HttpUserService);
 
     gameMode: typeof GameMode = GameMode;
     isLoading: WritableSignal<boolean> = signal(false);
+    showChat: WritableSignal<boolean> = signal(false);
     friendsOnly: boolean = false;
     isRapidElim: boolean = false;
     selectedPollPrizeAmount: number = 0;
@@ -146,7 +150,9 @@ export class CreationPageComponent implements OnInit {
         });
         this.hasBeenClicked = true;
     }
-
+    openChat() {
+        this.showChat.set(!this.showChat());
+    }
     private refreshUserData(): void {
         const userId = this.userManagerService.getCurrentUser().id;
         this.httpUserService.getUser(userId).subscribe({

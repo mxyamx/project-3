@@ -1,25 +1,40 @@
+$font-primary: 'Jaro', sans-serif;
+$button-border-radius: 66px;
+$button-padding-y: 10px;
+$button-padding-x: 30px;
+$animation-delay-1: 0.2s;
 .shop-page {
     min-height: 100vh;
     background: url('../../../assets/background/arrierePlanVueEdition.jpg') center/cover no-repeat fixed;
     padding: 24px;
     color: #fff;
 
-    .toolbar {
+    .navigation {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
         align-items: center;
-        margin-bottom: 16px;
-
-        .btn {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            padding: 8px 12px;
-            border-radius: 12px;
+        width: 95%;
+        top: 1px;
+        position: absolute;
+        .right-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .navigation-button {
+            font-family: $font-primary;
+            padding: $button-padding-y $button-padding-x;
+            font-size: 0.85em;
+            color: white;
+            background-color: #719ff0;
+            border: none;
+            border-radius: $button-border-radius;
             cursor: pointer;
-            transition: transform 0.1s ease;
-            &:active {
-                transform: scale(0.98);
-            }
+            transition:
+                transform $animation-delay-1 ease,
+                background-color $animation-delay-1 ease;
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 1);
+            border: 11px solid #162744;
         }
         .balance {
             display: flex;
@@ -258,5 +273,41 @@
     50% {
         opacity: 0.7;
         transform: scale(1.1);
+    }
+}
+
+.chat-button {
+    font-size: 2.5rem;
+    color: transparent;
+    background: linear-gradient(90deg, #000000, #0044cc, #1a1a1a, #0044cc);
+    background-size: 300%;
+    -webkit-background-clip: text;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+.chat-button:hover {
+    transform: scale(1.2);
+}
+
+.chat-container {
+    position: fixed;
+    right: 20px;
+    top: 16%;
+    z-index: 1;
+    border-radius: 25px !important;
+
+    width: 500px;
+    height: 75vh;
+
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.8);
+
+    display: flex;
+    flex-direction: column;
+    app-chat-container {
+        height: 100%;
+        width: 100%;
     }
 }

@@ -1,6 +1,11 @@
 <section class="main-container">
     <section class="navigation">
-        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}</button>
+        <div class="right-group">
+            <i class="fa-solid fa-message chat-button" aria-hidden="true" (click)="openChat()"></i>
+            <button class="navigation-button" routerLink="/main-page">
+                <i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}
+            </button>
+        </div>
     </section>
     <section class="title-section">
         <h2 class="page-title">{{'join-game-page.title' | translate}}</h2>
@@ -182,4 +187,9 @@
         </div>
         }
     </section>
+    @if(showChat() && !this.chatService.chatDetache()){
+    <div class="chat-container">
+        <app-chat-container></app-chat-container>
+    </div>
+    }
 </section>

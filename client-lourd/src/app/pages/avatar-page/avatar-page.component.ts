@@ -1,8 +1,9 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AttributeFormComponent } from '@app/components/attribute-form/attribute-form.component';
 import { AvatarImgComponent } from '@app/components/avatar-img/avatar-img.component';
+import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { EMPTY_CODE } from '@app/constants/development-constants';
 import { DEFAULT_ATTRIBUTES_POINT } from '@app/constants/objects-constants';
 import { ChatService } from '@app/services/chat/chat.service';
@@ -25,7 +26,7 @@ import { UpdateGamedRes } from '@common/socket-data-forms';
 import { TranslatePipe } from '@ngx-translate/core';
 @Component({
     selector: 'app-avatar-page',
-    imports: [ReactiveFormsModule, AvatarImgComponent, AttributeFormComponent, RouterLink, TranslatePipe],
+    imports: [ReactiveFormsModule, AvatarImgComponent, AttributeFormComponent, RouterLink, TranslatePipe, ChatContainerComponent],
     templateUrl: './avatar-page.component.html',
     styleUrls: ['./avatar-page.component.scss'],
 })
@@ -49,9 +50,10 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
     joiningRoom: boolean = false;
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     userManagerService: UserManagerService = inject(UserManagerService);
+    showChat: WritableSignal<boolean> = signal(false);
     private playerSocketService = inject(PlayerSocketService);
     private currentGameManager = inject(CurrentGameManagerService);
-    private chatService = inject(ChatService);
+    chatService = inject(ChatService);
     private gameEventService = inject(GameEventService);
     private httpUserService = inject(HttpUserService);
     private gameId: string = '';
@@ -173,7 +175,6 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
     hideAlert() {
         this.showVisibilityAlert = false;
         this.createCharacter();
-        this.chatService.roomMessages = [];
         this.gameEventService.events = [];
     }
 
@@ -231,6 +232,9 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
             this.hasBeenClicked = true;
             this.currentGameManager.addPlayer(response.player);
             if (response.game.phase === CurrentGamePhase.Running && response.updateGamedRes) {
+                if (this.chatService.chatDetache()) {
+                    this.chatService.joinGameChat(response.game.id);
+                }
                 this.gameSessionManager.updateChosenPlayer(response.player);
                 this.gameSessionManager.updateGameId(response.game.id);
                 this.joinRunningGame(response.updateGamedRes);
@@ -251,6 +255,9 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
         this.limitError = false;
         this.notExistingError = false;
         this.hasBeenClicked = false;
+    }
+    openChat() {
+        this.showChat.set(!this.showChat());
     }
 
     joinRunningGame(data: UpdateGamedRes): void {

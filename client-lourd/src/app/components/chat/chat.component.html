@@ -1,4 +1,4 @@
-<div class="chat-container" [class.expanded]="isExpended">
+<div class="chat-container" [class.expanded]="isPopup">
     <div class="chat-header">
         <button class="back-btn" (click)="closeChat.emit()">
             <i class="fa fa-arrow-left"></i>
@@ -15,9 +15,30 @@
         }
     </div>
 
+    @if (channelDeleted()) {
+    <div class="channel-deleted-banner">
+        <div class="icon">
+            <i class="fa fa-exclamation-triangle"></i>
+        </div>
+        <div class="text">
+            <div class="title">
+                {{ 'chat.channel-deleted.title' | translate }}
+            </div>
+            <div class="description">
+                {{ 'chat.channel-deleted.text' | translate }}
+            </div>
+            <button class="close-chat-btn" (click)="closeChat.emit()">
+                {{ 'chat.channel-deleted.close' | translate }}
+            </button>
+        </div>
+    </div>
+    }
+
     <div class="chat-messages" #scroll>
         <div class="message-list">
-            @for (message of chatService.roomMessages; track message.timestamp + '-' + message.senderId) {
+            @if(isLoading()){
+            <app-loading></app-loading>
+            } @else{ @for (message of chatService.roomMessages; track message.timestamp + '-' + message.senderId) {
             <div class="message" [ngClass]="{ 'my-message': userManager.currentUser().id === message.senderId }">
                 <div class="message-header">
                     <span class="sender">{{ message.sender }}</span>
@@ -30,26 +51,29 @@
                     {{ message.text }}
                 </div>
             </div>
-            }
+            } }
         </div>
     </div>
 
-    <div class="chat-input">
+    <div class="chat-input" [class.disabled]="channelDeleted()">
         <div class="input-wrapper">
             <input
                 id="roomMessage"
                 [(ngModel)]="messageInput"
-                (keydown.enter)="sendToRoom()"
+                (keydown.enter)="!channelDeleted() && sendToRoom()"
                 type="text"
                 required
                 minlength="1"
                 (ngModelChange)="onModelChange($event)"
                 [ngClass]="{ 'border-red': nCharacters() > maxNCharacters }"
-                [placeholder]="'chat.send-placeholder' | translate"
+                [placeholder]="(channelDeleted() ? 'chat.channel-deleted.placeholder' : 'chat.send-placeholder') | translate"
+                [disabled]="channelDeleted() || isLoading()"
                 #input
             />
             <div class="max-character" [ngClass]="{ 'text-red': nCharacters() > maxNCharacters }">{{ nCharacters() }} / {{ maxNCharacters }}</div>
         </div>
-        <button (click)="sendToRoom()">{{ 'chat.send' | translate }}</button>
+        <button (click)="sendToRoom()" [disabled]="channelDeleted() || isLoading()">
+            {{ 'chat.send' | translate }}
+        </button>
     </div>
 </div>
