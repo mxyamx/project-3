@@ -413,18 +413,25 @@ export class GameSession {
 
     repositionPlayer(player: Player): void {
         this.dropAllItems(player);
-        const playerCopy: Player = this.staticPlayerMap.get(player.name);
-        let position: Position | undefined = playerCopy.position;
 
-        if (position) {
-            if ((this.boardGame.tiles[position.x][position.y].containedPlayer ?? STANDARD_LIST_PLAYERS[0]).name !== player.name) {
-                position = this.isValidPosition(position) ? position : this.findNearestValidTile(position);
-            }
+        // Clear player's current position on the board
+        if (player.position) {
             this.boardGame.tiles[player.position.x][player.position.y].containedPlayer = undefined;
-            this.boardGame.tiles[position.x][position.y].containedPlayer = player;
-            player.position.x = position.x;
-            player.position.y = position.y;
         }
+
+        // Use startPosition for respawn
+        let position: Position = player.startPosition;
+
+        // Only if startPosition is occupied, find nearest valid
+        if (this.boardGame.tiles[position.x][position.y].containedPlayer) {
+            position = this.findNearestValidTile(position);
+        }
+
+        this.boardGame.tiles[position.x][position.y].containedPlayer = player;
+        player.position = position;
+
+        this.updateIllumination();
+        this.updatePlayerBonuses();
     }
 
     endFight(): void {
