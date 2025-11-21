@@ -115,8 +115,17 @@ $animation-delay-1: 0.25s;
     justify-content: flex-end;
     align-items: center;
     width: 90%;
-    top: 5%;
     position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.navigation {
+    pointer-events: none;
+}
+
+.navigation * {
+    pointer-events: auto;
 }
 
 .right-group {

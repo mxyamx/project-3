@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { Component, HostListener, inject, OnInit } from '@angular/core';
-=======
-import { Component, inject, signal, WritableSignal } from '@angular/core';
->>>>>>> dev
+import { Component, HostListener, inject, OnInit, signal, WritableSignal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router, RouterLink } from '@angular/router';
