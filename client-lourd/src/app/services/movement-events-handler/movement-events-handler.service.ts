@@ -57,6 +57,9 @@ export class MovementEventsHandlerService {
                     this.gameSessionManager.pickUpItem();
                 } else {
                     this.gameSessionManager.changeState(PlayerState.WaitingForAction);
+                    if (this.gameSessionManager.shouldChangeTurn()) {
+                        this.gameSessionManager.endTurn();
+                    }
                 }
             }
         });
