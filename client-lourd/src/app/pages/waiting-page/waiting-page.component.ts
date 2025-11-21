@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { PlayersListComponent } from '@app/components/players-list/players-list';
 import { EMPTY_CODE } from '@app/constants/development-constants';
-import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
+import { ChatService } from '@app/services/chat/chat.service';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { CurrentGameManagerService } from '@app/services/current-game-manager/current-game-manager.service';
 import { FriendManagerService } from '@app/services/friend-manager/friend-manager.service';
@@ -49,7 +49,7 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     hasToggleStateDropIn: boolean = false;
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     showPlayerAmountWarning = false;
-    chatDockService: ChatDockService = inject(ChatDockService);
+    chatService = inject(ChatService);
     isStartingGame: boolean = false;
     protected showVirtualPlayerProfile: boolean = false;
     protected virtualPlayerProfile = VirtualPlayerProfile;
@@ -78,6 +78,9 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.gameId = this.currentGameManager.displayedCurrentGame().id;
+        if (this.chatService.chatDetache()) {
+            this.chatService.joinGameChat(this.gameId);
+        }
         if (this.gameId) {
             this.userStatusService.updateMyGameActivity(GameActivityStatus.inGame, this.gameId);
         }
@@ -108,7 +111,6 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
         });
 
         this.playerSocketService.onKicked((player: Player) => {
-            this.chatDockService.leftGame();
             this.currentGame.players = this.currentGame.players.filter((kickedPlayer) => kickedPlayer.name !== player.name);
             this.playersLimitReached = this.playerlimit();
         });
@@ -150,6 +152,9 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
         if (!this.isStartingGame && this.gameId) {
             this.playerSocketService.emitLeaveGame(this.gameId);
             this.playerSocketService.unsubscribeGameEvents();
+            if (this.chatService.chatDetache()) {
+                this.chatService.leaveGameChat(this.gameId);
+            }
         }
 
         this.statusSubscription?.unsubscribe();

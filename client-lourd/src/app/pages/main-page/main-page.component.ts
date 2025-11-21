@@ -1,9 +1,9 @@
-import { Component, computed, inject, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, WritableSignal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { SocialsPopupComponent } from '@app/components/socials-popup/socials-popup.component';
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
-import { ChatDockService } from '@app/services/chat-dock/chat-dock.service';
+import { ChatService } from '@app/services/chat/chat.service';
 import { FriendManagerService } from '@app/services/friend-manager/friend-manager.service';
 import { GameInviteService } from '@app/services/game-invite/game-invite.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
@@ -19,8 +19,8 @@ import { Subscription } from 'rxjs';
     styleUrls: ['./main-page.component.scss'],
     imports: [RouterLink, ChatContainerComponent, TranslatePipe, SocialsPopupComponent],
 })
-export class MainPageComponent implements OnDestroy, OnInit {
-    chatDockService: ChatDockService = inject(ChatDockService);
+export class MainPageComponent implements OnInit {
+    chatService = inject(ChatService);
     private authService: AuthentificationService = inject(AuthentificationService);
     private userManager: UserManagerService = inject(UserManagerService);
     private httpUserService: HttpUserService = inject(HttpUserService);
@@ -53,7 +53,6 @@ export class MainPageComponent implements OnDestroy, OnInit {
     }
 
     ngOnDestroy(): void {
-        this.chatDockService.leftGame();
         this.inviteCountSubscription?.unsubscribe();
     }
 
@@ -62,7 +61,7 @@ export class MainPageComponent implements OnDestroy, OnInit {
         user.status = DeviceType.offline;
         this.playerSocketService.disconnect();
         this.friendService.cleanup();
-
+        this.chatService.closePopup();
         this.httpUserService.updateUser(user).subscribe({
             next: () => {
                 this.authService.logout();

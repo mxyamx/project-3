@@ -112,8 +112,7 @@
                     {{ 'waiting-page.start-game' | translate }}
                 </button>
             </div>
-
-            @if(!chatDockService.chatDetache()) {
+            @if(!chatService.chatDetache()){
             <div class="chat-zone">
                 <app-chat-container [gameId]="gameSessionManager.gameId()"></app-chat-container>
             </div>

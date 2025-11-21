@@ -149,7 +149,19 @@
         "general": "Général",
         "game": "Chat de jeu",
         "send": "Envoyer",
-        "send-placeholder": "Envoyer un message"
+        "send-placeholder": "Envoyer un message",
+        "channel-deleted": {
+            "title": "Canal supprimé",
+            "text": "Ce canal a été supprimé par son administrateur. Vous ne pouvez plus envoyer de messages.",
+            "close": "Quitter le canal",
+            "placeholder": "Ce canal n'accepte plus de messages."
+        },
+        "leave": "Quitter",
+        "delete": "Supprimer"
+    },
+    "channels": {
+        "deleted": "Un canal auquel vous étiez abonné a été supprimé.",
+        "deleted-with-name": "Le canal \"{{name}}\" a été supprimé."
     },
     "creation-page": {
         "title": "Crée une nouvelle partie",
@@ -434,6 +446,17 @@
             "label": "Nom du canal",
             "cancel-button-label": "Annuler",
             "create-button-label": "Créer"
+        },
+        "server-error": {
+            "title": "Erreur du serveur",
+            "confirm-button-label": "OK",
+            "server-errors": {
+                "channel-already-exists": "Impossible de créer ce canal car un autre porte déjà ce nom.",
+                "unknown": "Une erreur inattendue est survenue.",
+                "channel-not-found": "Ce canal est introuvable ou n'existe plus.",
+                "invalid-request-body": "Le corps de la requête est invalide.",
+                "channel-delete-forbidden": "Vous n'avez pas les droits pour supprimer ce canal."
+            }
         }
     },
     "event-log": {

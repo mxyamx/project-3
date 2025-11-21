@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
+import { ChatService } from '@app/services/chat/chat.service';
 
 @Component({
     selector: 'app-chat-page',
@@ -8,29 +9,10 @@ import { ChatContainerComponent } from '@app/components/chat-container/chat-cont
     styleUrl: './chat-page.component.scss',
 })
 export class ChatPageComponent implements OnInit {
-    // private route = inject(ActivatedRoute);
-    // private chatDockService = inject(ChatDockService);
-    // private userManager = inject(UserManagerService);
-    // //Broadcast Channel Api so we can communicate with other tabs/windows from the same origin
-    // private bus = new BroadcastChannel('chat');
-
     gameId: string;
-    ngOnInit(): void {
-        // this.gameId = this.route.snapshot.queryParamMap.get('gameId') || CHANNEL_GENERAL_ID;
-        // this.chatDockService.playerName.set(this.route.snapshot.queryParamMap.get('playerName') || this.userManager.currentUser().username);
-        // this.bus.postMessage({ type: 'POPUP_OPENED' });
-        // window.addEventListener('beforeunload', () => {
-        //     this.bus.postMessage({ type: 'POPUP_CLOSED' });
-        // });
-        // this.bus.onmessage = (e) => {
-        //     if (e.data?.type === 'LEFT_GAME') {
-        //         window.close();
-        //     }
-        // };
-    }
+    private chatService: ChatService = inject(ChatService);
 
-    // ngOnDestroy() {
-    //     this.bus.postMessage({ type: 'POPUP_CLOSED' });
-    //     this.bus.close();
-    // }
+    ngOnInit(): void {
+        this.chatService.chatDetache.set(true);
+    }
 }

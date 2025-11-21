@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
+import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { DropdownComponent } from '@app/components/dropdown/dropdown.component';
 import { GameListComponent } from '@app/components/game-list/game-list.component';
 import { LoadingComponent } from '@app/components/loading/loading.component';
 import { SaveBoardDialogComponent } from '@app/components/save-board-dialog/save-board-dialog.component';
 import { AdminPageManagerService } from '@app/services/admin-page-manager/admin-page-manager.service';
+import { ChatService } from '@app/services/chat/chat.service';
 import { HttpBoardGameService } from '@app/services/http-manager/http-board-game.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { BoardGameDTO } from '@common/board-game';
@@ -17,7 +19,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-admin-page',
-    imports: [RouterLink, CommonModule, FormsModule, GameListComponent, TranslatePipe, DropdownComponent, LoadingComponent],
+    imports: [RouterLink, CommonModule, FormsModule, GameListComponent, TranslatePipe, DropdownComponent, LoadingComponent, ChatContainerComponent],
     templateUrl: './admin-page.component.html',
     styleUrl: './admin-page.component.scss',
 })
@@ -30,6 +32,8 @@ export class AdminPageComponent implements OnInit {
     protected adminPageManagerService: AdminPageManagerService = inject(AdminPageManagerService);
     private httpBoardGameService: HttpBoardGameService = inject(HttpBoardGameService);
     userManager = inject(UserManagerService);
+    showChat: WritableSignal<boolean> = signal(false);
+    chatService: ChatService = inject(ChatService);
 
     constructor(private dialog: MatDialog) {}
 
@@ -99,6 +103,9 @@ export class AdminPageComponent implements OnInit {
         dialogRef.afterClosed().subscribe(async () => {
             await this.loadGames();
         });
+    }
+    openChat() {
+        this.showChat.set(!this.showChat());
     }
 
     private async loadGames(): Promise<void> {

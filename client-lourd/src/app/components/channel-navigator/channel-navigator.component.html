@@ -1,4 +1,4 @@
-<div class="channel-navigator-container" [class.expanded]="isExpended">
+<div class="channel-navigator-container" [class.expanded]="isPopup">
     <div class="channel-header">
         <h3>
             {{ 'chat.channel-header' | translate }}
@@ -37,6 +37,17 @@
         </div>
     </div>
 
+    @if (channelRemovedMessage()) {
+    <div class="channel-removed-banner">
+        <span class="icon">
+            <i class="fa fa-info-circle"></i>
+        </span>
+        <span class="text">
+            {{ channelRemovedMessage() }}
+        </span>
+    </div>
+    }
+
     <div class="search-input">
         @if(selectedTab() === ChannelTab.Joined){
         <i class="fa-solid fa-filter search-icon"></i>
@@ -65,9 +76,17 @@
             }
             <div class="actions">
                 @if (channel.isManageable) {
-                <i class="fa-solid fa-x delete-icon" title="Quitter" (click)="leaveChannel(channel.id); $event.stopPropagation()"></i>
+                <i
+                    class="fa-solid fa-x delete-icon"
+                    [attr.title]="'chat.leave' | translate"
+                    (click)="leaveChannel(channel.id); $event.stopPropagation()"
+                ></i>
                 } @if (channel.isAdmin) {
-                <i class="fa-solid fa-trash delete-icon" title="Supprimer" (click)="deleteChannel(channel.id); $event.stopPropagation()"></i>
+                <i
+                    class="fa-solid fa-trash delete-icon"
+                    [attr.title]="'chat.delete' | translate"
+                    (click)="deleteChannel(channel.id); $event.stopPropagation()"
+                ></i>
                 }
             </div>
         </div>
@@ -76,7 +95,7 @@
     } @if(selectedTab() === ChannelTab.Directory && !isLoading()){
     <div class="channels" id="panel-directory">
         @for(channel of directoryChannels; track channel.id){
-        <div class="channel-item" (click)="joinChannel(channel.id, channel.name)">
+        <div class="channel-item" (click)="joinChannel(channel.id)">
             <h3>{{ channel.name }}</h3>
         </div>
         } @empty{

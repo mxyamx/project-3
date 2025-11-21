@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router, RouterLink } from '@angular/router';
@@ -9,6 +9,7 @@ import { HttpBoardGameService } from '@app/services/http-manager/http-board-game
 import { ItemApplicatorService } from '@app/services/item-applicator/item-applicator.service';
 import { TileApplicatorService } from '@app/services/tile-applicator/tile-applicator.service';
 
+import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { ItemDescriptionComponent } from '@app/components/item-description/item-description.component';
 import {
     followerData,
@@ -17,6 +18,7 @@ import {
     FROM_TILE_TYPE_TO_DESCRIPTION,
     FROM_TILE_TYPE_TO_IMAGE,
 } from '@app/constants/objects-constants';
+import { ChatService } from '@app/services/chat/chat.service';
 import { PreviewImageGenerationService } from '@app/services/preview-image-generation/preview-image-generation.service';
 import { restrictEvent } from '@app/utils/functions/dom-related-functions';
 import { BoardGame } from '@common/board-game';
@@ -28,7 +30,15 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-board-edition-page',
-    imports: [BoardgameContainerComponent, MatDialogModule, MatButtonModule, RouterLink, TranslatePipe, ItemDescriptionComponent],
+    imports: [
+        BoardgameContainerComponent,
+        MatDialogModule,
+        MatButtonModule,
+        RouterLink,
+        TranslatePipe,
+        ItemDescriptionComponent,
+        ChatContainerComponent,
+    ],
     templateUrl: './board-edition-page.component.html',
     styleUrl: './board-edition-page.component.scss',
 })
@@ -37,7 +47,8 @@ export class BoardEditionPageComponent {
     hoveredItem: Item | null = null;
     mouseX: number = 0;
     mouseY: number = 0;
-
+    showChat: WritableSignal<boolean> = signal(false);
+    chatService = inject(ChatService);
     tiles: Tile[] = [
         { type: TileType.Wall, image: FROM_TILE_TYPE_TO_IMAGE[TileType.Wall], description: FROM_TILE_TYPE_TO_DESCRIPTION[TileType.Wall] },
         {
@@ -245,5 +256,8 @@ export class BoardEditionPageComponent {
 
             this.itemApplicator.deactivate();
         }
+    }
+    openChat() {
+        this.showChat.set(!this.showChat());
     }
 }

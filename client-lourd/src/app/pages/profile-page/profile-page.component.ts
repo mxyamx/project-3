@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { assetFromId } from '@app/constants/avatar-catalog';
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
+import { ChatService } from '@app/services/chat/chat.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { DeviceType } from '@common/enums/deviceType';
@@ -13,7 +15,7 @@ import { SocialsPageComponent } from '../socials-page/socials-page.component';
 
 @Component({
     selector: 'app-profile-page',
-    imports: [CommonModule, TranslatePipe, ReactiveFormsModule, SocialsPageComponent],
+    imports: [CommonModule, TranslatePipe, ReactiveFormsModule, SocialsPageComponent, ChatContainerComponent],
     templateUrl: './profile-page.component.html',
     styleUrl: './profile-page.component.scss',
 })
@@ -23,6 +25,9 @@ export class ProfilePageComponent {
     private httpUserService: HttpUserService = inject(HttpUserService);
     private fb: FormBuilder = inject(FormBuilder);
     private router: Router = inject(Router);
+
+    chatService: ChatService = inject(ChatService);
+    showChat: WritableSignal<boolean> = signal(false);
 
     DeviceType = DeviceType;
     ActiveTab = ActiveTab;
@@ -206,5 +211,9 @@ export class ProfilePageComponent {
         } finally {
             this.saving = false;
         }
+    }
+
+    openChat() {
+        this.showChat.set(!this.showChat());
     }
 }

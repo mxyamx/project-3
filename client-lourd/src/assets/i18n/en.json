@@ -149,7 +149,19 @@
         "general": "General",
         "game": "Game Chat",
         "send": "Send",
-        "send-placeholder": "Send a message"
+        "send-placeholder": "Send a message",
+        "channel-deleted": {
+            "title": "Channel deleted",
+            "text": "This channel was deleted by its administrator. You can no longer send messages.",
+            "close": "Leave channel",
+            "placeholder": "This channel no longer accepts messages."
+        },
+        "leave": "Leave",
+        "delete": "Delete"
+    },
+    "channels": {
+        "deleted": "A channel you were subscribed to has been deleted.",
+        "deleted-with-name": "Channel \"{{name}}\" has been deleted."
     },
     "creation-page": {
         "title": "Create a New Game",
@@ -434,6 +446,17 @@
             "label": "Channel Name",
             "cancel-button-label": "Cancel",
             "create-button-label": "Create"
+        },
+        "server-error": {
+            "title": "Server Error",
+            "confirm-button-label": "OK",
+            "server-errors": {
+                "channel-already-exists": "Unable to create this channel because another one already has this name.",
+                "unknown": "An unexpected error occurred.",
+                "channel-not-found": "This channel cannot be found or no longer exists.",
+                "invalid-request-body": "The request body is invalid.",
+                "channel-delete-forbidden": "You do not have permission to delete this channel."
+            }
         }
     },
     "event-log": {
