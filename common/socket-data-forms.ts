@@ -212,6 +212,18 @@ export interface DropItemRes extends StandardRes {
     activePlayer: Player;
     droppedItem?: Item;
 }
+
+export interface DepositTorchReq extends StandardReq {
+    player: Player;
+}
+
+export interface DepositTorchRes extends StandardRes {
+    boardGame: BoardGame;
+    listOfPlayers: Player[];
+    activePlayer: Player;
+    depositedPosition: Position;
+}
+
 export interface GetGameStateReq extends StandardReq {}
 
 export interface GetGameStateRes extends StandardRes {

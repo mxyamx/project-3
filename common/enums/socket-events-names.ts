@@ -15,6 +15,7 @@ export enum SocketServerEventNames {
     HandleTrap = 'handleTrap',
     PickUpItem = 'pickUpItem',
     DropItem = 'dropItem',
+    DepositTorch = 'depositTorch',
     GetActivePlayer = 'getActivePlayer',
     GetGameState = 'getGameState',
 }
@@ -44,6 +45,7 @@ export enum SocketClientEventNames {
     Teleport = 'teleport',
     PickUpItem = 'pickUpItem',
     DropItem = 'dropItem',
+    DepositTorch = 'depositTorch',
     GetActivePlayer = 'getActivePlayer',
     GameState = 'gameState',
 }

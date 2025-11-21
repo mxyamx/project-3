@@ -433,6 +433,34 @@ export class GameSessionController {
         return this.gameSession.gameStarted;
     }
 
+    depositTorch(player: Player): void {
+        console.log('🔥 SERVER: depositTorch called for player:', player.name);
+        if (this.gameSession.gameOver) return;
+        try {
+            const depositPosition = { ...player.position };
+            console.log('🔥 SERVER: About to call gameSession.depositTorch');
+            this.gameSession.depositTorch(player);
+            console.log('🔥 SERVER: gameSession.depositTorch succeeded');
+
+            const ans: dataForm.DepositTorchRes = {
+                successful: true,
+                message: 'Torch deposited successfully',
+                boardGame: this.gameSession.board,
+                listOfPlayers: this.gameSession.listOfPlayers.getValues(),
+                activePlayer: this.gameSession.activePlayerInstance,
+                depositedPosition: depositPosition,
+            };
+            console.log('🔥 SERVER: About to emit response');
+            this.sio.to(this.roomCode).emit(SocketClientEventNames.DepositTorch, ans);
+            console.log('🔥 SERVER: Response emitted');
+        } catch (error) {
+            console.error('🔥 SERVER ERROR:', error);
+            const ans: dataForm.StandardRes = genErrorMessage();
+            this.sio.to(this.roomCode).emit(SocketClientEventNames.DepositTorch, ans);
+            sendError((error as Error).message || STANDARD_ERROR_MESSAGE, this.sio, this.roomCode);
+        }
+    }
+
     private endFight(): void {
         if (this.gameOver()) return;
         this.fightSubController.endFight();

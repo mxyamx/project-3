@@ -154,6 +154,58 @@ export class GameSession {
         this.updatePlayerBonuses();
     }
 
+    depositTorch(player: Player): void {
+        // Validate player is the active player
+        if (player.name !== this.activePlayer.name) {
+            throw new Error('Only the active player can deposit a torch');
+        }
+
+        // Check if player has a torch in inventory
+        const hasTorch = player.inventory?.some((item) => item.name === ItemName.Torch);
+        if (!hasTorch) {
+            throw new Error('Player does not have a torch to deposit');
+        }
+
+        const position = player.position;
+
+        // Validate position exists
+        if (!position) {
+            throw new Error('Player position is undefined');
+        }
+
+        const tile = this.boardGame.tiles[position.x][position.y];
+
+        // Validate tile type - can only deposit on base/grass, water, or ice
+        const validTileTypes = [TileType.Grass, TileType.Water, TileType.Ice];
+        if (!validTileTypes.includes(tile.type)) {
+            throw new Error('Torch can only be deposited on grass, water, or ice tiles');
+        }
+
+        // Check if tile already has an item
+        if (tile.containedItem) {
+            throw new Error('Tile already contains an item');
+        }
+
+        // Find the torch item in inventory
+        const torchItem = player.inventory.find((item) => item.name === ItemName.Torch);
+        if (!torchItem) {
+            throw new Error('Torch not found in inventory');
+        }
+
+        // Remove torch from player's inventory (create new array without the torch)
+        const newInventory = this.activePlayer.inventory.filter((item) => item.name !== ItemName.Torch);
+        this.activePlayer.inventory = newInventory;
+
+        // Place torch on the tile
+        this.boardGame.tiles[position.x][position.y].containedItem = { ...torchItem };
+
+        // Update illumination to reflect the newly placed torch
+        // This will handle both lit torches (on grass) and extinguished torches (on water/ice)
+        this.updateIllumination();
+
+        this.updatePlayerBonuses();
+    }
+
     validItemPresent(position: Position): boolean {
         const item = this.boardGame.tiles[position.x][position.y].containedItem;
         if (!item) return false;

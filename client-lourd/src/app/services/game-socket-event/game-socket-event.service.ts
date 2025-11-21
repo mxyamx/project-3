@@ -64,6 +64,7 @@ export class GameSocketEventService {
             this.handleDeactivateDebugMode();
             this.handlePickUpItem();
             this.handleDropItem();
+            this.handleDepositTorch();
         }
     }
 
@@ -390,5 +391,23 @@ export class GameSocketEventService {
             this.notificationService.showGameOverNotification();
         }
         return;
+    }
+    private handleDepositTorch(): void {
+        this.socketManager.on(SocketClientEventNames.DepositTorch, (data: dataForm.DepositTorchRes) => {
+            if (!data.successful) {
+                console.error('Torch deposit failed:', data.message);
+                return;
+            }
+
+            this.gameSessionManager.updateBoardGame(data.boardGame);
+            this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
+            this.torchIlluminationService.updateBoardIllumination(data.boardGame.tiles, data.listOfPlayers);
+
+            // Only update state and log for the active player
+            if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
+                this.gameEventService.showLogDepositTorchNotificationWithPosition(data);
+                this.gameSessionManager.changeState(PlayerState.WaitingForAction);
+            }
+        });
     }
 }

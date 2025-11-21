@@ -13,4 +13,12 @@
         </div>
         }
     </div>
+    @if(canDepositTorch()) {
+    <div class="deposit-torch-section">
+        <button class="deposit-torch-btn" (click)="onDepositTorch()" [disabled]="!canDepositTorch()" [title]="getDepositTorchTooltip()">
+            <img [src]="getItemImage('Torch')" alt="torch" class="torch-icon" />
+            {{ 'game-page.inventory.deposit-torch' | translate }}
+        </button>
+    </div>
+    }
 </div>

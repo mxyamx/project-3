@@ -18,6 +18,7 @@ import { PlayerSocketService } from '@app/services/player-socket/player-socket.s
 import { PlayerStateManagerService } from '@app/services/player-state-manager/player-state-manager.service';
 import { BoardGame } from '@common/board-game';
 import { GameMode } from '@common/enums/game-mode';
+import { ItemName } from '@common/enums/item-name';
 import { ItemType } from '@common/enums/item-type';
 import { PlayerState } from '@common/enums/player-state';
 import { SocketServerEventNames } from '@common/enums/socket-events-names';
@@ -426,6 +427,41 @@ export class GameSessionManagerService {
         this.canDropItem.set(false);
     }
 
+    depositTorch(): void {
+        console.log('🔥 CLIENT: depositTorch() called');
+        if (this.chosenPlayer().name !== this.activePlayer().name) {
+            console.log('❌ Not active player');
+            return;
+        }
+
+        const hasTorch = this.chosenPlayer().inventory?.some((item) => item.name === ItemName.Torch);
+        if (!hasTorch) {
+            console.log('❌ No torch');
+            return;
+        }
+
+        const position = this.chosenPlayer().position;
+        if (!position) {
+            console.log('❌ No position');
+            return;
+        }
+
+        const tile = this.boardGameManager.playingBoardGame().tiles[position.x][position.y];
+        const validTileTypes = [TileType.Grass, TileType.Water, TileType.Ice];
+
+        if (!validTileTypes.includes(tile.type)) {
+            console.log('❌ Invalid tile type:', tile.type);
+            return;
+        }
+
+        if (tile.containedItem) {
+            console.log('❌ Tile has item');
+            return;
+        }
+
+        console.log('✅ All checks passed, calling emitDepositTorch');
+        this.playerSocket.emitDepositTorch(this.gameId(), this.chosenPlayer());
+    }
     private updateDisplayedPlayerList(newList: Player[]): void {
         const oldList: Player[] = structuredClone(this.displayedPlayerList());
         const newDisplayed: Player[] = newList;
