@@ -2,6 +2,7 @@
     <section class="navigation">
         <div class="action-buttons">
             <button class="navigation-button" (click)="leaveGame()"><i class="fas fa-home"></i>{{ 'waiting-page.leave' | translate }}</button>
+
             @if(isOrganizer()) {
             <button
                 class="virtual-player-generation"
@@ -9,10 +10,17 @@
                 [disabled]="isRoomFull()"
                 (click)="onGenerateVirtualPlayerClick()"
             >
-                <i class="fas fa-robot"></i> {{ (isRoomFull() ? 'waiting-page.full-room' : 'waiting-page.vp.button') | translate }}
+                <i class="fas fa-robot"></i>
+                {{ (isRoomFull() ? 'waiting-page.full-room' : 'waiting-page.vp.button') | translate }}
+            </button>
+
+            <button class="invite-friends-button" [class.disabled]="isRoomFull()" [disabled]="isRoomFull()" (click)="openInviteFriendsPopup()">
+                <i class="fas fa-user-plus"></i>
+                {{ 'waiting-page.invite-friends' | translate }}
             </button>
             }
         </div>
+
         <div class="blocked-container">
             <div class="blocked-section">
                 <i
@@ -20,6 +28,7 @@
                     (mouseenter)="showTooltip = true"
                     (mouseleave)="showTooltip = false"
                 ></i>
+
                 <button
                     [class.btn-locked]="roomLockedState"
                     [class.btn-unlocked]="!roomLockedState"
@@ -29,18 +38,21 @@
                 >
                     {{ (roomLockedState ? 'waiting-page.unlock-room' : 'waiting-page.lock-room') | translate }}
                 </button>
-                @if(showTooltip) { @if(currentGame.locked){
+
+                @if(showTooltip) { @if(currentGame.locked) {
                 <div class="tooltip tl1">{{ 'waiting-page.locked-room' | translate }}</div>
                 } @else {
                 <div class="tooltip tl1">{{ 'waiting-page.unlocked-room' | translate }}</div>
                 } }
             </div>
+
             <div class="blocked-section">
                 <i
                     [ngClass]="dropInEnabled ? 'fa fa-lock' : 'fa fa-lock-open'"
                     (mouseenter)="showDropInTooltip = true"
                     (mouseleave)="showDropInTooltip = false"
                 ></i>
+
                 <button
                     [ngClass]="[dropInEnabled ? 'btn-locked' : 'btn-disabled', !isOrganizer() ? 'hidden' : '']"
                     [disabled]="!isOrganizer() || hasToggleStateDropIn"
@@ -48,7 +60,8 @@
                 >
                     {{ (dropInEnabled ? 'waiting-page.disable-drop-in' : 'waiting-page.enable-drop-in') | translate }}
                 </button>
-                @if(showDropInTooltip) { @if(dropInEnabled){
+
+                @if(showDropInTooltip) { @if(dropInEnabled) {
                 <div class="tooltip tl2">{{ 'waiting-page.drop-in-enabled' | translate }}</div>
                 } @else {
                 <div class="tooltip tl2">{{ 'waiting-page.drop-in-disabled' | translate }}</div>
@@ -56,15 +69,18 @@
             </div>
         </div>
     </section>
+
     <section>
         <div class="access-code-section">
             <div>
                 <h1><i class="fa fa-key"></i>{{ 'waiting-page.code' | translate }}:</h1>
             </div>
+
             <div>
                 <p class="game-code">{{ gameId }}</p>
             </div>
         </div>
+
         <div class="entry-fee-section">
             <span class="entry-fee-label"> {{ 'waiting-page.entry-fee-label' | translate }}: </span>
 
@@ -79,10 +95,14 @@
 
         <div class="second-section">
             <div class="left-zone">
-                <div class="text">{{ 'waiting-page.waiting' | translate }}</div>
+                <div class="text">
+                    {{ 'waiting-page.waiting' | translate }}
+                </div>
+
                 <div class="players-list">
                     <app-players-list [gameId]="gameId"></app-players-list>
                 </div>
+
                 <button
                     [ngClass]="!isOrganizer() ? 'hidden' : ''"
                     [disabled]="playersLimitReached || !roomLockedState || hasBeenClicked || showPlayerAmountWarning"
@@ -92,7 +112,8 @@
                     {{ 'waiting-page.start-game' | translate }}
                 </button>
             </div>
-            @if(!chatDockService.chatDetache()){
+
+            @if(!chatDockService.chatDetache()) {
             <div class="chat-zone">
                 <app-chat-container [gameId]="gameSessionManager.gameId()"></app-chat-container>
             </div>
@@ -108,16 +129,70 @@
     </button>
 
     <p>{{ 'waiting-page.vp.title' | translate }}</p>
+
     <div class="confirmation-buttons">
-        <button (click)="selectProfile(virtualPlayerProfile.Agressive)">{{ 'waiting-page.vp.agressive' | translate }}</button>
-        <button (click)="selectProfile(virtualPlayerProfile.Defensive)">{{ 'waiting-page.vp.defensive' | translate }}</button>
+        <button (click)="selectProfile(virtualPlayerProfile.Agressive)">
+            {{ 'waiting-page.vp.agressive' | translate }}
+        </button>
+
+        <button (click)="selectProfile(virtualPlayerProfile.Defensive)">
+            {{ 'waiting-page.vp.defensive' | translate }}
+        </button>
+    </div>
+</div>
+} @if (showInviteFriendsPopup) {
+<div class="popup-overlay" (click)="closeInviteFriendsPopup()">
+    <div class="invite-friends-popup" (click)="$event.stopPropagation()">
+        <button class="close-btn" (click)="closeInviteFriendsPopup()">×</button>
+
+        <h2>
+            <i class="fa fa-user-plus"></i>
+            {{ 'waiting-page.invite-popup.title' | translate }}
+        </h2>
+
+        <div class="friends-list-container">
+            @if (availableFriends.length > 0) {
+            <ul class="friends-list">
+                @for (friend of availableFriends; track friend.id) {
+                <li class="friend-item">
+                    <div class="friend-info">
+                        <div class="avatar-wrapper">
+                            <img [src]="friend.avatar" [alt]="friend.username" class="avatar" />
+
+                            @if (getFriendStatus(friend.id); as status) {
+                            <div class="status-badge">
+                                <i class="device-icon fa" [ngClass]="getDeviceIcon(status.status)" [style.color]="getStatusColor(status.status)"></i>
+                            </div>
+                            }
+                        </div>
+
+                        <span class="friend-name">{{ friend.username }}</span>
+                    </div>
+
+                    <button class="invite-btn" (click)="inviteFriend(friend)">
+                        <i class="fa fa-paper-plane"></i>
+                        {{ 'waiting-page.invite-popup.invite' | translate }}
+                    </button>
+                </li>
+                }
+            </ul>
+            } @else {
+            <div class="empty-state">
+                <i class="fa fa-users"></i>
+                <p>{{ 'waiting-page.invite-popup.no-friends' | translate }}</p>
+            </div>
+            }
+        </div>
     </div>
 </div>
 } @if(showPlayerAmountWarning) {
 <div class="modal-overlay" (click)="showPlayerAmountWarning = false">
     <div class="player-amount-warning" (click)="$event.stopPropagation()">
         <span>{{ 'waiting-page.player-amount-modal' | translate }}</span>
-        <button class="close-btn" (click)="showPlayerAmountWarning = false">{{ 'general.button.close' | translate }}</button>
+
+        <button class="close-btn" (click)="showPlayerAmountWarning = false">
+            {{ 'general.button.close' | translate }}
+        </button>
     </div>
 </div>
 }

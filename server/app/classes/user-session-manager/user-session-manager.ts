@@ -18,7 +18,10 @@ export class UserSessionManager {
 
     connectUser(firebaseId: string, socketId: string, deviceType: DeviceType): boolean {
         if (this.isUserOnline(firebaseId)) {
-            return false;
+            const oldSession = this.activeSessions.get(firebaseId);
+            if (oldSession) {
+                this.socketToFirebaseMap.delete(oldSession.socketId);
+            }
         }
 
         const session: UserSession = {
@@ -70,6 +73,11 @@ export class UserSessionManager {
 
     getFirebaseIdBySocketId(socketId: string): string | null {
         return this.socketToFirebaseMap.get(socketId) || null;
+    }
+
+    getSocketIdByFirebaseId(firebaseId: string): string | null {
+        const session = this.activeSessions.get(firebaseId);
+        return session ? session.socketId : null;
     }
 
     getAllActiveSessions(): UserSession[] {

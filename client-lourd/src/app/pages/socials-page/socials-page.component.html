@@ -9,7 +9,37 @@
             @for (friend of friends(); track friend.id) {
             <li>
                 <div class="user-info">
-                    <img class="avatar" [src]="friend.avatar" [alt]="friend.username" />
+                    <div class="avatar-wrapper">
+                        <img class="avatar" [src]="friend.avatar" [alt]="friend.username" />
+                        @if (getFriendStatus(friend.id); as friendStatus) {
+                        <div class="status-badge">
+                            <i
+                                class="device-icon fa"
+                                [ngClass]="getDeviceIcon(friendStatus.status)"
+                                [style.color]="getStatusColor(friendStatus.status, friendStatus.gameActivity)"
+                                [title]="
+                                    friendStatus.status === DeviceType.offline
+                                        ? ('socials-page.status.offline' | translate)
+                                        : friendStatus.status === DeviceType.web
+                                        ? ('socials-page.status.desktop' | translate)
+                                        : ('socials-page.status.mobile' | translate)
+                                "
+                            ></i>
+                            @if (getActivityIcon(friendStatus.gameActivity)) {
+                            <i
+                                class="activity-icon fa"
+                                [ngClass]="getActivityIcon(friendStatus.gameActivity)"
+                                [style.color]="getStatusColor(friendStatus.status, friendStatus.gameActivity)"
+                                [title]="'socials-page.status.in-game' | translate"
+                            ></i>
+                            }
+                        </div>
+                        } @else {
+                        <div class="status-badge">
+                            <i class="device-icon fa fa-circle" [style.color]="'#9e9e9e'" [title]="'socials-page.status.offline' | translate"></i>
+                        </div>
+                        }
+                    </div>
                     <span class="name">{{ friend.username }}</span>
                 </div>
                 <div class="actions">

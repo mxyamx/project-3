@@ -1,6 +1,10 @@
 import { UserSessionManager } from '@app/classes/user-session-manager/user-session-manager';
+import { friendEvents } from '@app/events/friendEvents';
 import { UsersService } from '@app/services/users/users.service';
 import { DeviceType } from '@common/enums/deviceType';
+import { FriendEventType } from '@common/enums/friend-event-type';
+import { GameActivityStatus } from '@common/enums/game-activity-status';
+import { UserStatusInfo } from '@common/user';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 
@@ -16,6 +20,7 @@ export class UserSessionController {
     ) {
         this.userSessionManager = userSessionManager || new UserSessionManager();
         this.vpSocketIds = [];
+        this.setupFriendEventListeners();
     }
 
     handleUserConnection(socket: Socket): void {
@@ -67,8 +72,14 @@ export class UserSessionController {
                 deviceType,
             });
 
-            this.updateUserStatusInDB(firebaseId, deviceType).catch((error) => {
+            // Update user status to online with idle activity
+            this.updateUserStatusInDB(firebaseId, deviceType, GameActivityStatus.idle).catch((error) => {
                 console.error('Error updating user status in DB:', error);
+            });
+
+            // Notify friends that user came online
+            this.notifyFriendsOfStatusChange(firebaseId, deviceType, GameActivityStatus.idle).catch((error) => {
+                console.error('Error notifying friends:', error);
             });
         } catch (error) {
             console.error('Connection error:', error);
@@ -84,7 +95,7 @@ export class UserSessionController {
         socket.on('disconnect', async () => {
             const index = this.vpSocketIds.findIndex((id) => socket.id === id);
             if (index !== -1) {
-                this.vpSocketIds.slice(index, 1);
+                this.vpSocketIds.splice(index, 1);
                 return;
             }
             try {
@@ -93,6 +104,11 @@ export class UserSessionController {
                 if (firebaseId) {
                     await this.updateUserStatusInDB(firebaseId, DeviceType.offline).catch((error) => {
                         console.error('Error updating user status in DB on disconnect:', error);
+                    });
+
+                    // Notify friends that user went offline
+                    await this.notifyFriendsOfStatusChange(firebaseId, DeviceType.offline).catch((error) => {
+                        console.error('Error notifying friends:', error);
                     });
                 }
             } catch (error) {
@@ -134,15 +150,164 @@ export class UserSessionController {
                 this.userSessionManager.disconnectByFirebaseId(data.firebaseId);
             }
         });
+
+        // NEW: Get statuses for multiple users at once
+        socket.on('get-users-status', async (data: { userIds: string[] }) => {
+            try {
+                const statuses: UserStatusInfo[] = [];
+
+                for (const userId of data.userIds) {
+                    const user = await this.usersService.getUser(userId);
+                    if (user) {
+                        statuses.push({
+                            userId: user.id,
+                            username: user.username,
+                            avatar: user.avatar,
+                            status: user.status,
+                            gameActivity: user.gameActivity,
+                            gameId: user.currentGameId,
+                        });
+                    }
+                }
+
+                socket.emit('users-status-response', { statuses });
+            } catch (error) {
+                console.error('Error fetching user statuses:', error);
+                socket.emit('users-status-response', { statuses: [] });
+            }
+        });
+
+        socket.on('update-game-activity', async (data: { gameActivity: GameActivityStatus; gameId?: string }) => {
+            const firebaseId = socket.data.userId;
+            if (!firebaseId) return;
+
+            try {
+                const session = this.userSessionManager.getUserSession(firebaseId);
+                if (!session) return;
+
+                await this.updateUserStatusInDB(firebaseId, session.deviceType, data.gameActivity, data.gameId);
+                await this.notifyFriendsOfStatusChange(firebaseId, session.deviceType, data.gameActivity, data.gameId);
+            } catch (error) {
+                console.error('Failed to update game activity:', error);
+            }
+        });
+
+        socket.on('invite-to-game', async (data: { friendId: string; gameId: string }) => {
+            const firebaseId = socket.data.userId;
+            if (!firebaseId) return;
+
+            try {
+                const user = await this.usersService.getUser(firebaseId);
+                const friend = await this.usersService.getUser(data.friendId);
+
+                if (!user || !friend || friend.status === DeviceType.offline) {
+                    socket.emit('invite-failed', { reason: 'Friend is offline' });
+                    return;
+                }
+
+                if (!user.friends?.includes(data.friendId)) {
+                    socket.emit('invite-failed', { reason: 'Not friends' });
+                    return;
+                }
+
+                const friendSocketId = this.userSessionManager.getSocketIdByFirebaseId(data.friendId);
+                if (friendSocketId) {
+                    this.sio.to(friendSocketId).emit('game-invite-received', {
+                        from: user.username,
+                        fromId: user.id,
+                        fromAvatar: user.avatar,
+                        gameId: data.gameId,
+                    });
+                    socket.emit('invite-sent', { success: true });
+                }
+            } catch (error) {
+                console.error('Failed to send game invitation:', error);
+                socket.emit('invite-failed', { reason: 'Server error' });
+            }
+        });
+
+        socket.on('accept-game-invite', async (data: { gameId: string; inviterId: string }) => {
+            const userId = socket.data.userId;
+            if (!userId) return;
+
+            try {
+                const user = await this.usersService.getUser(userId);
+
+                const inviterSocketId = this.userSessionManager.getSocketIdByFirebaseId(data.inviterId);
+                if (inviterSocketId && user) {
+                    this.sio.to(inviterSocketId).emit('invite-accepted', {
+                        userId: user.id,
+                        username: user.username,
+                        avatar: user.avatar,
+                        gameId: data.gameId,
+                    });
+                }
+            } catch (error) {
+                console.error('Error handling invite acceptance:', error);
+            }
+        });
+
+        socket.on('decline-game-invite', async (data: { gameId: string; inviterId: string }) => {
+            const userId = socket.data.userId;
+            if (!userId) return;
+
+            try {
+                const user = await this.usersService.getUser(userId);
+
+                const inviterSocketId = this.userSessionManager.getSocketIdByFirebaseId(data.inviterId);
+                if (inviterSocketId && user) {
+                    this.sio.to(inviterSocketId).emit('invite-declined', {
+                        userId: user.id,
+                        username: user.username,
+                        gameId: data.gameId,
+                    });
+                }
+            } catch (error) {
+                console.error('Error handling invite decline:', error);
+            }
+        });
     }
 
-    private async updateUserStatusInDB(firebaseId: string, status: DeviceType): Promise<void> {
+    private async updateUserStatusInDB(firebaseId: string, status: DeviceType, gameActivity?: GameActivityStatus, gameId?: string): Promise<void> {
         try {
             const user = await this.usersService.getUser(firebaseId);
-            const updatedUser = { ...user, status };
+            const updatedUser = {
+                ...user,
+                status,
+                gameActivity: status === DeviceType.offline ? undefined : gameActivity,
+                currentGameId: status === DeviceType.offline ? undefined : gameId,
+            };
             await this.usersService.updateUser(updatedUser);
         } catch (error) {
             throw error;
+        }
+    }
+
+    private async notifyFriendsOfStatusChange(
+        firebaseId: string,
+        status: DeviceType,
+        gameActivity?: GameActivityStatus,
+        gameId?: string,
+    ): Promise<void> {
+        try {
+            const user = await this.usersService.getUser(firebaseId);
+            if (!user || !user.friends || user.friends.length === 0) return;
+
+            for (const friendId of user.friends) {
+                const friendSocketId = this.userSessionManager.getSocketIdByFirebaseId(friendId);
+                if (friendSocketId) {
+                    this.sio.to(friendSocketId).emit('user-game-activity-changed', {
+                        userId: user.id,
+                        username: user.username,
+                        avatar: user.avatar,
+                        status,
+                        gameActivity,
+                        gameId,
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error notifying friends:', error);
         }
     }
 
@@ -164,5 +329,47 @@ export class UserSessionController {
             return this.userSessionManager.disconnectByFirebaseId(firebaseId);
         }
         return false;
+    }
+
+    private setupFriendEventListeners(): void {
+        friendEvents.on(FriendEventType.FRIEND_ADDED, (data: { userId: string; friendId: string }) => {
+            try {
+                const userSession = this.userSessionManager.getUserSession(data.userId);
+                const friendSession = this.userSessionManager.getUserSession(data.friendId);
+
+                if (userSession && friendSession) {
+                    const userSocketId = this.userSessionManager.getSocketIdByFirebaseId(data.userId);
+                    const friendSocketId = this.userSessionManager.getSocketIdByFirebaseId(data.friendId);
+
+                    this.usersService.getUser(data.userId).then((user) => {
+                        if (user && friendSocketId) {
+                            this.sio.to(friendSocketId).emit('user-game-activity-changed', {
+                                userId: user.id,
+                                username: user.username,
+                                avatar: user.avatar,
+                                status: user.status,
+                                gameActivity: user.gameActivity,
+                                gameId: user.currentGameId,
+                            });
+                        }
+                    });
+
+                    this.usersService.getUser(data.friendId).then((friend) => {
+                        if (friend && userSocketId) {
+                            this.sio.to(userSocketId).emit('user-game-activity-changed', {
+                                userId: friend.id,
+                                username: friend.username,
+                                avatar: friend.avatar,
+                                status: friend.status,
+                                gameActivity: friend.gameActivity,
+                                gameId: friend.currentGameId,
+                            });
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error handling friend added event:', error);
+            }
+        });
     }
 }

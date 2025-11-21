@@ -13,22 +13,57 @@
                 <button [class.active]="activeTab === 'sent'" (click)="activeTab = 'sent'">
                     {{ 'socials-popup.tabs.sent' | translate }} ({{ sentCount() }})
                 </button>
+                <button [class.active]="activeTab === 'invites'" (click)="activeTab = 'invites'">
+                    {{ 'socials-popup.tabs.invites' | translate }} ({{ invitesCount() }})
+                </button>
                 <button [class.active]="activeTab === 'add'" (click)="activeTab = 'add'">
                     {{ 'socials-popup.tabs.add' | translate }}
                 </button>
             </div>
 
             <div class="tab-content">
-                @switch (activeTab) {
-                <!-- Friends Tab -->
-                @case ('friends') { @if (isLoading) {
+                @switch (activeTab) { @case ('friends') { @if (isLoading) {
                 <div class="loading">{{ 'socials-popup.loading' | translate }}</div>
                 } @if (!isLoading) {
                 <ul class="user-list">
                     @for (friend of friends; track friend.id) {
                     <li>
                         <div class="user-info">
-                            <img [src]="friend.avatar" [alt]="friend.username" class="avatar" />
+                            <div class="avatar-wrapper">
+                                <img [src]="friend.avatar" [alt]="friend.username" class="avatar" />
+                                @if (getFriendStatus(friend.id); as friendStatus) {
+                                <div class="status-badge">
+                                    <i
+                                        class="device-icon fa"
+                                        [ngClass]="getDeviceIcon(friendStatus.status)"
+                                        [style.color]="getStatusColor(friendStatus.status, friendStatus.gameActivity)"
+                                        [title]="
+                                            friendStatus.status === DeviceType.offline
+                                                ? ('socials-popup.status.offline' | translate)
+                                                : friendStatus.status === DeviceType.web
+                                                ? ('socials-popup.status.desktop' | translate)
+                                                : ('socials-popup.status.mobile' | translate)
+                                        "
+                                    ></i>
+                                    @if (getActivityIcon(friendStatus.gameActivity)) {
+                                    <i
+                                        class="activity-icon fa"
+                                        [ngClass]="getActivityIcon(friendStatus.gameActivity)"
+                                        [style.color]="getStatusColor(friendStatus.status, friendStatus.gameActivity)"
+                                        [title]="'socials-popup.status.in-game' | translate"
+                                    ></i>
+                                    }
+                                </div>
+                                } @else {
+                                <div class="status-badge">
+                                    <i
+                                        class="device-icon fa fa-circle"
+                                        [style.color]="'#9e9e9e'"
+                                        [title]="'socials-popup.status.offline' | translate"
+                                    ></i>
+                                </div>
+                                }
+                            </div>
                             <span class="name">{{ friend.username }}</span>
                         </div>
                         <div class="actions">
@@ -48,10 +83,7 @@
                     <li class="empty-state">{{ 'socials-popup.empty.no-friends' | translate }}</li>
                     }
                 </ul>
-                } }
-
-                <!-- Received Requests Tab -->
-                @case ('received') {
+                } } @case ('received') {
                 <ul class="user-list">
                     @for (request of pendingRequests; track request.id) {
                     <li>
@@ -72,10 +104,7 @@
                     <li class="empty-state">{{ 'socials-popup.empty.no-pending' | translate }}</li>
                     }
                 </ul>
-                }
-
-                <!-- Sent Requests Tab -->
-                @case ('sent') {
+                } @case ('sent') {
                 <ul class="user-list">
                     @for (request of sentRequests; track request.id) {
                     <li>
@@ -93,10 +122,49 @@
                     <li class="empty-state">{{ 'socials-popup.empty.no-sent' | translate }}</li>
                     }
                 </ul>
-                }
-
-                <!-- Add Friends Tab -->
-                @case ('add') {
+                } @case ('invites') {
+                <ul class="user-list">
+                    @for (invite of gameInvites(); track invite.gameId + invite.fromId) {
+                    <li class="invite-item">
+                        <div class="user-info">
+                            <img [src]="invite.fromAvatar" [alt]="invite.from" class="avatar" />
+                            <div class="invite-text">
+                                <span class="name">{{ invite.from }}</span>
+                                <span class="invite-message">{{ 'socials-popup.invite-message' | translate }}</span>
+                                <span class="time-ago">{{ getTimeAgo(invite.timestamp) }}</span>
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <button
+                                class="icon-btn accept-btn"
+                                (click)="acceptGameInvite(invite)"
+                                [disabled]="isProcessingInvite"
+                                [title]="'socials-popup.actions.accept' | translate"
+                            >
+                                @if (isProcessingInvite) {
+                                <i class="fa fa-spinner fa-spin"></i>
+                                } @else {
+                                <i class="fa fa-check"></i>
+                                }
+                            </button>
+                            <button
+                                class="icon-btn reject-btn"
+                                (click)="declineGameInvite(invite)"
+                                [disabled]="isProcessingInvite"
+                                [title]="'socials-popup.actions.decline' | translate"
+                            >
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    </li>
+                    } @empty {
+                    <li class="empty-state">
+                        <i class="fa fa-inbox"></i>
+                        {{ 'socials-popup.empty.no-invites' | translate }}
+                    </li>
+                    }
+                </ul>
+                } @case ('add') {
                 <div class="add-user">
                     <div class="search-bar">
                         <input
@@ -152,7 +220,6 @@
     </div>
 </div>
 
-<!-- Confirmation Dialog -->
 @if (showConfirmation) {
 <div class="confirmation-bubble" (click)="$event.stopPropagation()">
     <p>{{ confirmationMessage | translate }}</p>
@@ -161,10 +228,7 @@
         <button (click)="closeConfirmation()">{{ 'general.button.no' | translate }}</button>
     </div>
 </div>
-}
-
-<!-- Error Message Bubble -->
-@if (showError) {
+} @if (showError) {
 <div class="error-bubble" (click)="$event.stopPropagation()">
     <button class="close-error-btn" (click)="closeError()">×</button>
     <p>{{ errorMessage | translate }}</p>

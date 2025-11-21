@@ -15,6 +15,8 @@ import { GameInterfaceService } from '@app/services/game-interface/game-interfac
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { GameSocketEventService } from '@app/services/game-socket-event/game-socket-event.service';
 import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
+import { UserStatusService } from '@app/services/user-status/user-status.service';
+import { GameActivityStatus } from '@common/enums/game-activity-status';
 import { PlayerState } from '@common/enums/player-state';
 import { UrlPage } from '@common/enums/url-page';
 import { Player } from '@common/player';
@@ -53,6 +55,7 @@ export class GameComponent implements OnInit, OnDestroy {
     private playerSocketService: PlayerSocketService = inject(PlayerSocketService);
     private notificationService: CombatNotificationService = inject(CombatNotificationService);
     private gameInterfaceService: GameInterfaceService = inject(GameInterfaceService);
+    private userStatusService: UserStatusService = inject(UserStatusService);
 
     constructor() {
         this.router = new Router();
@@ -80,6 +83,7 @@ export class GameComponent implements OnInit, OnDestroy {
 
         this.playerSocketService.onPlayerLeft((player: Player) => {
             if (this.gameSessionManager.isCurrentPlayer(player)) {
+                this.userStatusService.updateMyGameActivity(GameActivityStatus.idle);
                 this.router.navigate([UrlPage.Home]);
             }
         });
@@ -92,6 +96,7 @@ export class GameComponent implements OnInit, OnDestroy {
 
         if (!this.gameSocketEventManager.gameEnding) {
             this.playerSocketService.emitLeaveGame(this.gameSessionManager.gameId());
+            this.userStatusService.updateMyGameActivity(GameActivityStatus.idle);
             this.playerSocketService.unsubscribeGameEvents();
         }
     }
@@ -141,6 +146,7 @@ export class GameComponent implements OnInit, OnDestroy {
         const player = this.gameSessionManager.chosenPlayer();
         if (player) {
             this.playerSocketService.emitLeaveGame(this.gameSessionManager.gameId());
+            this.userStatusService.updateMyGameActivity(GameActivityStatus.idle);
         }
         this.gameSessionManager.leaveGame();
         setTimeout(() => {
