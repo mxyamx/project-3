@@ -1,8 +1,13 @@
-<div class="main-area" [style.cursor]="tile.reachable ? 'pointer' : ''">
+<div class="main-area" [ngClass]="{ illuminated: tile.isIlluminated }" [style.cursor]="tile.reachable ? 'pointer' : ''">
     <img [src]="getTileImage(tile)" alt="{{ tile.type }}" />
-    @if((tile.containedItem && !tile.containedItem.disabled)||(tile.containedItem && this.tileIsStartingPosition())){
-    <app-playing-item class="item-element" [item]="tile.containedItem" (mousedown)="mouseDownOnItem($event)"></app-playing-item>}
-    @if(tile.containedPlayer){
+
+    <!-- Teleportation visual indicators (without number) -->
+    @if(tile.type === 'teleportation' && getTeleporterPairNumber()){
+    <div class="teleporter-overlay" [style.background-color]="getTeleporterColor()"></div>
+    <div class="teleporter-border" [style.border-color]="getTeleporterColor()"></div>
+    } @if((tile.containedItem && !tile.containedItem.disabled)||(tile.containedItem && this.tileIsStartingPosition())){
+    <app-playing-item class="item-element" [tileType]="tile.type" [item]="tile.containedItem" (mousedown)="mouseDownOnItem($event)"></app-playing-item
+    >} @if(tile.containedPlayer){
     <app-player-element class="player-element" [player]="tile.containedPlayer" (mousedown)="mouseDownOnPlayer($event)"></app-player-element>
     } @if(tile.reachable){
     <div class="reachable-filter"></div>
