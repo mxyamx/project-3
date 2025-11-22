@@ -22,4 +22,5 @@ export interface Player {
     ctfTeam?: CtfTeam;
     startPosition?: Position;
     eliminated: boolean;
+    hasIlluminationBonus?: boolean;
 }

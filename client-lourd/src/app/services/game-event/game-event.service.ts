@@ -204,6 +204,46 @@ export class GameEventService {
         this.playerSocketService.emitLog(this.gameSessionManagerService.gameId(), gameEvent);
     }
 
+    // Add this method to game-event.service.ts
+
+    showLogTrapNotification(data: dataForm.TrapResolvedData) {
+        const playerName = this.colorLogName(data.activePlayer.name);
+
+        let message: string;
+
+        if (data.avoided) {
+            // Player chose to avoid the trap
+            message = `${playerName} a évité le piège (-3 points de mouvement)`;
+        } else if (data.trapActivated) {
+            // Player attempted to cross and trap activated
+            message = `${playerName} a tenté de traverser le piège... ⚠️ LE PIÈGE S'EST ACTIVÉ! Son tour est terminé.`;
+        } else {
+            // Player attempted to cross and succeeded
+            message = `${playerName} a tenté de traverser le piège et a réussi! (-1 point de mouvement)`;
+        }
+
+        const gameEvent: GameEvent = {
+            message,
+            timestamp: new Date(),
+            type: GameEventType.Trap, // Add this to GameEventType enum
+            player: [data.activePlayer.name],
+        };
+
+        this.playerSocketService.emitLog(this.gameSessionManagerService.gameId(), gameEvent);
+    }
+
+    showLogDepositTorchNotificationWithPosition(data: dataForm.DepositTorchRes): void {
+        const position = data.depositedPosition;
+        const gameEvent: GameEvent = {
+            message: `${this.colorLogName(data.activePlayer.name)} a déposé une torche à la position (${position.x}, ${position.y})`,
+            timestamp: new Date(),
+            type: GameEventType.PickUpItem,
+            player: [data.activePlayer.name],
+        };
+
+        this.playerSocketService.emitLog(this.gameSessionManagerService.gameId(), gameEvent);
+    }
+
     setFilter(isFiltered: boolean, playerName: string) {
         this.isFiltered = isFiltered;
         this.playerName = playerName;

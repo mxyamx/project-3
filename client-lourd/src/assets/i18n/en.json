@@ -16,7 +16,9 @@
             "door": "door",
             "water": "water",
             "ice": "ice",
-            "grass": "grass"
+            "grass": "grass",
+            "teleportation": "teleportation",
+            "trap": "trap"
         },
         "item": {
             "name": {
@@ -28,7 +30,8 @@
                 "game-editor-2": "Time Reverser",
                 "random-item": "Resurrection Stone",
                 "starting-point": "Starting Point",
-                "flag": "Flag"
+                "flag": "Flag",
+                "torch": "Torch"
             },
             "type": {
                 "attribute-editor-1": "Attribute Modifier",
@@ -39,7 +42,8 @@
                 "game-editor-2": "Game Modifier",
                 "random-item": "Random",
                 "starting-point": "This is each player's initial position",
-                "flag": "Available only in CTF mode"
+                "flag": "Available only in CTF mode",
+                "torch": "+1 to Attack and Defense attributes."
             },
             "effect": {
                 "attribute-editor-1": "Gives +1 Speed and +1 Attack",
@@ -50,7 +54,8 @@
                 "game-editor-2": "Grants 2 possible actions per turn",
                 "random-item": "Non-specific",
                 "starting-point": "",
-                "flag": "Bring it back to your starting point to make your team win"
+                "flag": "Bring it back to your starting point to make your team win",
+                "torch": "Illuminates surrounding tiles"
             }
         },
 
@@ -59,7 +64,8 @@
             "door": "- Name: Door.\n - Terrain tile? No.\n - Movement cost: 1.\n A door can only be crossed if it's open.\n",
             "water": "- Name: Water.\n - Terrain tile? Yes.\n - Movement cost: 2.\n Movement is harder in water.\n",
             "ice": "- Name: Ice.\n - Terrain tile? Yes.\n - Movement cost: None.\n Easy to move on ice.\n",
-            "grass": "- Name: Grass.\n - Terrain tile? Yes.\n - Movement cost: 1.\n A normal terrain surface.\n"
+            "grass": "- Name: Grass.\n - Terrain tile? Yes.\n - Movement cost: 1.\n A normal terrain surface.\n",
+            "teleportation": "- Name: Teleportation.\n - Terrain tile? Yes.\n - Movement cost: None.\n Teleport to another teleportation tile.\n"
         },
         "game-mode": {
             "normal": "Normal",
@@ -86,7 +92,8 @@
         "action-type": {
             "open-door": "Open the door",
             "close-door": "Close the door",
-            "attack-player": "Attack the player"
+            "attack-player": "Attack the player",
+            "teleport": "Use the teleporter"
         },
         "game-privacy": {
             "public": "Public",
@@ -242,6 +249,7 @@
         "players": "Players",
         "team": "Team",
         "victories": "Victories",
+        "deposit-torch": "Deposit Torch",
         "combat": {
             "remaining-escape-attemps": "Remaining escape attempts",
             "attack-dice": "Attack Die",
