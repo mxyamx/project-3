@@ -99,21 +99,11 @@ export class SocketManager {
         this.channelSocketManager = new ChannelSocketManager(this.sio, this.userSessionManager, this.databaseService);
 
         friendEvents.on('vp-eliminated', (payload: { player: Player; gameId: string }) => {
-            const { player, gameId } = payload;
-            const vpManager = this.vpManagers.get(gameId);
-            vpManager?.releaseVpName(player.name);
+            const { player } = payload;
             const vpSocket = this.vpSockets.get(player.socketId);
             if (vpSocket) {
                 vpSocket.clientSocket.removeAllListeners();
-                vpSocket.clientSocket.disconnect();
             }
-            this.vpSockets.delete(player.socketId);
-            this.gameVpSocketEvents.delete(player.socketId);
-            this.fightVpSocketEvents.delete(player.socketId);
-            this.vpGameSessionManagers.delete(player.socketId);
-            this.vpBehaviorsInGame.delete(player.socketId);
-            this.vpBehaviorsInFight.delete(player.socketId);
-            console.log(`vp cleaned -> ${player.socketId}`);
             return;
         });
     }
