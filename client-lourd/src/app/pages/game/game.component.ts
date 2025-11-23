@@ -47,6 +47,7 @@ export class GameComponent implements OnInit, OnDestroy {
     showGameInterface = false;
     showAbandonConfirmation = false;
     showEndTurnConfirmation = false;
+    showEmoteMenuForPlayer = false;
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     chatService = inject(ChatService);
     gameIdCopy: string = '';
@@ -130,6 +131,20 @@ export class GameComponent implements OnInit, OnDestroy {
     cancelEndTurn() {
         this.showEndTurnConfirmation = false;
     }
+toggleEmoteMenu() {
+    console.log('🎯 [GameComponent] toggleEmoteMenu appelé');
+    console.log('   Valeur actuelle:', this.showEmoteMenuForPlayer);
+    
+    
+    this.showEmoteMenuForPlayer = true;
+    console.log('   Nouvelle valeur:', this.showEmoteMenuForPlayer);
+    
+    
+    setTimeout(() => {
+        this.showEmoteMenuForPlayer = false;
+        console.log('   Valeur réinitialisée à false');
+    }, 100);
+}
 
     onCLickEndTurn() {
         this.showEndTurnConfirmation = false;

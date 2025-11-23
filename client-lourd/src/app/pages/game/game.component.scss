@@ -159,6 +159,34 @@ $animation-delay-1: 0.2s;
                 cursor: not-allowed;
                 opacity: 0.5;
             }
+
+            &.emote-menu-button {
+    background: linear-gradient(145deg, #ff9500, #ff7700);
+    border: 7px ridge #ffd700;
+    font-size: 1.05rem;
+    padding: 12px 24px;
+    font-weight: 600;
+    box-shadow: 0 4px 8px rgba(255, 149, 0, 0.3);
+    
+    &:hover {
+        background: linear-gradient(145deg, #ffd700, #ffb700);
+        border: 7px ridge #ff9500;
+        transform: scale(1.15);
+        box-shadow: 
+            0 6px 16px rgba(255, 215, 0, 0.5),
+            0 0 20px rgba(255, 215, 0, 0.4);
+    }
+    
+    &:active {
+        transform: scale(1.05);
+        box-shadow: 0 2px 4px rgba(255, 149, 0, 0.4);
+    }
+}
+
+
+
+
+
         }
     }
 }

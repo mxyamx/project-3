@@ -232,6 +232,7 @@
     "game-page": {
         "action": "Perform an Action",
         "end-turn": "End Turn",
+        "emotes": "Emotes",
         "give-up": "Give Up",
         "debug-mode": "Debug Mode",
         "normal-mode": "Normal Mode",

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Signal } from '@angular/core';
+import { Component, inject, Signal, Input} from '@angular/core';
 import { PlayingBoardCanvasComponent } from '@app/components/playing-board-canvas/playing-board-canvas.component';
 import { PlayingTileComponent } from '@app/components/playing-tile/playing-tile.component';
 import { FROM_ITEM_NAME_TO_VP_PREFERENCE, FROM_ITEM_TO_IMAGE_ON_BOARD, RIGHT_CLICK } from '@app/constants/objects-constants';
@@ -29,6 +29,19 @@ export class PlayingBoardComponent {
     boardgame: Signal<BoardGame>;
     selectedTile: Tile | undefined = { type: TileType.Grass };
     showInfoNotification: boolean = false;
+       private _showEmoteMenuForPlayer = false;
+
+    @Input() 
+    set showEmoteMenuForPlayer(value: boolean) {
+        console.log('📥 [PlayingBoard] showEmoteMenuForPlayer reçu:', value);
+        console.log('   Joueur actuel:', this.gameSessionManager.chosenPlayer()?.name);
+        console.log('   Position joueur:', this.gameSessionManager.chosenPlayer()?.position);
+        this._showEmoteMenuForPlayer = value;
+    }
+
+    get showEmoteMenuForPlayer(): boolean {
+        return this._showEmoteMenuForPlayer;
+    }
     protected vpPreferenceItem = VpPreferenceItem;
 
     private boardManager: BoardGameManagerService = inject(BoardGameManagerService);

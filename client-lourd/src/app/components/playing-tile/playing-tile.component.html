@@ -6,11 +6,6 @@
 <app-player-element class="player-element" [player]="tile.containedPlayer"></app-player-element>
 
 
-@if(isCurrentPlayerTile()){
-<button class="emote-trigger-button" (click)="toggleEmoteMenu($event)" title="Emotes">
-    😊
-</button>
-}
 } @if(tile.reachable){
     <div class="reachable-filter"></div>
     } @if(tile.availableAction){

@@ -1,4 +1,4 @@
-import { Component, inject, Input, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, Input, ChangeDetectorRef, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PlayerElementComponent } from '@app/components/player-element/player-element.component';
 import { PlayingItemComponent } from '@app/components/playing-item/playing-item.component';
@@ -17,11 +17,12 @@ import { TranslatePipe } from '@ngx-translate/core';
     templateUrl: './playing-tile.component.html',
     styleUrl: './playing-tile.component.scss',
 })
-export class PlayingTileComponent {
+export class PlayingTileComponent implements OnChanges {
     @Input() tile: Tile = { type: TileType.Grass };
 
     @Input() xPosition: number;
     @Input() yPosition: number;
+    @Input() forceShowEmoteMenu = false;
     private imageHashMap: { [key in TileType]: string } = FROM_TILE_TYPE_TO_IMAGE;
     private gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     private cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
@@ -98,11 +99,13 @@ export class PlayingTileComponent {
     return this.tile.containedPlayer.userId === current.userId;
 }
 
-toggleEmoteMenu(event: MouseEvent): void {
-    event.stopPropagation();
+toggleEmoteMenu(event?: MouseEvent): void {
+    if (event) {
+        event.stopPropagation();
+    }
+    
     this.showEmoteMenu = !this.showEmoteMenu;
     
-   
     if (this.showEmoteMenu) {
         setTimeout(() => {
             const closeMenu = () => {
@@ -119,16 +122,48 @@ toggleEmoteMenu(event: MouseEvent): void {
         const tilePosition: Position = { x: this.xPosition, y: this.yPosition };
         return JSON.stringify(this.gameSessionManager.chosenPlayer().startPosition) === JSON.stringify(tilePosition);
     }
-    ngDoCheck(): void {
-    
+ngDoCheck(): void {
     if (this.tile.containedPlayer?.currentEmote) {
         console.log('🔍 [ngDoCheck] Emote détectée sur tuile !');
         console.log('   Position:', `[${this.xPosition},${this.yPosition}]`);
         console.log('   Joueur:', this.tile.containedPlayer.name);
         console.log('   Emote:', this.tile.containedPlayer.currentEmote);
-        
-     
         this.cdr.detectChanges();
+    }
+}
+
+
+ngOnChanges(changes: SimpleChanges): void {
+    if (changes['forceShowEmoteMenu']) {
+        const currentValue = changes['forceShowEmoteMenu'].currentValue;
+        const previousValue = changes['forceShowEmoteMenu'].previousValue;
+        
+        console.log('🔄 [ngOnChanges] forceShowEmoteMenu changé');
+        console.log('   currentValue:', currentValue);
+        console.log('   previousValue:', previousValue);
+        console.log('   tile.containedPlayer:', this.tile.containedPlayer);
+       
+        if (currentValue === true && previousValue === false) {
+            console.log('   Vérification isCurrentPlayerTile():', this.isCurrentPlayerTile());
+            
+            if (this.isCurrentPlayerTile()) {
+                console.log('   ✅ Ouverture du menu emote');
+                this.showEmoteMenu = true;
+                
+             
+                setTimeout(() => {
+                    const closeMenu = () => {
+                        console.log('   ❌ Fermeture du menu emote (clic extérieur)');
+                        this.showEmoteMenu = false;
+                        this.cdr.detectChanges();
+                        document.removeEventListener('click', closeMenu);
+                    };
+                    document.addEventListener('click', closeMenu);
+                }, 100);
+            } else {
+                console.log('   ⚠️ Pas la tuile du joueur actuel');
+            }
+        }
     }
 }
 }

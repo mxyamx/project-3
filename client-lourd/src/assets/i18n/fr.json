@@ -232,6 +232,7 @@
     "game-page": {
         "action": "Faire une action",
         "end-turn": "Finir le tour",
+        "emotes": "Émoticônes",
         "give-up": "Abandonner",
         "debug-mode": "Mode débogage",
         "normal-mode": "Mode normal",
