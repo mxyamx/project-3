@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { ID_GENERATION } from '@app/constants/development-constants';
+import { PlayerSlotState } from '@app/interfaces/player-slot-state';
 import { UsersService } from '@app/services/users/users.service';
 import { CurrentGame, CurrentGamePhase, CurrentGamePreview } from '@common/current-game';
 import { PlayerLimits } from '@common/enums/players-limit';
@@ -16,6 +17,7 @@ const clone = <T>(x: T): T => structuredClone(x);
 export class CurrentGamesService {
     private sio: io.Server;
     private games: Map<string, CurrentGame> = new Map();
+    gameSlots = new Map<string, Map<string, PlayerSlotState>>();
 
     constructor(
         private databaseService: DatabaseService,
@@ -29,6 +31,10 @@ export class CurrentGamesService {
 
     setIo(io: io.Server) {
         this.sio = io;
+    }
+
+    setSlots(id: string, slots: Map<string, PlayerSlotState>) {
+        this.gameSlots.set(id, slots);
     }
 
     getCurrentGamePreviews(): CurrentGamePreview[] {
@@ -51,6 +57,7 @@ export class CurrentGamesService {
                     isJoinable,
                     entryPrice: game.entryPrice,
                     friendsOnly: game.friendsOnly || false,
+                    isRapidElim: game.isRapidElim,
                 };
                 return preview;
             });
@@ -58,10 +65,18 @@ export class CurrentGamesService {
 
     canJoin(game: CurrentGame): boolean {
         const maxPlayerCount = PlayerLimits[game.boardGame.size].maxPlayers;
+
         return (
-            ((game.phase === CurrentGamePhase.Waiting && !game.locked) || (game.phase === CurrentGamePhase.Running && game.dropInEnabled)) &&
-            game.players.length < maxPlayerCount
+            (game.phase === CurrentGamePhase.Waiting && !game.locked && game.players.length < maxPlayerCount) ||
+            (game.phase === CurrentGamePhase.Running && game.dropInEnabled && game.players.length < maxPlayerCount)
         );
+    }
+    occupiedSlots(slots: Map<string, PlayerSlotState>): number {
+        let count = 0;
+        for (const state of slots.values()) {
+            if (state.countsForSlot) ++count;
+        }
+        return count;
     }
 
     async canUserJoinGame(
@@ -186,6 +201,7 @@ export class CurrentGamesService {
         }
 
         this.games.delete(id);
+        this.gameSlots.delete(id);
         this.emitUpdatedCurrentGamePreviews();
     }
 
@@ -223,6 +239,26 @@ export class CurrentGamesService {
 
         this.games.set(next.id, next);
         this.emitUpdatedCurrentGamePreviews();
+    }
+
+    canTakeASlot(userId: string, game: CurrentGame): boolean {
+        if (game.phase !== CurrentGamePhase.Running || !game.isRapidElim) {
+            return true;
+        }
+        if (!this.gameSlots.has(game.id)) {
+            return true;
+        }
+
+        if (!this.gameSlots.get(game.id).has(userId)) {
+            const maxPlayerCount = PlayerLimits[game.boardGame.size].maxPlayers;
+            return maxPlayerCount - this.occupiedSlots(this.gameSlots.get(game.id)) > 0;
+        }
+        if (!this.gameSlots.get(game.id).get(userId).countsForSlot) {
+            const maxPlayerCount = PlayerLimits[game.boardGame.size].maxPlayers;
+            return maxPlayerCount - this.occupiedSlots(this.gameSlots.get(game.id)) > 0;
+        }
+
+        return true;
     }
 
     async removePlayer(player: Player, gameId: string): Promise<void> {

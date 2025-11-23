@@ -41,6 +41,7 @@ export class CreationPageComponent implements OnInit {
     isLoading: WritableSignal<boolean> = signal(false);
     showChat: WritableSignal<boolean> = signal(false);
     friendsOnly: boolean = false;
+    isRapidElim: boolean = false;
     selectedPollPrizeAmount: number = 0;
 
     get maxPollPrize(): number {
@@ -110,6 +111,7 @@ export class CreationPageComponent implements OnInit {
                         ...currentGame,
                         entryPrice: this.selectedPollPrizeAmount,
                         friendsOnly: this.friendsOnly,
+                        isRapidElim: this.isRapidElim,
                     },
                     (response: any) => {
                         if (response?.error) {

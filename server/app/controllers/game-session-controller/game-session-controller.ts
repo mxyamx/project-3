@@ -147,6 +147,7 @@ export class GameSessionController {
     }
 
     async removePlayer(player: Player): Promise<void> {
+        console.log('remove player');
         if (this.gameSession.gameOver) return;
         if (!this.gameSession.playerIsInSession(player)) return;
 
@@ -167,6 +168,7 @@ export class GameSessionController {
                 }
             }
         }
+        this.gameSession.playerSlotManager.markDropOut(player.userId);
 
         if (player.name === this.gameSession.activePlayerInstance.name) {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
@@ -186,6 +188,20 @@ export class GameSessionController {
             const winner = remainingPlayers.length === 1 ? remainingPlayers[0] : undefined;
             console.log('Not enough players to continue the game. Ending game.');
             await this.endGame(winner);
+            return;
+        }
+
+        console.log(`n active players -> ${this.gameSession.listOfPlayers.getActivePlayers().length}`);
+        if (
+            this.gameSession.isRapidElim &&
+            this.gameSession.listOfPlayers.getActivePlayers().length < 2 &&
+            this.gameSession.board.gameMode === GameMode.Normal
+        ) {
+            await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
+            const remainingPlayers = this.gameSession.listOfPlayers.getValues();
+            const winner = remainingPlayers.length === 1 ? remainingPlayers[0] : undefined;
+            console.log('Not enough players to continue the game. Ending game.');
+            await this.endGame(winner);
         }
     }
 
@@ -199,6 +215,24 @@ export class GameSessionController {
     addActivePlayer(player: Player): dataForm.UpdateGamedRes | null {
         if (this.gameSession.gameOver) return null;
         if (!this.gameSession.gameStarted) return null;
+
+        if (this.gameSession.isRapidElim && this.gameSession.playerSlotManager.isEliminated(player.userId)) {
+            player.eliminated = true;
+            this.gameSession.listOfPlayers.addToBack(player);
+            this.gameSession.staticMapOfPlayer.set(player.name, structuredClone(player));
+            this.gameSession.playerSlotManager.markDropIn(player);
+
+            const ans: dataForm.UpdateGamedRes = {
+                successful: true,
+                message: '',
+                boardGame: this.gameSession.board,
+                activePlayer: this.gameSession.activePlayerInstance,
+                listOfPlayers: this.gameSession.listOfPlayers.getValues(),
+                eliminated: true,
+            };
+            this.updateGame();
+            return ans;
+        }
 
         this.gameSession.placeAndAddActivePlayer(player);
         const ans: dataForm.UpdateGamedRes = {
@@ -458,11 +492,28 @@ export class GameSessionController {
     private async handleVictory(winner: Player, loser: Player): Promise<void> {
         this.fightWinnerName = winner.name;
         this.fightLoserName = loser.name;
+        if (this.gameSession.isRapidElim) {
+            this.gameSession.listOfPlayers.markEliminated(loser.userId);
+            this.gameSession.playerSlotManager.markEliminated(loser.userId);
+        }
         this.showEndFightNotification();
         this.gameSession.registerVictory(winner);
         await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
         this.endFight();
-        if (this.gameSession.getPlayerAmountOfVic(winner) >= MAX_AMOUNT_OF_VICTORIES && this.gameSession.board.gameMode === GameMode.Normal) {
+        if (
+            this.gameSession.getPlayerAmountOfVic(winner) >= MAX_AMOUNT_OF_VICTORIES &&
+            this.gameSession.board.gameMode === GameMode.Normal &&
+            !this.gameSession.isRapidElim
+        ) {
+            await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
+            await this.endGame(winner);
+        }
+
+        if (
+            this.gameSession.listOfPlayers.getActivePlayers().length === 1 &&
+            this.gameSession.board.gameMode === GameMode.Normal &&
+            this.gameSession.isRapidElim
+        ) {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
             await this.endGame(winner);
         }

@@ -81,6 +81,20 @@
                     {{ 'game-list.details.size' | translate }} : {{ preview.boardgameSize }} x {{ preview.boardgameSize }}
                 </p>
 
+                <p class="line-mode">
+                    <i class="fa-solid fa-chess-board"></i>
+                    {{ 'join-game-page.mode' | translate }} :
+                    <span>
+                        {{ 'general.game-mode.'+preview.gameMode | translate}} @if(preview.gameMode===gameMode.CTF){
+                        <i class="fas fa-flag"></i>
+                        }
+                    </span>
+
+                    @if (preview.isRapidElim) {
+                    <span class="mode-pill rapid"> {{ 'join-game-page.rapid-elim' | translate }} </span>
+                    }
+                </p>
+
                 <p class="line-entry">
                     <i class="fa-solid fa-coins"></i>
                     {{ 'game-list.details.entry-price' | translate }} : @if (preview.entryPrice === 0) {

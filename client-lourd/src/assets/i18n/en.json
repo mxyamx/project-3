@@ -169,7 +169,8 @@
         "visibility-modal": "Warning!! This game's visibility has changed.",
         "create": "Create New Game",
         "poll-prize-title": "Select an entry fee for the game",
-        "friends-only": "Friends only"
+        "friends-only": "Friends only",
+        "rapid-elimination": "Rapid elimination"
     },
     "game-list": {
         "title": "Game List",
@@ -221,7 +222,9 @@
         "proceed-anyway": "Join Anyway",
         "cancel": "Cancel",
         "warning": "Warning!",
-        "understood": "Understood"
+        "understood": "Understood",
+        "mode": "Mode",
+        "rapid-elim": "Rapid elimination"
     },
     "error-page": {
         "title": "Oops! An error occurred. Please try again."
@@ -266,7 +269,10 @@
             },
             "ok": "ok",
             "drop-item": "drop an item"
-        }
+        },
+        "spectating-title": "You have been eliminated",
+        "spectating-subtitle": "You are now spectating this game. You can keep watching and using the chat.",
+        "spectating-tag": "Spectator"
     },
     "game-option-page": {
         "title": "Create a New Game",

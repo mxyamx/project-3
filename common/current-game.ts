@@ -19,6 +19,7 @@ export interface CurrentGame {
     dropInEnabled: boolean;
     entryPrice: number;
     friendsOnly: boolean;
+    isRapidElim: boolean;
 }
 
 export interface CurrentGamePreview {
@@ -32,6 +33,7 @@ export interface CurrentGamePreview {
     isJoinable: boolean;
     entryPrice: number;
     friendsOnly: boolean;
+    isRapidElim: boolean;
 }
 
 export interface JoinGameAck {

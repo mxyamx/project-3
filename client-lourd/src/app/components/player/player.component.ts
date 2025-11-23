@@ -32,9 +32,14 @@ export class PlayerComponent implements OnInit, OnDestroy {
 
     constructor() {
         effect(() => {
-            const updatedPlayer = this.isCurrentPlayer ? this.gameSessionManager.chosenPlayer() : this.gameSessionManager.defendingPlayer();
+            const currentName = this.player?.name;
+            if (!currentName) return;
 
-            if (this.player && updatedPlayer && this.player.name === updatedPlayer.name) {
+            const updatedPlayer = [this.gameSessionManager.attackingPlayer(), this.gameSessionManager.defendingPlayer()].find(
+                (player) => player.name === currentName,
+            );
+
+            if (updatedPlayer) {
                 this.player = { ...updatedPlayer, attributes: { ...updatedPlayer.attributes } };
             }
         });
@@ -50,8 +55,14 @@ export class PlayerComponent implements OnInit, OnDestroy {
             this.player = this.isCurrentPlayer ? this.getCurrentPlayer() : this.opponentService.getOpponent();
         }
 
-        if (this.player && this.player.attributes) {
+        if (this.player && this.player.attributes && !this.gameSessionManager.isEliminated()) {
             this.playerMaxHealth = this.player.attributes.healthValue;
+        }
+        if (this.player && this.player.attributes && this.gameSessionManager.isEliminated()) {
+            this.playerMaxHealth =
+                [this.gameSessionManager.attackingPlayer(), this.gameSessionManager.defendingPlayer()].find(
+                    (player) => player.name === this.player?.name,
+                )?.attributes.healthValue ?? this.player.attributes.healthValue;
         }
 
         this.subscriptions.push(

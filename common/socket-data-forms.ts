@@ -111,6 +111,7 @@ export interface EndFightRes extends StandardRes {
     winnerName?: string;
     loserName?: string;
     attackingPlayer?: Player;
+    eliminated?: boolean;
 }
 
 export interface EndTurnRes extends StandardRes {
@@ -155,6 +156,7 @@ export interface UpdateGamedRes extends StandardRes {
     boardGame: BoardGame;
     listOfPlayers: Player[];
     activePlayer: Player;
+    eliminated?: boolean;
 }
 
 export interface DeactivateDebugModeReq extends StandardReq {}

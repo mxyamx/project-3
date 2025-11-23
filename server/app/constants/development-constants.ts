@@ -50,6 +50,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         victories: 0,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
     {
         name: 'player-test2',
@@ -67,6 +68,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         victories: 0,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
     {
         name: 'player-test3',
@@ -84,6 +86,7 @@ export const STANDARD_LIST_PLAYERS: Player[] = [
         victories: 0,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
 ];
 
@@ -106,6 +109,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         virtualPlayer: true,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
     {
         name: 'vp2',
@@ -124,6 +128,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         virtualPlayer: true,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
     {
         name: 'vp3',
@@ -142,6 +147,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         virtualPlayer: true,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
     {
         name: 'vp4',
@@ -161,6 +167,7 @@ export const STANDARD_VIRTUAL_PLAYERS: VirtualPlayer[] = [
         virtualPlayer: true,
         socketId: '',
         userId: '',
+        eliminated: false,
     },
 ];
 
