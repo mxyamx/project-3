@@ -4,6 +4,7 @@ import { DynamicPlayerList } from '@app/classes/dynamic-player-list/dynamic-play
 import { ItemEffectApplicator } from '@app/classes/item-effect-applicator/item-effect-applicator';
 import { StatisticsManager } from '@app/classes/statistics-manager/statistics-manager';
 import { LARGE_DICE_VALUE, SMALL_DICE_VALUE, STANDARD_LIST_PLAYERS } from '@app/constants/development-constants';
+import { CurrentGamesService } from '@app/services/current-games/current-games.service';
 import { hasDuplicateNames, shuffleArray } from '@app/utils/functions/general-usage-functions';
 import { BoardGame } from '@common/board-game';
 import { CtfTeam } from '@common/enums/ctf-team';
@@ -11,15 +12,17 @@ import { DiceBonus } from '@common/enums/dice-bonus';
 import { GameMode } from '@common/enums/game-mode';
 import { ItemName } from '@common/enums/item-name';
 import { ItemType } from '@common/enums/item-type';
+import { PlayerLimits } from '@common/enums/players-limit';
 import { TileType } from '@common/enums/tile-type';
 import { Fight } from '@common/fight';
 import { Item } from '@common/item';
 import { Player } from '@common/player';
 import { Position } from '@common/position';
 import { Tile } from '@common/tile';
-
+import { PlayerSlotManager } from '../player-slot-manager/player-slot-manager';
 export class GameSession {
     statisticsManager: StatisticsManager;
+    playerSlotManager: PlayerSlotManager;
 
     private players: DynamicPlayerList;
     private activePlayer: Player;
@@ -43,9 +46,15 @@ export class GameSession {
 
     private initialPlayerCount: number = 0;
     private abandonedPlayers: Set<string> = new Set();
+    isRapidElim: boolean = false;
 
-    constructor(private boardGame: BoardGame) {
-        this.players = new DynamicPlayerList();
+    constructor(
+        gameService: CurrentGamesService,
+        private boardGame: BoardGame,
+        gameId: string,
+        isRapidElim: boolean,
+    ) {
+        this.players = new DynamicPlayerList(isRapidElim);
         this.staticPlayerMap = new Map();
         this.statisticsManager = new StatisticsManager(boardGame.tiles);
         this.gameHasStarted = false;
@@ -57,6 +66,10 @@ export class GameSession {
         this.itemEffectApplicator = new ItemEffectApplicator();
         this.escapeMAp = new Map();
         this.originalBoardGame = structuredClone(boardGame);
+        this.isRapidElim = isRapidElim;
+
+        const maxPlayers = PlayerLimits[this.boardGame.size].maxPlayers;
+        this.playerSlotManager = new PlayerSlotManager(maxPlayers, gameService, gameId);
     }
 
     get board(): BoardGame {
@@ -331,6 +344,17 @@ export class GameSession {
         }
     }
 
+    eliminatePlayer(player: Player): void {
+        this.dropAllItems(player);
+
+        if (player.position) {
+            this.boardGame.tiles[player.position.x][player.position.y].containedPlayer = undefined;
+        }
+
+        this.players.markEliminated(player.userId);
+        this.playerSlotManager.markEliminated(player.userId);
+    }
+
     playerIsInSession(player: Player): boolean {
         return this.players.getValues().find((element: Player) => {
             return element.name === player.name;
@@ -439,6 +463,7 @@ export class GameSession {
                     const playerCopy = structuredClone(player);
                     playerCopy.position = startPos;
                     this.staticPlayerMap.set(playerCopy.name, playerCopy);
+                    this.playerSlotManager.markDropIn(playerCopy);
                     break loop1;
                 }
             }
@@ -475,6 +500,8 @@ export class GameSession {
                         (this.staticPlayerMap.get(player.name) ?? STANDARD_LIST_PLAYERS[0]).startPosition = { x: i, y: j };
 
                         playerIsInFirstTeam = !playerIsInFirstTeam;
+
+                        this.playerSlotManager.registerInitialPlayer(player);
                     }
                 }
             }

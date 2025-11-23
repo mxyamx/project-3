@@ -171,6 +171,7 @@ export class FightSubController {
                 loserName: this.fightLoserName ?? '',
                 winnerName: this.fightWinnerName ?? '',
                 attackingPlayer,
+                eliminated: this.gameSession.isRapidElim,
             };
             this.sio.to(this.roomCode).emit(SocketClientEventNames.EndFight, ans);
         } catch {
@@ -209,7 +210,11 @@ export class FightSubController {
     private async handleVictory(): Promise<void> {
         const attackingPlayer: Player = this.gameSession.fight.attackingPlayer;
         const defendingPlayer: Player = this.gameSession.fight.defendingPlayer;
-        this.gameSession.repositionPlayer(defendingPlayer);
+        if (this.gameSession.isRapidElim) {
+            this.gameSession.eliminatePlayer(defendingPlayer);
+        } else {
+            this.gameSession.repositionPlayer(defendingPlayer);
+        }
         this.fightLoserName = defendingPlayer.name;
         this.fightWinnerName = attackingPlayer.name;
         this.showEndFightNotification();
@@ -221,7 +226,17 @@ export class FightSubController {
 
         if (
             this.gameSession.getPlayerAmountOfVic(attackingPlayer) >= MAX_AMOUNT_OF_VICTORIES &&
-            this.gameSession.board.gameMode === GameMode.Normal
+            this.gameSession.board.gameMode === GameMode.Normal &&
+            !this.gameSession.isRapidElim
+        ) {
+            await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
+            await this.gameSessionController.endGame(attackingPlayer);
+        }
+
+        if (
+            this.gameSession.listOfPlayers.getActivePlayers().length === 1 &&
+            this.gameSession.board.gameMode === GameMode.Normal &&
+            this.gameSession.isRapidElim
         ) {
             await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
             await this.gameSessionController.endGame(attackingPlayer);

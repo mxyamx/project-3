@@ -31,7 +31,7 @@ export class GameInterfaceComponent implements OnInit, OnDestroy {
     opponent: Player;
     attackingPlayer: Player;
     subscriptions: Subscription[] = [];
-    private gameSessionManager = inject(GameSessionManagerService);
+    gameSessionManager = inject(GameSessionManagerService);
     private diceService = inject(DiceService);
     private gameInterfaceService = inject(GameInterfaceService);
     private changeDetectorRef: ChangeDetectorRef;
@@ -115,7 +115,9 @@ export class GameInterfaceComponent implements OnInit, OnDestroy {
     }
 
     private initPlayers() {
-        const localPlayer = this.gameSessionManager.chosenPlayer();
+        const localPlayer = this.gameSessionManager.isEliminated()
+            ? this.gameSessionManager.attackingPlayer()
+            : this.gameSessionManager.chosenPlayer();
         const attackingPlayer = this.gameSessionManager.attackingPlayer();
         const defendingPlayer = this.gameSessionManager.defendingPlayer();
 

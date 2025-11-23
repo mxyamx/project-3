@@ -245,6 +245,7 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
             if (data.boardGame && data.listOfPlayers) {
                 this.gameSessionManager.updateListOfPlayers(data.listOfPlayers);
                 this.gameEventService.retrieveNumberOfPlayersInit(data);
+                this.gameSessionManager.isEliminated.set(false);
                 this.gameSessionManager.updateBoardGame(data.boardGame);
                 this.gameSessionManager.updateActivePlayer(data.activePlayer);
                 this.gameSessionManager.updateDisplayedList(structuredClone(data.listOfPlayers));

@@ -23,4 +23,5 @@ export interface Player {
     ctfTeam?: CtfTeam;
     startPosition?: Position;
     currentEmote?: EmoteType | null;
+    eliminated: boolean;
 }

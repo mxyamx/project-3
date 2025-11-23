@@ -3,6 +3,7 @@ import { VpBehaviorInFight } from '@app/classes/vp-behavior-in-fight/vp-behavior
 import { VpGameSessionManager } from '@app/classes/vp-game-session/vp-game-session-manager';
 import { VpSocketManager } from '@app/classes/vp-socket-manager/vp-socket-manager';
 import { VpState } from '@app/classes/vp-state/vp-state';
+import { friendEvents } from '@app/events/friendEvents';
 import { GameEventType } from '@common/enums/game-event-type';
 import { PlayerState } from '@common/enums/player-state';
 import { SocketClientEventNames } from '@common/enums/socket-events-names';
@@ -114,6 +115,11 @@ export class FightVpSocketEvent extends BaseVpSocketEvent {
                 this.vpGameSessionManager.changeState(PlayerState.WaitingForAction);
             } else {
                 this.vpGameSessionManager.changeState(PlayerState.WaitingForTurn);
+            }
+
+            if (this.virtualPlayer.name === data.loserName && data?.eliminated) {
+                const payload = { player: this.virtualPlayer, gameId: this.gameId };
+                friendEvents.emit('vp-eliminated', payload);
             }
         });
     }

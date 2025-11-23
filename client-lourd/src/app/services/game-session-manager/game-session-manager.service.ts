@@ -32,6 +32,7 @@ import { EmoteType } from '@common/enums/emote-type';
     providedIn: 'root',
 })
 export class GameSessionManagerService {
+    isEliminated: WritableSignal<boolean> = signal(false);
     chosenPlayer: WritableSignal<Player> = signal({
         ...STANDARD_PLAYERS[0],
         victories: STANDARD_PLAYERS[0].victories ?? 0,
@@ -465,20 +466,20 @@ private updateBoardGamePlayers(players: Player[]): void {
     }
 
     private updateDisplayedPlayerList(newList: Player[]): void {
-        const oldList: Player[] = structuredClone(this.displayedPlayerList());
-        const newDisplayed: Player[] = newList;
+        // const oldList: Player[] = structuredClone(this.displayedPlayerList());
+        // const newDisplayed: Player[] = newList;
 
-        oldList.forEach((player: Player) => {
-            const result = newList.find((player2: Player) => {
-                return player.name === player2.name;
-            });
-            if (!result) {
-                player.isNotInGame = true;
-                newDisplayed.push(player);
-            }
-        });
+        // oldList.forEach((player: Player) => {
+        //     const result = newList.find((player2: Player) => {
+        //         return player.name === player2.name;
+        //     });
+        //     if (!result) {
+        //         player.isNotInGame = true;
+        //         newDisplayed.push(player);
+        //     }
+        // });
 
-        this.updateDisplayedList(newDisplayed);
+        this.updateDisplayedList(newList);
     }
 
     private refreshChosenPlayer(): void {

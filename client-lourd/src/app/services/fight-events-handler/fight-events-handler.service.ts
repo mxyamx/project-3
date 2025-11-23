@@ -162,7 +162,10 @@ export class FightEventsHandlerService {
     }
 
     private stateOnFightStart(data: dataForm.ExecuteAttackRes): void {
-        if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.attackingPlayer().name) {
+        if (
+            this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.attackingPlayer().name ||
+            this.gameSessionManager.isEliminated()
+        ) {
             this.gameSessionManager.changeState(PlayerState.Attacking);
             this.gameEventService.showLogStartAttackNotification(data);
             this.gameInterfaceService.showInterface();
@@ -185,6 +188,9 @@ export class FightEventsHandlerService {
             }
         } else {
             this.gameSessionManager.changeState(PlayerState.WaitingForTurn);
+        }
+        if (data?.eliminated && (data.loserName ?? STANDARD_LIST_PLAYERS[0].name) === this.gameSessionManager.chosenPlayer().name) {
+            this.gameSessionManager.isEliminated.set(true);
         }
     }
 
