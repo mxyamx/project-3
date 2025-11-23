@@ -12,4 +12,25 @@
         {{ tile.availableAction.description | translate }}
     </div>
     }
+@if(showEmoteMenu){
+<div class="emote-menu" (click)="$event.stopPropagation()">
+    <button
+        *ngFor="let emote of emotes"
+        class="emote-button"
+        (click)="onEmoteClick(emote.type, $event)"
+        [title]="emote.type">
+        {{ emote.icon }}
+    </button>
+</div>
+}
+@if(tile.containedPlayer?.currentEmote){
+<div class="emote-bubble">
+    <div class="emote-content">
+        {{ getEmoteIcon(tile.containedPlayer?.currentEmote) }}
+    </div>
+    <div class="emote-bubble-tail"></div>  
+</div>
+}
+
+
 </div>

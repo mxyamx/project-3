@@ -58,6 +58,8 @@ export class GameSocketEventService {
             this.handleDeactivateDebugMode();
             this.handlePickUpItem();
             this.handleDropItem();
+            this.handlePlayerEmote();
+
         }
     }
 
@@ -354,4 +356,30 @@ export class GameSocketEventService {
         }
         return;
     }
+
+    private handlePlayerEmote(): void {
+    this.socketManager.on('player-emote', (data: any) => {
+        console.log('📡 [handlePlayerEmote] Event reçu !');
+        console.log('   Data:', data);
+
+        if (!data.successful) {
+            console.log('   ❌ Event non successful');
+            return;
+        }
+
+        const { playerId, emote } = data;
+        console.log('   ✅ playerId:', playerId);
+        console.log('   ✅ emote:', emote);
+
+        console.log('   Appel de setPlayerEmote...');
+        this.gameSessionManager.setPlayerEmote(playerId, emote);
+
+        console.log('   ⏱️  Timer de 10s démarré pour retirer l\'emote');
+        setTimeout(() => {
+            console.log('   ⏱️  Timer expiré - Retrait de l\'emote');
+            this.gameSessionManager.setPlayerEmote(playerId, null);
+        }, 10000);
+    });
+}
+
 }

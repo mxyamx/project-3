@@ -496,8 +496,17 @@ export class SocketManager {
                     await this.leavePlayer(game.id, player, 'timeout');
                 }
             });
-
+            
             this.vpSocketAddingHandler.register(socket);
+
+            socket.on('player-emote', (data) => {
+                this.sio.to(data.gameId).emit('player-emote', {
+                    successful: true,
+                    playerId: data.playerId,
+                    emote: data.emote,
+    });
+});
+
         });
     }
 

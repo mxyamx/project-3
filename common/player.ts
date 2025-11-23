@@ -1,5 +1,6 @@
 import { CharacterAttributes } from './character-attributes';
 import { CtfTeam } from './enums/ctf-team';
+import { EmoteType } from './enums/emote-type';
 import { Item } from './item';
 import { Position } from './position';
 import { PlayerStatistics } from './statistics';
@@ -21,4 +22,5 @@ export interface Player {
     statistic?: PlayerStatistics;
     ctfTeam?: CtfTeam;
     startPosition?: Position;
+    currentEmote?: EmoteType | null;
 }
