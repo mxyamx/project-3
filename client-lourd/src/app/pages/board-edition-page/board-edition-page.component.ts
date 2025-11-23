@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router, RouterLink } from '@angular/router';
@@ -7,7 +7,6 @@ import { SaveBoardDialogComponent } from '@app/components/save-board-dialog/save
 import { BoardGameManagerService } from '@app/services/board-game-manager/board-game-manager.service';
 import { HttpBoardGameService } from '@app/services/http-manager/http-board-game.service';
 import { ItemApplicatorService } from '@app/services/item-applicator/item-applicator.service';
-import { TeleportationManagerService } from '@app/services/teleportation-manager/teleportation-manager.service';
 import { TileApplicatorService } from '@app/services/tile-applicator/tile-applicator.service';
 
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
@@ -43,7 +42,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     templateUrl: './board-edition-page.component.html',
     styleUrl: './board-edition-page.component.scss',
 })
-export class BoardEditionPageComponent implements OnInit {
+export class BoardEditionPageComponent {
     hoveredTile: Tile | null = null;
     hoveredItem: Item | null = null;
     mouseX: number = 0;
@@ -65,16 +64,6 @@ export class BoardEditionPageComponent implements OnInit {
             description: FROM_TILE_TYPE_TO_DESCRIPTION[TileType.Water],
         },
         { type: TileType.Ice, image: FROM_TILE_TYPE_TO_IMAGE[TileType.Ice], description: FROM_TILE_TYPE_TO_DESCRIPTION[TileType.Ice] },
-        {
-            type: TileType.Teleportation,
-            image: FROM_TILE_TYPE_TO_IMAGE[TileType.Teleportation],
-            description: FROM_TILE_TYPE_TO_DESCRIPTION[TileType.Teleportation],
-        },
-        {
-            type: TileType.Trap,
-            image: FROM_TILE_TYPE_TO_IMAGE[TileType.Trap],
-            description: FROM_TILE_TYPE_TO_DESCRIPTION[TileType.Trap],
-        },
     ];
 
     private tileApplicator: TileApplicatorService = inject(TileApplicatorService);
@@ -82,7 +71,6 @@ export class BoardEditionPageComponent implements OnInit {
     private boardgameManager: BoardGameManagerService = inject(BoardGameManagerService);
     private httpBoardGameService: HttpBoardGameService = inject(HttpBoardGameService);
     private previewImageGenerationService: PreviewImageGenerationService = inject(PreviewImageGenerationService);
-    private teleportationManager: TeleportationManagerService = inject(TeleportationManagerService);
 
     private itemImageCorrespondance: { [key: string]: string };
     private itemDescriptionCorrespondance: { [key: string]: string };
@@ -93,11 +81,6 @@ export class BoardEditionPageComponent implements OnInit {
     ) {
         this.itemImageCorrespondance = FROM_ITEM_TO_IMAGE;
         this.itemDescriptionCorrespondance = FROM_ITEM_NAME_TO_DESCRIPTION;
-    }
-
-    ngOnInit(): void {
-        // Initialize teleportation manager from existing board data
-        this.teleportationManager.initializeFromBoard();
     }
 
     get itemApplicatorService(): ItemApplicatorService {
@@ -118,27 +101,6 @@ export class BoardEditionPageComponent implements OnInit {
 
     get boardManager(): BoardGameManagerService {
         return this.boardgameManager;
-    }
-
-    // ADD: Helper method to get item image (handles torch dynamic selection in follower)
-    getItemImageForFollower(itemName: string): string {
-        // For the mouse follower, torch always shows as lit since it's being carried
-        return this.itemImageCorrespondance[itemName];
-    }
-
-    @HostListener('document:keydown.escape')
-    onEscapePress(): void {
-        // Handle new teleportation manager
-        if (this.teleportationManager.isPlacingTeleport()) {
-            this.teleportationManager.cancelPlacement();
-            this.tileApplicator.deactivate();
-            return;
-        }
-
-        // Fallback to old property if it exists (backward compatibility)
-        // if (this.tileApplicator.isWaitingForSecondTeleporter) {
-        //     this.tileApplicator.cancelTeleporterPlacement();
-        // }
     }
 
     tileOnMouseEnter(tile: Tile) {
@@ -168,7 +130,6 @@ export class BoardEditionPageComponent implements OnInit {
         this.mouseX = event.clientX - followerData.followerWidth / 2;
         this.mouseY = event.clientY - followerData.followerHeight / 2;
     }
-
     onInputDescription(event: Event): void {
         const target = event.target as HTMLTextAreaElement;
         this.boardgameManager.updateDescription(target.value);
@@ -186,15 +147,9 @@ export class BoardEditionPageComponent implements OnInit {
             return;
         }
 
-        // Cancel ongoing teleportation if switching tools
-        if (this.teleportationManager.isPlacingTeleport() && tileType !== TileType.Teleportation) {
-            this.teleportationManager.cancelPlacement();
-        }
-
         this.itemApplicator.deactivate();
         this.tileApplicator.activate(tileType);
     }
-
     async saveBoard(): Promise<void> {
         const newBoard = await this.modifyBoard();
         const boardId = this.boardgameManager.editedBoardGame().id;
@@ -266,11 +221,8 @@ export class BoardEditionPageComponent implements OnInit {
 
     reinitialize(): void {
         this.boardgameManager.updateDisplayedBoardGame(structuredClone(this.boardgameManager.loadedBoardGame()));
-        this.boardgameManager.refreshIllumination();
         this.tileApplicator.deactivate();
         this.itemApplicator.deactivate();
-        // Reinitialize teleportation from reloaded board
-        this.teleportationManager.initializeFromBoard();
     }
 
     private async generatePreview(): Promise<string> {

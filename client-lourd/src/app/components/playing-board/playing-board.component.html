@@ -1,6 +1,5 @@
 <div class="main-container" (contextmenu)="$event.preventDefault()">
     <canvas #lineCanvas class="line-canvas"> </canvas>
-    <app-trap-popup></app-trap-popup>
     <app-playing-board-canvas [canvasElement]="lineCanvas" class="canvas-component"></app-playing-board-canvas>
     @for(tileGroup of boardgame().tiles; track $index; let idx = $index) { @for(tile of tileGroup; track $index; let jdx = $index){
     <app-playing-tile
@@ -78,7 +77,7 @@
     <div class="items-to-drop">
         @for(item of this.sessionManager.chosenPlayer().inventory; track $index){
         <div class="item-section" (click)="clickOnItemToDrop(item)" [style.cursor]="'pointer'">
-            <img [src]="getItemImage(item.name)" [alt]="item.name" />
+            <img [src]="imageCorrespondance[item.name]" [alt]="item.name" />
         </div>
 
         }

@@ -28,30 +28,12 @@ export class ActionDetectorService {
         this.actionActivated.set(false);
         this.boardGameManager.updateTiles(tiles, true);
     }
+
     setActionStatus(activePlayer: Player): void {
         const neighbors: Tile[] = this.getNeighbors(activePlayer.position ?? { x: 0, y: 0 });
         const tiles: Tile[][] = this.boardGameManager.playingBoardGame().tiles;
 
         this.clearActionState();
-
-        // Check current tile for teleportation
-        const currentPosition = activePlayer.position ?? { x: 0, y: 0 };
-        const currentTile = tiles[currentPosition.x][currentPosition.y];
-
-        if (currentTile.type === TileType.Teleportation && currentTile.teleportTarget) {
-            const target = currentTile.teleportTarget;
-            // Validate target is in bounds and free
-            if (target.x >= 0 && target.y >= 0 && target.x < tiles.length && target.y < tiles[0].length) {
-                const targetTile = tiles[target.x][target.y];
-                if (!targetTile.containedPlayer) {
-                    currentTile.availableAction = {
-                        type: ActionType.Teleport,
-                        target: target,
-                        description: this.i18nActionRootKey + ActionType.Teleport,
-                    };
-                }
-            }
-        }
 
         neighbors.forEach((tile: Tile) => {
             if (tile.containedPlayer) {

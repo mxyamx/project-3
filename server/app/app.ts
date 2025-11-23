@@ -53,21 +53,11 @@ export class Application {
         });
         this.errorHandling();
     }
+
     private config(): void {
         // Middlewares configuration
-        this.app.use(
-            express.json({
-                limit: '50mb', // ⬅️ bump this to what you *actually* need
-            }),
-        );
-
-        this.app.use(
-            express.urlencoded({
-                extended: true,
-                limit: '50mb', // ⬅️ same here for form-encoded
-            }),
-        );
-
+        this.app.use(express.json());
+        this.app.use(express.urlencoded({ extended: true }));
         this.app.use(cookieParser());
         this.app.use(cors());
     }

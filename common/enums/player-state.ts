@@ -11,5 +11,4 @@ export enum PlayerState {
     Teleporting = 'teleporting',
     PickingItem = 'pickingItem',
     OpeningDoor = 'openingDoor',
-    InteractingWithTrap = 'interactingWithTrap',
 }

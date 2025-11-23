@@ -8,5 +8,4 @@ export enum ItemName {
     RandomItem = 'random-item',
     StartingPoint = 'starting-point',
     Flag = 'flag',
-    Torch = 'torch',
 }

@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 import { BaseVpSocketEvent } from '@app/classes/base-vp-socket-event/base-vp-socket-event';
 import { VpBehaviorInGame } from '@app/classes/vp-behavior-in-game/vp-behavior-in-game';
 import { VpGameSessionManager } from '@app/classes/vp-game-session/vp-game-session-manager';
@@ -10,7 +9,6 @@ import { ItemName } from '@common/enums/item-name';
 import { ItemType } from '@common/enums/item-type';
 import { SocketClientEventNames, SocketServerEventNames } from '@common/enums/socket-events-names';
 import { TileType } from '@common/enums/tile-type';
-import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { VpPreferenceItem } from '@common/enums/vp-preference-item';
 import { GameEvent } from '@common/game-event';
 import { Player } from '@common/player';
@@ -41,8 +39,6 @@ export class GameVpSocketEvent extends BaseVpSocketEvent {
         this.handleMovePlayer(vpSocket);
         this.handleMovementOver(vpSocket);
         this.handlePickUpItem(vpSocket);
-        this.handleTrapEncountered(vpSocket);
-        this.handleTrapResolved(vpSocket);
     }
 
     protected async handleClock(data: dataForm.ClockRes, vpSocket: VpSocketManager): Promise<void> {
@@ -150,71 +146,6 @@ export class GameVpSocketEvent extends BaseVpSocketEvent {
         });
     }
 
-    private handleTrapEncountered(vpSocket: VpSocketManager): void {
-        vpSocket.clientSocket.on(SocketClientEventNames.TrapEncountered, (data: dataForm.TrapEncounteredData) => {
-            if (!data.successful) return;
-            if (this.virtualPlayer.name !== this.activePlayer?.name) return;
-
-            const AVOID_TRAP_COST = 3;
-            const movementPoints = data.playerMovementPoints;
-            const canAvoid = movementPoints >= AVOID_TRAP_COST;
-
-            let avoid: boolean;
-
-            if (!canAvoid) {
-                avoid = false; // Must attempt
-            } else if (this.virtualPlayer.profile === VirtualPlayerProfile.Defensive) {
-                avoid = true; // Defensive always avoids when possible
-            } else {
-                // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-                avoid = movementPoints <= 5; // Aggressive risks when movement > 5
-            }
-
-            const choice: dataForm.HandleTrapChoice = {
-                gameCode: this.gameId,
-                avoid,
-            };
-
-            vpSocket.clientSocket.emit(SocketServerEventNames.HandleTrap, choice);
-        });
-    }
-
-    private handleTrapResolved(vpSocket: VpSocketManager): void {
-        vpSocket.clientSocket.on(SocketClientEventNames.TrapResolved, async (data: dataForm.TrapResolvedData) => {
-            if (!data.successful) return;
-
-            await Promise.all([this.getGameState(vpSocket), this.getActivePlayer(vpSocket)]);
-
-            if (this.virtualPlayer.name !== this.activePlayer?.name) return;
-
-            // After trap is resolved, check what to do next (same as MovementOver)
-            const playerPosition = this.activePlayer.position;
-            if (playerPosition) {
-                // Check for adjacent player to fight
-                const adjacentPlayer = this.findAdjacentPlayer();
-                const isWinningCtfGame =
-                    this.activePlayer.inventory?.some((item) => item.type === ItemType.Flag) &&
-                    this.activePlayer.position.x === this.activePlayer.startPosition.x &&
-                    this.activePlayer.position.y === this.activePlayer.startPosition.y;
-
-                const canStartFight =
-                    adjacentPlayer &&
-                    !this.vpState.isMovingToItem &&
-                    this.vpGameSessionManager.nbOfActions.get() > 0 &&
-                    adjacentPlayer.ctfTeam !== this.activePlayer.ctfTeam &&
-                    !isWinningCtfGame;
-
-                if (canStartFight) {
-                    this.startFight(vpSocket, adjacentPlayer);
-                    return;
-                }
-            }
-
-            // No fight to start, end turn
-            vpSocket.clientSocket.emit(SocketClientEventNames.EndTurn, { gameCode: this.gameId });
-        });
-    }
-
     private findAdjacentClosedDoor(position: Position): Position | null {
         const directions = [
             { x: -1, y: 0 },
@@ -239,7 +170,7 @@ export class GameVpSocketEvent extends BaseVpSocketEvent {
     }
 
     private showLogTurnNotification(vpSocket: VpSocketManager) {
-        // TODO: add translation for message
+        //TODO: add translation for message
         const gameEvent: GameEvent = {
             message: `C'est le tour de : ${this.activePlayer.name}`,
             timestamp: new Date(),
@@ -287,8 +218,7 @@ export class GameVpSocketEvent extends BaseVpSocketEvent {
                     currentTile.containedItem &&
                     (FROM_ITEM_NAME_TO_VP_PREFERENCE[currentTile.containedItem.name] === VpPreferenceItem.Defensive ||
                         FROM_ITEM_NAME_TO_VP_PREFERENCE[currentTile.containedItem.name] === VpPreferenceItem.Aggressive ||
-                        currentTile.containedItem.name === ItemName.Flag ||
-                        currentTile.containedItem.name === ItemName.Torch)
+                        currentTile.containedItem.name === ItemName.Flag)
                 ) {
                     const pickUpData: dataForm.PickUpItemReq = {
                         gameCode: this.gameId,
