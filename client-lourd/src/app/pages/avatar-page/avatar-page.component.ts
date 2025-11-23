@@ -268,7 +268,7 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
             this.gameSessionManager.updateActivePlayer(data.activePlayer);
             this.gameSessionManager.updateDisplayedList(structuredClone(data.listOfPlayers));
             this.statisticsManager.reset();
-
+            this.gameSessionManager.isEliminated.set(data?.eliminated ?? false);
             this.router.navigate([UrlPage.Game]);
 
             const newChosenPlayer: Player | undefined = data.listOfPlayers.find((player: Player) => {

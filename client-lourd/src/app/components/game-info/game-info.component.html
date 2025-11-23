@@ -15,7 +15,7 @@
                 @for (player of players; track player.name) {
                 <div class="player-item">
                     <img [src]="player.character" [alt]="player.name" class="player-avatar" />
-                    <span class="player-name" [ngClass]="{ 'active-player': player.name === activePlayerName, 'not-in-game': player.isNotInGame }">
+                    <span class="player-name" [ngClass]="{ 'active-player': player.name === activePlayerName, 'not-in-game': player.eliminated }">
                         {{ player.name }}
                         @if (player.virtualPlayer) {
                         <i class="fas fa-robot robot-icon" [ngClass]="{ aggressive: isAggressive(player), defensive: !isAggressive(player) }"></i>

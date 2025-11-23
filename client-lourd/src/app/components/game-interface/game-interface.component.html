@@ -43,16 +43,16 @@
         <button
             class="attack"
             (click)="onAttack()"
-            [class.disabled]="isAttackButtonDisabled()"
-            [attr.disabled]="isAttackButtonDisabled() ? 'disabled' : null"
+            [class.disabled]="isAttackButtonDisabled() || gameSessionManager.isEliminated()"
+            [attr.disabled]="isAttackButtonDisabled() || gameSessionManager.isEliminated() ? 'disabled' : null"
         >
             {{ getAttackButtonText() | translate }}
         </button>
         <button
             class="escape"
             (click)="onEscape()"
-            [class.disabled]="isEscapeButtonDisabled()"
-            [attr.disabled]="isEscapeButtonDisabled() ? 'disabled' : null"
+            [class.disabled]="isEscapeButtonDisabled() || gameSessionManager.isEliminated()"
+            [attr.disabled]="isEscapeButtonDisabled() || gameSessionManager.isEliminated() ? 'disabled' : null"
         >
             {{ 'game-page.combat.escape' | translate }}
         </button>

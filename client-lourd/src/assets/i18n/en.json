@@ -269,7 +269,10 @@
             },
             "ok": "ok",
             "drop-item": "drop an item"
-        }
+        },
+        "spectating-title": "You have been eliminated",
+        "spectating-subtitle": "You are now spectating this game. You can keep watching and using the chat.",
+        "spectating-tag": "Spectator"
     },
     "game-option-page": {
         "title": "Create a New Game",

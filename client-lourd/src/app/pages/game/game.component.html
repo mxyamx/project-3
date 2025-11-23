@@ -1,12 +1,23 @@
 <div class="game">
     <div class="column-left">
         <app-countdown [isInCombat]="false"></app-countdown>
+        @if(!gameSessionManager.isEliminated()){
         <app-player-info></app-player-info>
         <app-inventory></app-inventory>
+        }
     </div>
 
     <div class="column-center">
         <app-playing-board></app-playing-board>
+        @if (gameSessionManager.isEliminated()) {
+        <div class="spectator-panel">
+            <h2>{{ 'game-page.spectating-title' | translate }}</h2>
+            <p>{{ 'game-page.spectating-subtitle' | translate }}</p>
+            <span class="spectator-tag">
+                {{ 'game-page.spectating-tag' | translate }}
+            </span>
+        </div>
+        } @else {
         <div class="action-buttons">
             <button
                 (click)="onActionClick()"
@@ -23,6 +34,7 @@
                 {{ 'game-page.end-turn' | translate }}
             </button>
         </div>
+        }
     </div>
 
     <div class="column-right">

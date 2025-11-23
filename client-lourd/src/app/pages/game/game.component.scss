@@ -91,6 +91,45 @@ $animation-delay-1: 0.2s;
         min-width: 0;
     }
 
+    .spectator-panel {
+        margin: 0 auto;
+        padding: 12px 20px;
+        max-width: 80%;
+        border-radius: 20px;
+        background: rgba(10, 20, 40, 0.9);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+        text-align: center;
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .spectator-panel h2 {
+        font-family: 'Jaro', sans-serif;
+        font-size: 1.4rem;
+        margin: 0;
+        color: #fffb00;
+    }
+
+    .spectator-panel p {
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .spectator-tag {
+        align-self: center;
+        margin-top: 4px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        background-color: #51b9ff;
+        color: #143e5a;
+        font-family: 'Jaro', sans-serif;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
     .action-buttons {
         display: flex;
         gap: 50px;

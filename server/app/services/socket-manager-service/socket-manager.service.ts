@@ -17,6 +17,7 @@ import { VpGameSessionManager } from '@app/classes/vp-game-session/vp-game-sessi
 import { VpSocketAddingHandler } from '@app/classes/vp-socket-adding-handler/vp-socket-adding-handler';
 import { VpSocketManager } from '@app/classes/vp-socket-manager/vp-socket-manager';
 import { UserSessionController } from '@app/controllers/user-session-controller/user-session-controller';
+import { friendEvents } from '@app/events/friendEvents';
 import { ChannelDoc } from '@app/interfaces/channel-doc';
 import { VpSocketAddingHandlerConfig } from '@app/interfaces/vp-socket-adding-handler-config';
 import { CurrentGamesService } from '@app/services/current-games/current-games.service';
@@ -96,6 +97,25 @@ export class SocketManager {
         this.vpSocketAddingHandler = new VpSocketAddingHandler(vpSocketAddingHandlerConfig);
         this.friendSocketManager = new FriendSocketManager(this.sio, this.userSessionManager);
         this.channelSocketManager = new ChannelSocketManager(this.sio, this.userSessionManager, this.databaseService);
+
+        friendEvents.on('vp-eliminated', (payload: { player: Player; gameId: string }) => {
+            const { player, gameId } = payload;
+            const vpManager = this.vpManagers.get(gameId);
+            vpManager?.releaseVpName(player.name);
+            const vpSocket = this.vpSockets.get(player.socketId);
+            if (vpSocket) {
+                vpSocket.clientSocket.removeAllListeners();
+                vpSocket.clientSocket.disconnect();
+            }
+            this.vpSockets.delete(player.socketId);
+            this.gameVpSocketEvents.delete(player.socketId);
+            this.fightVpSocketEvents.delete(player.socketId);
+            this.vpGameSessionManagers.delete(player.socketId);
+            this.vpBehaviorsInGame.delete(player.socketId);
+            this.vpBehaviorsInFight.delete(player.socketId);
+            console.log(`vp cleaned -> ${player.socketId}`);
+            return;
+        });
     }
 
     handleSockets(): void {

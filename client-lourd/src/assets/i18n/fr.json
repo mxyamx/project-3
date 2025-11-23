@@ -269,7 +269,10 @@
             },
             "ok": "ok",
             "drop-item": "déposer un item"
-        }
+        },
+        "spectating-title": "Vous êtes éliminé",
+        "spectating-subtitle": "Vous êtes maintenant spectateur de la partie. Vous pouvez continuer à regarder et à utiliser le chat.",
+        "spectating-tag": "Spectateur"
     },
     "game-option-page": {
         "title": "Créer un nouveau jeu",

@@ -38,7 +38,7 @@ export class PlayerSlotManager {
 
         if (!existing) {
             if (!this.canJoinAsActive()) {
-                throw new Error('No free slot for new player');
+                return;
             }
             this.slots.set(player.userId, {
                 userId: player.userId,

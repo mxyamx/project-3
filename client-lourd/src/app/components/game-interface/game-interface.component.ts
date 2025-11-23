@@ -31,7 +31,7 @@ export class GameInterfaceComponent implements OnInit, OnDestroy {
     opponent: Player;
     attackingPlayer: Player;
     subscriptions: Subscription[] = [];
-    private gameSessionManager = inject(GameSessionManagerService);
+    gameSessionManager = inject(GameSessionManagerService);
     private diceService = inject(DiceService);
     private gameInterfaceService = inject(GameInterfaceService);
     private changeDetectorRef: ChangeDetectorRef;

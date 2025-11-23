@@ -51,7 +51,7 @@ export class GameSession {
         private boardGame: BoardGame,
         isRapidElim: boolean,
     ) {
-        this.players = new DynamicPlayerList();
+        this.players = new DynamicPlayerList(isRapidElim);
         this.staticPlayerMap = new Map();
         this.statisticsManager = new StatisticsManager(boardGame.tiles);
         this.gameHasStarted = false;
@@ -65,10 +65,8 @@ export class GameSession {
         this.originalBoardGame = structuredClone(boardGame);
         this.isRapidElim = isRapidElim;
 
-        if (isRapidElim) {
-            const maxPlayers = PlayerLimits[this.boardGame.size].maxPlayers;
-            this.playerSlotManager = new PlayerSlotManager(maxPlayers);
-        }
+        const maxPlayers = PlayerLimits[this.boardGame.size].maxPlayers;
+        this.playerSlotManager = new PlayerSlotManager(maxPlayers);
     }
 
     get board(): BoardGame {
@@ -343,6 +341,17 @@ export class GameSession {
         }
     }
 
+    eliminatePlayer(player: Player): void {
+        this.dropAllItems(player);
+
+        if (player.position) {
+            this.boardGame.tiles[player.position.x][player.position.y].containedPlayer = undefined;
+        }
+
+        this.players.markEliminated(player.userId);
+        this.playerSlotManager.markEliminated(player.userId);
+    }
+
     playerIsInSession(player: Player): boolean {
         return this.players.getValues().find((element: Player) => {
             return element.name === player.name;
@@ -451,6 +460,7 @@ export class GameSession {
                     const playerCopy = structuredClone(player);
                     playerCopy.position = startPos;
                     this.staticPlayerMap.set(playerCopy.name, playerCopy);
+                    this.playerSlotManager.markDropIn(playerCopy);
                     break loop1;
                 }
             }
@@ -488,9 +498,7 @@ export class GameSession {
 
                         playerIsInFirstTeam = !playerIsInFirstTeam;
 
-                        if (this.isRapidElim) {
-                            this.playerSlotManager.registerInitialPlayer(player);
-                        }
+                        this.playerSlotManager.registerInitialPlayer(player);
                     }
                 }
             }
