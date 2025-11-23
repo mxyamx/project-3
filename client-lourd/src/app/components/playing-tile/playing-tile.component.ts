@@ -71,6 +71,27 @@ export class PlayingTileComponent {
         return emote?.icon || '';
     }
 
+    getEmoteClass(emoteType: EmoteType | null | undefined): string {
+    if (!emoteType) return '';
+    
+    switch (emoteType) {
+        case EmoteType.Happy:
+            return 'emote-happy';
+        case EmoteType.Sad:
+            return 'emote-sad';
+        case EmoteType.Angry:
+            return 'emote-angry';
+        case EmoteType.Laugh:
+            return 'emote-laugh';
+        case EmoteType.ThumbUp:
+            return 'emote-thumbup';
+        case EmoteType.ThumbDown:
+            return 'emote-thumbdown';
+        default:
+            return '';
+    }
+}
+
     isCurrentPlayerTile(): boolean {
     if (!this.tile.containedPlayer) return false;
     const current = this.gameSessionManager.chosenPlayer();
@@ -81,7 +102,7 @@ toggleEmoteMenu(event: MouseEvent): void {
     event.stopPropagation();
     this.showEmoteMenu = !this.showEmoteMenu;
     
-    // Fermer le menu si on clique ailleurs
+   
     if (this.showEmoteMenu) {
         setTimeout(() => {
             const closeMenu = () => {

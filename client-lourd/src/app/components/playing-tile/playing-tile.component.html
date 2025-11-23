@@ -31,9 +31,9 @@
 </div>
 }
 @if(tile.containedPlayer?.currentEmote){
-<div class="emote-bubble">
+<div class="emote-bubble" [ngClass]="getEmoteClass(tile.containedPlayer?.currentEmote)">
     <div class="emote-content">
-        {{ getEmoteIcon(tile.containedPlayer?.currentEmote) }}
+        <span class="emote-icon">{{ getEmoteIcon(tile.containedPlayer?.currentEmote) }}</span>
     </div>
     <div class="emote-bubble-tail"></div>  
 </div>
