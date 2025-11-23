@@ -9,5 +9,4 @@ export const FROM_ITEM_NAME_TO_VP_PREFERENCE: { [key in string]: VpPreferenceIte
     [ItemName.GameEditor1]: VpPreferenceItem.Defensive,
     [ItemName.GameEditor2]: VpPreferenceItem.Aggressive,
     [ItemName.RandomItem]: VpPreferenceItem.Defensive,
-    [ItemName.Torch]: VpPreferenceItem.Aggressive,
 };
