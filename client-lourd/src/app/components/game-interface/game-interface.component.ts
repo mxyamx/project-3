@@ -115,7 +115,9 @@ export class GameInterfaceComponent implements OnInit, OnDestroy {
     }
 
     private initPlayers() {
-        const localPlayer = this.gameSessionManager.chosenPlayer();
+        const localPlayer = this.gameSessionManager.isEliminated()
+            ? this.gameSessionManager.attackingPlayer()
+            : this.gameSessionManager.chosenPlayer();
         const attackingPlayer = this.gameSessionManager.attackingPlayer();
         const defendingPlayer = this.gameSessionManager.defendingPlayer();
 

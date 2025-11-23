@@ -4,6 +4,7 @@ import { DynamicPlayerList } from '@app/classes/dynamic-player-list/dynamic-play
 import { ItemEffectApplicator } from '@app/classes/item-effect-applicator/item-effect-applicator';
 import { StatisticsManager } from '@app/classes/statistics-manager/statistics-manager';
 import { LARGE_DICE_VALUE, SMALL_DICE_VALUE, STANDARD_LIST_PLAYERS } from '@app/constants/development-constants';
+import { CurrentGamesService } from '@app/services/current-games/current-games.service';
 import { hasDuplicateNames, shuffleArray } from '@app/utils/functions/general-usage-functions';
 import { BoardGame } from '@common/board-game';
 import { CtfTeam } from '@common/enums/ctf-team';
@@ -48,7 +49,9 @@ export class GameSession {
     isRapidElim: boolean = false;
 
     constructor(
+        gameService: CurrentGamesService,
         private boardGame: BoardGame,
+        gameId: string,
         isRapidElim: boolean,
     ) {
         this.players = new DynamicPlayerList(isRapidElim);
@@ -66,7 +69,7 @@ export class GameSession {
         this.isRapidElim = isRapidElim;
 
         const maxPlayers = PlayerLimits[this.boardGame.size].maxPlayers;
-        this.playerSlotManager = new PlayerSlotManager(maxPlayers);
+        this.playerSlotManager = new PlayerSlotManager(maxPlayers, gameService, gameId);
     }
 
     get board(): BoardGame {

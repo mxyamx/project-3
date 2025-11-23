@@ -117,7 +117,7 @@ export class FightVpSocketEvent extends BaseVpSocketEvent {
                 this.vpGameSessionManager.changeState(PlayerState.WaitingForTurn);
             }
 
-            if (this.virtualPlayer.name === data.loserName) {
+            if (this.virtualPlayer.name === data.loserName && data?.eliminated) {
                 const payload = { player: this.virtualPlayer, gameId: this.gameId };
                 friendEvents.emit('vp-eliminated', payload);
             }

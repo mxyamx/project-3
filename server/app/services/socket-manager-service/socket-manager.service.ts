@@ -283,7 +283,11 @@ export class SocketManager {
                     return;
                 }
                 const maxPlayerCount = PlayerLimits[game.boardGame.size].maxPlayers;
-                if (game.players.length >= maxPlayerCount) {
+
+                if (
+                    game.players.length >= maxPlayerCount ||
+                    !this.gameService.canTakeASlot(this.userSessionManager.getFirebaseIdBySocketId(socket.id), game)
+                ) {
                     const response: JoinGameAck = { codeError: false, limitError: true, lockedError: false };
                     callback(response);
                     return;
@@ -343,7 +347,11 @@ export class SocketManager {
                 }
 
                 const maxPlayerCount = PlayerLimits[game.boardGame.size].maxPlayers;
-                if (game.players.length >= maxPlayerCount) {
+
+                if (
+                    game.players.length >= maxPlayerCount ||
+                    !this.gameService.canTakeASlot(this.userSessionManager.getFirebaseIdBySocketId(socket.id), game)
+                ) {
                     const response: JoinGameAck = { codeError: false, limitError: true, lockedError: false };
                     callback(response);
                     return;

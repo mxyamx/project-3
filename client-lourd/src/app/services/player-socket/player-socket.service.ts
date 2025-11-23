@@ -202,6 +202,7 @@ export class PlayerSocketService {
     }
 
     emitJoinCombatLogRoom(gameId: string, playerNames: string[]): void {
+        //TODO: should a eliminated player see the game
         playerNames.forEach((playerName) => {
             this.clientSocketService.emit('join-combat-log', { gameId, playerName });
         });

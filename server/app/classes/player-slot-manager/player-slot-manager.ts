@@ -1,12 +1,16 @@
 import { PlayerSlotState } from '@app/interfaces/player-slot-state';
+import { CurrentGamesService } from '@app/services/current-games/current-games.service';
 import { Player } from '@common/player';
 
 export class PlayerSlotManager {
     private readonly maxSlots: number;
     private readonly slots = new Map<string, PlayerSlotState>();
-
-    constructor(maxSlots: number) {
+    private gameId: string;
+    private gameService: CurrentGamesService;
+    constructor(maxSlots: number, gameService: CurrentGamesService, gameId: string) {
         this.maxSlots = maxSlots;
+        this.gameService = gameService;
+        this.gameId = gameId;
     }
 
     registerInitialPlayer(player: Player): void {
@@ -15,6 +19,8 @@ export class PlayerSlotManager {
             eliminated: false,
             countsForSlot: true,
         });
+
+        this.gameService.setSlots(this.gameId, structuredClone(this.slots));
     }
 
     markEliminated(userId: string): void {
@@ -30,6 +36,7 @@ export class PlayerSlotManager {
 
         if (!state.eliminated) {
             state.countsForSlot = false;
+            this.gameService.setSlots(this.gameId, structuredClone(this.slots));
         }
     }
 
@@ -45,6 +52,7 @@ export class PlayerSlotManager {
                 eliminated: false,
                 countsForSlot: true,
             });
+            this.gameService.setSlots(this.gameId, structuredClone(this.slots));
             return;
         }
 
@@ -57,6 +65,7 @@ export class PlayerSlotManager {
                 return;
             }
             existing.countsForSlot = true;
+            this.gameService.setSlots(this.gameId, structuredClone(this.slots));
         }
     }
 

@@ -21,6 +21,8 @@
                         <i class="fas fa-robot robot-icon" [ngClass]="{ aggressive: isAggressive(player), defensive: !isAggressive(player) }"></i>
                         } @if (player.organizer) {
                         <i class="fas fa-star organizer-star"></i>
+                        } @if(player.eliminated){
+                        <i class="fa-solid fa-eye"></i>
                         }
                     </span>
                     <i class="fas fa-flag" [ngClass]="hasFlag(player) && !player.isNotInGame ? 'flag-visible' : 'flag-hidden'"></i>
