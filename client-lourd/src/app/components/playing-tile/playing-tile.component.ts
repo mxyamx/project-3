@@ -48,27 +48,6 @@ export class PlayingTileComponent {
         { type: EmoteType.ThumbDown, icon: '👎' },
     ];
 
-    mouseDownOnPlayer(event: MouseEvent): void {
-        if (event.button === 2) {
-            event.preventDefault();
-
-            const current = this.gameSessionManager.chosenPlayer();
-            if (!this.tile.containedPlayer || current.userId !== this.tile.containedPlayer.userId) {
-                return;
-            }
-
-            this.showEmoteMenu = true;
-
-            
-            setTimeout(() => {
-                const closeMenu = () => {
-                    this.showEmoteMenu = false;
-                    document.removeEventListener('click', closeMenu);
-                };
-                document.addEventListener('click', closeMenu);
-            }, 100);
-        }
-    }
 
 
     onEmoteClick(emoteType: EmoteType, event: MouseEvent): void {
@@ -91,6 +70,28 @@ export class PlayingTileComponent {
         const emote = this.emotes.find((e) => e.type === emoteType);
         return emote?.icon || '';
     }
+
+    isCurrentPlayerTile(): boolean {
+    if (!this.tile.containedPlayer) return false;
+    const current = this.gameSessionManager.chosenPlayer();
+    return this.tile.containedPlayer.userId === current.userId;
+}
+
+toggleEmoteMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.showEmoteMenu = !this.showEmoteMenu;
+    
+    // Fermer le menu si on clique ailleurs
+    if (this.showEmoteMenu) {
+        setTimeout(() => {
+            const closeMenu = () => {
+                this.showEmoteMenu = false;
+                document.removeEventListener('click', closeMenu);
+            };
+            document.addEventListener('click', closeMenu);
+        }, 100);
+    }
+}
 
 
     tileIsStartingPosition(): boolean {

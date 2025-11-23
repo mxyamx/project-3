@@ -142,18 +142,6 @@
         inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Animation d'apparition du menu */
-@keyframes menu-appear {
-    0% {
-        opacity: 0;
-        transform: translateX(-50%) translateY(10px) scale(0.8);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0) scale(1);
-    }
-}
-
 /* Indicateur de sélection (petit point en dessous) */
 .emote-button::after {
     content: '';
@@ -219,6 +207,18 @@
     box-shadow: 
         0 6px 12px rgba(192, 57, 43, 0.4),
         0 0 16px rgba(192, 57, 43, 0.3);
+}
+
+/* Animation d'apparition du menu */
+@keyframes menu-appear {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
 }
 
 /* ==================== BULLE D'EMOTE (VISIBLE PAR TOUS) ==================== */
@@ -291,7 +291,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* ==================== ANIMATION DE LA BULLE ==================== */
+/* ==================== ANIMATIONS ==================== */
 @keyframes emote-bubble-appear {
     0% {
         opacity: 0;
@@ -343,50 +343,52 @@
     }
 }
 
-/* Couleurs spécifiques selon l'emote au survol */
-.emote-button:nth-child(1):hover {
-    /* Happy - Jaune */
-    border-color: #f39c12;
+/* ==================== BOUTON FLOTTANT D'EMOTE ==================== */
+.emote-trigger-button {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    background: linear-gradient(145deg, rgba(0, 0, 0, 0.85), rgba(40, 40, 40, 0.85));
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: all 0.2s ease;
     box-shadow: 
-        0 6px 12px rgba(243, 156, 18, 0.4),
-        0 0 16px rgba(243, 156, 18, 0.3);
+        0 3px 10px rgba(0, 0, 0, 0.4),
+        inset 0 1px 2px rgba(255, 255, 255, 0.2);
+    animation: float-button 2s ease-in-out infinite;
 }
 
-.emote-button:nth-child(2):hover {
-    /* Sad - Bleu */
-    border-color: #3498db;
+.emote-trigger-button:hover {
+    transform: translateX(-50%) scale(1.2);
+    background: linear-gradient(145deg, rgba(255, 215, 0, 0.9), rgba(255, 165, 0, 0.9));
+    border-color: #ffd700;
     box-shadow: 
-        0 6px 12px rgba(52, 152, 219, 0.4),
-        0 0 16px rgba(52, 152, 219, 0.3);
-}
-.emote-button:nth-child(3):hover {
-    /* Angry - Rouge */
-    border-color: #e74c3c;
-    box-shadow: 
-        0 6px 12px rgba(231, 76, 60, 0.4),
-        0 0 16px rgba(231, 76, 60, 0.3);
+        0 5px 15px rgba(255, 215, 0, 0.5),
+        0 0 20px rgba(255, 215, 0, 0.3),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
-.emote-button:nth-child(4):hover {
-    /* Laugh - Violet */
-    border-color: #9b59b6;
+.emote-trigger-button:active {
+    transform: translateX(-50%) scale(1.1);
     box-shadow: 
-        0 6px 12px rgba(155, 89, 182, 0.4),
-        0 0 16px rgba(155, 89, 182, 0.3);
+        0 2px 5px rgba(0, 0, 0, 0.3),
+        inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.emote-button:nth-child(5):hover {
-    /* ThumbUp - Vert */
-    border-color: #27ae60;
-    box-shadow: 
-        0 6px 12px rgba(39, 174, 96, 0.4),
-        0 0 16px rgba(39, 174, 96, 0.3);
-}
-
-.emote-button:nth-child(6):hover {
-    /* ThumbDown - Rouge foncé */
-    border-color: #c0392b;
-    box-shadow: 
-        0 6px 12px rgba(192, 57, 43, 0.4),
-        0 0 16px rgba(192, 57, 43, 0.3);
+@keyframes float-button {
+    0%, 100% {
+        top: -25px;
+    }
+    50% {
+        top: -30px;
+    }
 }

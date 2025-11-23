@@ -2,9 +2,16 @@
     <img [src]="getTileImage(tile)" alt="{{ tile.type }}" />
     @if((tile.containedItem && !tile.containedItem.disabled)||(tile.containedItem && this.tileIsStartingPosition())){
     <app-playing-item class="item-element" [item]="tile.containedItem" (mousedown)="mouseDownOnItem($event)"></app-playing-item>}
-    @if(tile.containedPlayer){
-    <app-player-element class="player-element" [player]="tile.containedPlayer" (mousedown)="mouseDownOnPlayer($event)"></app-player-element>
-    } @if(tile.reachable){
+@if(tile.containedPlayer){
+<app-player-element class="player-element" [player]="tile.containedPlayer"></app-player-element>
+
+
+@if(isCurrentPlayerTile()){
+<button class="emote-trigger-button" (click)="toggleEmoteMenu($event)" title="Emotes">
+    😊
+</button>
+}
+} @if(tile.reachable){
     <div class="reachable-filter"></div>
     } @if(tile.availableAction){
     <div class="action-filter"></div>
