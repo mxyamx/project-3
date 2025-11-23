@@ -1,5 +1,3 @@
-/* eslint-disable complexity */
-/* eslint-disable @typescript-eslint/prefer-for-of */
 /* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable max-lines */
 import { DynamicPlayerList } from '@app/classes/dynamic-player-list/dynamic-player-list';
@@ -19,11 +17,8 @@ import { Fight } from '@common/fight';
 import { Item } from '@common/item';
 import { Player } from '@common/player';
 import { Position } from '@common/position';
-import { TeleportationDataHelper } from '@common/teleportation';
 import { Tile } from '@common/tile';
-import { BoardGameGraph } from '../board-game-graph/board-game-graph';
 import { PlayerSlotManager } from '../player-slot-manager/player-slot-manager';
-
 export class GameSession {
     statisticsManager: StatisticsManager;
     playerSlotManager: PlayerSlotManager;
@@ -138,9 +133,6 @@ export class GameSession {
         this.itemEffectApplicator.removeEffect(this.activePlayer, item.name);
         this.activePlayer.inventory = newInventory;
         this.boardGame.tiles[position.x][position.y].containedItem = item;
-
-        this.updateIllumination();
-        this.updatePlayerBonuses();
     }
 
     pickUpItem(player: Player): void {
@@ -162,61 +154,6 @@ export class GameSession {
         this.activePlayer.inventory.push(item);
         this.itemEffectApplicator.applyEffect(this.activePlayer, item.name);
         this.boardGame.tiles[position.x][position.y].containedItem = undefined;
-
-        this.updateIllumination();
-        this.updatePlayerBonuses();
-    }
-
-    depositTorch(player: Player): void {
-        // Validate player is the active player
-        if (player.name !== this.activePlayer.name) {
-            throw new Error('Only the active player can deposit a torch');
-        }
-
-        // Check if player has a torch in inventory
-        const hasTorch = player.inventory?.some((item) => item.name === ItemName.Torch);
-        if (!hasTorch) {
-            throw new Error('Player does not have a torch to deposit');
-        }
-
-        const position = player.position;
-
-        // Validate position exists
-        if (!position) {
-            throw new Error('Player position is undefined');
-        }
-
-        const tile = this.boardGame.tiles[position.x][position.y];
-
-        // Validate tile type - can only deposit on base/grass, water, or ice
-        const validTileTypes = [TileType.Grass, TileType.Water, TileType.Ice];
-        if (!validTileTypes.includes(tile.type)) {
-            throw new Error('Torch can only be deposited on grass, water, or ice tiles');
-        }
-
-        // Check if tile already has an item
-        if (tile.containedItem) {
-            throw new Error('Tile already contains an item');
-        }
-
-        // Find the torch item in inventory
-        const torchItem = player.inventory.find((item) => item.name === ItemName.Torch);
-        if (!torchItem) {
-            throw new Error('Torch not found in inventory');
-        }
-
-        // Remove torch from player's inventory (create new array without the torch)
-        const newInventory = this.activePlayer.inventory.filter((item) => item.name !== ItemName.Torch);
-        this.activePlayer.inventory = newInventory;
-
-        // Place torch on the tile
-        this.boardGame.tiles[position.x][position.y].containedItem = { ...torchItem };
-
-        // Update illumination to reflect the newly placed torch
-        // This will handle both lit torches (on grass) and extinguished torches (on water/ice)
-        this.updateIllumination();
-
-        this.updatePlayerBonuses();
     }
 
     validItemPresent(position: Position): boolean {
@@ -257,76 +194,9 @@ export class GameSession {
         );
         this.statisticsManager.updateTilePercentage(newPosition);
         this.statisticsManager.updatePlayerTilePercentage(player.userId, newPosition);
-
-        this.updateIllumination();
-        this.updatePlayerBonuses();
     }
-    useTeleporter(playerPosition: Position): { success: boolean; message?: string } {
-        const tile = this.boardGame.tiles[playerPosition.x][playerPosition.y];
 
-        // Validate the teleportation action
-        const validation = TeleportationDataHelper.validateTeleportAction(playerPosition, tile, this.boardGame.tiles);
-
-        if (!validation.isValid) {
-            return { success: false, message: validation.reason };
-        }
-
-        // CRITICAL: Get the player from the tile
-        const tilePlayer = tile.containedPlayer;
-        if (!tilePlayer) {
-            return { success: false, message: 'No player at position' };
-        }
-
-        // Verify this is the active player
-        if (tilePlayer.userId !== this.activePlayer.userId) {
-            return { success: false, message: 'Only the active player can use teleporter' };
-        }
-
-        // Get the target position (validated above)
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const targetPosition = validation.targetPosition!;
-
-        // Clear player from current tile
-        this.boardGame.tiles[playerPosition.x][playerPosition.y].containedPlayer = undefined;
-
-        // CRITICAL FIX: Update the activePlayer position (single source of truth)
-        this.activePlayer.position = targetPosition;
-
-        // Deduct speed cost for using teleporter (same as movePlayer pattern)
-        this.activePlayer.attributes.speedValue -= 1;
-
-        // Place activePlayer reference at target tile (ensures same object reference everywhere)
-        this.boardGame.tiles[targetPosition.x][targetPosition.y].containedPlayer = this.activePlayer;
-
-        // CRITICAL: Update staticPlayerMap to preserve state for next turn
-        // This ensures when changeActivePlayer() resets stats, it uses the updated position
-        const staticPlayer = this.staticPlayerMap.get(this.activePlayer.name);
-        if (staticPlayer) {
-            staticPlayer.position = targetPosition;
-            // Also update the static player's speed to match (important for turn changes)
-            // staticPlayer.attributes.speedValue = this.activePlayer.attributes.speedValue;
-        }
-
-        // Update statistics (same as movePlayer)
-        this.statisticsManager.updateTilePercentage(targetPosition);
-        this.statisticsManager.updatePlayerTilePercentage(this.activePlayer.userId, targetPosition);
-
-        // Update illumination and bonuses (same as movePlayer)
-        this.updateIllumination();
-        this.updatePlayerBonuses();
-
-        return { success: true };
-    }
     changeActivePlayer(): void {
-        // Remove illumination bonuses before resetting
-        for (const player of this.players.getValues()) {
-            if (player.hasIlluminationBonus) {
-                player.attributes.attackValue -= 1;
-                player.attributes.defenseValue -= 1;
-            }
-            player.hasIlluminationBonus = false;
-        }
-
         this.resetSpeed(this.activePlayer);
         this.resetHealth(this.activePlayer);
         this.resetDefense(this.activePlayer);
@@ -337,9 +207,6 @@ export class GameSession {
 
         this.players.moveFirstToBack();
         this.activePlayer = this.players.getFirst();
-
-        this.updateIllumination();
-        this.updatePlayerBonuses();
     }
 
     startGame(): void {
@@ -368,8 +235,6 @@ export class GameSession {
         if (tile.type === TileType.Door) {
             tile.doorState = !tile.doorState;
         }
-        this.updateIllumination();
-        this.updatePlayerBonuses();
         return tile.doorState;
     }
 
@@ -410,8 +275,6 @@ export class GameSession {
         const temp = this.ongoingFight.attackingPlayer;
         this.ongoingFight.attackingPlayer = this.ongoingFight.defendingPlayer;
         this.ongoingFight.defendingPlayer = temp;
-        this.updateIllumination();
-        this.updatePlayerBonuses();
     }
     attemptEscape(): boolean {
         const oldEscapeAttempts = this.escapeMAp.get(this.ongoingFight.attackingPlayer.name);
@@ -426,25 +289,18 @@ export class GameSession {
 
     repositionPlayer(player: Player): void {
         this.dropAllItems(player);
+        const playerCopy: Player = this.staticPlayerMap.get(player.name);
+        let position: Position | undefined = playerCopy.position;
 
-        // Clear player's current position on the board
-        if (player.position) {
+        if (position) {
+            if ((this.boardGame.tiles[position.x][position.y].containedPlayer ?? STANDARD_LIST_PLAYERS[0]).name !== player.name) {
+                position = this.isValidPosition(position) ? position : this.findNearestValidTile(position);
+            }
             this.boardGame.tiles[player.position.x][player.position.y].containedPlayer = undefined;
+            this.boardGame.tiles[position.x][position.y].containedPlayer = player;
+            player.position.x = position.x;
+            player.position.y = position.y;
         }
-
-        // Use startPosition for respawn
-        let position: Position = player.startPosition;
-
-        // Only if startPosition is occupied, find nearest valid
-        if (this.boardGame.tiles[position.x][position.y].containedPlayer) {
-            position = this.findNearestValidTile(position);
-        }
-
-        this.boardGame.tiles[position.x][position.y].containedPlayer = player;
-        player.position = position;
-
-        this.updateIllumination();
-        this.updatePlayerBonuses();
     }
 
     endFight(): void {
@@ -462,8 +318,6 @@ export class GameSession {
         if (this.itemEffectApplicator.hasItem(defendingPlayer, ItemName.AttributeEditor2)) {
             this.itemEffectApplicator.applyEffect(defendingPlayer, ItemName.AttributeEditor2);
         }
-        this.updateIllumination();
-        this.updatePlayerBonuses();
     }
 
     registerVictory(player: Player): void {
@@ -769,8 +623,6 @@ export class GameSession {
             case TileType.Water:
                 return 2;
             case TileType.Grass:
-            case TileType.Teleportation:
-            case TileType.Trap:
                 return 1;
             case TileType.Door:
                 if (tile.doorState) return 1;
@@ -801,92 +653,6 @@ export class GameSession {
                 : false;
         }
         return false;
-    }
-
-    /**
-     * Update board illumination based on torch positions
-     */
-    private updateIllumination(): void {
-        const tiles = this.boardGame.tiles;
-        // const players = Array.from(this.listOfPlayers.values());
-        const players = this.players.getValues();
-        // Clear all illumination
-        for (let i = 0; i < tiles.length; i++) {
-            for (let j = 0; j < tiles[i].length; j++) {
-                tiles[i][j].isIlluminated = false;
-            }
-        }
-
-        // Illuminate from map torches (2-block range)
-        for (let i = 0; i < tiles.length; i++) {
-            for (let j = 0; j < tiles[i].length; j++) {
-                const tile = tiles[i][j];
-                if (tile.containedItem?.name === ItemName.Torch) {
-                    if (tile.type !== TileType.Water && tile.type !== TileType.Ice) {
-                        this.illuminateFromPosition(tiles, { x: i, y: j });
-                    }
-                }
-            }
-        }
-
-        // Illuminate for players holding torches (only their tile)
-        for (const player of players) {
-            const hasTorch = player.inventory?.some((item) => item.name === ItemName.Torch);
-            if (hasTorch && player.position) {
-                const pos = player.position;
-                if (pos.x >= 0 && pos.x < tiles.length && pos.y >= 0 && pos.y < tiles[0].length) {
-                    const tileType = tiles[pos.x][pos.y].type;
-                    // Only illuminate if NOT on water or ice
-                    if (tileType !== TileType.Water && tileType !== TileType.Ice) {
-                        tiles[pos.x][pos.y].isIlluminated = true;
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Illuminate tiles within 2-block range from position
-     */
-    private illuminateFromPosition(tiles: Tile[][], position: Position): void {
-        const graph = new BoardGameGraph(tiles, false, true);
-        const reachableNodes = graph.findReachableNodes(position, 2);
-
-        tiles[position.x][position.y].isIlluminated = true;
-
-        for (const node of reachableNodes) {
-            const pos = node.tilePosition;
-            tiles[pos.x][pos.y].isIlluminated = true;
-        }
-    }
-
-    /**
-     * Update illumination bonuses for all players
-     */
-    private updatePlayerBonuses(): void {
-        // const players = Array.from(this.players.values());
-        const players = this.players.getValues();
-        const tiles = this.boardGame.tiles;
-
-        for (const player of players) {
-            if (!player.position) continue;
-
-            const pos = player.position;
-            const isIlluminated = tiles[pos.x]?.[pos.y]?.isIlluminated ?? false;
-
-            // Apply bonus if on illuminated tile
-            if (isIlluminated && !player.hasIlluminationBonus) {
-                player.attributes.attackValue += 1;
-                player.attributes.defenseValue += 1;
-                player.hasIlluminationBonus = true;
-            }
-            // Remove bonus if not on illuminated tile
-            else if (!isIlluminated && player.hasIlluminationBonus) {
-                player.attributes.attackValue -= 1;
-                player.attributes.defenseValue -= 1;
-                player.hasIlluminationBonus = false;
-            }
-        }
     }
 
     get initialPlayers(): number {

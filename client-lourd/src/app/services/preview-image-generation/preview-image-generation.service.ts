@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FROM_ITEM_TO_IMAGE_ON_BOARD, FROM_TILE_TYPE_TO_IMAGE, getTorchImageOnBoard, PREVIEW_IMAGE_SIZE } from '@app/constants/objects-constants';
-import { ItemName } from '@common/enums/item-name';
+import { FROM_ITEM_TO_IMAGE_ON_BOARD, FROM_TILE_TYPE_TO_IMAGE, PREVIEW_IMAGE_SIZE } from '@app/constants/objects-constants';
 import { Tile } from '@common/tile';
 
 // sources utilisees: https://www.w3schools.com/graphics/canvas_images.asp
@@ -82,13 +81,7 @@ export class PreviewImageGenerationService {
                 const tile = tiles[i][j];
                 if (tile.containedItem && tile.containedItem.type) {
                     const containedItem = tile.containedItem;
-
-                    let objectImageUrl: string;
-                    if (containedItem.name === ItemName.Torch) {
-                        objectImageUrl = getTorchImageOnBoard(containedItem.name, tile.type);
-                    } else {
-                        objectImageUrl = FROM_ITEM_TO_IMAGE_ON_BOARD[containedItem.name];
-                    }
+                    const objectImageUrl = FROM_ITEM_TO_IMAGE_ON_BOARD[containedItem.name];
 
                     if (objectImageUrl) {
                         const img = new Image();

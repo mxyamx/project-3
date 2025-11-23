@@ -1,42 +1,15 @@
-<div
-    class="tile-element"
-    [ngClass]="{
-        'trap-tile': tile.type === 'trap',
-        illuminated: tile.isIlluminated
-    }"
-    (mousedown)="mouseDownOnTile($event)"
-    (mouseenter)="mouseEnterTile()"
-    (mouseup)="mouseUpOnTile()"
->
+<div class="tile-element" (mouseup)="mouseUpOnTile()">
     <img [src]="getTileImage(tile)" alt="{{ tile.type }}" />
-
-    <!-- Teleportation visual indicators -->
-    @if(tile.type === 'teleportation' && getTeleporterPairNumber()){
-    <div class="teleporter-overlay" [style.background-color]="getTeleporterColor()"></div>
-    <div class="teleporter-id" [style.color]="getTeleporterColor()">
-        {{ getTeleporterPairNumber() }}
-    </div>
-    <div class="teleporter-border" [style.border-color]="getTeleporterColor()"></div>
-    }
-
-    <!-- Highlight for first teleport tile while waiting for second -->
-    @if(isFirstTeleportTile() && isTeleportationWaitingForSecond()){
-    <div class="first-teleport-highlight"></div>
-    }
-
-    <!-- Item element -->
     @if(tile.containedItem){
     <app-item-element
         class="item-element"
         [item]="tile.containedItem"
-        [tileType]="tile.type"
         (mousedown)="mouseDownOnItem($event, tile.containedItem)"
-        [style.cursor]="this.itemApplicator.isActivated ? 'grabbing' : this.tileApplicator.isActivated ? 'crosshair' : 'grab'"
+        [style.cursor]="this.itemApplicatorService.isActivated ? 'grabbing' : this.tileApplicatorService.isActivated ? 'crosshair' : 'grab'"
     ></app-item-element>
     }
 </div>
 
-<!-- Item limit warning modal -->
 @if(showItemLimitWarning){
 <div class="item-limit-warning">
     <h2 class="item-limit-warning-title">{{ 'general.error' | translate }}</h2>

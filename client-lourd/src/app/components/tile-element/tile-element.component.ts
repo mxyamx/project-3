@@ -1,10 +1,8 @@
-import { NgClass } from '@angular/common';
-import { Component, inject, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { ItemElementComponent } from '@app/components/item-element/item-element.component';
-import { FROM_TILE_TYPE_TO_IMAGE } from '@app/constants/objects-constants';
+import { FROM_TILE_TYPE_TO_IMAGE, NB_ITEM_LARGE_MAP, NB_ITEM_MEDIUM_MAP, NB_ITEM_SMALL_MAP } from '@app/constants/objects-constants';
 import { BoardGameManagerService } from '@app/services/board-game-manager/board-game-manager.service';
 import { ItemApplicatorService } from '@app/services/item-applicator/item-applicator.service';
-import { TeleportationManagerService } from '@app/services/teleportation-manager/teleportation-manager.service';
 import { TileApplicatorService } from '@app/services/tile-applicator/tile-applicator.service';
 import { restrictEvent } from '@app/utils/functions/dom-related-functions';
 import { BoardGameSize } from '@common/enums/board-game-size';
@@ -16,29 +14,30 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-tile-element',
-    imports: [ItemElementComponent, TranslatePipe, NgClass],
+    imports: [ItemElementComponent, TranslatePipe],
     templateUrl: './tile-element.component.html',
     styleUrl: './tile-element.component.scss',
 })
 export class TileElementComponent {
     @Input() tile: Tile = { type: TileType.Grass };
+
     @Input() xPosition: number;
     @Input() yPosition: number;
 
     showItemLimitWarning: boolean = false;
 
-    private imageHashMap: { [key in TileType]: string } = FROM_TILE_TYPE_TO_IMAGE;
+    private itemApplicator: ItemApplicatorService = inject(ItemApplicatorService);
+    private tileApplicator: TileApplicatorService = inject(TileApplicatorService);
     private boardManager: BoardGameManagerService = inject(BoardGameManagerService);
-    private itemApplicatorService: ItemApplicatorService = inject(ItemApplicatorService);
-    private tileApplicatorService: TileApplicatorService = inject(TileApplicatorService);
-    private teleportationManager: TeleportationManagerService = inject(TeleportationManagerService);
 
-    get itemApplicator(): ItemApplicatorService {
-        return this.itemApplicatorService;
+    private imageHashMap: { [key in TileType]: string } = FROM_TILE_TYPE_TO_IMAGE;
+
+    get itemApplicatorService(): ItemApplicatorService {
+        return this.itemApplicator;
     }
 
-    get tileApplicator(): TileApplicatorService {
-        return this.tileApplicatorService;
+    get tileApplicatorService(): TileApplicatorService {
+        return this.tileApplicator;
     }
 
     getTileImage(tile: Tile): string {
@@ -48,90 +47,27 @@ export class TileElementComponent {
         return this.imageHashMap[tile.type];
     }
 
-    getTeleporterPairNumber(): string | null {
-        if (this.tile.type === TileType.Teleportation && this.tile.teleportPairId) {
-            return this.tile.teleportPairId.replace('tp-', '');
-        }
-        return null;
-    }
-
-    getTeleporterColor(): string {
-        if (this.tile.type === TileType.Teleportation && this.tile.teleportPairId) {
-            return this.teleportationManager.getPairColor(this.tile.teleportPairId);
-        }
-        return '#FFFFFF';
-    }
-
-    isTeleportationWaitingForSecond(): boolean {
-        return this.teleportationManager.isWaitingForSecondTeleport();
-    }
-
-    isFirstTeleportTile(): boolean {
-        const firstPos = this.teleportationManager.firstTeleportPosition();
-        return firstPos !== null && firstPos.x === this.xPosition && firstPos.y === this.yPosition;
-    }
-
-    mouseDownOnTile(event: MouseEvent): void {
-        if (event.button === 2) {
-            // Right click
-            this.rightClickOnTile(event);
-            return;
-        }
-
-        // Left click
-        if (this.tileApplicatorService.isActivated) {
-            this.tileApplicatorService.mouseClicked = true;
-            this.tileApplicatorService.handleTileClick(this.xPosition, this.yPosition);
-        }
-    }
-
-    mouseEnterTile(): void {
-        // Handle tile sliding (not for teleportation)
-        if (this.tileApplicatorService.isActivated && this.tileApplicatorService.currentTileType !== TileType.Teleportation) {
-            this.tileApplicatorService.handleTileDrag(this.xPosition, this.yPosition);
-        }
-    }
-
     mouseUpOnTile(): void {
         if (this.tile.containedItem) {
             return;
         }
-
-        // Handle item placement
-        if (this.itemApplicatorService.isActivated) {
+        if (this.itemApplicator.isActivated) {
             if (this.tile.type === TileType.Grass || this.tile.type === TileType.Ice || this.tile.type === TileType.Water) {
-                const currentItem = this.itemApplicatorService.currentItemSelected;
-
-                if (currentItem.type !== ItemType.StartingPoint && currentItem.type !== ItemType.Flag) {
+                if (
+                    this.itemApplicator.currentItemSelected.type !== ItemType.StartingPoint &&
+                    this.itemApplicator.currentItemSelected.type !== ItemType.Flag
+                ) {
                     if (this.findNumberOfItem() >= this.getItemLimit()) {
-                        console.log(`Maximum number of items (${this.getItemLimit()}) reached.`);
-                        console.log(`Current number of items: ${this.findNumberOfItem()}`);
                         this.showItemLimitWarning = true;
                         return;
                     }
                 }
-
                 if (!this.tile.containedItem) {
-                    this.itemApplicatorService.positionItem(this.xPosition, this.yPosition, structuredClone(currentItem), false);
-                    this.itemApplicatorService.deactivate();
+                    this.itemApplicator.positionItem(this.xPosition, this.yPosition, structuredClone(this.itemApplicator.currentItemSelected), false);
+                    this.itemApplicator.deactivate();
                 }
             }
         }
-
-        this.tileApplicatorService.mouseClicked = false;
-    }
-
-    rightClickOnTile(event: Event): void {
-        restrictEvent(event);
-
-        // Remove teleport pair or reset tile
-        if (this.tile.type === TileType.Teleportation && this.tile.teleportPairId) {
-            this.teleportationManager.removeTeleportPair(this.tile.teleportPairId);
-        } else if (this.tile.type !== TileType.Grass) {
-            this.tileApplicatorService.resetTile(this.xPosition, this.yPosition);
-        }
-
-        this.tileApplicatorService.deactivate();
     }
 
     mouseDownOnItem(event: MouseEvent, item: Item): void {
@@ -140,29 +76,43 @@ export class TileElementComponent {
             return;
         }
 
-        if (this.tileApplicatorService.isActivated) {
+        if (this.tileApplicator.isActivated) {
             return;
         }
 
-        this.itemApplicatorService.activate(structuredClone(item));
+        this.itemApplicator.activate(structuredClone(item));
         this.boardManager.updateTile(this.xPosition, this.yPosition, { type: this.tile.type });
 
-        this.itemApplicatorService.positionedItemSelected = true;
-        this.itemApplicatorService.xPositionLastItem = this.xPosition;
-        this.itemApplicatorService.yPositionLastItem = this.yPosition;
+        this.itemApplicator.positionedItemSelected = true;
+        this.itemApplicator.xPositionLastItem = this.xPosition;
+        this.itemApplicator.yPositionLastItem = this.yPosition;
     }
 
     rightClickOnItem(event: Event): void {
         restrictEvent(event);
 
         if (this.tile.containedItem) {
-            this.itemApplicatorService.removeItem(this.xPosition, this.yPosition, this.tile.containedItem?.name);
+            this.itemApplicator.removeItem(this.xPosition, this.yPosition, this.tile.containedItem?.name);
         }
-        this.itemApplicatorService.deactivate();
+        this.itemApplicator.deactivate();
     }
 
     clickOnOk(): void {
         this.showItemLimitWarning = false;
+    }
+
+    protected getItemLimit(): number {
+        switch (this.boardManager.editedBoardGame().size) {
+            case BoardGameSize.Small: {
+                return NB_ITEM_SMALL_MAP;
+            }
+            case BoardGameSize.Medium: {
+                return NB_ITEM_MEDIUM_MAP;
+            }
+            case BoardGameSize.Large: {
+                return NB_ITEM_LARGE_MAP;
+            }
+        }
     }
 
     private findNumberOfItem(): number {
@@ -179,19 +129,5 @@ export class TileElementComponent {
             }
         }
         return result;
-    }
-
-    protected getItemLimit(): number {
-        const size = this.boardManager.editedBoardGame().size;
-        switch (size) {
-            case BoardGameSize.Small:
-                return 2;
-            case BoardGameSize.Medium:
-                return 4;
-            case BoardGameSize.Large:
-                return 6;
-            default:
-                return 0;
-        }
     }
 }

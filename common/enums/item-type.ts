@@ -5,5 +5,4 @@ export enum ItemType {
     RandomItem = 'randomItem',
     StartingPoint = 'startingPoint',
     Flag = 'flag',
-    Torch = 'torch',
 }

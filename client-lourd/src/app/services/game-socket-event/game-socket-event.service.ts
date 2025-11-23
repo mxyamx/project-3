@@ -22,10 +22,8 @@ import { ItemName } from '@common/enums/item-name';
 import { PlayerState } from '@common/enums/player-state';
 import { SocketClientEventNames } from '@common/enums/socket-events-names';
 import { UrlPage } from '@common/enums/url-page';
-import { Player } from '@common/player';
 import * as dataForm from '@common/socket-data-forms';
 import { CurrentGameManagerService } from '../current-game-manager/current-game-manager.service';
-import { TorchIlluminationService } from '../torch-illumination/torch-illumination.service';
 
 @Injectable({
     providedIn: 'root',
@@ -40,13 +38,9 @@ export class GameSocketEventService {
     private gameInterfaceService: GameInterfaceService = inject(GameInterfaceService);
     private statisticsService: StatisticsManagerService = inject(StatisticsManagerService);
     private currentGamesService: CurrentGameManagerService = inject(CurrentGameManagerService);
-    private torchIlluminationService: TorchIlluminationService = inject(TorchIlluminationService);
     private limitOfItems: number = MAXIMUM_AMOUNT_OF_ITEM;
     private gameEventService: GameEventService = inject(GameEventService);
     gameEnding: boolean = false;
-
-    private previousPlayerIds: string[] = [];
-    private previousPlayers: Player[] = [];
 
     configureBaseSocket(router: Router): void {
         if (this.socketManager.isSocketAlive()) {
@@ -64,7 +58,6 @@ export class GameSocketEventService {
             this.handleDeactivateDebugMode();
             this.handlePickUpItem();
             this.handleDropItem();
-            this.handleDepositTorch();
         }
     }
 
@@ -201,6 +194,7 @@ export class GameSocketEventService {
             }, ENDGAME_COOL_DOWN_MSEC);
         });
     }
+
     private handleUpdateGame(): void {
         this.socketManager.on(SocketClientEventNames.UpdateGame, (data: dataForm.UpdateGamedRes) => {
             if (!data.successful) {
@@ -214,37 +208,12 @@ export class GameSocketEventService {
             if (this.gameSessionManager.playerState() === PlayerState.WaitingForAction) {
                 this.gameSessionManager.changeState(PlayerState.WaitingForAction);
             }
-
-            // FIX: Properly detect when a player has actually left
-            // Only show abandon notification if a player count decreased
-            const currentPlayerIds = data.listOfPlayers.map((p) => p.userId);
-
-            // Initialize previousPlayerIds on first call
-            if (this.previousPlayerIds.length === 0) {
-                this.previousPlayerIds = currentPlayerIds;
-                this.previousPlayers = data.listOfPlayers;
-                return;
+            if (this.gameSessionManager.listOfPlayers.length !== this.gameEventService.numberOfPlayersInit) {
+                this.gameEventService.showLogAbandonNotification(data.activePlayer);
             }
-
-            // Check if a player actually left (player count decreased)
-            if (currentPlayerIds.length < this.previousPlayerIds.length) {
-                // Find which player left
-                const leftPlayerId = this.previousPlayerIds.find((id) => !currentPlayerIds.includes(id));
-
-                if (leftPlayerId) {
-                    const leftPlayer = this.previousPlayers.find((p) => p.userId === leftPlayerId);
-
-                    if (leftPlayer) {
-                        this.gameEventService.showLogAbandonNotification(leftPlayer);
-                    }
-                }
-            }
-
-            // Update previous state for next comparison
-            this.previousPlayerIds = currentPlayerIds;
-            this.previousPlayers = [...data.listOfPlayers];
         });
     }
+
     private handleEndFightNotification(): void {
         this.socketManager.on(SocketClientEventNames.ShowEndFightNotification, (data: dataForm.endFightNotification) => {
             if (!data.successful) {
@@ -305,10 +274,6 @@ export class GameSocketEventService {
             this.gameSessionManager.updateBoardGame(data.boardGame);
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
 
-            // Refresh illumination using the data we just received
-            this.torchIlluminationService.updateBoardIllumination(data.boardGame.tiles, data.listOfPlayers);
-            this.gameSessionManager.updateBoardGame(data.boardGame); // This triggers the UI update
-
             this.gameSessionManager.updateCanPickUpItem(true);
 
             if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
@@ -346,10 +311,6 @@ export class GameSocketEventService {
             this.gameSessionManager.updateBoardGame(data.boardGame);
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
 
-            // Refresh illumination using the data we just received
-            this.torchIlluminationService.updateBoardIllumination(data.boardGame.tiles, data.listOfPlayers);
-            this.gameSessionManager.updateBoardGame(data.boardGame); // This triggers the UI update
-
             this.gameSessionManager.updateCanDropItem(true);
 
             if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
@@ -368,6 +329,7 @@ export class GameSocketEventService {
             }
         });
     }
+
     private checkInventoryLimit() {
         const inventory = this.gameSessionManager.chosenPlayer().inventory;
         if (inventory && inventory.length >= this.limitOfItems) {
@@ -391,23 +353,5 @@ export class GameSocketEventService {
             this.notificationService.showGameOverNotification();
         }
         return;
-    }
-    private handleDepositTorch(): void {
-        this.socketManager.on(SocketClientEventNames.DepositTorch, (data: dataForm.DepositTorchRes) => {
-            if (!data.successful) {
-                console.error('Torch deposit failed:', data.message);
-                return;
-            }
-
-            this.gameSessionManager.updateBoardGame(data.boardGame);
-            this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
-            this.torchIlluminationService.updateBoardIllumination(data.boardGame.tiles, data.listOfPlayers);
-
-            // Only update state and log for the active player
-            if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
-                this.gameEventService.showLogDepositTorchNotificationWithPosition(data);
-                this.gameSessionManager.changeState(PlayerState.WaitingForAction);
-            }
-        });
     }
 }
