@@ -8,7 +8,7 @@
     </div>
 
     <div class="column-center">
-        <app-playing-board></app-playing-board>
+        <app-playing-board [showEmoteMenuForPlayer]="showEmoteMenuForPlayer"></app-playing-board>
         @if (gameSessionManager.isEliminated()) {
         <div class="spectator-panel">
             <h2>{{ 'game-page.spectating-title' | translate }}</h2>
@@ -26,6 +26,14 @@
             >
                 {{ 'game-page.action' | translate }}
             </button>
+
+            <button
+        (click)="toggleEmoteMenu()"
+        class="emote-menu-button"
+    >
+        {{ 'game-page.emotes' | translate }}
+    </button>
+
             <button
                 (click)="confirmEndTurn()"
                 [class.disabled]="isEndTurnButtonDisabled()"
