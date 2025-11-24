@@ -56,6 +56,10 @@ export class FightSubController {
             };
 
             this.sio.to(this.roomCode).emit(SocketClientEventNames.StartFight, ans);
+            this.gameSession.eventLogManager.emitStartAttackNotification(
+                this.gameSession.fight.attackingPlayer,
+                this.gameSession.fight.defendingPlayer,
+            );
         } catch {
             const ans: dataForm.StandardRes = genErrorMessage();
             this.sio.to(this.roomCode).emit(SocketClientEventNames.StartFight, ans);
@@ -106,6 +110,8 @@ export class FightSubController {
             };
 
             this.sio.to(this.roomCode).emit(SocketClientEventNames.ProcessAttack, ans);
+            this.gameSession.eventLogManager.emitAttackNotification(ans);
+
             if (defendingPlayer.attributes.healthValue <= 0) {
                 await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
                 await this.handleVictory();
@@ -149,6 +155,7 @@ export class FightSubController {
                 this.sio.to(this.roomCode).emit(SocketClientEventNames.ProcessEscapeAttempt, ans);
                 this.switchTurn();
             }
+            this.gameSession.eventLogManager.emitResultEscapeNotification(escapingPlayer, attempResult);
         } catch {
             const ans = genErrorMessage();
             this.sio.to(this.roomCode).emit(SocketClientEventNames.ProcessEscapeAttempt, ans);
@@ -217,7 +224,7 @@ export class FightSubController {
         }
         this.fightLoserName = defendingPlayer.name;
         this.fightWinnerName = attackingPlayer.name;
-        this.showEndFightNotification();
+        this.showEndFightNotification(attackingPlayer, defendingPlayer);
         this.gameSession.statisticsManager.updateDefeatAmount(defendingPlayer.userId);
 
         this.gameSession.registerVictory(attackingPlayer);
@@ -243,7 +250,7 @@ export class FightSubController {
         }
     }
 
-    private showEndFightNotification(): void {
+    private showEndFightNotification(winner: Player, loser: Player): void {
         const ans: dataForm.endFightNotification = {
             successful: true,
             message: '',
@@ -252,6 +259,8 @@ export class FightSubController {
         };
 
         this.sio.to(this.roomCode).emit(SocketClientEventNames.ShowEndFightNotification, ans);
+        this.gameSession.eventLogManager.emitEndFightNotification(winner, loser);
+        this.gameSession.eventLogManager.emitResultFightNotification(winner, loser);
     }
 
     private findLargestAmountOfEscapeAttempts(): number | undefined {

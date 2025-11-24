@@ -1,4 +1,4 @@
-import { GameEventType } from "./enums/game-event-type";
+import { GameEventType } from './enums/game-event-type';
 
 export interface GameEvent {
     message: string;
@@ -7,3 +7,9 @@ export interface GameEvent {
     player: string[];
 }
 
+export interface EventLog {
+    english: string;
+    french: string;
+    timestamp: string;
+    playerIds: string[];
+}

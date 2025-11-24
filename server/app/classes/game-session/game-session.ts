@@ -19,10 +19,13 @@ import { Item } from '@common/item';
 import { Player } from '@common/player';
 import { Position } from '@common/position';
 import { Tile } from '@common/tile';
+import * as io from 'socket.io';
+import { EventLogManager } from '../event-log-manager/event-log-manager';
 import { PlayerSlotManager } from '../player-slot-manager/player-slot-manager';
 export class GameSession {
     statisticsManager: StatisticsManager;
     playerSlotManager: PlayerSlotManager;
+    eventLogManager: EventLogManager;
 
     private players: DynamicPlayerList;
     private activePlayer: Player;
@@ -53,6 +56,7 @@ export class GameSession {
         private boardGame: BoardGame,
         gameId: string,
         isRapidElim: boolean,
+        sio: io.Server,
     ) {
         this.players = new DynamicPlayerList(isRapidElim);
         this.staticPlayerMap = new Map();
@@ -70,6 +74,7 @@ export class GameSession {
 
         const maxPlayers = PlayerLimits[this.boardGame.size].maxPlayers;
         this.playerSlotManager = new PlayerSlotManager(maxPlayers, gameService, gameId);
+        this.eventLogManager = new EventLogManager(sio, gameId);
     }
 
     get board(): BoardGame {

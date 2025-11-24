@@ -18,7 +18,9 @@ import { UsersService } from '@app/services/users/users.service';
 import { genErrorMessage, sendError } from '@app/utils/functions/socket-error-functions';
 import { CtfTeam } from '@common/enums/ctf-team';
 import { GameMode } from '@common/enums/game-mode';
+import { ItemName } from '@common/enums/item-name';
 import { SocketClientEventNames, SocketServerEventNames } from '@common/enums/socket-events-names';
+import { EventLog } from '@common/game-event';
 import { Item } from '@common/item';
 import { Player } from '@common/player';
 import { Position } from '@common/position';
@@ -72,6 +74,10 @@ export class GameSessionController {
         this.isPlayerMoving = newValue;
     }
 
+    getLogHistory(): EventLog[] {
+        return this.gameSession.eventLogManager.logs;
+    }
+
     setFightSubController(controller: FightSubController): void {
         this.fightSubController = controller;
     }
@@ -119,6 +125,11 @@ export class GameSessionController {
                 pickedItem,
             };
             this.sio.to(this.roomCode).emit(SocketClientEventNames.PickUpItem, ans);
+            if (pickedItem?.name === ItemName.Flag) {
+                this.gameSession.eventLogManager.emitFlagNotification(this.gameSession.activePlayerInstance);
+            } else {
+                this.gameSession.eventLogManager.emitItemNotification(this.gameSession.activePlayerInstance, pickedItem?.name);
+            }
         } catch {
             const ans: dataForm.StandardRes = genErrorMessage();
             this.sio.to(this.roomCode).emit(SocketClientEventNames.PickUpItem, ans);
@@ -156,7 +167,7 @@ export class GameSessionController {
         if (this.gameSession.listOfPlayers.getValues().length === 0) this.gameSession.endGame();
         if (!this.gameSession.gameStarted) return;
 
-        this.updateGame();
+        this.updateGame(player);
 
         if (this.gameSession.fight) {
             if (player.name === this.gameSession.fight.attackingPlayer.name || player.name === this.gameSession.fight.defendingPlayer.name) {
@@ -230,7 +241,7 @@ export class GameSessionController {
                 listOfPlayers: this.gameSession.listOfPlayers.getValues(),
                 eliminated: true,
             };
-            this.updateGame();
+            this.updateGame(player, true);
             return ans;
         }
 
@@ -242,7 +253,7 @@ export class GameSessionController {
             activePlayer: this.gameSession.activePlayerInstance,
             listOfPlayers: this.gameSession.listOfPlayers.getValues(),
         };
-        this.updateGame();
+        this.updateGame(player, true);
         return ans;
     }
 
@@ -285,6 +296,7 @@ export class GameSessionController {
             };
 
             this.sio.to(this.roomCode).emit(SocketClientEventNames.StartGame, ans);
+            this.gameSession.eventLogManager.emitTurnNotification(this.gameSession.activePlayerInstance);
         } catch {
             const ans: dataForm.StandardRes = genErrorMessage();
             this.sio.to(this.roomCode).emit(SocketClientEventNames.StartGame, ans);
@@ -357,6 +369,7 @@ export class GameSessionController {
             };
 
             this.sio.to(this.roomCode).emit(SocketClientEventNames.EndTurn, ans);
+            this.gameSession.eventLogManager.emitTurnNotification(this.gameSession.activePlayerInstance);
 
             this.clockManager.setTransitioning(true);
             this.changingTurn = false;
@@ -386,6 +399,7 @@ export class GameSessionController {
         };
 
         this.sio.to(this.roomCode).emit(SocketClientEventNames.ToggleDebugMode, ans);
+        this.gameSession.eventLogManager.emitToggleDebugModeNotification(this.gameSession.debugModeStatus);
     }
 
     async teleportPlayer(oldPosition: Position, newPosition: Position): Promise<void> {
@@ -410,6 +424,7 @@ export class GameSessionController {
 
     async endGame(winner?: Player): Promise<void> {
         console.log('Game ended. END GAME WAS CALLED. with the following winner ', winner ? JSON.stringify(winner, null, 2) : 'No winner');
+        const remainingPlayers = structuredClone(this.gameSession.listOfPlayers.getActivePlayers());
         this.gameSession.endGame();
         this.gameService.setGameEnded(this.roomCode);
         this.clockManager.stopClock();
@@ -460,9 +475,10 @@ export class GameSessionController {
         };
 
         this.sio.to(this.roomCode).emit(SocketClientEventNames.EndGame, ans);
+        this.gameSession.eventLogManager.emitEndNotification(remainingPlayers);
     }
 
-    private updateGame(): void {
+    private updateGame(player: Player, playerJoined: boolean = false): void {
         if (this.gameOver()) return;
         const ans: dataForm.UpdateGamedRes = {
             successful: true,
@@ -472,6 +488,11 @@ export class GameSessionController {
             listOfPlayers: this.gameSession.listOfPlayers.getValues(),
         };
         this.sio.to(this.roomCode).emit(SocketClientEventNames.UpdateGame, ans);
+        if (playerJoined) {
+            this.gameSession.eventLogManager.emitJoinNotification(player);
+        } else {
+            this.gameSession.eventLogManager.emitAbandonNotification(player);
+        }
     }
 
     private deactivateDebugMode(): void {
@@ -496,7 +517,7 @@ export class GameSessionController {
             this.gameSession.listOfPlayers.markEliminated(loser.userId);
             this.gameSession.playerSlotManager.markEliminated(loser.userId);
         }
-        this.showEndFightNotification();
+        this.showEndFightNotification(winner, loser);
         this.gameSession.registerVictory(winner);
         await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
         this.endFight();
@@ -521,7 +542,7 @@ export class GameSessionController {
         this.fightWinnerName = undefined;
     }
 
-    private showEndFightNotification(): void {
+    private showEndFightNotification(winner: Player, loser: Player): void {
         const ans: dataForm.endFightNotification = {
             successful: true,
             message: '',
@@ -529,6 +550,8 @@ export class GameSessionController {
             winnerName: this.fightWinnerName ?? '',
         };
         this.sio.to(this.roomCode).emit(SocketClientEventNames.ShowEndFightNotification, ans);
+        this.gameSession.eventLogManager.emitEndFightNotification(winner, loser);
+        this.gameSession.eventLogManager.emitResultFightNotification(winner, loser);
     }
 
     private async distributePrizes(winner: Player): Promise<void> {
