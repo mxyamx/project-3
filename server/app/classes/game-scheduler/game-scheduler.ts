@@ -148,6 +148,11 @@ export class GameScheduler {
             this.toggleDoorState(data.gameCode, data.doorPosition);
         });
 
+        socket.on(SocketServerEventNames.UseTeleporter, (data: dataForm.UseTeleporterReq) => {
+            this.checkController(data.gameCode, socket);
+            this.useTeleporter(data.gameCode, data.position, socket);
+        });
+
         socket.on(SocketServerEventNames.StartFight, (data: dataForm.StartFightReq) => {
             this.checkController(data.gameCode, socket);
             this.startFight(data.gameCode, data.targetPlayerPosition);
@@ -184,6 +189,14 @@ export class GameScheduler {
             this.checkController(data.gameCode, socket);
             this.dropItem(data.player, data.item, data.gameCode);
         });
+        socket.on(SocketServerEventNames.DepositTorch, (data: dataForm.DepositTorchReq) => {
+            this.checkController(data.gameCode, socket);
+            this.depositTorch(data.player, data.gameCode);
+        });
+        socket.on(SocketServerEventNames.HandleTrap, (data: dataForm.HandleTrapChoice) => {
+            this.checkController(data.gameCode, socket);
+            this.handleTrapChoice(data.gameCode, data);
+        });
         socket.on(SocketServerEventNames.GetActivePlayer, (data: dataForm.GetActivePlayerReq) => {
             this.checkController(data.gameCode, socket);
             this.getActivePlayer(data.gameCode);
@@ -207,10 +220,24 @@ export class GameScheduler {
         });
     }
 
+    private depositTorch(player: Player, gameId: string): void {
+        const controller: GameSessionController = this.gameMap.get(gameId);
+        if (controller) {
+            controller.depositTorch(player);
+        }
+    }
+
     private getActivePlayer(gameId: string) {
         const controller: GameSessionController = this.gameMap.get(gameId);
         if (controller) {
             controller.getActivePlayer();
+        }
+    }
+
+    private useTeleporter(gameId: string, position: Position, socket: io.Socket): void {
+        const controller: GameSessionController = this.gameMap.get(gameId);
+        if (controller) {
+            controller.useTeleporter(position, socket);
         }
     }
 
@@ -324,6 +351,12 @@ export class GameScheduler {
         const controller: GameSessionController = this.gameMap.get(gameId);
         if (controller) {
             controller.dropItem(player, item);
+        }
+    }
+    private handleTrapChoice(gameId: string, choice: dataForm.HandleTrapChoice): void {
+        const controller: GameSessionController = this.gameMap.get(gameId);
+        if (controller) {
+            controller.handleTrapChoice(choice);
         }
     }
 }

@@ -1,5 +1,6 @@
 import { ItemName } from '@common/enums/item-name';
 import { Player } from '@common/player';
+import { Tile } from '@common/tile';
 
 export class ItemEffectApplicator {
     applyEffect(player: Player, item: string) {
@@ -37,6 +38,56 @@ export class ItemEffectApplicator {
                 break;
             default:
                 break;
+        }
+    }
+
+    /**
+     * Apply illumination bonus if player is on illuminated tile
+     * Grants +1 attack and +1 defense
+     */
+    applyIlluminationBonus(player: Player, tiles: Tile[][]): void {
+        if (!player.position) return;
+
+        const pos = player.position;
+        const isIlluminated = tiles[pos.x]?.[pos.y]?.isIlluminated;
+
+        if (isIlluminated && !player.hasIlluminationBonus) {
+            player.attributes.attackValue += 1;
+            player.attributes.defenseValue += 1;
+            player.hasIlluminationBonus = true;
+        }
+    }
+
+    /**
+     * Remove illumination bonus from player
+     */
+    removeIlluminationBonus(player: Player): void {
+        if (player.hasIlluminationBonus) {
+            player.attributes.attackValue -= 1;
+            player.attributes.defenseValue -= 1;
+            player.hasIlluminationBonus = false;
+        }
+    }
+
+    /**
+     * Update illumination bonuses for all players based on board state
+     * Should be called after any board or player position changes
+     */
+    updateAllIlluminationBonuses(players: Player[], tiles: Tile[][]): void {
+        for (const player of players) {
+            if (!player.position) continue;
+
+            const pos = player.position;
+            const isIlluminated = tiles[pos.x]?.[pos.y]?.isIlluminated ?? false;
+
+            // Apply bonus if on illuminated tile and doesn't have it yet
+            if (isIlluminated && !player.hasIlluminationBonus) {
+                this.applyIlluminationBonus(player, tiles);
+            }
+            // Remove bonus if not on illuminated tile but still has it
+            else if (!isIlluminated && player.hasIlluminationBonus) {
+                this.removeIlluminationBonus(player);
+            }
         }
     }
 

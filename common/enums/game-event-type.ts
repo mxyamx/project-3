@@ -10,4 +10,5 @@ export enum GameEventType {
     DoorState = '🚪',
     PickUpItem = '➕📦',
     JoinGame = '🔥',
+    Trap = '⚠️',
 }

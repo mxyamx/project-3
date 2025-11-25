@@ -17,4 +17,7 @@ export interface Tile {
     shortestDistanceFromPosition?: Position[];
     availableAction?: Action;
     position?: Position;
+    teleportPairId?: string;
+    teleportTarget?: Position;
+    isIlluminated?: boolean;
 }

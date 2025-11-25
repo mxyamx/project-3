@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { ChatMessage } from '@common/chat-message';
 import { CurrentGame, CurrentGamePreview, JoinGameAck } from '@common/current-game';
-import { SocketClientEventNames, SocketEventNames } from '@common/enums/socket-events-names';
+import { SocketClientEventNames, SocketEventNames, SocketServerEventNames } from '@common/enums/socket-events-names';
 import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
 import { EventLog } from '@common/game-event';
 import { Player } from '@common/player';
@@ -208,6 +208,13 @@ export class PlayerSocketService {
         this.clientSocketService.on<EventLog>('combat-log-sent', (data: EventLog) => {
             callback(data);
         });
+    }
+    emitDepositTorch(gameCode: string, player: Player, callback?: (response: unknown) => void): void {
+        if (callback) {
+            this.clientSocketService.emit(SocketServerEventNames.DepositTorch, { gameCode, player }, callback);
+        } else {
+            this.clientSocketService.send(SocketServerEventNames.DepositTorch, { gameCode, player });
+        }
     }
 
     unsubscribeChat(): void {

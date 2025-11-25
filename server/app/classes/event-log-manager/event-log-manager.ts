@@ -21,6 +21,7 @@ export class EventLogManager {
         [ItemName.RandomItem, 'Pierre de Résurrection'],
         [ItemName.StartingPoint, 'Point de Départ'],
         [ItemName.Flag, 'Drapeau'],
+        [ItemName.Torch, 'Torche'],
     ]);
 
     private itemNamesEN: Map<string, string> = new Map([
@@ -33,6 +34,7 @@ export class EventLogManager {
         [ItemName.RandomItem, 'Resurrection Stone'],
         [ItemName.StartingPoint, 'Starting Point'],
         [ItemName.Flag, 'Flag'],
+        [ItemName.Torch, 'Torch'],
     ]);
 
     private logSentSocketEventName: string = 'log-sent';
@@ -261,5 +263,55 @@ export class EventLogManager {
         };
 
         this.sio.to(this.combatRoomCode).emit('combat-log-sent', log);
+    }
+
+    emitTrapNotification(data: dataForm.TrapResolvedData) {
+        if (!data) {
+            return;
+        }
+        const playerName = data.activePlayer.name;
+        const now = new Date();
+
+        let message: string;
+        let messageEN: string;
+
+        if (data.avoided) {
+            message = `${playerName} a évité le piège (-3 points de mouvement)`;
+            messageEN = `${playerName} avoided the trap (-3 movement points)`;
+        } else if (data.trapActivated) {
+            message = `${playerName} a tenté de traverser le piège... ⚠️ LE PIÈGE S'EST ACTIVÉ! Son tour est terminé.`;
+            messageEN = `${playerName} tried to cross the trap... ⚠️ THE TRAP HAS BEEN ACTIVATED! Their turn is over.`;
+        } else {
+            message = `${playerName} a tenté de traverser le piège et a réussi! (-1 point de mouvement)`;
+            messageEN = message = `${playerName} attempted to cross the trap and succeeded! (-1 movement point)`;
+        }
+
+        const log: EventLog = {
+            french: message,
+            english: messageEN,
+            timestamp: now.toISOString(),
+            playerIds: [data.activePlayer.userId],
+            type: GameEventType.Trap,
+        };
+        this.logs.push(log);
+        this.sio.to(this.roomCode).emit(this.logSentSocketEventName, log);
+    }
+
+    emitDepositTorchNotificationWithPosition(data: dataForm.DepositTorchRes): void {
+        if (!data) {
+            return;
+        }
+        const now = new Date();
+        const position = data.depositedPosition;
+
+        const log: EventLog = {
+            french: `${data.activePlayer.name} a déposé une torche à la position (${position.x}, ${position.y})`,
+            english: `${data.activePlayer.name} dropped a torch at position (${position.x}, ${position.y})`,
+            timestamp: now.toISOString(),
+            playerIds: [data.activePlayer.userId],
+            type: GameEventType.PickUpItem,
+        };
+        this.logs.push(log);
+        this.sio.to(this.roomCode).emit(this.logSentSocketEventName, log);
     }
 }

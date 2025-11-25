@@ -17,6 +17,7 @@ import { PlayerStateManagerService } from '@app/services/player-state-manager/pl
 import { BoardGame } from '@common/board-game';
 import { EmoteType } from '@common/enums/emote-type';
 import { GameMode } from '@common/enums/game-mode';
+import { ItemName } from '@common/enums/item-name';
 import { ItemType } from '@common/enums/item-type';
 import { PlayerState } from '@common/enums/player-state';
 import { SocketServerEventNames } from '@common/enums/socket-events-names';
@@ -25,6 +26,7 @@ import { Item } from '@common/item';
 import { Player } from '@common/player';
 import { Position } from '@common/position';
 import * as dataForm from '@common/socket-data-forms';
+import { PlayerSocketService } from '../player-socket/player-socket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -87,6 +89,7 @@ export class GameSessionManagerService {
     private fightSystemManager: FightSystemManagerService = inject(FightSystemManagerService);
     private movementSystemManager: MovementSystemManagerService = inject(MovementSystemManagerService);
     private _leavingGame: WritableSignal<boolean> = signal(false);
+    private playerSocket = inject(PlayerSocketService);
 
     constructor() {
         this.playerState = this.playerStateManager.playerState.asReadonly();
@@ -299,6 +302,10 @@ export class GameSessionManagerService {
         this.movementSystemManager.toggleDoorState(doorPosition, this.gameId());
     }
 
+    executeTeleport(position: Position): void {
+        this.movementSystemManager.useTeleporter(position, this.gameId());
+    }
+
     attackPlayer(): void {
         if (this.playerState() !== PlayerState.Attacking) return;
         if (!this.canExecuteAttack()) return;
@@ -445,6 +452,41 @@ export class GameSessionManagerService {
         this.canDropItem.set(false);
     }
 
+    depositTorch(): void {
+        console.log('🔥 CLIENT: depositTorch() called');
+        if (this.chosenPlayer().name !== this.activePlayer().name) {
+            console.log('❌ Not active player');
+            return;
+        }
+
+        const hasTorch = this.chosenPlayer().inventory?.some((item) => item.name === ItemName.Torch);
+        if (!hasTorch) {
+            console.log('❌ No torch');
+            return;
+        }
+
+        const position = this.chosenPlayer().position;
+        if (!position) {
+            console.log('❌ No position');
+            return;
+        }
+
+        const tile = this.boardGameManager.playingBoardGame().tiles[position.x][position.y];
+        const validTileTypes = [TileType.Grass, TileType.Water, TileType.Ice];
+
+        if (!validTileTypes.includes(tile.type)) {
+            console.log('❌ Invalid tile type:', tile.type);
+            return;
+        }
+
+        if (tile.containedItem) {
+            console.log('❌ Tile has item');
+            return;
+        }
+
+        console.log('✅ All checks passed, calling emitDepositTorch');
+        this.playerSocket.emitDepositTorch(this.gameId(), this.chosenPlayer());
+    }
     private updateDisplayedPlayerList(newList: Player[]): void {
         // const oldList: Player[] = structuredClone(this.displayedPlayerList());
         // const newDisplayed: Player[] = newList;
