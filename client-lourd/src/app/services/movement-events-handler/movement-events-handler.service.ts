@@ -69,15 +69,18 @@ export class MovementEventsHandlerService {
                 return;
             }
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
-            this.gameSessionManager.updateBoardGame(data.boardGame);
-            this.gameSessionManager.updateChosenPlayer(data.activePlayer);
 
-            if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
+            this.gameSessionManager.updateBoardGame(data.boardGame);
+
+            if (this.gameSessionManager.playerState() === PlayerState.OpeningDoor) {
+                this.gameSessionManager.updateChosenPlayer(data.activePlayer);
                 this.gameSessionManager.changeState(PlayerState.WaitingForAction);
                 if (this.gameSessionManager.shouldChangeTurn()) {
                     this.gameSessionManager.endTurn();
                 }
+                //this.gameEventService.showLogToggleDoorNotification(data);
             }
+            this.gameSessionManager.updateCanToggleDoor(true);
         });
     }
 
