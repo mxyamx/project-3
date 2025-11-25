@@ -1,4 +1,3 @@
-
 export enum GameEventType {
     StartTurn = '⏳',
     StartFight = '⚔️',
@@ -9,5 +8,6 @@ export enum GameEventType {
     DebugMode = '🛠️',
     AbandonGame = '🏳️',
     DoorState = '🚪',
-    PickUpItem = '➕📦',  
+    PickUpItem = '➕📦',
+    JoinGame = '🔥',
 }

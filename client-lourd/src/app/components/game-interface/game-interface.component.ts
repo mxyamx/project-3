@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { CountdownComponent } from '@app/components/countdown/countdown.component';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { PlayerComponent } from '@app/components/player/player.component';
 import { DiceService } from '@app/services/dice/dice.service';
 import { GameInterfaceService } from '@app/services/game-interface/game-interface.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
+import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { PlayerState } from '@common/enums/player-state';
 import { Player } from '@common/player';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -32,9 +33,12 @@ export class GameInterfaceComponent implements OnInit, OnDestroy {
     attackingPlayer: Player;
     subscriptions: Subscription[] = [];
     gameSessionManager = inject(GameSessionManagerService);
+
+    @Input() gameId: string = '';
     private diceService = inject(DiceService);
     private gameInterfaceService = inject(GameInterfaceService);
     private changeDetectorRef: ChangeDetectorRef;
+    private playerSocket: PlayerSocketService = inject(PlayerSocketService);
 
     constructor(changeDetectorRef: ChangeDetectorRef) {
         this.changeDetectorRef = changeDetectorRef;
@@ -46,6 +50,7 @@ export class GameInterfaceComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.playerSocket.emitJoinCombatLogRoom(this.gameId);
         this.subscriptions.push(
             this.diceService.diceValue$.subscribe((value) => {
                 this.currentDiceValue = value;
@@ -70,6 +75,7 @@ export class GameInterfaceComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.subscriptions.forEach((sub) => sub.unsubscribe());
+        this.playerSocket.emitLeaveCombatLogRoom(this.gameId);
     }
 
     onAttack() {

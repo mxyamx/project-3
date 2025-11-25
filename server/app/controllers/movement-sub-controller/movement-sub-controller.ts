@@ -54,6 +54,7 @@ export class MovementSubController {
                 doorState,
             };
             this.sio.to(this.roomCode).emit(SocketClientEventNames.ToggleDoorState, ans);
+            this.gameSession.eventLogManager.emitToggleDoorNotification(this.gameSession.activePlayerInstance, doorState);
         } catch {
             const ans: dataForm.StandardRes = genErrorMessage();
             this.sio.to(this.roomCode).emit(SocketClientEventNames.ToggleDoorState, ans);

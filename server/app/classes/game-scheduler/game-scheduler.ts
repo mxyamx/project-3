@@ -35,7 +35,7 @@ export class GameScheduler {
 
     createGame(game: CurrentGame): void {
         const newBoard: BoardGame = game.boardGame;
-        const newGameSession: GameSession = new GameSession(this.gameService, newBoard, game.id, game.isRapidElim);
+        const newGameSession: GameSession = new GameSession(this.gameService, newBoard, game.id, game.isRapidElim, this.sio);
         const newClockManager: GameClockManager = new GameClockManager(newGameSession, this.sio, game.id);
 
         const usersService = Container.get(UsersService);
@@ -187,6 +187,23 @@ export class GameScheduler {
         socket.on(SocketServerEventNames.GetActivePlayer, (data: dataForm.GetActivePlayerReq) => {
             this.checkController(data.gameCode, socket);
             this.getActivePlayer(data.gameCode);
+        });
+
+        socket.on('join-room-log', async (gameId: string, callback) => {
+            const controller: GameSessionController = this.gameMap.get(gameId);
+            if (!controller) {
+                callback([]);
+                return;
+            }
+            callback(controller.getLogHistory());
+        });
+
+        socket.on('join-combat-log', async (gameId: string) => {
+            console.log(`Player joining -> room`);
+            socket.join(`COMBAT-${gameId}`);
+        });
+        socket.on('leave-combat-log', async (gameId: string) => {
+            socket.leave(`COMBAT-${gameId}`);
         });
     }
 

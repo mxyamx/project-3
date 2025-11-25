@@ -20,7 +20,6 @@ import { CurrentGame, CurrentGamePhase, JoinGameAck } from '@common/current-game
 import { DiceBonus } from '@common/enums/dice-bonus';
 import { SocketClientEventNames } from '@common/enums/socket-events-names';
 import { UrlPage } from '@common/enums/url-page';
-import { GameEvent } from '@common/game-event';
 import { Player } from '@common/player';
 import { UpdateGamedRes } from '@common/socket-data-forms';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -276,9 +275,6 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
             });
             if (newChosenPlayer) this.gameSessionManager.updateChosenPlayer(newChosenPlayer);
         }
-        this.playerSocketService.onChangeLog((gameEvent: GameEvent) => {
-            this.gameEventService.addLog(gameEvent);
-        });
     }
     private refreshUserData(): void {
         const userId = this.userManagerService.getCurrentUser().id;

@@ -13,7 +13,6 @@ import {
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { CombatNotificationService } from '@app/services/combat-notification/combat-notification.service';
 import { FightEventsHandlerService } from '@app/services/fight-events-handler/fight-events-handler.service';
-import { GameEventService } from '@app/services/game-event/game-event.service';
 import { GameInterfaceService } from '@app/services/game-interface/game-interface.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { MovementEventsHandlerService } from '@app/services/movement-events-handler/movement-events-handler.service';
@@ -39,7 +38,6 @@ export class GameSocketEventService {
     private statisticsService: StatisticsManagerService = inject(StatisticsManagerService);
     private currentGamesService: CurrentGameManagerService = inject(CurrentGameManagerService);
     private limitOfItems: number = MAXIMUM_AMOUNT_OF_ITEM;
-    private gameEventService: GameEventService = inject(GameEventService);
     gameEnding: boolean = false;
 
     configureBaseSocket(router: Router): void {
@@ -59,7 +57,6 @@ export class GameSocketEventService {
             this.handlePickUpItem();
             this.handleDropItem();
             this.handlePlayerEmote();
-
         }
     }
 
@@ -80,9 +77,6 @@ export class GameSocketEventService {
             this.notificationService.showTurnTransition();
             this.gameSessionManager.changeState(PlayerState.Transitioning);
             if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
-                if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
-                    this.gameEventService.showLogTurnNotification();
-                }
                 if (!data.activePlayer.virtualPlayer) {
                     this.gameSessionManager.updateChosenPlayer(data.activePlayer);
                 }
@@ -168,9 +162,7 @@ export class GameSocketEventService {
             this.gameSessionManager.changeState(PlayerState.EndGame);
             this.hideNotifications();
 
-            setTimeout(() => {
-                this.gameEventService.showLogEndNotification();
-            }, 0);
+            setTimeout(() => {}, 0);
 
             setTimeout(
                 () => {
@@ -210,9 +202,6 @@ export class GameSocketEventService {
             if (this.gameSessionManager.playerState() === PlayerState.WaitingForAction) {
                 this.gameSessionManager.changeState(PlayerState.WaitingForAction);
             }
-            if (this.gameSessionManager.listOfPlayers.length !== this.gameEventService.numberOfPlayersInit) {
-                this.gameEventService.showLogAbandonNotification(data.activePlayer);
-            }
         });
     }
 
@@ -226,8 +215,6 @@ export class GameSocketEventService {
             if (data.winnerName && data.loserName) {
                 if (data.winnerName === chosenPlayerName) {
                     this.notificationService.showVictoryNotification();
-                    this.gameEventService.showLogEndFightNotification(data);
-                    this.gameEventService.showLogResultFightNotification(data);
                 } else if (data.loserName === chosenPlayerName) {
                     this.notificationService.showDefeatNotification();
                 }
@@ -288,11 +275,6 @@ export class GameSocketEventService {
                 }
 
                 this.checkInventoryLimit();
-                if (data.pickedItem?.name === ItemName.Flag) {
-                    this.gameEventService.showLogFlagNotification(data);
-                } else {
-                    this.gameEventService.showLogItemNotification(data);
-                }
             }
         });
     }
@@ -358,28 +340,27 @@ export class GameSocketEventService {
     }
 
     private handlePlayerEmote(): void {
-    this.socketManager.on('player-emote', (data: any) => {
-        console.log('📡 [handlePlayerEmote] Event reçu !');
-        console.log('   Data:', data);
+        this.socketManager.on('player-emote', (data: any) => {
+            console.log('📡 [handlePlayerEmote] Event reçu !');
+            console.log('   Data:', data);
 
-        if (!data.successful) {
-            console.log('   ❌ Event non successful');
-            return;
-        }
+            if (!data.successful) {
+                console.log('   ❌ Event non successful');
+                return;
+            }
 
-        const { playerId, emote } = data;
-        console.log('   ✅ playerId:', playerId);
-        console.log('   ✅ emote:', emote);
+            const { playerId, emote } = data;
+            console.log('   ✅ playerId:', playerId);
+            console.log('   ✅ emote:', emote);
 
-        console.log('   Appel de setPlayerEmote...');
-        this.gameSessionManager.setPlayerEmote(playerId, emote);
+            console.log('   Appel de setPlayerEmote...');
+            this.gameSessionManager.setPlayerEmote(playerId, emote);
 
-        console.log('   ⏱️  Timer de 10s démarré pour retirer l\'emote');
-        setTimeout(() => {
-            console.log('   ⏱️  Timer expiré - Retrait de l\'emote');
-            this.gameSessionManager.setPlayerEmote(playerId, null);
-        }, 10000);
-    });
-}
-
+            console.log("   ⏱️  Timer de 10s démarré pour retirer l'emote");
+            setTimeout(() => {
+                console.log("   ⏱️  Timer expiré - Retrait de l'emote");
+                this.gameSessionManager.setPlayerEmote(playerId, null);
+            }, 10000);
+        });
+    }
 }

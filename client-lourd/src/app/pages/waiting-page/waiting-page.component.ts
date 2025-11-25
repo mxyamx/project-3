@@ -23,7 +23,6 @@ import { PlayerLimits } from '@common/enums/players-limit';
 import { SocketClientEventNames } from '@common/enums/socket-events-names';
 import { UrlPage } from '@common/enums/url-page';
 import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
-import { GameEvent } from '@common/game-event';
 import { Player } from '@common/player';
 import * as socketDataForm from '@common/socket-data-forms';
 import { User, UserStatusInfo } from '@common/user';
@@ -258,15 +257,9 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
                     return player.name === this.gameSessionManager.chosenPlayer().name;
                 });
                 if (newChosenPlayer) this.gameSessionManager.updateChosenPlayer(newChosenPlayer);
-                if (data.activePlayer.name === this.gameSessionManager.chosenPlayer().name) {
-                    this.gameEventService.showFirstTurnNotification(data);
-                }
             } else {
                 this.router.navigate([UrlPage.Error]);
             }
-            this.playerSocketService.onChangeLog((gameEvent: GameEvent) => {
-                this.gameEventService.addLog(gameEvent);
-            });
         });
 
         this.socketManager.on(SocketClientEventNames.ServerError, () => {

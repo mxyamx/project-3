@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { CombatNotificationComponent } from '@app/components/combat-notification/combat-notification/combat-notification.component';
@@ -11,6 +11,7 @@ import { PlayerInfoComponent } from '@app/components/player-info/player-info.com
 import { PlayingBoardComponent } from '@app/components/playing-board/playing-board.component';
 import { ChatService } from '@app/services/chat/chat.service';
 import { CombatNotificationService } from '@app/services/combat-notification/combat-notification.service';
+import { GameEventService } from '@app/services/game-event/game-event.service';
 import { GameInterfaceService } from '@app/services/game-interface/game-interface.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { GameSocketEventService } from '@app/services/game-socket-event/game-socket-event.service';
@@ -19,6 +20,7 @@ import { UserStatusService } from '@app/services/user-status/user-status.service
 import { GameActivityStatus } from '@common/enums/game-activity-status';
 import { PlayerState } from '@common/enums/player-state';
 import { UrlPage } from '@common/enums/url-page';
+import { EventLog } from '@common/game-event';
 import { Player } from '@common/player';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
@@ -51,6 +53,7 @@ export class GameComponent implements OnInit, OnDestroy {
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     chatService = inject(ChatService);
     gameIdCopy: string = '';
+    @ViewChild(EventLogComponent) logComponent!: EventLogComponent;
     private router: Router;
     private subscription: Subscription;
     private gameSocketEventManager: GameSocketEventService = inject(GameSocketEventService);
@@ -58,6 +61,7 @@ export class GameComponent implements OnInit, OnDestroy {
     private notificationService: CombatNotificationService = inject(CombatNotificationService);
     private gameInterfaceService: GameInterfaceService = inject(GameInterfaceService);
     private userStatusService: UserStatusService = inject(UserStatusService);
+    private gameEventService = inject(GameEventService);
 
     constructor() {
         this.router = new Router();
@@ -81,6 +85,28 @@ export class GameComponent implements OnInit, OnDestroy {
         this.gameSocketEventManager.gameEnding = false;
         this.subscription = this.gameInterfaceService.isInterfaceVisible$.subscribe((isVisible) => {
             this.showGameInterface = isVisible;
+        });
+        this.playerSocketService.onChangeLog((event: EventLog) => {
+            this.gameEventService.addLog(event);
+            if (this.showChat && !this.chatService.chatDetache()) {
+                return;
+            }
+            this.logComponent.bottom();
+        });
+        this.playerSocketService.onCombatLog((gameEvent: EventLog) => {
+            this.gameEventService.addLog(gameEvent);
+            if (this.showChat && !this.chatService.chatDetache()) {
+                return;
+            }
+            this.logComponent.bottom();
+        });
+        this.playerSocketService.emitJoinLogRoom(this.gameSessionManager.gameId(), (response: EventLog[]) => {
+            this.gameEventService.setLogs(response);
+            if (this.showChat && !this.chatService.chatDetache()) {
+                return;
+            }
+            this.logComponent.bottom();
+            return;
         });
 
         this.playerSocketService.onPlayerLeft((player: Player) => {
@@ -131,20 +157,18 @@ export class GameComponent implements OnInit, OnDestroy {
     cancelEndTurn() {
         this.showEndTurnConfirmation = false;
     }
-toggleEmoteMenu() {
-    console.log('🎯 [GameComponent] toggleEmoteMenu appelé');
-    console.log('   Valeur actuelle:', this.showEmoteMenuForPlayer);
-    
-    
-    this.showEmoteMenuForPlayer = true;
-    console.log('   Nouvelle valeur:', this.showEmoteMenuForPlayer);
-    
-    
-    setTimeout(() => {
-        this.showEmoteMenuForPlayer = false;
-        console.log('   Valeur réinitialisée à false');
-    }, 100);
-}
+    toggleEmoteMenu() {
+        console.log('🎯 [GameComponent] toggleEmoteMenu appelé');
+        console.log('   Valeur actuelle:', this.showEmoteMenuForPlayer);
+
+        this.showEmoteMenuForPlayer = true;
+        console.log('   Nouvelle valeur:', this.showEmoteMenuForPlayer);
+
+        setTimeout(() => {
+            this.showEmoteMenuForPlayer = false;
+            console.log('   Valeur réinitialisée à false');
+        }, 100);
+    }
 
     onCLickEndTurn() {
         this.showEndTurnConfirmation = false;

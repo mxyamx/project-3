@@ -243,6 +243,13 @@
         "players": "Joueurs",
         "team": "Équipe",
         "victories": "Victoires",
+        "notifications": {
+            "victory": "Félicitations ! Vous avez gagné",
+            "loser": "Vous êtes nul ! Vous avez perdu",
+            "turn": "C'est le tour de : {{ name }}",
+            "winner": "Le grand vainqueur est : {{ name }}",
+            "game-over": "Fin de partie, Tous les joueurs sont partis!"
+        },
         "combat": {
             "remaining-escape-attemps": "Tentatives d'évasion restantes",
             "attack-dice": "Dé d'attaque",

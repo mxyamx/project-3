@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CombatNotification, CombatNotificationService } from '@app/services/combat-notification/combat-notification.service';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-combat-notification',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, TranslatePipe],
     templateUrl: './combat-notification.component.html',
     styleUrl: './combat-notification.component.scss',
 })

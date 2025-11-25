@@ -9,6 +9,7 @@ import {
 import { GameInterfaceService } from '@app/services/game-interface/game-interface.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { PlayerState } from '@common/enums/player-state';
+import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface CombatNotification {
@@ -24,7 +25,7 @@ export interface CombatNotification {
 })
 export class CombatNotificationService {
     notifications$: Observable<CombatNotification[]>;
-
+    private translate: TranslateService = inject(TranslateService);
     private gameSessionManagerService = inject(GameSessionManagerService);
     private gameInterfaceService = inject(GameInterfaceService);
     private notificationsSubject = new BehaviorSubject<CombatNotification[]>([]);
@@ -42,7 +43,7 @@ export class CombatNotificationService {
     showVictoryNotification() {
         this.addNotification({
             id: COMBAT_NOTIFICATION_ID,
-            message: 'Félicitations ! Vous avez gagné',
+            message: 'game-page.notifications.victory',
             icon: 'fas fa-trophy',
             type: 'victory',
             isVisible: true,
@@ -55,7 +56,7 @@ export class CombatNotificationService {
     showDefeatNotification() {
         this.addNotification({
             id: COMBAT_NOTIFICATION_ID,
-            message: 'Vous êtes nul ! Vous avez perdu',
+            message: 'game-page.notifications.loser',
             icon: 'fas fa-skull',
             type: 'defeat',
             isVisible: true,
@@ -71,10 +72,9 @@ export class CombatNotificationService {
         }
 
         const playerName = this.gameSessionManagerService.activePlayer().name;
-        //TODO: add translation for message
         this.addNotification({
             id: TURN_NOTIFICATION_ID,
-            message: `C'est le tour de : ${playerName}`,
+            message: this.translate.instant('game-page.notifications.turn', { name: playerName }),
             icon: 'fas fa-user-clock',
             type: 'turnTransition',
             isVisible: true,
@@ -83,7 +83,9 @@ export class CombatNotificationService {
     }
 
     showGameOverNotification(winnerName?: string) {
-        const message = winnerName?.trim() ? `Le grand vainqueur est : ${winnerName}` : 'Fin de partie, Tous les joueurs sont partis!';
+        const message = winnerName?.trim()
+            ? this.translate.instant('game-page.notifications.winner', { name: winnerName })
+            : 'game-page.notifications.game-over';
 
         this.addNotification({
             id: COMBAT_NOTIFICATION_ID,

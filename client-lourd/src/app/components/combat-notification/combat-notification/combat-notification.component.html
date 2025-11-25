@@ -3,8 +3,7 @@
     <div class="notification-item" [ngClass]="notification.position || 'top'">
         <div class="notification-content" [ngClass]="notification.type">
             <i [class]="notification.icon"></i>
-            <!-- TODO add translation -->
-            <p>{{ notification.message }}</p>
+            <p>{{ notification.message | translate }}</p>
         </div>
     </div>
     } }
