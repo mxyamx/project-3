@@ -24,4 +24,5 @@ export interface Player {
     startPosition?: Position;
     currentEmote?: EmoteType | null;
     eliminated: boolean;
+    hasIlluminationBonus?: boolean;
 }

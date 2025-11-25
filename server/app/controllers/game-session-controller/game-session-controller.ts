@@ -20,6 +20,7 @@ import { CtfTeam } from '@common/enums/ctf-team';
 import { GameMode } from '@common/enums/game-mode';
 import { ItemName } from '@common/enums/item-name';
 import { SocketClientEventNames, SocketServerEventNames } from '@common/enums/socket-events-names';
+import { TileType } from '@common/enums/tile-type';
 import { EventLog } from '@common/game-event';
 import { Item } from '@common/item';
 import { Player } from '@common/player';
@@ -157,6 +158,11 @@ export class GameSessionController {
         }
     }
 
+    handleTrapChoice(choice: dataForm.HandleTrapChoice): void {
+        if (this.gameOver()) return;
+        this.movementSubController.handleTrapChoice(choice);
+    }
+
     async removePlayer(player: Player): Promise<void> {
         console.log('remove player');
         if (this.gameSession.gameOver) return;
@@ -261,17 +267,27 @@ export class GameSessionController {
         if (this.gameSession.gameOver) return;
         let index = 0;
         const positions = path;
+        let trapEncountered = false;
 
         const interval = setInterval(async () => {
             const itemIsBlocking = this.gameSession.validItemPresent(positions[index]) && index > 0;
-            if (index < positions.length - 1 && socket.connected && !itemIsBlocking && !this.gameSession.ctfIsOver()) {
+            if (index < positions.length - 1 && socket.connected && !itemIsBlocking && !this.gameSession.ctfIsOver() && !trapEncountered) {
                 this.movementSubController.movePlayer(positions[index], positions[index + 1], isMovingToItem);
+
+                // Check if this tile has a trap - if so, stop movement
+                const currentTile = this.gameSession.board.tiles[positions[index + 1].x][positions[index + 1].y];
+                if (currentTile.type === TileType.Trap) {
+                    trapEncountered = true;
+                }
+
                 this.playerMoving = true;
                 ++index;
             } else {
                 clearInterval(interval);
                 this.playerMoving = false;
-                this.endMovement();
+                if (!trapEncountered) {
+                    this.endMovement();
+                }
                 if (this.gameSession.ctfIsOver()) {
                     await delay(WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC);
                     this.winnerTeam = this.gameSession.activePlayerInstance.ctfTeam;
@@ -413,8 +429,85 @@ export class GameSessionController {
         }
     }
 
+    useTeleporter(position: Position, socket: io.Socket): void {
+        if (this.gameOver()) return;
+
+        try {
+            const activePlayer = this.gameSession.activePlayerInstance;
+
+            // Check if it's the player's turn
+            if (activePlayer.socketId !== socket.id) {
+                sendError('Not your turn', this.sio, this.roomCode);
+                return;
+            }
+
+            // Execute teleportation (this moves the player AND updates their speed)
+            const result = this.gameSession.useTeleporter(position);
+
+            if (!result.success) {
+                sendError(result.message || 'Teleport failed', this.sio, this.roomCode);
+                return;
+            }
+
+            // Update statistics AFTER teleportation (using updated position)
+            this.gameSession.statisticsManager.updatePlayerTilePercentage(
+                this.gameSession.activePlayerInstance.userId,
+                this.gameSession.activePlayerInstance.position,
+            );
+
+            // Get FRESH references after teleportation
+            const ans: dataForm.UpdateGamedRes = {
+                successful: true,
+                message: 'Teleport successful',
+                boardGame: this.gameSession.board,
+                activePlayer: this.gameSession.activePlayerInstance, // Fresh reference
+                listOfPlayers: this.gameSession.listOfPlayers.getValues(), // Fresh list
+            };
+
+            // FIX: Only emit Teleport event, NOT both Teleport and UpdateGame
+            this.sio.to(this.roomCode).emit(SocketClientEventNames.Teleport, ans);
+
+            // REMOVED: this.sio.to(this.roomCode).emit(SocketClientEventNames.UpdateGame, ans);
+            // The double emission was causing the client to process teleportation twice
+        } catch (error) {
+            console.error('Error in useTeleporter:', error);
+            const ans: dataForm.StandardRes = genErrorMessage();
+            this.sio.to(this.roomCode).emit(SocketClientEventNames.Teleport, ans);
+            sendError(STANDARD_ERROR_MESSAGE, this.sio, this.roomCode);
+        }
+    }
+
     hasGameStarted(): boolean {
         return this.gameSession.gameStarted;
+    }
+
+    depositTorch(player: Player): void {
+        console.log('🔥 SERVER: depositTorch called for player:', player.name);
+        if (this.gameSession.gameOver) return;
+        try {
+            const depositPosition = { ...player.position };
+            console.log('🔥 SERVER: About to call gameSession.depositTorch');
+            this.gameSession.depositTorch(player);
+            console.log('🔥 SERVER: gameSession.depositTorch succeeded');
+
+            const ans: dataForm.DepositTorchRes = {
+                successful: true,
+                message: 'Torch deposited successfully',
+                boardGame: this.gameSession.board,
+                listOfPlayers: this.gameSession.listOfPlayers.getValues(),
+                activePlayer: this.gameSession.activePlayerInstance,
+                depositedPosition: depositPosition,
+            };
+            console.log('🔥 SERVER: About to emit response');
+            this.sio.to(this.roomCode).emit(SocketClientEventNames.DepositTorch, ans);
+            this.gameSession.eventLogManager.emitDepositTorchNotificationWithPosition(ans);
+            console.log('🔥 SERVER: Response emitted');
+        } catch (error) {
+            console.error('🔥 SERVER ERROR:', error);
+            const ans: dataForm.StandardRes = genErrorMessage();
+            this.sio.to(this.roomCode).emit(SocketClientEventNames.DepositTorch, ans);
+            sendError((error as Error).message || STANDARD_ERROR_MESSAGE, this.sio, this.roomCode);
+        }
     }
 
     private endFight(): void {

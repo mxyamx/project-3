@@ -15,7 +15,9 @@
             "door": "porte",
             "water": "eau",
             "ice": "glace",
-            "grass": "gazon"
+            "grass": "gazon",
+            "teleportation": "téléportation",
+            "trap": "piège"
         },
 
         "item": {
@@ -28,7 +30,8 @@
                 "game-editor-2": "Retourneur de Temps",
                 "random-item": "Pierre de Résurrection",
                 "starting-point": "Point de Départ",
-                "flag": "Drapeau"
+                "flag": "Drapeau",
+                "torch": "Torche"
             },
             "type": {
                 "attribute-editor-1": "Modificateur d'attributs",
@@ -39,7 +42,8 @@
                 "game-editor-2": "Modificateur de jeu",
                 "random-item": "Aléatoire",
                 "starting-point": "C'est la position initiale de chaque joueur",
-                "flag": "Disponible uniquement en mode CTF"
+                "flag": "Disponible uniquement en mode CTF",
+                "torch": "Utilitaire"
             },
             "effect": {
                 "attribute-editor-1": "Donne +1 Vitesse et +1 Attaque",
@@ -50,7 +54,8 @@
                 "game-editor-2": "Donne 2 actions possibles par tour",
                 "random-item": "Non spécifique",
                 "starting-point": "",
-                "flag": "Ramenez-le à votre point de départ pour faire gagner votre équipe"
+                "flag": "Ramenez-le à votre point de départ pour faire gagner votre équipe",
+                "torch": "+1 aux attributs Attaque et Défense."
             }
         },
 
@@ -59,7 +64,8 @@
             "door": "- Nom: Porte.\n - Tuile de terrain ? Non.\n - Coût du déplacement: 1.\n Une porte ne peut être traversée que si elle est ouverte.\n",
             "water": "- Nom: Eau.\n - Tuile de terrain ? Oui.\n - Coût du déplacement: 2.\n Les déplacements sont plus difficiles dans l'eau.\n",
             "ice": "- Nom: Glace.\n - Tuile de terrain ? Oui.\n - Coût du déplacement: Aucun.\n Il est facile d'avancer sur la glace.\n",
-            "grass": "- Nom: Gazon.\n - Tuile de terrain ? Oui.\n - Coût du déplacement: 1.\n Une surface normale de terrain.\n"
+            "grass": "- Nom: Gazon.\n - Tuile de terrain ? Oui.\n - Coût du déplacement: 1.\n Une surface normale de terrain.\n",
+            "teleportation": "- Nom: Téléportation.\n - Tuile de terrain ? Oui.\n - Coût du déplacement: Aucun.\n Téléporte vers une autre tuile de téléportation.\n"
         },
         "game-mode": {
             "normal": "Normal",
@@ -86,7 +92,8 @@
         "action-type": {
             "open-door": "Ouvrir la porte",
             "close-door": "Fermer la porte",
-            "attack-player": "Attaquer le joueur"
+            "attack-player": "Attaquer le joueur",
+            "teleport": "Utiliser le téléporteur"
         },
         "game-privacy": {
             "public": "Public",
@@ -264,6 +271,7 @@
             }
         },
         "inventory": "Inventaire",
+        "deposit-torch": "Déposer la torche",
         "playing-board": {
             "type": "type",
             "cost": "coût",

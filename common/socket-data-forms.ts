@@ -43,6 +43,7 @@ export interface MovePlayer extends StandardRes {
     listOfPlayers: Player[];
     activePlayer: Player;
     isMovingToItem?: boolean;
+    hasTrap?: boolean;
 }
 
 export interface ChangeActivePlayer {
@@ -59,6 +60,11 @@ export interface ToggleDoorStateRes extends StandardRes {
     activePlayer: Player;
     doorPosition: Position;
     doorState: boolean;
+}
+
+export interface UseTeleporterReq {
+    gameCode: string;
+    position: Position;
 }
 
 export interface StartFightReq extends StandardReq {
@@ -208,6 +214,18 @@ export interface DropItemRes extends StandardRes {
     activePlayer: Player;
     droppedItem?: Item;
 }
+
+export interface DepositTorchReq extends StandardReq {
+    player: Player;
+}
+
+export interface DepositTorchRes extends StandardRes {
+    boardGame: BoardGame;
+    listOfPlayers: Player[];
+    activePlayer: Player;
+    depositedPosition: Position;
+}
+
 export interface GetGameStateReq extends StandardReq {}
 
 export interface GetGameStateRes extends StandardRes {
@@ -244,4 +262,22 @@ export interface GameEventLog {
 export interface CombatLog {
     gameId: string;
     playerName: string;
+}
+
+export interface TrapEncounteredData extends StandardRes {
+    trapPosition: Position;
+    playerMovementPoints: number;
+}
+
+export interface TrapResolvedData extends StandardRes {
+    trapActivated: boolean;
+    avoided: boolean;
+    turnEnded: boolean;
+    boardGame: BoardGame;
+    listOfPlayers: Player[];
+    activePlayer: Player;
+}
+
+export interface HandleTrapChoice extends StandardReq {
+    avoid: boolean;
 }

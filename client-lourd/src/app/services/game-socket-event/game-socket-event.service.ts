@@ -23,6 +23,7 @@ import { SocketClientEventNames } from '@common/enums/socket-events-names';
 import { UrlPage } from '@common/enums/url-page';
 import * as dataForm from '@common/socket-data-forms';
 import { CurrentGameManagerService } from '../current-game-manager/current-game-manager.service';
+import { TorchIlluminationService } from '../torch-illumination/torch-illumination.service';
 
 @Injectable({
     providedIn: 'root',
@@ -37,7 +38,9 @@ export class GameSocketEventService {
     private gameInterfaceService: GameInterfaceService = inject(GameInterfaceService);
     private statisticsService: StatisticsManagerService = inject(StatisticsManagerService);
     private currentGamesService: CurrentGameManagerService = inject(CurrentGameManagerService);
+    private torchIlluminationService: TorchIlluminationService = inject(TorchIlluminationService);
     private limitOfItems: number = MAXIMUM_AMOUNT_OF_ITEM;
+
     gameEnding: boolean = false;
 
     configureBaseSocket(router: Router): void {
@@ -57,6 +60,7 @@ export class GameSocketEventService {
             this.handlePickUpItem();
             this.handleDropItem();
             this.handlePlayerEmote();
+            this.handleDepositTorch();
         }
     }
 
@@ -188,7 +192,6 @@ export class GameSocketEventService {
             }, ENDGAME_COOL_DOWN_MSEC);
         });
     }
-
     private handleUpdateGame(): void {
         this.socketManager.on(SocketClientEventNames.UpdateGame, (data: dataForm.UpdateGamedRes) => {
             if (!data.successful) {
@@ -204,7 +207,6 @@ export class GameSocketEventService {
             }
         });
     }
-
     private handleEndFightNotification(): void {
         this.socketManager.on(SocketClientEventNames.ShowEndFightNotification, (data: dataForm.endFightNotification) => {
             if (!data.successful) {
@@ -263,6 +265,10 @@ export class GameSocketEventService {
             this.gameSessionManager.updateBoardGame(data.boardGame);
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
 
+            // Refresh illumination using the data we just received
+            this.torchIlluminationService.updateBoardIllumination(data.boardGame.tiles, data.listOfPlayers);
+            this.gameSessionManager.updateBoardGame(data.boardGame); // This triggers the UI update
+
             this.gameSessionManager.updateCanPickUpItem(true);
 
             if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
@@ -295,6 +301,10 @@ export class GameSocketEventService {
             this.gameSessionManager.updateBoardGame(data.boardGame);
             this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
 
+            // Refresh illumination using the data we just received
+            this.torchIlluminationService.updateBoardIllumination(data.boardGame.tiles, data.listOfPlayers);
+            this.gameSessionManager.updateBoardGame(data.boardGame); // This triggers the UI update
+
             this.gameSessionManager.updateCanDropItem(true);
 
             if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
@@ -313,7 +323,6 @@ export class GameSocketEventService {
             }
         });
     }
-
     private checkInventoryLimit() {
         const inventory = this.gameSessionManager.chosenPlayer().inventory;
         if (inventory && inventory.length >= this.limitOfItems) {
@@ -361,6 +370,23 @@ export class GameSocketEventService {
                 console.log("   ⏱️  Timer expiré - Retrait de l'emote");
                 this.gameSessionManager.setPlayerEmote(playerId, null);
             }, 10000);
+        });
+    }
+    private handleDepositTorch(): void {
+        this.socketManager.on(SocketClientEventNames.DepositTorch, (data: dataForm.DepositTorchRes) => {
+            if (!data.successful) {
+                console.error('Torch deposit failed:', data.message);
+                return;
+            }
+
+            this.gameSessionManager.updateBoardGame(data.boardGame);
+            this.gameSessionManager.updatePlayersInfos(data.listOfPlayers, data.activePlayer);
+            this.torchIlluminationService.updateBoardIllumination(data.boardGame.tiles, data.listOfPlayers);
+
+            // Only update state and log for the active player
+            if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.activePlayer().name) {
+                this.gameSessionManager.changeState(PlayerState.WaitingForAction);
+            }
         });
     }
 }

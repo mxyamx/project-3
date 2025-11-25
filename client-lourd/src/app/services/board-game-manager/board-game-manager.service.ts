@@ -1,4 +1,4 @@
-import { Injectable, signal, WritableSignal } from '@angular/core';
+import { inject, Injectable, signal, WritableSignal } from '@angular/core';
 import {
     FROM_ITEM_NAME_TO_DESCRIPTION,
     FROM_ITEM_NAME_TO_TYPE,
@@ -17,11 +17,14 @@ import { TileType } from '@common/enums/tile-type';
 import { Item } from '@common/item';
 import { ItemInfoContainer } from '@common/item-info-container';
 import { Tile } from '@common/tile';
+import { TorchIlluminationService } from '../torch-illumination/torch-illumination.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class BoardGameManagerService {
+    private torchIlluminationService = inject(TorchIlluminationService);
+
     editedBoardGame: WritableSignal<BoardGame> = signal({
         id: '',
         name: '',
@@ -113,11 +116,21 @@ export class BoardGameManagerService {
     updateTile(xPosition: number, yPosition: number, newTile: Tile, playingPage?: boolean) {
         const newTiles: Tile[][] = this.editedBoardGame().tiles;
         newTiles[xPosition][yPosition] = newTile;
+
+        // ADD: Update illumination
+        this.torchIlluminationService.updateBoardIllumination(newTiles);
+
         if (playingPage) {
             this.playingBoardGame.update((curr) => ({ ...curr, tiles: structuredClone(newTiles) }));
         } else {
             this.editedBoardGame.update((curr) => ({ ...curr, tiles: structuredClone(newTiles) }));
         }
+    }
+
+    refreshIllumination(): void {
+        const tiles = this.editedBoardGame().tiles;
+        this.torchIlluminationService.updateBoardIllumination(tiles);
+        this.editedBoardGame.update((curr) => ({ ...curr, tiles: structuredClone(tiles) }));
     }
 
     getBoardGame(): BoardGame {

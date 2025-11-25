@@ -1,0 +1,36 @@
+<div class="trap-popup-overlay" *ngIf="showTrapPopup">
+    <div class="trap-popup">
+        <div class="trap-icon">⚠️</div>
+        <h2>Piège Détecté!</h2>
+        <p class="trap-description">
+            Vous êtes tombé sur un piège! Vous avez <strong>{{ playerMovementPoints }}</strong> points de mouvement restants.
+        </p>
+
+        <div class="trap-options">
+            <div class="option-card" [class.disabled]="!canAvoidTrap">
+                <div class="option-header">
+                    <span class="option-icon">🛡️</span>
+                    <span class="option-title">Éviter le piège</span>
+                </div>
+                <p class="option-description">Contournez le piège en toute sécurité</p>
+                <p class="option-cost">Coût: <strong>3 points de mouvement</strong></p>
+                <button class="trap-button avoid" (click)="chooseTrapOption(true)" [disabled]="!canAvoidTrap">Éviter (3 pts)</button>
+            </div>
+
+            <div class="option-card">
+                <div class="option-header">
+                    <span class="option-icon">🎲</span>
+                    <span class="option-title">Traverser le piège</span>
+                </div>
+                <p class="option-description">Tentez de traverser (50% de chance d'activation)</p>
+                <p class="option-cost">Coût: <strong>1 point de mouvement</strong></p>
+                <p class="option-risk">⚠️ Si activé, votre tour se termine</p>
+                <button class="trap-button attempt" (click)="chooseTrapOption(false)">Tenter (1 pt)</button>
+            </div>
+        </div>
+
+        <div class="insufficient-points" *ngIf="!canAvoidTrap">
+            <p>⚠️ Vous n'avez pas assez de points de mouvement pour éviter le piège!</p>
+        </div>
+    </div>
+</div>

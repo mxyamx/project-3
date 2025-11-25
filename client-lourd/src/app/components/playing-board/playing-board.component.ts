@@ -1,14 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Signal, Input} from '@angular/core';
+
+import { AfterViewInit, Component, effect, inject, Input, Signal, ViewChild } from '@angular/core';
 import { PlayingBoardCanvasComponent } from '@app/components/playing-board-canvas/playing-board-canvas.component';
 import { PlayingTileComponent } from '@app/components/playing-tile/playing-tile.component';
-import { FROM_ITEM_NAME_TO_VP_PREFERENCE, FROM_ITEM_TO_IMAGE_ON_BOARD, RIGHT_CLICK } from '@app/constants/objects-constants';
+import { FROM_ITEM_NAME_TO_VP_PREFERENCE, FROM_ITEM_TO_IMAGE_ON_BOARD, RIGHT_CLICK, TORCH_ASSETS } from '@app/constants/objects-constants';
 import { BoardGameManagerService } from '@app/services/board-game-manager/board-game-manager.service';
 import { CanvasManagerService } from '@app/services/canvas-manager/canvas-manager.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
+import { GameplayTeleportationHelperService } from '@app/services/gameplay-teleportation-helper/gameplay-teleportation-helper.service';
+import { MovementEventsHandlerService } from '@app/services/movement-events-handler/movement-events-handler.service';
 import { restrictEvent } from '@app/utils/functions/dom-related-functions';
 import { BoardGame } from '@common/board-game';
 import { ActionType } from '@common/enums/action-type';
+import { ItemName } from '@common/enums/item-name';
 import { PlayerState } from '@common/enums/player-state';
 import { TileType } from '@common/enums/tile-type';
 import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
@@ -19,19 +23,22 @@ import { Position } from '@common/position';
 import { Tile } from '@common/tile';
 import { VirtualPlayer } from '@common/virtual-player';
 import { TranslatePipe } from '@ngx-translate/core';
+import { TrapPopupComponent } from '../trap-popup/trap-popup.component';
 @Component({
     selector: 'app-playing-board',
-    imports: [CommonModule, PlayingTileComponent, PlayingBoardCanvasComponent, TranslatePipe],
+    imports: [CommonModule, PlayingTileComponent, PlayingBoardCanvasComponent, TranslatePipe, TrapPopupComponent],
     templateUrl: './playing-board.component.html',
     styleUrl: './playing-board.component.scss',
 })
-export class PlayingBoardComponent {
+export class PlayingBoardComponent implements AfterViewInit {
+    @ViewChild(TrapPopupComponent) trapPopup?: TrapPopupComponent;
+
     boardgame: Signal<BoardGame>;
     selectedTile: Tile | undefined = { type: TileType.Grass };
     showInfoNotification: boolean = false;
-       private _showEmoteMenuForPlayer = false;
+    private _showEmoteMenuForPlayer = false;
 
-    @Input() 
+    @Input()
     set showEmoteMenuForPlayer(value: boolean) {
         console.log('📥 [PlayingBoard] showEmoteMenuForPlayer reçu:', value);
         console.log('   Joueur actuel:', this.gameSessionManager.chosenPlayer()?.name);
@@ -47,10 +54,25 @@ export class PlayingBoardComponent {
     private boardManager: BoardGameManagerService = inject(BoardGameManagerService);
     private gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     private canvasManager: CanvasManagerService = inject(CanvasManagerService);
+    private teleportHelper: GameplayTeleportationHelperService = inject(GameplayTeleportationHelperService);
+    private movementEventsHandler: MovementEventsHandlerService = inject(MovementEventsHandlerService);
     private itemImageCorrespondance: { [key: string]: string } = FROM_ITEM_TO_IMAGE_ON_BOARD;
 
     constructor() {
         this.boardgame = this.boardManager.playingBoardGame.asReadonly();
+        effect(() => {
+            const board = this.boardgame();
+            if (board && board.tiles) {
+                this.teleportHelper.initializeFromTiles(board.tiles);
+            }
+        });
+    }
+
+    ngAfterViewInit(): void {
+        // Connect the trap popup to the movement events handler
+        if (this.trapPopup) {
+            this.movementEventsHandler.trapPopupComponent = this.trapPopup;
+        }
     }
 
     get imageCorrespondance(): { [key: string]: string } {
@@ -119,6 +141,10 @@ export class PlayingBoardComponent {
                     this.gameSessionManager.startAttack(tile.position ?? { x: 0, y: 0 });
                     break;
                 }
+                case ActionType.Teleport: {
+                    this.gameSessionManager.executeTeleport(this.gameSessionManager.activePlayer().position ?? { x: 0, y: 0 });
+                    break;
+                }
                 default:
                     return;
             }
@@ -148,6 +174,33 @@ export class PlayingBoardComponent {
         if (event.button === RIGHT_CLICK) event.preventDefault();
     }
 
+    getItemImage(itemName: string): string {
+        // Special handling for torch - check if player is on water/ice
+        if (itemName === ItemName.Torch) {
+            const player = this.gameSessionManager.chosenPlayer();
+            if (player && player.position) {
+                // Access tiles through boardGameManager
+                const tiles = this.boardManager.playingBoardGame().tiles;
+                const pos = player.position;
+
+                // Check if position is valid
+                if (pos.x >= 0 && pos.x < tiles.length && pos.y >= 0 && pos.y < tiles[0].length) {
+                    const tileType = tiles[pos.x][pos.y].type;
+
+                    // If player is on water or ice, show extinguished torch
+                    if (tileType === TileType.Water || tileType === TileType.Ice) {
+                        return TORCH_ASSETS.extinguished;
+                    }
+                }
+            }
+            // Otherwise show lit torch
+            return TORCH_ASSETS.lit;
+        }
+
+        // For all other items, use the standard mapping
+        return FROM_ITEM_TO_IMAGE_ON_BOARD[itemName];
+    }
+
     protected isAggressive(player: Player): boolean {
         if (player.virtualPlayer) {
             return (player as VirtualPlayer).profile === VirtualPlayerProfile.Agressive;
@@ -162,6 +215,8 @@ export class PlayingBoardComponent {
             case TileType.Water:
                 return 2;
             case TileType.Grass:
+            case TileType.Teleportation:
+            case TileType.Trap:
                 return 1;
             case TileType.Door:
                 if (tile.doorState) return 1;
