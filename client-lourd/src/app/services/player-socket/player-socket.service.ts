@@ -4,7 +4,7 @@ import { ChatMessage } from '@common/chat-message';
 import { CurrentGame, CurrentGamePreview, JoinGameAck } from '@common/current-game';
 import { SocketClientEventNames, SocketEventNames } from '@common/enums/socket-events-names';
 import { VirtualPlayerProfile } from '@common/enums/virtual-player-profile';
-import { GameEvent } from '@common/game-event';
+import { EventLog } from '@common/game-event';
 import { Player } from '@common/player';
 import { AuthentificationService } from '../authentification/authentification.service';
 
@@ -187,33 +187,25 @@ export class PlayerSocketService {
         this.clientSocketService.emit('add-virtual-player', { gameId, profile });
     }
 
-    emitJoinLogRoom(gameId: string): void {
-        this.clientSocketService.emit('join-room-log', gameId);
+    emitJoinLogRoom(gameId: string, callback: (response: EventLog[]) => void): void {
+        this.clientSocketService.emit('join-room-log', gameId, callback);
     }
 
-    emitLog(gameId: string, gameEvent: GameEvent, callback?: (response: unknown) => void): void {
-        this.clientSocketService.emit('change-turn-log', { gameId, gameEvent }, callback);
-    }
-
-    onChangeLog(callback: (gameEvent: GameEvent) => void): void {
-        this.clientSocketService.on<GameEvent>('change-turn-log-sent', (data: GameEvent) => {
+    onChangeLog(callback: (gameEvent: EventLog) => void): void {
+        this.clientSocketService.on<EventLog>('log-sent', (data: EventLog) => {
             callback(data);
         });
     }
 
-    emitJoinCombatLogRoom(gameId: string, playerNames: string[]): void {
-        //TODO: should a eliminated player see the game
-        playerNames.forEach((playerName) => {
-            this.clientSocketService.emit('join-combat-log', { gameId, playerName });
-        });
+    emitJoinCombatLogRoom(gameId: string): void {
+        this.clientSocketService.emit('join-combat-log', gameId);
+    }
+    emitLeaveCombatLogRoom(gameId: string): void {
+        this.clientSocketService.emit('leave-combat-log', gameId);
     }
 
-    emitCombatLog(gameId: string, gameEvent: GameEvent, callback?: (response: unknown) => void): void {
-        this.clientSocketService.emit('combat-log', { gameId, gameEvent }, callback);
-    }
-
-    onCombatLog(callback: (gameEvent: GameEvent) => void): void {
-        this.clientSocketService.on<GameEvent>('combat-log-sent', (data: GameEvent) => {
+    onCombatLog(callback: (gameEvent: EventLog) => void): void {
+        this.clientSocketService.on<EventLog>('combat-log-sent', (data: EventLog) => {
             callback(data);
         });
     }
@@ -262,5 +254,7 @@ export class PlayerSocketService {
         this.clientSocketService.off(SocketClientEventNames.ToggleDoorState);
         this.clientSocketService.off(SocketClientEventNames.Teleport);
         this.clientSocketService.off('drop-in-updated');
+        this.clientSocketService.off('log-sent');
+        this.clientSocketService.off('combat-log-sent');
     }
 }

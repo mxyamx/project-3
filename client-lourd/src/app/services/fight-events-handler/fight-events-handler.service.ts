@@ -7,10 +7,8 @@ import {
 } from '@app/constants/development-constants';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { DiceService } from '@app/services/dice/dice.service';
-import { GameEventService } from '@app/services/game-event/game-event.service';
 import { GameInterfaceService } from '@app/services/game-interface/game-interface.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
-import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { GameMode } from '@common/enums/game-mode';
 import { PlayerState } from '@common/enums/player-state';
 import { SocketClientEventNames } from '@common/enums/socket-events-names';
@@ -24,10 +22,8 @@ import { SfxService } from '../sound/sound.service';
 export class FightEventsHandlerService {
     private gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     private socketManager: SocketClientService = inject(SocketClientService);
-    private playerSocket: PlayerSocketService = inject(PlayerSocketService);
     private gameInterfaceService: GameInterfaceService = inject(GameInterfaceService);
     private diceService: DiceService = inject(DiceService);
-    private gameEventService: GameEventService = inject(GameEventService);
     private sfxService: SfxService = inject(SfxService);
 
     configureBaseSocket(): void {
@@ -76,10 +72,6 @@ export class FightEventsHandlerService {
 
             this.diceService.setAttackDiceValue(data.attackDice ?? 0);
             this.diceService.setDefenseDiceValue(data.defenseDice ?? 0);
-            const isCurrentPlayerAttacker = data.attackingPlayer.name === this.gameSessionManager.chosenPlayer().name;
-            if (isCurrentPlayerAttacker) {
-                this.gameEventService.showLogAttackNotification(data);
-            }
 
             if (data.attackSoundEffect) {
                 this.sfxService.playById(data.attackSoundEffect);
@@ -113,21 +105,12 @@ export class FightEventsHandlerService {
 
     private handleEscapeAttempt(): void {
         this.socketManager.on(SocketClientEventNames.ProcessEscapeAttempt, (data: dataForm.EscapeAttemptRes) => {
-            const playerNames = [data.defenderPlayer, data.escapingPlayer]
-                .filter((player): player is Player => player !== undefined)
-                .map((player) => player.name);
-
-            this.playerSocket.emitJoinCombatLogRoom(this.gameSessionManager.gameId(), playerNames);
-
             if (!data.successful) {
                 return;
             }
 
             if (data.message.includes('escaped')) {
                 this.gameInterfaceService.hideInterface();
-            }
-            if (this.gameSessionManager.activePlayer().name === this.gameSessionManager.chosenPlayer().name) {
-                this.gameEventService.showResultEscapeNotification(data);
             }
             this.gameSessionManager.updateLargestAmountOfEscape(data.largestAmountOfEScapeAttempts ?? 0);
         });
@@ -167,7 +150,6 @@ export class FightEventsHandlerService {
             this.gameSessionManager.isEliminated()
         ) {
             this.gameSessionManager.changeState(PlayerState.Attacking);
-            this.gameEventService.showLogStartAttackNotification(data);
             this.gameInterfaceService.showInterface();
         } else if (this.gameSessionManager.chosenPlayer().name === this.gameSessionManager.defendingPlayer().name) {
             this.gameSessionManager.changeState(PlayerState.Defending);

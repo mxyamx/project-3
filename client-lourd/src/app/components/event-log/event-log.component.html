@@ -10,9 +10,12 @@
         @for (event of gameEventService.filteredEvents; track event.timestamp) {
         <div class="event-item" [ngClass]="event.type">
             <span class="event-icon">{{ event.type }}</span>
-            <!-- TODO add log translation -->
-            <span class="event-message"><p [innerHTML]="replaceNewlines(event.message)"></p></span>
-            <span class="event-time">{{ event.timestamp | date: 'HH:mm:ss' }}</span>
+            @if(userManager.currentUser().parameters.language ==='en'){
+            <span class="event-message"><p [innerHTML]="replaceNewlines(event.english)"></p></span>
+            } @else {
+            <span class="event-message"><p [innerHTML]="replaceNewlines(event.french)"></p></span>
+            }
+            <span class="event-time">{{ event.timestamp | date: 'HH:mm:ss' : 'America/Toronto' }}</span>
         </div>
         }
     </div>

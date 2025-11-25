@@ -57,8 +57,8 @@ export class FightSubController {
 
             this.sio.to(this.roomCode).emit(SocketClientEventNames.StartFight, ans);
             this.gameSession.eventLogManager.emitStartAttackNotification(
-                this.gameSession.fight.attackingPlayer,
-                this.gameSession.fight.defendingPlayer,
+                this.gameSession.activePlayerInstance,
+                this.gameSession.board.tiles[targetPlayerPosition.x][targetPlayerPosition.y].containedPlayer,
             );
         } catch {
             const ans: dataForm.StandardRes = genErrorMessage();

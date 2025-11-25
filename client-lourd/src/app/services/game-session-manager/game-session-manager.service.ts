@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { Injectable, Injector, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { Injectable, Signal, WritableSignal, inject, signal } from '@angular/core';
 import {
     EMPTY_CODE,
     INITIAL_AMOUNT_OF_ACTION,
@@ -12,11 +12,10 @@ import { ActionDetectorService } from '@app/services/action-detector/action-dete
 import { BoardGameManagerService } from '@app/services/board-game-manager/board-game-manager.service';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
 import { FightSystemManagerService } from '@app/services/fight-system-manager/fight-system-manager.service';
-import { GameEventService } from '@app/services/game-event/game-event.service';
 import { MovementSystemManagerService } from '@app/services/movement-system-manager/movement-system-manager.service';
-import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { PlayerStateManagerService } from '@app/services/player-state-manager/player-state-manager.service';
 import { BoardGame } from '@common/board-game';
+import { EmoteType } from '@common/enums/emote-type';
 import { GameMode } from '@common/enums/game-mode';
 import { ItemType } from '@common/enums/item-type';
 import { PlayerState } from '@common/enums/player-state';
@@ -26,7 +25,6 @@ import { Item } from '@common/item';
 import { Player } from '@common/player';
 import { Position } from '@common/position';
 import * as dataForm from '@common/socket-data-forms';
-import { EmoteType } from '@common/enums/emote-type';
 
 @Injectable({
     providedIn: 'root',
@@ -89,10 +87,8 @@ export class GameSessionManagerService {
     private fightSystemManager: FightSystemManagerService = inject(FightSystemManagerService);
     private movementSystemManager: MovementSystemManagerService = inject(MovementSystemManagerService);
     private _leavingGame: WritableSignal<boolean> = signal(false);
-    private playerSocket: PlayerSocketService = inject(PlayerSocketService);
-    private _gameEventService?: GameEventService;
 
-    constructor(private injector: Injector) {
+    constructor() {
         this.playerState = this.playerStateManager.playerState.asReadonly();
         this.actionActivated = this.actionDetector.actionActivated.asReadonly();
         this.switchingTurn = false;
@@ -103,13 +99,6 @@ export class GameSessionManagerService {
     }
     get gameMode(): GameMode {
         return this.boardGameManager.playingBoardGame().gameMode;
-    }
-
-    private get gameEventService(): GameEventService {
-        if (!this._gameEventService) {
-            this._gameEventService = this.injector.get(GameEventService);
-        }
-        return this._gameEventService;
     }
 
     updateChangeDisplayAttackClock(newValue: boolean): void {
@@ -163,51 +152,46 @@ export class GameSessionManagerService {
     updateListOfPlayers(newPlayers: Player[]): void {
         this.listOfPlayers.set(newPlayers);
         this.updateDisplayedPlayerList(structuredClone(newPlayers));
-         this.updateBoardGamePlayers(newPlayers);
+        this.updateBoardGamePlayers(newPlayers);
         if (this.listOfPlayers().length < 2) {
             this.changeState(PlayerState.EndGame);
         }
     }
 
-private updateBoardGamePlayers(players: Player[]): void {
-    console.log('🎮 [updateBoardGamePlayers] START');
-    const currentBoard = this.boardGameManager.playingBoardGame();
-    
-    let updatedCount = 0;
-    
-   
-    for (let x = 0; x < currentBoard.tiles.length; x++) {
-        for (let y = 0; y < currentBoard.tiles[x].length; y++) {
-            const tile = currentBoard.tiles[x][y];
-            
-            if (tile.containedPlayer) {
-                console.log(`   📍 Tuile [${x},${y}] contient joueur:`, tile.containedPlayer.name);
-                console.log('      Emote AVANT:', tile.containedPlayer.currentEmote);
-                
-                
-                const updatedPlayer = players.find(p => p.userId === tile.containedPlayer?.userId);
-                
-                if (updatedPlayer) {
-                    console.log('      ✅ Joueur trouvé dans la liste:', updatedPlayer.name);
-                    console.log('      Emote APRÈS:', updatedPlayer.currentEmote);
-                    
-                  
-                    tile.containedPlayer = updatedPlayer;
-                    updatedCount++;
-                } else {
-                    console.log('      ❌ Joueur NON trouvé dans la liste !');
+    private updateBoardGamePlayers(players: Player[]): void {
+        console.log('🎮 [updateBoardGamePlayers] START');
+        const currentBoard = this.boardGameManager.playingBoardGame();
+
+        let updatedCount = 0;
+
+        for (let x = 0; x < currentBoard.tiles.length; x++) {
+            for (let y = 0; y < currentBoard.tiles[x].length; y++) {
+                const tile = currentBoard.tiles[x][y];
+
+                if (tile.containedPlayer) {
+                    console.log(`   📍 Tuile [${x},${y}] contient joueur:`, tile.containedPlayer.name);
+                    console.log('      Emote AVANT:', tile.containedPlayer.currentEmote);
+
+                    const updatedPlayer = players.find((p) => p.userId === tile.containedPlayer?.userId);
+
+                    if (updatedPlayer) {
+                        console.log('      ✅ Joueur trouvé dans la liste:', updatedPlayer.name);
+                        console.log('      Emote APRÈS:', updatedPlayer.currentEmote);
+
+                        tile.containedPlayer = updatedPlayer;
+                        updatedCount++;
+                    } else {
+                        console.log('      ❌ Joueur NON trouvé dans la liste !');
+                    }
                 }
             }
         }
-    }
-    
-    console.log(`   Total joueurs mis à jour: ${updatedCount}`);
-    
-  
-    this.boardGameManager.updateDisplayedBoardGame(currentBoard, true);
-    console.log('🎮 [updateBoardGamePlayers] END');
-}
 
+        console.log(`   Total joueurs mis à jour: ${updatedCount}`);
+
+        this.boardGameManager.updateDisplayedBoardGame(currentBoard, true);
+        console.log('🎮 [updateBoardGamePlayers] END');
+    }
 
     isCurrentPlayer(player: Player): boolean {
         return this.chosenPlayer().name === player.name;
@@ -271,7 +255,6 @@ private updateBoardGamePlayers(players: Player[]): void {
         };
         this.socketManager.send(SocketServerEventNames.ToggleDebugMode, data);
         this.updateCanToggleDebugMode(false);
-        this.gameEventService.showToggleDebugModeNotification();
     }
 
     init(): void {
@@ -317,9 +300,6 @@ private updateBoardGamePlayers(players: Player[]): void {
     }
 
     attackPlayer(): void {
-        const playerNames = [this.defendingPlayer().name, this.attackingPlayer().name];
-        this.playerSocket.emitJoinCombatLogRoom(this.gameId(), playerNames);
-
         if (this.playerState() !== PlayerState.Attacking) return;
         if (!this.canExecuteAttack()) return;
         if (this.defendingPlayer().attributes.healthValue === 0) return;
@@ -521,37 +501,34 @@ private updateBoardGamePlayers(players: Player[]): void {
         this.changeDisplayAttackClock.set(false);
     }
     sendEmote(emote: EmoteType) {
-    const payload = {
-        gameId: this.gameId(),
-        playerId: this.chosenPlayer().userId,
-        emote,
-    };
+        const payload = {
+            gameId: this.gameId(),
+            playerId: this.chosenPlayer().userId,
+            emote,
+        };
 
-    this.socketManager.send('player-emote', payload);
-}
-setPlayerEmote(playerId: string, emote: EmoteType | null) {
-    console.log('🎯 [setPlayerEmote] START');
-    console.log('   playerId:', playerId);
-    console.log('   emote:', emote);
+        this.socketManager.send('player-emote', payload);
+    }
+    setPlayerEmote(playerId: string, emote: EmoteType | null) {
+        console.log('🎯 [setPlayerEmote] START');
+        console.log('   playerId:', playerId);
+        console.log('   emote:', emote);
 
-    const players = this.listOfPlayers();
-    console.log('   Nombre de joueurs dans la liste:', players.length);
+        const players = this.listOfPlayers();
+        console.log('   Nombre de joueurs dans la liste:', players.length);
 
-    
-    const updatedPlayers = players.map(p => {
-        if (p.userId === playerId) {
-            console.log('   ✅ Joueur trouvé:', p.name);
-            console.log('   Emote AVANT:', p.currentEmote);
-            console.log('   Emote APRÈS:', emote);
-            return { ...p, currentEmote: emote };
-        }
-        return p;
-    });
+        const updatedPlayers = players.map((p) => {
+            if (p.userId === playerId) {
+                console.log('   ✅ Joueur trouvé:', p.name);
+                console.log('   Emote AVANT:', p.currentEmote);
+                console.log('   Emote APRÈS:', emote);
+                return { ...p, currentEmote: emote };
+            }
+            return p;
+        });
 
-    console.log('   Appel de updateListOfPlayers...');
-    this.updateListOfPlayers(updatedPlayers);
-    console.log('🎯 [setPlayerEmote] END');
-}
-
-
+        console.log('   Appel de updateListOfPlayers...');
+        this.updateListOfPlayers(updatedPlayers);
+        console.log('🎯 [setPlayerEmote] END');
+    }
 }

@@ -27,12 +27,9 @@
                 {{ 'game-page.action' | translate }}
             </button>
 
-            <button
-        (click)="toggleEmoteMenu()"
-        class="emote-menu-button"
-    >
-        {{ 'game-page.emotes' | translate }}
-    </button>
+            <button (click)="toggleEmoteMenu()" class="emote-menu-button">
+                {{ 'game-page.emotes' | translate }}
+            </button>
 
             <button
                 (click)="confirmEndTurn()"
@@ -58,11 +55,11 @@
             </button>
         </div>
         <app-game-info [gameId]="gameSessionManager.gameId()"></app-game-info>
-        @if (showChat && !chatService.chatDetache() && !showGameInterface) {
+        @if(!showGameInterface) { @if (showChat && !chatService.chatDetache()){
         <app-chat-container [gameId]="gameSessionManager.gameId()"></app-chat-container>
         } @else {
         <app-event-log></app-event-log>
-        }
+        } }
         <div class="nav-buttons">
             <button (click)="toggleView(true)" [class.active]="showChat">{{ 'game-page.chat' | translate }} <i class="fas fa-comments"></i></button>
             <button (click)="toggleView(false)" [class.active]="!showChat"><i class="fas fa-tasks"></i> {{ 'game-page.log' | translate }}</button>
@@ -73,7 +70,7 @@
 @if (showGameInterface) {
 <div class="dual-modal-layout">
     <div class="combat-interface-area">
-        <app-game-interface></app-game-interface>
+        <app-game-interface [gameId]="gameSessionManager.gameId()"></app-game-interface>
     </div>
     <div class="chat-log-area">
         <div class="abandon-button">

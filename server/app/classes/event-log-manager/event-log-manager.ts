@@ -1,3 +1,4 @@
+import { GameEventType } from '@common/enums/game-event-type';
 import { ItemName } from '@common/enums/item-name';
 import { EventLog } from '@common/game-event';
 import { Player } from '@common/player';
@@ -54,6 +55,7 @@ export class EventLogManager {
             english: `It's ${player.name}'s turn`,
             timestamp: now.toISOString(),
             playerIds: [player.userId],
+            type: GameEventType.StartTurn,
         };
         this.logs.push(log);
         this.sio.to(this.roomCode).emit(this.logSentSocketEventName, log);
@@ -69,6 +71,7 @@ export class EventLogManager {
             english: `${player.name} ${doorState ? 'opened' : 'closed'} the door`,
             timestamp: now.toISOString(),
             playerIds: [player.userId],
+            type: GameEventType.DoorState,
         };
         this.logs.push(log);
         this.sio.to(this.roomCode).emit(this.logSentSocketEventName, log);
@@ -82,6 +85,7 @@ export class EventLogManager {
             english: `Debug mode ${status ? 'enabled' : 'disabled'} `,
             timestamp: now.toISOString(),
             playerIds: [],
+            type: GameEventType.DebugMode,
         };
         this.logs.push(log);
         this.sio.to(this.roomCode).emit(this.logSentSocketEventName, log);
@@ -94,10 +98,11 @@ export class EventLogManager {
         const now = new Date();
 
         const log: EventLog = {
-            french: `${attackingPlayer} commence le combat avec ${defendingPlayer}`,
-            english: `${attackingPlayer} starts the fight with ${defendingPlayer}`,
+            french: `${attackingPlayer.name} commence le combat avec ${defendingPlayer.name}`,
+            english: `${attackingPlayer.name} starts the fight with ${defendingPlayer.name}`,
             timestamp: now.toISOString(),
             playerIds: [attackingPlayer.userId, defendingPlayer.userId],
+            type: GameEventType.StartFight,
         };
         this.logs.push(log);
         this.sio.to(this.roomCode).emit(this.logSentSocketEventName, log);
@@ -115,6 +120,7 @@ export class EventLogManager {
             english: `There is ${playersString} left in the game`,
             timestamp: now.toISOString(),
             playerIds: players.map((player) => player.userId),
+            type: GameEventType.EndGame,
         };
         this.logs.push(log);
         this.sio.to(this.roomCode).emit(this.logSentSocketEventName, log);
@@ -131,6 +137,7 @@ export class EventLogManager {
             english: `${winner.name} won and ${loser.name} lost the fight`,
             timestamp: now.toISOString(),
             playerIds: [winner.userId, loser.userId],
+            type: GameEventType.EndFight,
         };
         this.logs.push(log);
         this.sio.to(this.roomCode).emit(this.logSentSocketEventName, log);
@@ -146,6 +153,7 @@ export class EventLogManager {
             english: `${winner.name} and ${loser.name} have finished the fight`,
             timestamp: now.toISOString(),
             playerIds: [winner.userId, loser.userId],
+            type: GameEventType.EndFight,
         };
         this.logs.push(log);
         this.sio.to(this.roomCode).emit(this.logSentSocketEventName, log);
@@ -162,6 +170,7 @@ export class EventLogManager {
             english: `${player.name} has forfeited the game`,
             timestamp: now.toISOString(),
             playerIds: [player.userId],
+            type: GameEventType.AbandonGame,
         };
         this.logs.push(log);
         this.sio.to(this.roomCode).emit(this.logSentSocketEventName, log);
@@ -178,6 +187,7 @@ export class EventLogManager {
             english: `${player.name} has joined the game`,
             timestamp: now.toISOString(),
             playerIds: [player.userId],
+            type: GameEventType.JoinGame,
         };
         this.logs.push(log);
         this.sio.to(this.roomCode).emit(this.logSentSocketEventName, log);
@@ -194,6 +204,7 @@ export class EventLogManager {
             english: `${player.name} picked up the flag`,
             timestamp: now.toISOString(),
             playerIds: [player.userId],
+            type: GameEventType.AbandonGame,
         };
         this.logs.push(log);
         this.sio.to(this.roomCode).emit(this.logSentSocketEventName, log);
@@ -212,6 +223,7 @@ export class EventLogManager {
             english: `${player.name} picked up an item: ${itemNameEN}`,
             timestamp: now.toISOString(),
             playerIds: [player.userId],
+            type: GameEventType.PickUpItem,
         };
         this.logs.push(log);
         this.sio.to(this.roomCode).emit(this.logSentSocketEventName, log);
@@ -229,6 +241,7 @@ export class EventLogManager {
             ~ ${data.damageDoneAttackingPlayer} life points lost ~`,
             timestamp: now.toISOString(),
             playerIds: [data.attackingPlayer.userId, data.defendingPlayer.userId],
+            type: GameEventType.Fight,
         };
 
         this.sio.to(this.combatRoomCode).emit('combat-log-sent', log);
@@ -244,6 +257,7 @@ export class EventLogManager {
             ${player.name} has ${escaped ? 'successfully' : 'failed'} escape`,
             timestamp: now.toISOString(),
             playerIds: [player.userId],
+            type: GameEventType.Escape,
         };
 
         this.sio.to(this.combatRoomCode).emit('combat-log-sent', log);

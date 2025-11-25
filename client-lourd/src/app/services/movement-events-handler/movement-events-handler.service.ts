@@ -1,6 +1,5 @@
 import { Injectable, inject } from '@angular/core';
 import { SocketClientService } from '@app/services/client-socket/socket-client.service';
-import { GameEventService } from '@app/services/game-event/game-event.service';
 import { GameSessionManagerService } from '@app/services/game-session-manager/game-session-manager.service';
 import { GameMode } from '@common/enums/game-mode';
 import { ItemType } from '@common/enums/item-type';
@@ -15,7 +14,6 @@ import * as dataForm from '@common/socket-data-forms';
 export class MovementEventsHandlerService {
     private gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     private socketManager: SocketClientService = inject(SocketClientService);
-    private gameEventService: GameEventService = inject(GameEventService);
 
     configureBaseSocket(): void {
         this.handleMovePlayer();
@@ -73,7 +71,6 @@ export class MovementEventsHandlerService {
                 if (this.gameSessionManager.shouldChangeTurn()) {
                     this.gameSessionManager.endTurn();
                 }
-                this.gameEventService.showLogToggleDoorNotification(data);
             }
             this.gameSessionManager.updateCanToggleDoor(true);
         });

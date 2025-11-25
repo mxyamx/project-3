@@ -12,4 +12,5 @@ export interface EventLog {
     french: string;
     timestamp: string;
     playerIds: string[];
+    type: GameEventType;
 }

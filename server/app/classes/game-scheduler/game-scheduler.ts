@@ -199,6 +199,7 @@ export class GameScheduler {
         });
 
         socket.on('join-combat-log', async (gameId: string) => {
+            console.log(`Player joining -> room`);
             socket.join(`COMBAT-${gameId}`);
         });
         socket.on('leave-combat-log', async (gameId: string) => {

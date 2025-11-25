@@ -243,6 +243,13 @@
         "players": "Players",
         "team": "Team",
         "victories": "Victories",
+        "notifications": {
+            "victory": "Congratulations! You won!",
+            "loser": "You lost! You lost!",
+            "turn": "It's {{ name }}'s turn",
+            "winner": "The winner is {{ name }}",
+            "game-over": "Game over, all players have left!"
+        },
         "combat": {
             "remaining-escape-attemps": "Remaining escape attempts",
             "attack-dice": "Attack Die",
