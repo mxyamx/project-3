@@ -21,6 +21,11 @@
             }
         </div>
 
+        <!-- QR CODE BETWEEN "INVITER DES AMIS" AND "BLOQUER LA SALLE" -->
+        <div class="qr-code-nav">
+            <qrcode [qrdata]="gameId ?? ''" [width]="110" [errorCorrectionLevel]="'M'"></qrcode>
+        </div>
+
         <div class="blocked-container">
             <div class="blocked-section">
                 <i
@@ -112,6 +117,7 @@
                     {{ 'waiting-page.start-game' | translate }}
                 </button>
             </div>
+
             @if(!chatService.chatDetache()){
             <div class="chat-zone">
                 <app-chat-container [gameId]="gameSessionManager.gameId()"></app-chat-container>
