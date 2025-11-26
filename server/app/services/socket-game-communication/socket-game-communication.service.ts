@@ -4,7 +4,6 @@ import { ChannelDoc } from '@app/interfaces/channel-doc';
 import { ChatMessageDoc } from '@app/interfaces/chat-message-doc';
 import { ChatMessage } from '@common/chat-message';
 import { CHANNEL_GENERAL_ID, GAME_ROOM_REGEX } from '@common/constants/chat.constants';
-import { SocketEventNames } from '@common/enums/socket-events-names';
 import { RoomMessage } from '@common/socket-data-forms';
 import { Collection } from 'mongodb';
 import * as io from 'socket.io';
@@ -44,14 +43,14 @@ export class SocketGameCommunication {
             if (!GAME_ROOM_REGEX.test(roomId) && roomId !== CHANNEL_GENERAL_ID) {
                 const channel = await this.channelCollection.findOne({ id: roomId });
                 if (!channel) {
-                    callback({ roomDeleted: true });
+                    callback({ roomDeleted: true, history: [] });
                     return;
                 }
             }
             if (GAME_ROOM_REGEX.test(roomId)) {
                 const game = await this.gameService.getGame(roomId.split('-')[1]);
                 if (!game) {
-                    callback({ roomDeleted: true });
+                    callback({ roomDeleted: true, history: [] });
                     return;
                 }
             }
@@ -83,9 +82,7 @@ export class SocketGameCommunication {
             if (currentFirebaseId) {
                 history = await this.filterBlockedMessages(history, currentFirebaseId);
             }
-
-            socket.emit(SocketEventNames.ChatHistory, history);
-            callback({ roomDeleted: false });
+            callback({ roomDeleted: false, history });
         });
 
         socket.on('leave-room-chat', async (roomId: string) => {

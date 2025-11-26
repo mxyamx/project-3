@@ -28,6 +28,8 @@
                 <p>{{ 'avatar-page.error-modal.locked' | translate }}</p>
                 } @if(notExistingError) {
                 <p>{{ 'avatar-page.error-modal.not-existing' | translate }}</p>
+                } @if(limitError) {
+                <p>{{ 'join-game-page.game-full' | translate }}</p>
                 }
                 <div class="confirmation-buttons">
                     <button (click)="retry()" disabled="notExistingError">{{ 'avatar-page.error-modal.retry' | translate }}</button>
