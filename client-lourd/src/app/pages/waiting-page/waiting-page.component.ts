@@ -27,11 +27,12 @@ import { Player } from '@common/player';
 import * as socketDataForm from '@common/socket-data-forms';
 import { User, UserStatusInfo } from '@common/user';
 import { TranslatePipe } from '@ngx-translate/core';
+import { QRCodeComponent } from 'angularx-qrcode';
 import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-waiting-page',
-    imports: [PlayersListComponent, CommonModule, ChatContainerComponent, TranslatePipe],
+    imports: [PlayersListComponent, CommonModule, ChatContainerComponent, TranslatePipe, QRCodeComponent],
     templateUrl: './waiting-page.component.html',
     styleUrl: './waiting-page.component.scss',
 })
@@ -54,6 +55,7 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
     protected virtualPlayerProfile = VirtualPlayerProfile;
 
     entryPrice: number = 25;
+    qrData: string = '';
 
     showInviteFriendsPopup: boolean = false;
     private friendManagerService = inject(FriendManagerService);
@@ -93,6 +95,7 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
                     this.dropInEnabled = response.dropInEnabled;
                     this.playersLimitReached = this.playerlimit();
                     this.automaticLock();
+                    this.qrData = `join:${response.id}`;
                 }
             });
         }
