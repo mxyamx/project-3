@@ -21,8 +21,7 @@
             }
         </div>
 
-        <!-- QR CODE BETWEEN "INVITER DES AMIS" AND "BLOQUER LA SALLE" -->
-        <div class="qr-code-nav">
+        <div class="qr-code-nav" style="margin-top: 50px; /* move it down */ margin-left: 80px; /* move it to the right */">
             <qrcode [qrdata]="gameId ?? ''" [width]="110" [errorCorrectionLevel]="'M'"></qrcode>
         </div>
 

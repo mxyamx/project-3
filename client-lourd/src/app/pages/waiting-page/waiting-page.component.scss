@@ -215,7 +215,7 @@ app-chat-container {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 30px;
+    gap: 8px;
 
     button {
         width: 40%;
@@ -495,7 +495,7 @@ app-chat-container {
 }
 
 .entry-fee-section {
-    margin-top: 25px;
+    margin-top: 55px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -800,21 +800,14 @@ app-chat-container {
     .game-code {
         font-size: 35px;
     }
-
     .qr-code-nav {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 8px;
-        margin-left: 300px; /* ⇽ increase this */
-        margin-right: 10px; /* ⇽ keep small */
-        background-color: #ffffff;
+        position: absolute;
+        top: 300px; /* adjust vertical offset below “Code d'accès” */
+        right: 0; /* attach to the right border of .navigation */
+        background: #ffffff;
+        padding: 10px;
         border-radius: 12px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
-        z-index: 2;
-    }
-
-    .qrcode {
-        display: block;
+        z-index: 999;
     }
 }
