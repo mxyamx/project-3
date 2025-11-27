@@ -173,10 +173,6 @@ export class ChatService {
         const username = this.userManager.getCurrentUser().username;
         const userId = this.userManager.getCurrentUser().id;
 
-        this.playerSocketService.onChatHistory((msgs) => {
-            this.roomMessages = msgs;
-            this.ipc?.send('main:send-chat-history', msgs);
-        });
         this.playerSocketService.onChannelDeleted((response: { channelId: string }) => {
             if (response.channelId === roomId) {
                 this.ipc?.send('main:channel-deleted');
@@ -189,6 +185,7 @@ export class ChatService {
                 this.ipc?.send('main:channel-deleted');
                 return;
             }
+            this.ipc?.send('main:send-chat-history', response.history);
         });
 
         this.playerSocketService.onNewMessage((roomMessage: ChatMessage) => {
