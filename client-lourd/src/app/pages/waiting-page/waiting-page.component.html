@@ -20,6 +20,34 @@
             </button>
             }
         </div>
+        <div class="access-code-container">
+            <div class="access-code-section">
+                <div>
+                    <h1><i class="fa fa-key"></i>{{ 'waiting-page.code' | translate }}:</h1>
+                </div>
+
+                <div>
+                    <p class="game-code">{{ gameId }}</p>
+                </div>
+            </div>
+
+            <div class="entry-fee-section">
+                <span class="entry-fee-label"> {{ 'waiting-page.entry-fee-label' | translate }}: </span>
+
+                <span class="entry-fee-value" *ngIf="entryPrice > 0; else freeEntry"> <i class="fa-solid fa-coins"></i> {{ entryPrice }} </span>
+
+                <ng-template #freeEntry>
+                    <span class="entry-fee-value free">
+                        {{ 'waiting-page.entry-fee-free' | translate }}
+                    </span>
+                </ng-template>
+            </div>
+        </div>
+
+        <!-- QR CODE BETWEEN "INVITER DES AMIS" AND "BLOQUER LA SALLE" -->
+        <div class="qr-code-nav">
+            <qrcode [qrdata]="gameId ?? ''" [width]="110" [errorCorrectionLevel]="'M'"></qrcode>
+        </div>
 
         <div class="blocked-container">
             <div class="blocked-section">
@@ -71,28 +99,6 @@
     </section>
 
     <section>
-        <div class="access-code-section">
-            <div>
-                <h1><i class="fa fa-key"></i>{{ 'waiting-page.code' | translate }}:</h1>
-            </div>
-
-            <div>
-                <p class="game-code">{{ gameId }}</p>
-            </div>
-        </div>
-
-        <div class="entry-fee-section">
-            <span class="entry-fee-label"> {{ 'waiting-page.entry-fee-label' | translate }}: </span>
-
-            <span class="entry-fee-value" *ngIf="entryPrice > 0; else freeEntry"> <i class="fa-solid fa-coins"></i> {{ entryPrice }} </span>
-
-            <ng-template #freeEntry>
-                <span class="entry-fee-value free">
-                    {{ 'waiting-page.entry-fee-free' | translate }}
-                </span>
-            </ng-template>
-        </div>
-
         <div class="second-section">
             <div class="left-zone">
                 <div class="text">
@@ -112,6 +118,7 @@
                     {{ 'waiting-page.start-game' | translate }}
                 </button>
             </div>
+
             @if(!chatService.chatDetache()){
             <div class="chat-zone">
                 <app-chat-container [gameId]="gameSessionManager.gameId()"></app-chat-container>
