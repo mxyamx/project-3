@@ -49,7 +49,7 @@ export class ChannelNavigatorComponent implements OnInit, OnDestroy {
     readonly dialog = inject(MatDialog);
     readonly gameRoomRegex = GAME_ROOM_REGEX;
     readonly channelGeneralId = CHANNEL_GENERAL_ID;
-
+    private translateService = inject(TranslateService);
     private channelService = inject(ChannelService);
     private chatService: ChatService = inject(ChatService);
     private popupChatBridgeService = inject(PopupChatBridgeService);
@@ -140,7 +140,14 @@ export class ChannelNavigatorComponent implements OnInit, OnDestroy {
         }
         if (this.selectedTab() === ChannelTab.Joined) {
             let regex = new RegExp(this.searchInput.trim());
-            this.filteredJoinedChannels = this.joinedChannels.filter((channel: ChannelSummary) => channel.name.match(regex));
+            this.filteredJoinedChannels = this.joinedChannels.filter((channel: ChannelSummary) => {
+                const isGeneral = channel.id === this.channelGeneralId;
+                const isGameChannel = this.gameRoomRegex.test(channel.id);
+                if (isGameChannel || isGeneral) {
+                    return this.translateService.instant(`chat.${channel.name}`).match(regex);
+                }
+                channel.name.match(regex);
+            });
         } else {
             if (this.chatService.chatDetache()) {
                 this.isLoading.set(true);

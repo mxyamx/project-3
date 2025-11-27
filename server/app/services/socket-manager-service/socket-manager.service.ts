@@ -514,7 +514,7 @@ export class SocketManager {
                     await this.leavePlayer(game.id, player, 'timeout');
                 }
             });
-            
+
             this.vpSocketAddingHandler.register(socket);
 
             socket.on('player-emote', (data) => {
@@ -522,9 +522,8 @@ export class SocketManager {
                     successful: true,
                     playerId: data.playerId,
                     emote: data.emote,
-    });
-});
-
+                });
+            });
         });
     }
 
@@ -534,6 +533,7 @@ export class SocketManager {
         if (!game) return;
 
         this.sio.sockets.sockets.get(player.socketId)?.leave(`GAME-${gameId}`);
+        this.sio.sockets.sockets.get(player.socketId)?.leave(`COMBAT-${gameId}`);
         const isOrganizer = game.adminId === player.socketId;
         const isWaiting = game.phase === CurrentGamePhase.Waiting;
 

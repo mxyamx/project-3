@@ -160,7 +160,7 @@ export class PlayerSocketService {
         });
     }
 
-    emitJoinChatRoom(gameId: string, callback: (response: { roomDeleted: boolean }) => void): void {
+    emitJoinChatRoom(gameId: string, callback: (response: { roomDeleted: boolean; history: ChatMessage[] }) => void): void {
         this.clientSocketService.emit('join-room-chat', gameId, callback);
     }
     emitLeaveChatRoom(roomId: string): void {
@@ -173,12 +173,6 @@ export class PlayerSocketService {
 
     onNewMessage(callback: (message: ChatMessage) => void): void {
         this.clientSocketService.on<ChatMessage>('message-sent', (data: ChatMessage) => {
-            callback(data);
-        });
-    }
-
-    onChatHistory(callback: (chatHistory: ChatMessage[]) => void) {
-        this.clientSocketService.on<ChatMessage[]>(SocketEventNames.ChatHistory, (data: ChatMessage[]) => {
             callback(data);
         });
     }

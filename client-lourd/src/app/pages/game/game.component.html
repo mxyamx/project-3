@@ -45,14 +45,6 @@
     <div class="column-right">
         <div class="abandon-button">
             <button (click)="confirmAbandon()">{{ 'game-page.give-up' | translate }}</button>
-            <button
-                (click)="gameSessionManager.toggleDebugMode()"
-                (keydown)="onKeydown($event)"
-                [class.disabled]="!this.gameSessionManager.chosenPlayer().organizer"
-                [disabled]="!this.gameSessionManager.chosenPlayer().organizer"
-            >
-                {{ (gameSessionManager.debugModeStatus() ? 'game-page.debug-mode' : 'game-page.normal-mode') | translate }}
-            </button>
         </div>
         <app-game-info [gameId]="gameSessionManager.gameId()"></app-game-info>
         @if(!showGameInterface) { @if (showChat && !chatService.chatDetache()){
