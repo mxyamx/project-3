@@ -23,6 +23,8 @@ export class ChatService {
     private ipc?: IpcRenderer;
     roomMessages: ChatMessage[] = [];
     chatDetache = signal(false);
+    unreadMessageCount = signal(0);
+    private notificationAudio: HTMLAudioElement | null = null;
     private userManager = inject(UserManagerService);
     private playerSocketService = inject(PlayerSocketService);
     private channelService = inject(ChannelService);
@@ -146,6 +148,25 @@ export class ChatService {
         } catch (e) {
             console.warn('IPC non dispo (mode web ?)', e);
         }
+    }
+
+    playNotificationSound(): void {
+        if (!this.notificationAudio) {
+            this.notificationAudio = new Audio('assets/sounds/notification.mp3');
+            this.notificationAudio.volume = 0.5;
+        }
+        this.notificationAudio.currentTime = 0;
+        this.notificationAudio.play().catch((err) => {
+            console.warn('Audio play failed:', err);
+        });
+    }
+
+    incrementUnread(): void {
+        this.unreadMessageCount.update(count => count + 1);
+    }
+
+    resetUnread(): void {
+        this.unreadMessageCount.set(0);
     }
 
     private handleServerError(err: unknown) {

@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, computed, inject, OnInit, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { SocialsPopupComponent } from '@app/components/socials-popup/socials-popup.component';
@@ -19,7 +19,7 @@ import { Subscription } from 'rxjs';
     styleUrls: ['./main-page.component.scss'],
     imports: [RouterLink, ChatContainerComponent, TranslatePipe, SocialsPopupComponent],
 })
-export class MainPageComponent implements OnInit {
+export class MainPageComponent implements OnInit, OnDestroy {
     chatService = inject(ChatService);
     private authService: AuthentificationService = inject(AuthentificationService);
     private userManager: UserManagerService = inject(UserManagerService);
@@ -29,6 +29,7 @@ export class MainPageComponent implements OnInit {
     private gameInviteService = inject(GameInviteService);
 
     private inviteCountSubscription?: Subscription;
+    private isListeningForNotifications = false;
 
     constructor(private router: Router) {}
 
@@ -50,15 +51,63 @@ export class MainPageComponent implements OnInit {
         this.inviteCountSubscription = this.gameInviteService.getInvitationCountObservable().subscribe((count) => {
             this.gameInviteCount.set(count);
         });
+
+        this.setupChatNotifications();
     }
 
     ngOnDestroy(): void {
         this.inviteCountSubscription?.unsubscribe();
+        this.playerSocketService.unsubscribeChatNotification();
+    }
+
+    private setupChatNotifications(): void {
+        if (this.isListeningForNotifications) return;
+        this.isListeningForNotifications = true;
+
+        const currentUserId = this.userManager.getCurrentUser().id;
+        console.log('=== SETUP CHAT NOTIFICATIONS ===');
+        console.log('Current user ID:', currentUserId);
+        console.log('Socket connected:', this.playerSocketService.isConnected());
+
+        this.playerSocketService.onChatNotification((data) => {
+            console.log('=== RECEIVED CHAT NOTIFICATION ===');
+            console.log('Data:', data);
+            console.log('Room ID:', data.roomId);
+            console.log('Message sender ID:', data.message.senderId);
+            console.log('Message text:', data.message.text);
+            console.log('Target user ID:', data.targetUserId);
+            console.log('Current user ID:', currentUserId);
+            console.log('Is chat open:', this.showChat());
+
+            // Ignorer nos propres messages
+            if (data.message.senderId === currentUserId) {
+                console.log('>>> IGNORED: Own message');
+                return;
+            }
+
+            // Ignorer si destiné à un autre utilisateur
+            if (data.targetUserId && data.targetUserId !== currentUserId) {
+                console.log('>>> IGNORED: Message for other user');
+                return;
+            }
+
+            // Notifier seulement si le chat est fermé
+            if (!this.showChat()) {
+                console.log('>>> SHOWING NOTIFICATION!');
+                this.chatService.incrementUnread();
+                this.chatService.playNotificationSound();
+            } else {
+                console.log('>>> IGNORED: Chat is open');
+            }
+        });
+
+        console.log('Chat notification listener registered');
     }
 
     logout() {
         const user = this.userManager.getCurrentUser();
         user.status = DeviceType.offline;
+        this.playerSocketService.unsubscribeChatNotification();
         this.playerSocketService.disconnect();
         this.friendService.cleanup();
         this.chatService.closePopup();
@@ -87,6 +136,9 @@ export class MainPageComponent implements OnInit {
 
     openGeneralChat() {
         this.showChat.set(!this.showChat());
+        if (this.showChat()) {
+            this.chatService.resetUnread();
+        }
     }
 
     openSettings(): void {
@@ -99,7 +151,6 @@ export class MainPageComponent implements OnInit {
 
         this.httpUserService.getUser(userId).subscribe({
             next: (user) => {
-                // Update all user fields from DB
                 this.userManager.currentUser.set(user);
             },
             error: (err) => console.error('Failed to refresh user data:', err),

@@ -9,6 +9,7 @@ import { Collection } from 'mongodb';
 import * as io from 'socket.io';
 import { CurrentGamesService } from '../current-games/current-games.service';
 import { DatabaseService } from '../database/database.service';
+import { ChannelMemberDoc } from '@app/interfaces/channel-member-doc';
 
 interface UserDoc {
     _id: string; // if you use ObjectId, change to ObjectId and cast senderIds accordingly
@@ -135,8 +136,50 @@ export class SocketGameCommunication {
                     }
                 }
             }
+            await this.emitGlobalNotification(roomId, message);
         });
     }
+private async emitGlobalNotification(roomId: string, message: ChatMessage): Promise<void> {
+    try {
+        const notification = { roomId, message };
+        console.log('=== EMITTING CHAT NOTIFICATION ===');
+        console.log('Room ID:', roomId);
+        console.log('Sender ID:', message.senderId);
+        console.log('Message:', message.text);
+        
+        // Pour le chat général, notifier tout le monde
+        if (roomId === CHANNEL_GENERAL_ID) {
+            console.log('Broadcasting to ALL connected sockets (general chat)');
+            this.sio.emit('chat-notification', notification);
+            return;
+        }
+
+        // Pour les game rooms, notifier tout le monde
+        if (GAME_ROOM_REGEX.test(roomId)) {
+            console.log('Broadcasting to ALL connected sockets (game room)');
+            this.sio.emit('chat-notification', notification);
+            return;
+        }
+
+        // Pour les channels personnalisés, récupérer les membres et notifier
+        console.log('Custom channel - fetching members');
+        const memberCollection: Collection<ChannelMemberDoc> = this.databaseService.database.collection(process.env.CHANNEL_MEMBERS_COLLECTION_NAME);
+        const members = await memberCollection.find({ channelId: roomId }).toArray();
+        console.log('Members found:', members.length);
+        
+        for (const member of members) {
+            if (member.userId !== message.senderId) {
+                console.log('Emitting to user:', member.userId);
+                this.sio.emit('chat-notification', { 
+                    ...notification,
+                    targetUserId: member.userId 
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error emitting global notification:', error);
+    }
+}
 
     private withOwnerLookup() {
         return [
