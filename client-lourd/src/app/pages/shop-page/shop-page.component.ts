@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal, WritableSignal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
@@ -24,7 +24,6 @@ export class ShoppingPageComponent {
     private audioMap = new Map<string, HTMLAudioElement>();
 
     chatService: ChatService = inject(ChatService);
-    showChat: WritableSignal<boolean> = signal(false);
 
     user = this.userManager.currentUser.asReadonly();
     catalog: AvatarDef[] = avatarList;
@@ -130,7 +129,7 @@ export class ShoppingPageComponent {
         if (a) a.pause();
     }
     openChat() {
-        this.showChat.set(!this.showChat());
+        this.chatService.showChat.set(!this.chatService.showChat());
     }
     async buySfx(s: SfxDef) {
         this.errorMsg.set('');

@@ -25,6 +25,8 @@ export class ChatService {
     chatDetache = signal(false);
     unreadChannels = signal<Map<string, number>>(new Map());
     private notificationAudio: HTMLAudioElement | null = null;
+    showChat = signal(false);
+
     private userManager = inject(UserManagerService);
     private playerSocketService = inject(PlayerSocketService);
     private channelService = inject(ChannelService);

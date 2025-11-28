@@ -35,7 +35,6 @@ export class MainPageComponent implements OnInit, OnDestroy {
 
     readonly title: string = 'Méchante Patte';
     avatar = this.userManager.currentUser.asReadonly();
-    showChat: WritableSignal<boolean> = signal(false);
     showSocialsPopup: WritableSignal<boolean> = signal(false);
 
     gameInviteCount = signal(0);
@@ -80,7 +79,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
             this.chatService.incrementUnreadForChannel(data.roomId);
 
          
-            if (!this.showChat()) {
+            if (!this.chatService.showChat()) {
                 this.chatService.playNotificationSound();
             }
         });
@@ -117,7 +116,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
     }
 
     openGeneralChat() {
-        this.showChat.set(!this.showChat());
+        this.chatService.showChat.set(!this.chatService.showChat());
     }
 
     openSettings(): void {
