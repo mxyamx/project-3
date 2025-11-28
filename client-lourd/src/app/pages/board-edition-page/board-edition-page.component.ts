@@ -196,25 +196,22 @@ export class BoardEditionPageComponent implements OnInit {
 
     async saveBoard(): Promise<void> {
         const newBoard = await this.modifyBoard();
-        const boardId = this.boardgameManager.editedBoardGame().id;
 
-        this.httpBoardGameService.getBoard(boardId).subscribe({
+        if (!this.boardgameManager.isEditing) {
+            this.httpBoardGameService.createBoard(newBoard).subscribe({
+                next: () => {
+                    this.openDialog('success', true);
+                },
+                error: (error) => this.openDialog(error.message, false),
+            });
+            return;
+        }
+
+        this.httpBoardGameService.updateBoard(newBoard).subscribe({
             next: () => {
-                this.httpBoardGameService.updateBoard(newBoard).subscribe({
-                    next: () => {
-                        this.openDialog('success', true);
-                    },
-                    error: (error) => this.openDialog(error.message, false),
-                });
+                this.openDialog('success', true);
             },
-            error: () => {
-                this.httpBoardGameService.createBoard(newBoard).subscribe({
-                    next: () => {
-                        this.openDialog('success', true);
-                    },
-                    error: (error) => this.openDialog(error.message, false),
-                });
-            },
+            error: (error) => this.openDialog(error.message, false),
         });
     }
 

@@ -69,6 +69,7 @@ export class BoardGameManagerService {
         itemInfos: [],
         ownerId: '',
     });
+    isEditing: boolean = false;
 
     constructor() {
         const newTiles: Tile[][] = this.tileGenerator(this.editedBoardGame().size);

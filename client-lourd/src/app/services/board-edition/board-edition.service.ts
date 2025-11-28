@@ -46,7 +46,6 @@ export class BoardEditionService {
         return {
             ...this.boardgameManager.editedBoardGame(),
             previewImage,
-            visibility: false,
             name: this.boardgameManager.editedBoardGame().name.trim().replace(/\s+/g, ' '),
         };
     }

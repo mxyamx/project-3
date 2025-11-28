@@ -6,6 +6,7 @@ import { BoardGame, BoardGameDTO } from '@common/board-game';
 import { GamePrivacy } from '@common/enums/game-visibility';
 import { UrlPage } from '@common/enums/url-page';
 import { BehaviorSubject, Observable, catchError, firstValueFrom, map, of, tap } from 'rxjs';
+import { PlayerSocketService } from '../player-socket/player-socket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -25,6 +26,7 @@ export class AdminPageManagerService {
     private displayedObjectSubject: BehaviorSubject<BoardGameDTO | null>;
     private showDeleteConfirmationSubject: BehaviorSubject<boolean>;
     private showAlertConfirmationSubject: BehaviorSubject<boolean>;
+    private playerSocketService = inject(PlayerSocketService);
 
     constructor() {
         this.gamesListSubject = new BehaviorSubject<BoardGameDTO[]>([]);
@@ -61,6 +63,19 @@ export class AdminPageManagerService {
         }
     }
 
+    onBoadGameChanges() {
+        this.playerSocketService.onRefreshBoardGameList(() => this.loadGames());
+        this.playerSocketService.onRemoveBoardGame((payload: { id: string }) => {
+            const games = [...this.gamesListSubject.value.filter((game) => game.id !== payload.id)];
+            this.gamesListSubject.next(games);
+            if (games.length > 0) {
+                this.displayedObjectSubject.next(games[0]);
+            } else {
+                this.displayedObjectSubject.next(null);
+            }
+        });
+    }
+
     setDisplayedObject(game: BoardGameDTO): void {
         const foundGame = this.gamesList.find((g) => g.id === game.id);
         this.displayedObjectSubject.next(foundGame || { ...game });
@@ -78,9 +93,9 @@ export class AdminPageManagerService {
         this.showAlertConfirmationSubject.next(false);
     }
 
-    updateObjectPrivacy(privacy: GamePrivacy): Observable<BoardGame | null> {
+    async updateObjectPrivacy(privacy: GamePrivacy): Promise<boolean> {
         const currentObject = this.displayedObject;
-        if (!currentObject) return of(null);
+        if (!currentObject) return false;
 
         const updatedGame: BoardGameDTO = {
             ...currentObject,
@@ -90,17 +105,19 @@ export class AdminPageManagerService {
         const { ownerName, ...board } = updatedGame;
         const result: Omit<BoardGameDTO, 'ownerName'> = { ...board, ownerId: '' };
 
-        return this.httpBoardGameService.updateBoard(result).pipe(
-            tap(() => {
-                const updatedList = [...this.gamesList];
-                const index = updatedList.findIndex((g) => g.id === updatedGame.id);
-                if (index !== -1) {
-                    updatedList[index] = { ...updatedGame };
-                }
-                this.gamesListSubject.next(updatedList);
-                this.displayedObjectSubject.next({ ...updatedGame });
-            }),
-        );
+        try {
+            await firstValueFrom(this.httpBoardGameService.updatePrivacy(result.id, privacy));
+            const updatedList = [...this.gamesList];
+            const index = updatedList.findIndex((g) => g.id === updatedGame.id);
+            if (index !== -1) {
+                updatedList[index] = { ...updatedGame };
+            }
+            this.gamesListSubject.next(updatedList);
+            this.displayedObjectSubject.next({ ...updatedGame });
+            return true;
+        } catch (err: unknown) {
+            return false;
+        }
     }
 
     deleteGame(): Observable<boolean> {
@@ -139,6 +156,7 @@ export class AdminPageManagerService {
 
         this.boardGameManagerService.updateDisplayedBoardGame(currentObject);
         this.boardGameManagerService.updateLoadedBoardGame(structuredClone(currentObject));
+        this.boardGameManagerService.isEditing = true;
         this.router.navigate([UrlPage.Editor], { queryParams: { id: currentObject.id } });
         return true;
     }

@@ -2,6 +2,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ErrorMessages, HttpStatus } from '@app/constants/http-status-constants';
 import { BoardGame, BoardGameDTO } from '@common/board-game';
+import { GamePrivacy } from '@common/enums/game-visibility';
 import { catchError, Observable, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -35,7 +36,12 @@ export class HttpBoardGameService {
     }
 
     updateBoard(board: BoardGame): Observable<BoardGameDTO> {
+        console.log('board game edited');
         return this.http.put<BoardGameDTO>(`${this.apiUrl}/board-games/${board.id}`, board).pipe(catchError(this.handleError));
+    }
+
+    updatePrivacy(id: string, privacy: GamePrivacy): Observable<void> {
+        return this.http.put<void>(`${this.apiUrl}/board-games/privacy/${id}`, { privacy });
     }
 
     private handleError(error: HttpErrorResponse) {
