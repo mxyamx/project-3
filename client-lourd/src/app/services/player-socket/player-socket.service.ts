@@ -171,7 +171,7 @@ export class PlayerSocketService {
         });
     }
 
-    emitJoinChatRoom(gameId: string, callback: (response: { roomDeleted: boolean }) => void): void {
+    emitJoinChatRoom(gameId: string, callback: (response: { roomDeleted: boolean; history: ChatMessage[] }) => void): void {
         this.clientSocketService.emit('join-room-chat', gameId, callback);
     }
     emitLeaveChatRoom(roomId: string): void {
@@ -187,11 +187,12 @@ export class PlayerSocketService {
             callback(data);
         });
     }
+    onChatNotification(callback: (data: { roomId: string; message: ChatMessage; targetUserId?: string }) => void): void {
+        this.clientSocketService.on<{ roomId: string; message: ChatMessage; targetUserId?: string }>('chat-notification', callback);
+    }
 
-    onChatHistory(callback: (chatHistory: ChatMessage[]) => void) {
-        this.clientSocketService.on<ChatMessage[]>(SocketEventNames.ChatHistory, (data: ChatMessage[]) => {
-            callback(data);
-        });
+    unsubscribeChatNotification(): void {
+        this.clientSocketService.off('chat-notification');
     }
 
     emitAddVirtualPlayer(gameId: string, profile: VirtualPlayerProfile): void {

@@ -1,9 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { DEFAULT_BOARD, ID_LENGTH } from '@app/constants/objects-constants';
 import { OptionForm } from '@app/interfaces/option-form';
 import { BoardGameManagerService } from '@app/services/board-game-manager/board-game-manager.service';
+import { ChatService } from '@app/services/chat/chat.service';
 import { generateId } from '@app/utils/functions/id-related-functions';
 import { BoardGame } from '@common/board-game';
 import { GameMode } from '@common/enums/game-mode';
@@ -13,7 +15,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-game-option',
-    imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
+    imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ChatContainerComponent],
     templateUrl: './game-option.component.html',
     styleUrl: './game-option.component.scss',
 })
@@ -29,6 +31,8 @@ export class GameOptionComponent {
     };
     private displayedBoardManager: BoardGameManagerService = inject(BoardGameManagerService);
     private router: Router;
+
+    chatService: ChatService = inject(ChatService);
 
     constructor() {
         this.settingsForm = new FormGroup<OptionForm>({
@@ -52,6 +56,10 @@ export class GameOptionComponent {
         this.displayedBoardManager.updateLoadedBoardGame(structuredClone(newBoard));
         this.displayedBoardManager.isEditing = false;
         this.router.navigate([UrlPage.Editor]);
+    }
+
+    openChat() {
+        this.chatService.showChat.set(!this.chatService.showChat());
     }
 
     private registerChoices(newBoard: BoardGame): boolean {

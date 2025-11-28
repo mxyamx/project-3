@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { DropdownComponent } from '@app/components/dropdown/dropdown.component';
@@ -26,7 +26,6 @@ export class SettingsPageComponent implements OnInit {
     readonly themes = [InterfaceTheme.Light, InterfaceTheme.Dark];
     selectedLanguage: Language;
     selectedTheme: InterfaceTheme;
-    showChat: WritableSignal<boolean> = signal(false);
     chatService: ChatService = inject(ChatService);
 
     initialLanguage: Language;
@@ -70,6 +69,6 @@ export class SettingsPageComponent implements OnInit {
         }
     }
     openChat() {
-        this.showChat.set(!this.showChat());
+        this.chatService.showChat.set(!this.chatService.showChat());
     }
 }

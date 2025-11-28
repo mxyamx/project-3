@@ -39,7 +39,6 @@ export class CreationPageComponent implements OnInit, OnDestroy {
 
     gameMode: typeof GameMode = GameMode;
     isLoading: WritableSignal<boolean> = signal(false);
-    showChat: WritableSignal<boolean> = signal(false);
     friendsOnly: boolean = false;
     isRapidElim: boolean = false;
     selectedPollPrizeAmount: number = 0;
@@ -162,7 +161,7 @@ export class CreationPageComponent implements OnInit, OnDestroy {
         this.hasBeenClicked = true;
     }
     openChat() {
-        this.showChat.set(!this.showChat());
+        this.chatService.showChat.set(!this.chatService.showChat());
     }
     private refreshUserData(): void {
         const userId = this.userManagerService.getCurrentUser().id;

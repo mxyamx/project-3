@@ -1,7 +1,12 @@
 <div class="form-container">
     <section class="navigation">
         <div class="right-group">
-            <i class="fa-solid fa-message chat-button" aria-hidden="true" (click)="openChat()"></i>
+            <div class="notification-wrapper-inline">
+    <i class="fa-solid fa-message chat-button" aria-hidden="true" (click)="openChat()"></i>
+    @if (chatService.totalUnreadCount() > 0) {
+        <span class="notification-badge">{{ chatService.totalUnreadCount() }}</span>
+    }
+</div>
             <button class="navigation-button" routerLink="/main-page">
                 <i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}
             </button>
@@ -28,6 +33,8 @@
                 <p>{{ 'avatar-page.error-modal.locked' | translate }}</p>
                 } @if(notExistingError) {
                 <p>{{ 'avatar-page.error-modal.not-existing' | translate }}</p>
+                } @if(limitError) {
+                <p>{{ 'join-game-page.game-full' | translate }}</p>
                 }
                 <div class="confirmation-buttons">
                     <button (click)="retry()" disabled="notExistingError">{{ 'avatar-page.error-modal.retry' | translate }}</button>
@@ -55,7 +62,7 @@
             </div>
         </section>
     </form>
-    @if(showChat() && !this.chatService.chatDetache()){
+    @if(chatService.showChat() && !this.chatService.chatDetache()){
     <div class="chat-container">
         <app-chat-container></app-chat-container>
     </div>

@@ -45,24 +45,23 @@
     <div class="column-right">
         <div class="abandon-button">
             <button (click)="confirmAbandon()">{{ 'game-page.give-up' | translate }}</button>
-            <button
-                (click)="gameSessionManager.toggleDebugMode()"
-                (keydown)="onKeydown($event)"
-                [class.disabled]="!this.gameSessionManager.chosenPlayer().organizer"
-                [disabled]="!this.gameSessionManager.chosenPlayer().organizer"
-            >
-                {{ (gameSessionManager.debugModeStatus() ? 'game-page.debug-mode' : 'game-page.normal-mode') | translate }}
-            </button>
         </div>
         <app-game-info [gameId]="gameSessionManager.gameId()"></app-game-info>
-        @if(!showGameInterface) { @if (showChat && !chatService.chatDetache()){
+        @if(!showGameInterface) { @if (chatService.showChat() && !chatService.chatDetache()){
         <app-chat-container [gameId]="gameSessionManager.gameId()"></app-chat-container>
         } @else {
         <app-event-log></app-event-log>
         } }
         <div class="nav-buttons">
-            <button (click)="toggleView(true)" [class.active]="showChat">{{ 'game-page.chat' | translate }} <i class="fas fa-comments"></i></button>
-            <button (click)="toggleView(false)" [class.active]="!showChat"><i class="fas fa-tasks"></i> {{ 'game-page.log' | translate }}</button>
+            <button (click)="toggleView(true)" [class.active]="chatService.showChat()" class="chat-nav-button">
+                <i class="fas fa-comments"></i>
+                @if (chatService.totalUnreadCount() > 0 && !chatService.showChat()) {
+                    <span class="notification-badge-inline">{{ chatService.totalUnreadCount() }}</span>
+                }
+            </button>
+            <button (click)="toggleView(false)" [class.active]="!chatService.showChat()">
+                <i class="fas fa-tasks"></i> {{ 'game-page.log' | translate }}
+            </button>
         </div>
     </div>
 </div>
@@ -76,16 +75,19 @@
         <div class="abandon-button">
             <button (click)="confirmAbandon()">{{ 'game-page.give-up' | translate }}</button>
         </div>
-        @if (showChat && !chatService.chatDetache()) {
+        @if (chatService.showChat() && !chatService.chatDetache()) {
         <app-chat-container [gameId]="gameSessionManager.gameId()"></app-chat-container>
         } @else {
         <app-event-log></app-event-log>
         }
         <div class="nav-buttons">
-            <button (click)="toggleView(true)" [class.active]="showChat">
+            <button (click)="toggleView(true)" [class.active]="chatService.showChat()" class="chat-nav-button">
                 <i class="fas fa-comments"></i>
+                @if (chatService.totalUnreadCount() > 0 && !chatService.showChat()) {
+                    <span class="notification-badge-inline">{{ chatService.totalUnreadCount() }}</span>
+                }
             </button>
-            <button (click)="toggleView(false)" [class.active]="!showChat">
+            <button (click)="toggleView(false)" [class.active]="!chatService.showChat()">
                 <i class="fas fa-tasks"></i>
             </button>
         </div>

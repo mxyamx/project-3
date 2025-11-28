@@ -1,6 +1,11 @@
 <div class="game-option-container" (submit)="onSubmit()">
     <section class="navigation">
-        <button class="navigation-button" routerLink="/main-page"><i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}</button>
+        <div class="right-group">
+            <i class="fa-solid fa-message chat-button" aria-hidden="true" (click)="openChat()"></i>
+            <button class="navigation-button" routerLink="/main-page">
+                <i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}
+            </button>
+        </div>
     </section>
     <div class="page-title">
         <h1>{{ 'game-option-page.title' | translate }}</h1>
@@ -38,4 +43,10 @@
         </div>
         <button type="submit" class="primary" [disabled]="settingsForm.invalid">{{ 'game-option-page.create' | translate }}</button>
     </form>
+
+    @if(chatService.showChat() && !this.chatService.chatDetache()){
+    <div class="chat-container">
+        <app-chat-container></app-chat-container>
+    </div>
+    }
 </div>

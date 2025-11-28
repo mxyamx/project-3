@@ -536,6 +536,7 @@ export class SocketManager {
         if (!game) return;
 
         this.sio.sockets.sockets.get(player.socketId)?.leave(`GAME-${gameId}`);
+        this.sio.sockets.sockets.get(player.socketId)?.leave(`COMBAT-${gameId}`);
         const isOrganizer = game.adminId === player.socketId;
         const isWaiting = game.phase === CurrentGamePhase.Waiting;
 

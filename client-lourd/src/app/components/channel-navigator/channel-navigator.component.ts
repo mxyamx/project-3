@@ -49,12 +49,13 @@ export class ChannelNavigatorComponent implements OnInit, OnDestroy {
     readonly dialog = inject(MatDialog);
     readonly gameRoomRegex = GAME_ROOM_REGEX;
     readonly channelGeneralId = CHANNEL_GENERAL_ID;
-
+    private translateService = inject(TranslateService);
     private channelService = inject(ChannelService);
     private chatService: ChatService = inject(ChatService);
     private popupChatBridgeService = inject(PopupChatBridgeService);
     private playerSocketService = inject(PlayerSocketService);
     private translate = inject(TranslateService);
+
     async ngOnInit(): Promise<void> {
         if (this.chatService.chatDetache()) {
             this.popupChatBridgeService.onServerError((data: any) => {
@@ -125,6 +126,7 @@ export class ChannelNavigatorComponent implements OnInit, OnDestroy {
             setTimeout(() => this.channelRemovedMessage.set(null), 3000);
         });
     }
+
     ngOnDestroy(): void {
         if (this.chatService.chatDetache()) {
             this.popupChatBridgeService.sendChannelOnDestroy();
@@ -132,6 +134,7 @@ export class ChannelNavigatorComponent implements OnInit, OnDestroy {
         }
         this.playerSocketService.unsubscribeChannel();
     }
+
     async searchChannel(): Promise<void> {
         if (!this.searchInput.trim()) {
             this.filteredJoinedChannels = this.joinedChannels;
@@ -140,7 +143,14 @@ export class ChannelNavigatorComponent implements OnInit, OnDestroy {
         }
         if (this.selectedTab() === ChannelTab.Joined) {
             let regex = new RegExp(this.searchInput.trim());
-            this.filteredJoinedChannels = this.joinedChannels.filter((channel: ChannelSummary) => channel.name.match(regex));
+            this.filteredJoinedChannels = this.joinedChannels.filter((channel: ChannelSummary) => {
+                const isGeneral = channel.id === this.channelGeneralId;
+                const isGameChannel = this.gameRoomRegex.test(channel.id);
+                if (isGameChannel || isGeneral) {
+                    return this.translateService.instant(`chat.${channel.name}`).match(regex);
+                }
+                channel.name.match(regex);
+            });
         } else {
             if (this.chatService.chatDetache()) {
                 this.isLoading.set(true);
@@ -224,6 +234,7 @@ export class ChannelNavigatorComponent implements OnInit, OnDestroy {
             await this.initJoinedChannels();
         }
     }
+
     async leaveChannel(channelId: string): Promise<void> {
         const confirmed = await this.openConfirm(LEAVE_CHANNEL_CONFIRM_DIALOG_DATA);
         if (!confirmed) {
@@ -270,6 +281,11 @@ export class ChannelNavigatorComponent implements OnInit, OnDestroy {
             await this.initJoinedChannels();
         }
     }
+
+    getUnreadCount(channelId: string): number {
+        return this.chatService.getUnreadCountForChannel(channelId);
+    }
+
     private resetSearchInput(): void {
         this.searchInput = '';
         this.filteredJoinedChannels = this.joinedChannels;
@@ -280,6 +296,7 @@ export class ChannelNavigatorComponent implements OnInit, OnDestroy {
     private instanceOfConfirmationDialogData(object: any): object is ConfirmationDialogData {
         return 'confirmButtonLabel' in object;
     }
+
     async initJoinedChannels(): Promise<void> {
         if (this.chatService.chatDetache()) {
             this.isLoading.set(true);
@@ -312,6 +329,7 @@ export class ChannelNavigatorComponent implements OnInit, OnDestroy {
         const confirmed = await firstValueFrom(ref.afterClosed().pipe(take(1)));
         return confirmed;
     }
+
     openChannelPopup(): void {
         if (this.isPopup) return;
         const context: PopupChatContext = { openChat: false, channelId: '', channelName: '' };

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
@@ -34,7 +34,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     private httpBoardGameService: HttpBoardGameService = inject(HttpBoardGameService);
     private playerSocketService = inject(PlayerSocketService);
     userManager = inject(UserManagerService);
-    showChat: WritableSignal<boolean> = signal(false);
     chatService: ChatService = inject(ChatService);
 
     constructor(private dialog: MatDialog) {}
@@ -112,7 +111,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         });
     }
     openChat() {
-        this.showChat.set(!this.showChat());
+        this.chatService.showChat.set(!this.chatService.showChat());
     }
 
     private async loadGames(): Promise<void> {

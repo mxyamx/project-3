@@ -105,6 +105,10 @@ export class WaitingPageComponent implements OnInit, OnDestroy {
                 this.currentGame.players = [...this.currentGame.players, player];
             }
             this.playersLimitReached = this.playerlimit();
+        
+            if (!player.virtualPlayer) {
+                this.automaticLock();
+            }
         });
 
         this.playerSocketService.onPlayerLeft((player: Player) => {

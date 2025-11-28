@@ -1,7 +1,12 @@
 <section class="main-container">
     <section class="navigation">
         <div class="right-group">
-            <i class="fa-solid fa-message chat-button" aria-hidden="true" (click)="openChat()"></i>
+            <div class="notification-wrapper-inline">
+    <i class="fa-solid fa-message chat-button" aria-hidden="true" (click)="openChat()"></i>
+    @if (chatService.totalUnreadCount() > 0) {
+        <span class="notification-badge">{{ chatService.totalUnreadCount() }}</span>
+    }
+</div>
             <button class="navigation-button" routerLink="/main-page">
                 <i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}
             </button>
@@ -187,7 +192,7 @@
         </div>
         }
     </section>
-    @if(showChat() && !this.chatService.chatDetache()){
+    @if(chatService.showChat() && !this.chatService.chatDetache()){
     <div class="chat-container">
         <app-chat-container></app-chat-container>
     </div>
