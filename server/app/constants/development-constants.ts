@@ -29,6 +29,10 @@ export const TRANSITION_TIME_INTERVAL_SEC = 3;
 
 export const MAX_AMOUNT_OF_VICTORIES = 3;
 
+export const DEFAULT_WINNER_PRIZE = 50;
+
+export const DEFAULT_LOSER_PRIZE = 20;
+
 export const WAIT_TIME_FOR_CONSECUTIVE_MESSAGES_MSEC = 150;
 
 export const MAX_AMOUNT_OF_ESCAPES = 2;

@@ -1,4 +1,5 @@
 // server/app/services/prize-pool/prize-pool.service.ts
+import { DEFAULT_LOSER_PRIZE, DEFAULT_WINNER_PRIZE } from '@app/constants/development-constants';
 import { Player } from '@common/player';
 import { Service } from 'typedi';
 
@@ -29,7 +30,7 @@ export class PrizePoolService {
 
         // Distribute winner pool
         if (winners.length > 0) {
-            const amountPerWinner = Math.floor(winnerPool / winners.length);
+            const amountPerWinner = Math.floor(winnerPool / winners.length) + DEFAULT_WINNER_PRIZE;
             winners.forEach((winner) => {
                 if (!winner.virtualPlayer) {
                     distribution.winners.set(winner.userId, amountPerWinner);
@@ -39,7 +40,7 @@ export class PrizePoolService {
 
         // Distribute consolation pool
         if (losers.length > 0) {
-            const amountPerLoser = Math.floor(consolationPool / losers.length);
+            const amountPerLoser = Math.floor(consolationPool / losers.length) + DEFAULT_LOSER_PRIZE;
             losers.forEach((loser) => {
                 if (!loser.virtualPlayer) {
                     distribution.losers.set(loser.userId, amountPerLoser);
@@ -56,7 +57,7 @@ export class PrizePoolService {
      */
     calculateSoleWinnerPrize(entryPrice: number, initialPlayerCount: number): number {
         const totalPrizePool = entryPrice * initialPlayerCount;
-        return Math.round((totalPrizePool * 2) / 3);
+        return Math.round((totalPrizePool * 2) / 3) + DEFAULT_WINNER_PRIZE;
     }
 
     /**
