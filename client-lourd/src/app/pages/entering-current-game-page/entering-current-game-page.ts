@@ -38,7 +38,6 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
     blockedByPlayerError = false;
     showBlockedUserWarning = false;
     pendingGameId: string | null = null;
-    showChat: WritableSignal<boolean> = signal(false);
     chatService: ChatService = inject(ChatService);
 
     private httpUserService = inject(HttpUserService);
@@ -192,6 +191,6 @@ export class EnteringCurrentGamePageComponent implements OnInit, OnDestroy {
         });
     }
     openChat() {
-        this.showChat.set(!this.showChat());
+        this.chatService.showChat.set(!this.chatService.showChat());
     }
 }

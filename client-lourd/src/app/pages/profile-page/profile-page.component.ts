@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal, WritableSignal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
@@ -27,7 +27,6 @@ export class ProfilePageComponent {
     private router: Router = inject(Router);
 
     chatService: ChatService = inject(ChatService);
-    showChat: WritableSignal<boolean> = signal(false);
 
     DeviceType = DeviceType;
     ActiveTab = ActiveTab;
@@ -214,6 +213,6 @@ export class ProfilePageComponent {
     }
 
     openChat() {
-        this.showChat.set(!this.showChat());
+        this.chatService.showChat.set(!this.chatService.showChat());
     }
 }

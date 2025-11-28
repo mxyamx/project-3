@@ -82,7 +82,7 @@
             } }
         </section>
     </div>
-    @if(showChat() && !this.chatService.chatDetache()){
+    @if(chatService.showChat() && !this.chatService.chatDetache()){
     <div class="chat-container">
         <app-chat-container></app-chat-container>
     </div>

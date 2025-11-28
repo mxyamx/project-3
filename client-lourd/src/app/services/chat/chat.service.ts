@@ -23,6 +23,8 @@ export class ChatService {
     private ipc?: IpcRenderer;
     roomMessages: ChatMessage[] = [];
     chatDetache = signal(false);
+    showChat = signal(false);
+
     private userManager = inject(UserManagerService);
     private playerSocketService = inject(PlayerSocketService);
     private channelService = inject(ChannelService);

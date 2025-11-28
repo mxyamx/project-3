@@ -45,7 +45,6 @@ import { Subscription } from 'rxjs';
     styleUrl: './game.component.scss',
 })
 export class GameComponent implements OnInit, OnDestroy {
-    showChat = false;
     showGameInterface = false;
     showAbandonConfirmation = false;
     showEndTurnConfirmation = false;
@@ -88,21 +87,21 @@ export class GameComponent implements OnInit, OnDestroy {
         });
         this.playerSocketService.onChangeLog((event: EventLog) => {
             this.gameEventService.addLog(event);
-            if (this.showChat && !this.chatService.chatDetache()) {
+            if (this.chatService.showChat() && !this.chatService.chatDetache()) {
                 return;
             }
             this.logComponent.bottom();
         });
         this.playerSocketService.onCombatLog((gameEvent: EventLog) => {
             this.gameEventService.addLog(gameEvent);
-            if (this.showChat && !this.chatService.chatDetache()) {
+            if (this.chatService.showChat() && !this.chatService.chatDetache()) {
                 return;
             }
             this.logComponent.bottom();
         });
         this.playerSocketService.emitJoinLogRoom(this.gameSessionManager.gameId(), (response: EventLog[]) => {
             this.gameEventService.setLogs(response);
-            if (this.showChat && !this.chatService.chatDetache()) {
+            if (this.chatService.showChat() && !this.chatService.chatDetache()) {
                 return;
             }
             this.logComponent.bottom();
@@ -134,7 +133,7 @@ export class GameComponent implements OnInit, OnDestroy {
     }
 
     toggleView(showChat: boolean) {
-        this.showChat = showChat;
+        this.chatService.showChat.set(showChat);
     }
 
     toggleGameInterface() {

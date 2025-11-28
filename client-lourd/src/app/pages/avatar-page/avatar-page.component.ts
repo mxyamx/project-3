@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AttributeFormComponent } from '@app/components/attribute-form/attribute-form.component';
@@ -49,7 +49,7 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
     joiningRoom: boolean = false;
     gameSessionManager: GameSessionManagerService = inject(GameSessionManagerService);
     userManagerService: UserManagerService = inject(UserManagerService);
-    showChat: WritableSignal<boolean> = signal(false);
+
     private playerSocketService = inject(PlayerSocketService);
     private currentGameManager = inject(CurrentGameManagerService);
     chatService = inject(ChatService);
@@ -256,7 +256,7 @@ export class AvatarPageComponent implements OnInit, OnDestroy {
         this.hasBeenClicked = false;
     }
     openChat() {
-        this.showChat.set(!this.showChat());
+        this.chatService.showChat.set(!this.chatService.showChat());
     }
 
     joinRunningGame(data: UpdateGamedRes): void {
