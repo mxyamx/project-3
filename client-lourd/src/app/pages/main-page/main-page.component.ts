@@ -67,20 +67,19 @@ export class MainPageComponent implements OnInit, OnDestroy {
         const currentUserId = this.userManager.getCurrentUser().id;
 
         this.playerSocketService.onChatNotification((data) => {
-            // Ignorer nos propres messages
+            
             if (data.message.senderId === currentUserId) {
                 return;
             }
 
-            // Ignorer si destiné à un autre utilisateur
+           
             if (data.targetUserId && data.targetUserId !== currentUserId) {
                 return;
             }
 
-            // Incrémenter le compteur pour ce canal spécifique
             this.chatService.incrementUnreadForChannel(data.roomId);
 
-            // Jouer le son seulement si le chat est fermé
+         
             if (!this.showChat()) {
                 this.chatService.playNotificationSound();
             }
