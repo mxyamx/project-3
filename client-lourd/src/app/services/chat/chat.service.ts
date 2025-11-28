@@ -25,6 +25,7 @@ export class ChatService {
     chatDetache = signal(false);
     unreadChannels = signal<Map<string, number>>(new Map());
     private notificationAudio: HTMLAudioElement | null = null;
+    private notificationsInitialized = false;
     showChat = signal(false);
 
     private userManager = inject(UserManagerService);
@@ -41,6 +42,29 @@ export class ChatService {
 
     constructor() {
         this.initIpc();
+    }
+
+    initNotificationListener(): void {
+        if (this.notificationsInitialized) return;
+        this.notificationsInitialized = true;
+
+        this.playerSocketService.onChatNotification((data) => {
+            const currentUserId = this.userManager.getCurrentUser().id;
+
+            
+            if (data.message.senderId === currentUserId) return;
+
+           
+            if (data.targetUserId && data.targetUserId !== currentUserId) return;
+
+          
+            this.incrementUnreadForChannel(data.roomId);
+
+            
+            if (!this.showChat()) {
+                this.playNotificationSound();
+            }
+        });
     }
 
     addMessage(roomMessage: ChatMessage) {
@@ -261,7 +285,7 @@ export class ChatService {
         if (this.ipc) {
             this.ipc.send('popup:open', context);
         } else {
-            console.warn('detachChat() sans ipcRenderer (pas d’Electron)');
+            console.warn('detachChat() sans ipcRenderer (pas d\'Electron)');
         }
     }
 

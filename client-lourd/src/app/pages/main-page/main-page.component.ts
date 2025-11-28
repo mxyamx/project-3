@@ -29,7 +29,6 @@ export class MainPageComponent implements OnInit, OnDestroy {
     private gameInviteService = inject(GameInviteService);
 
     private inviteCountSubscription?: Subscription;
-    private isListeningForNotifications = false;
 
     constructor(private router: Router) {}
 
@@ -51,38 +50,13 @@ export class MainPageComponent implements OnInit, OnDestroy {
             this.gameInviteCount.set(count);
         });
 
-        this.setupChatNotifications();
+    
+        this.chatService.initNotificationListener();
     }
 
     ngOnDestroy(): void {
         this.inviteCountSubscription?.unsubscribe();
-        this.playerSocketService.unsubscribeChatNotification();
-    }
-
-    private setupChatNotifications(): void {
-        if (this.isListeningForNotifications) return;
-        this.isListeningForNotifications = true;
-
-        const currentUserId = this.userManager.getCurrentUser().id;
-
-        this.playerSocketService.onChatNotification((data) => {
-            
-            if (data.message.senderId === currentUserId) {
-                return;
-            }
-
-           
-            if (data.targetUserId && data.targetUserId !== currentUserId) {
-                return;
-            }
-
-            this.chatService.incrementUnreadForChannel(data.roomId);
-
-         
-            if (!this.chatService.showChat()) {
-                this.chatService.playNotificationSound();
-            }
-        });
+        
     }
 
     logout() {

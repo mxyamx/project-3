@@ -1,7 +1,12 @@
 <div class="shop-page">
     <section class="navigation">
         <div class="right-group">
-            <i class="fa-solid fa-message chat-button" aria-hidden="true" (click)="openChat()"></i>
+            <div class="notification-wrapper-inline">
+    <i class="fa-solid fa-message chat-button" aria-hidden="true" (click)="openChat()"></i>
+    @if (chatService.totalUnreadCount() > 0) {
+        <span class="notification-badge">{{ chatService.totalUnreadCount() }}</span>
+    }
+</div>
             <div class="balance">
                 <i class="fa-solid fa-coins"></i><span>{{ money() }}</span>
             </div>
