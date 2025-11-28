@@ -526,7 +526,9 @@
         "incorrectly-placed-door": "Chaque tuile de porte doit se trouver entre deux tuiles de mur sur un même axe et ne peut pas être placée sur les bords de la zone de jeu",
         "missing-entry-points": "Tous les points de départ doivent être placés",
         "missing-flag": "Le drapeau doit être placé",
-        "success": "Enregistrement réussi!"
+        "success": "Enregistrement réussi!",
+        "not-found": "Le jeu a été supprimé",
+        "can-not-edit": "Vous n'avez pas le droit de modifier ce jeu"
     },
 
     "shop-page": {

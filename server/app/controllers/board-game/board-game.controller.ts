@@ -248,9 +248,24 @@ export class BoardGameController {
          *         schema:
          *           $ref: '#/definitions/BoardGame'
          */
-        this.router.put('/:id', async (req: Request, res: Response) => {
+        this.router.put('/:id', async (req: AuthedRequest, res: Response) => {
             try {
-                await this.boardGameService.updateBoard(req.body);
+                const userId = req.user?.uid;
+                await this.boardGameService.updateBoard(req.body, userId);
+                res.status(httpStatus.NO_CONTENT).send();
+            } catch (error) {
+                if (error instanceof HttpException) {
+                    res.status(error.status).json({ error: error.message });
+                } else {
+                    res.status(httpStatus.BAD_REQUEST).json({ error: 'Une erreur serveur est survenue.' });
+                }
+            }
+        });
+
+        this.router.put('/privacy/:id', async (req: AuthedRequest, res: Response) => {
+            try {
+                const userId = req.user?.uid;
+                await this.boardGameService.updatePrivacy(req.params.id, req.body.privacy, userId);
                 res.status(httpStatus.NO_CONTENT).send();
             } catch (error) {
                 if (error instanceof HttpException) {

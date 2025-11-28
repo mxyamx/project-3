@@ -526,7 +526,9 @@
         "incorrectly-placed-door": "Each door tile must be placed between two wall tiles on the same axis and cannot be placed on the edges of the game area",
         "missing-entry-points": "All starting points must be placed",
         "missing-flag": "The flag must be placed",
-        "success": "Registration successful!"
+        "success": "Registration successful!",
+        "not-found": "The game has been removed",
+        "can-not-edit": "You do not have the right to modify this game"
     },
 
     "shop-page": {

@@ -1,5 +1,6 @@
 import { HttpException } from '@app/classes/http-exception/http.exception';
 import { DATABASE_COLLECTION } from '@app/constants/development-constants';
+import { friendEvents } from '@app/events/friendEvents';
 import { DatabaseService } from '@app/services/database/database.service';
 import { BoardGame, BoardGameDTO } from '@common/board-game';
 import { GamePrivacy } from '@common/enums/game-visibility';
@@ -133,13 +134,43 @@ export class BoardGameService {
                 if (!res) {
                     throw new Error('Le jeu n a pas été trouvé.');
                 }
+                friendEvents.emit('boardgame-deleted', { id });
             })
             .catch(() => {
                 throw new Error('Échec lors de la suppression du jeu.');
             });
     }
+    async updatePrivacy(id: string, privacy: GamePrivacy, userId: string) {
+        const preExistingBoard = await this.collection.findOne({ id: id });
+        if (!preExistingBoard) {
+            throw new HttpException('not-found', httpStatus.NOT_FOUND);
+        }
+        if (preExistingBoard.ownerId !== userId) {
+            throw new HttpException('can-not-edit', httpStatus.BAD_REQUEST);
+        }
 
-    async updateBoard(board: BoardGame): Promise<void> {
+        await this.collection.updateOne(
+            { id: id },
+            {
+                $set: {
+                    privacy: privacy,
+                },
+            },
+        );
+
+        friendEvents.emit('update-boardgame-list');
+    }
+
+    async updateBoard(board: BoardGame, userId: string): Promise<void> {
+        const preExistingBoard = await this.collection.findOne({ id: board.id });
+
+        if (!preExistingBoard) {
+            throw new HttpException('not-found', httpStatus.BAD_REQUEST);
+        }
+        if (preExistingBoard.ownerId !== userId && preExistingBoard.privacy !== GamePrivacy.Public) {
+            throw new HttpException('can-not-edit', httpStatus.BAD_REQUEST);
+        }
+
         const existingBoard = await this.collection.findOne({ name: board.name });
         const validation = BoardGameValidation.validateBoard(board, existingBoard);
         if (!validation.valid) {
@@ -165,6 +196,7 @@ export class BoardGameService {
         if (result.matchedCount === 0 || result.modifiedCount === 0) {
             throw new Error('Échec lors de la mise à jour du jeu.');
         }
+        friendEvents.emit('update-boardgame-list');
     }
     private withOwnerLookup(matchStage: any) {
         return [
