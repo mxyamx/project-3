@@ -142,38 +142,51 @@ export class SocketGameCommunication {
 private async emitGlobalNotification(roomId: string, message: ChatMessage): Promise<void> {
     try {
         const notification = { roomId, message };
-        console.log('=== EMITTING CHAT NOTIFICATION ===');
-        console.log('Room ID:', roomId);
-        console.log('Sender ID:', message.senderId);
-        console.log('Message:', message.text);
         
-        // Pour le chat général, notifier tout le monde
+        // Récupérer les sockets qui sont DÉJÀ dans la room (ils reçoivent déjà message-sent)
+        const socketsInRoom = await this.sio.in(roomId).fetchSockets();
+        const socketIdsInRoom = new Set(socketsInRoom.map(s => s.id));
+
+        // Pour le chat général, notifier tout le monde SAUF ceux dans la room
         if (roomId === CHANNEL_GENERAL_ID) {
-            console.log('Broadcasting to ALL connected sockets (general chat)');
-            this.sio.emit('chat-notification', notification);
+            const allSockets = await this.sio.fetchSockets();
+            for (const socket of allSockets) {
+                if (!socketIdsInRoom.has(socket.id)) {
+                    socket.emit('chat-notification', notification);
+                }
+            }
             return;
         }
 
-        // Pour les game rooms, notifier tout le monde
+        // Pour les game rooms, notifier tout le monde SAUF ceux dans la room
         if (GAME_ROOM_REGEX.test(roomId)) {
-            console.log('Broadcasting to ALL connected sockets (game room)');
-            this.sio.emit('chat-notification', notification);
+            const allSockets = await this.sio.fetchSockets();
+            for (const socket of allSockets) {
+                if (!socketIdsInRoom.has(socket.id)) {
+                    socket.emit('chat-notification', notification);
+                }
+            }
             return;
         }
 
-        // Pour les channels personnalisés, récupérer les membres et notifier
-        console.log('Custom channel - fetching members');
+        // Pour les channels personnalisés, notifier les membres qui ne sont PAS dans la room
         const memberCollection: Collection<ChannelMemberDoc> = this.databaseService.database.collection(process.env.CHANNEL_MEMBERS_COLLECTION_NAME);
         const members = await memberCollection.find({ channelId: roomId }).toArray();
-        console.log('Members found:', members.length);
         
         for (const member of members) {
             if (member.userId !== message.senderId) {
-                console.log('Emitting to user:', member.userId);
-                this.sio.emit('chat-notification', { 
-                    ...notification,
-                    targetUserId: member.userId 
-                });
+                // Trouver le socket de ce membre
+                const allSockets = await this.sio.fetchSockets();
+                for (const socket of allSockets) {
+                    const socketUserId = this.getFirebaseIdBySocketId(socket.id);
+                    // Envoyer seulement si c'est le bon user ET qu'il n'est pas dans la room
+                    if (socketUserId === member.userId && !socketIdsInRoom.has(socket.id)) {
+                        socket.emit('chat-notification', { 
+                            ...notification,
+                            targetUserId: member.userId 
+                        });
+                    }
+                }
             }
         }
     } catch (error) {
