@@ -34,7 +34,6 @@ export class MainPageComponent implements OnInit {
 
     readonly title: string = 'Méchante Patte';
     avatar = this.userManager.currentUser.asReadonly();
-    showChat: WritableSignal<boolean> = signal(false);
     showSocialsPopup: WritableSignal<boolean> = signal(false);
 
     gameInviteCount = signal(0);
@@ -86,7 +85,7 @@ export class MainPageComponent implements OnInit {
     }
 
     openGeneralChat() {
-        this.showChat.set(!this.showChat());
+        this.chatService.showChat.set(!this.chatService.showChat());
     }
 
     openSettings(): void {

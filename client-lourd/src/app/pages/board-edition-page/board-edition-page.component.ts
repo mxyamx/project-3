@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, HostListener, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router, RouterLink } from '@angular/router';
@@ -48,7 +48,6 @@ export class BoardEditionPageComponent implements OnInit {
     hoveredItem: Item | null = null;
     mouseX: number = 0;
     mouseY: number = 0;
-    showChat: WritableSignal<boolean> = signal(false);
     chatService = inject(ChatService);
     tiles: Tile[] = [
         { type: TileType.Wall, image: FROM_TILE_TYPE_TO_IMAGE[TileType.Wall], description: FROM_TILE_TYPE_TO_DESCRIPTION[TileType.Wall] },
@@ -306,6 +305,6 @@ export class BoardEditionPageComponent implements OnInit {
         }
     }
     openChat() {
-        this.showChat.set(!this.showChat());
+        this.chatService.showChat.set(!this.chatService.showChat());
     }
 }
