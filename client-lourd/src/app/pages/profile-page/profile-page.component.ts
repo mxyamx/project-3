@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { assetFromId } from '@app/constants/avatar-catalog';
 import { AuthentificationService } from '@app/services/authentification/authentification.service';
+import { AvatarUploadService } from '@app/services/avatar-upload/avatar-upload.service';
 import { ChatService } from '@app/services/chat/chat.service';
 import { HttpUserService } from '@app/services/http-manager/http-users.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
@@ -23,6 +24,7 @@ export class ProfilePageComponent {
     private userManager: UserManagerService = inject(UserManagerService);
     private authService: AuthentificationService = inject(AuthentificationService);
     private httpUserService: HttpUserService = inject(HttpUserService);
+    private avatarUploadService: AvatarUploadService = inject(AvatarUploadService);
     private fb: FormBuilder = inject(FormBuilder);
     private router: Router = inject(Router);
 
@@ -31,9 +33,7 @@ export class ProfilePageComponent {
     DeviceType = DeviceType;
     ActiveTab = ActiveTab;
 
-    /** Hold the signal… */
     userSig = this.userManager.currentUser.asReadonly();
-    /** …and expose a plain object for template/class usage */
     get user() {
         return this.userSig();
     }
@@ -56,6 +56,9 @@ export class ProfilePageComponent {
     isEditing = false;
     saving = false;
     editError = '';
+    uploadingAvatar = false;
+    uploadAvatarError = '';
+
     editForm: FormGroup = this.fb.group({
         username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(32)]],
         email: ['', [Validators.required, Validators.email]],
@@ -70,7 +73,8 @@ export class ProfilePageComponent {
     private rebuildAvatarList() {
         const purchasedIds = this.user.purchasedAvatars ?? [];
         const purchasedAssets = purchasedIds.map((id) => assetFromId(id)).filter((x): x is string => !!x);
-        const set = new Set<string>([...this.PRESET_AVATARS, ...purchasedAssets]);
+        const uploadedAvatars = this.user.uploadedAvatars ?? [];
+        const set = new Set<string>([...this.PRESET_AVATARS, ...purchasedAssets, ...uploadedAvatars]);
         this.ALL_AVATARS.set([...set]);
     }
 
@@ -102,7 +106,6 @@ export class ProfilePageComponent {
     get averageGameTimeSeconds(): number {
         const stats = this.user?.statistics;
         if (!stats || !stats.gamesPlayed) return 0;
-
         return (stats.totalGameDuration ?? 0) / stats.gamesPlayed / 1000;
     }
 
@@ -131,6 +134,7 @@ export class ProfilePageComponent {
         this.router.navigate(['/']);
     }
 
+    // ========= Edit Account =========
     editAccount() {
         this.rebuildAvatarList();
 
@@ -143,13 +147,15 @@ export class ProfilePageComponent {
         this.avatarPreview.set(idx >= 0 ? all[idx] : u.avatar || '');
 
         this.editError = '';
+        this.uploadAvatarError = '';
         this.isEditing = true;
     }
 
     closeEdit() {
-        if (this.saving) return;
+        if (this.saving || this.uploadingAvatar) return;
         this.isEditing = false;
         this.editError = '';
+        this.uploadAvatarError = '';
         this.editForm.reset();
         this.selectedAvatarIndex.set(null);
     }
@@ -160,6 +166,59 @@ export class ProfilePageComponent {
         this.selectedAvatarIndex.set(index);
         this.editForm.patchValue({ avatar: path });
         this.avatarPreview.set(path);
+    }
+
+    // ========= Avatar Upload =========
+    async onAvatarFileSelected(event: Event) {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (!file) return;
+
+        this.uploadingAvatar = true;
+        this.uploadAvatarError = '';
+
+        try {
+            // Convert file to base64 data URL
+            const dataUrl = await this.avatarUploadService.fileToDataUrl(file);
+
+            // Get current uploaded avatars
+            const uploadedAvatars = [...(this.user.uploadedAvatars ?? [])];
+
+            // Add new avatar if not already present
+            if (!uploadedAvatars.includes(dataUrl)) {
+                uploadedAvatars.push(dataUrl);
+
+                // Update user in database
+                const updatedUser = { ...this.user, uploadedAvatars };
+                await this.httpUserService.updateUser(updatedUser).toPromise();
+
+                // Update local user manager
+                this.userManager.setUploadedAvatars(uploadedAvatars);
+
+                // Rebuild avatar list
+                this.rebuildAvatarList();
+
+                // Select the newly uploaded avatar
+                const all = this.ALL_AVATARS();
+                const idx = all.indexOf(dataUrl);
+                if (idx >= 0) {
+                    this.chooseAvatar(idx);
+                }
+            } else {
+                // Avatar already exists, just select it
+                const all = this.ALL_AVATARS();
+                const idx = all.indexOf(dataUrl);
+                if (idx >= 0) {
+                    this.chooseAvatar(idx);
+                }
+            }
+        } catch (err: any) {
+            console.error('Avatar upload error:', err);
+            this.uploadAvatarError = err?.message || 'profil-page.edit-modal.error.upload-failed';
+        } finally {
+            this.uploadingAvatar = false;
+            // Reset file input
+            (event.target as HTMLInputElement).value = '';
+        }
     }
 
     async saveEdit() {
@@ -187,12 +246,18 @@ export class ProfilePageComponent {
 
         try {
             if (email !== u.email) await this.authService.updateCurrentUserEmail(email);
-            await this.authService.updateCurrentUserProfile(username, avatar);
+
+            // FIX: Only update Firebase photoURL for preset avatars (starts with 'assets/')
+            // Custom base64 avatars are too long for Firebase Auth
+            if (avatar.startsWith('assets/')) {
+                await this.authService.updateCurrentUserProfile(username, avatar);
+            } else {
+                await this.authService.updateCurrentUserProfile(username, undefined);
+            }
 
             const payload = { ...u, username, email, avatar };
             await this.httpUserService.updateUser(payload).toPromise();
 
-            // reflect UI state immediately
             this.userManager.setUsername(username);
             this.userManager.setEmail(email);
             this.userManager.setAvatar(avatar);
@@ -214,5 +279,10 @@ export class ProfilePageComponent {
 
     openChat() {
         this.chatService.showChat.set(!this.chatService.showChat());
+    }
+
+    // Helper to check if avatar is custom uploaded
+    isCustomAvatar(avatarUrl: string): boolean {
+        return this.avatarUploadService.isCustomAvatar(avatarUrl);
     }
 }

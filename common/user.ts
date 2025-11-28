@@ -20,6 +20,7 @@ export interface User {
     gameActivity?: GameActivityStatus;
     currentGameId?: string;
     selectedSound?: string;
+    uploadedAvatars?: string[];
 }
 
 export interface UserStatusInfo {

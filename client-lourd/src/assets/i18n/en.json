@@ -371,11 +371,16 @@
             "avatar": "Choose an avatar",
             "cancel": "Cancel",
             "save": "Save",
+            "upload-new": "Upload New Avatar",
+            "uploading": "Uploading...",
             "error": {
                 "general": "Account edit failed.",
                 "used-username": "Username already taken",
                 "required-avatar": "Please choose a valid avatar.",
-                "connection": "To change your email, log in again and try again."
+                "connection": "To change your email, log in again and try again.",
+                "upload-failed": "Failed to upload avatar. Please try again.",
+                "file-too-large": "File size must be less than 2MB",
+                "invalid-file-type": "File must be an image"
             }
         }
     },

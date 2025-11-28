@@ -131,4 +131,11 @@ export class UserManagerService {
     setCurrentGameId(currentGameId?: string) {
         this.currentUser.update((curr) => ({ ...curr, currentGameId }));
     }
+    /**
+     * Sets the uploaded avatars for the current user
+     * @param uploadedAvatars Array of base64 data URLs
+     */
+    setUploadedAvatars(uploadedAvatars: string[]): void {
+        this.currentUser.update((user) => ({ ...user, uploadedAvatars }));
+    }
 }

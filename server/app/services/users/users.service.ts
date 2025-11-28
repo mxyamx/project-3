@@ -83,6 +83,7 @@ export class UsersService {
                     selectedSound: user.selectedSound,
                     gameActivity: user.gameActivity,
                     currentGameId: user.currentGameId,
+                    uploadedAvatars: user.uploadedAvatars,
                 },
             },
         );

@@ -371,11 +371,16 @@
             "avatar": "Choisir un avatar",
             "cancel": "Annuler",
             "save": "Enregistrer",
+            "upload-new": "Téléverser un nouvel avatar",
+            "uploading": "Téléversement...",
             "error": {
                 "general": "Échec de la modification du compte.",
                 "used-username": "Pseudonyme déjà utilisé",
                 "required-avatar": "Veuillez choisir un avatar valide.",
-                "connection": "Pour modifier votre courriel, reconnectez-vous puis réessayez."
+                "connection": "Pour modifier votre courriel, reconnectez-vous puis réessayez.",
+                "upload-failed": "Échec du téléversement de l'avatar. Veuillez réessayer.",
+                "file-too-large": "La taille du fichier doit être inférieure à 2 Mo",
+                "invalid-file-type": "Le fichier doit être une image"
             }
         }
     },

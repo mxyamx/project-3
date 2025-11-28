@@ -2,11 +2,11 @@
     <section class="navigation">
         <div class="right-group">
             <div class="notification-wrapper-inline">
-    <i class="fa-solid fa-message chat-button" aria-hidden="true" (click)="openChat()"></i>
-    @if (chatService.totalUnreadCount() > 0) {
-        <span class="notification-badge">{{ chatService.totalUnreadCount() }}</span>
-    }
-</div>
+                <i class="fa-solid fa-message chat-button" aria-hidden="true" (click)="openChat()"></i>
+                @if (chatService.totalUnreadCount() > 0) {
+                <span class="notification-badge">{{ chatService.totalUnreadCount() }}</span>
+                }
+            </div>
             <button class="navigation-button" (click)="goHome()"><i class="fas fa-home"></i> {{ 'general.button.back-home' | translate }}</button>
         </div>
     </section>
@@ -36,12 +36,8 @@
         </div>
 
         <div class="profile-actions">
-            <button class="button" (click)="editAccount()">
-                {{ 'profil-page.modify' | translate }}
-            </button>
-            <button class="button" (click)="showDeletePopup()">
-                {{ 'profil-page.delete' | translate }}
-            </button>
+            <button class="button" (click)="editAccount()">{{ 'profil-page.modify' | translate }}</button>
+            <button class="button" (click)="showDeletePopup()">{{ 'profil-page.delete' | translate }}</button>
         </div>
     </div>
 
@@ -60,12 +56,8 @@
         <div class="confirmation-bubble">
             <p>{{ 'profil-page.delete-account-modal' | translate }}</p>
             <div class="confirmation-buttons">
-                <button (click)="deleteAccount()">
-                    {{ 'general.button.yes' | translate }}
-                </button>
-                <button (click)="hideDeletePopup()">
-                    {{ 'general.button.no' | translate }}
-                </button>
+                <button (click)="deleteAccount()">{{ 'general.button.yes' | translate }}</button>
+                <button (click)="hideDeletePopup()">{{ 'general.button.no' | translate }}</button>
             </div>
         </div>
         }
@@ -75,54 +67,38 @@
             <app-socials-page></app-socials-page>
             } @case (ActiveTab.Statistics) {
             <div class="stats-wrapper">
-                <h3 class="stats-title">
-                    {{ 'profil-page.stats' | translate }}
-                </h3>
+                <h3 class="stats-title">{{ 'profil-page.stats' | translate }}</h3>
 
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon">🏆</div>
                         <div class="stat-text">
-                            <span class="stat-label">
-                                {{ 'profil-page.victories' | translate }}
-                            </span>
-                            <span class="stat-value">
-                                {{ user.statistics.victoryAmount ?? 0 }}
-                            </span>
+                            <span class="stat-label">{{ 'profil-page.victories' | translate }}</span>
+                            <span class="stat-value">{{ user.statistics.victoryAmount ?? 0 }}</span>
                         </div>
                     </div>
 
                     <div class="stat-card">
                         <div class="stat-icon">⏳</div>
                         <div class="stat-text">
-                            <span class="stat-label">
-                                {{ 'profil-page.average-game-time' | translate }}
-                            </span>
-                            <span class="stat-value"> {{ averageGameTimeSeconds | number: '1.0-2' }} s </span>
+                            <span class="stat-label">{{ 'profil-page.average-game-time' | translate }}</span>
+                            <span class="stat-value">{{ averageGameTimeSeconds | number: '1.0-2' }} s</span>
                         </div>
                     </div>
 
                     <div class="stat-card">
                         <div class="stat-icon">🌤️</div>
                         <div class="stat-text">
-                            <span class="stat-label">
-                                {{ 'profil-page.total-game-normal' | translate }}
-                            </span>
-                            <span class="stat-value">
-                                {{ user.statistics.gamesPlayedNormal ?? 0 }}
-                            </span>
+                            <span class="stat-label">{{ 'profil-page.total-game-normal' | translate }}</span>
+                            <span class="stat-value">{{ user.statistics.gamesPlayedNormal ?? 0 }}</span>
                         </div>
                     </div>
 
                     <div class="stat-card">
                         <div class="stat-icon">⚔️</div>
                         <div class="stat-text">
-                            <span class="stat-label">
-                                {{ 'profil-page.total-game-ctf' | translate }}
-                            </span>
-                            <span class="stat-value">
-                                {{ user.statistics.gamesPlayedCTF ?? 0 }}
-                            </span>
+                            <span class="stat-label">{{ 'profil-page.total-game-ctf' | translate }}</span>
+                            <span class="stat-value">{{ user.statistics.gamesPlayedCTF ?? 0 }}</span>
                         </div>
                     </div>
                 </div>
@@ -141,27 +117,46 @@
 
             <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
                 <div class="form-row">
-                    <label for="username">
-                        {{ 'profil-page.edit-modal.username' | translate }}
-                    </label>
+                    <label for="username">{{ 'profil-page.edit-modal.username' | translate }}</label>
                     <input id="username" type="text" formControlName="username" />
                 </div>
 
                 <div class="form-row">
-                    <label for="email">
-                        {{ 'profil-page.edit-modal.email' | translate }}
-                    </label>
+                    <label for="email">{{ 'profil-page.edit-modal.email' | translate }}</label>
                     <input id="email" type="email" formControlName="email" />
                 </div>
 
                 <div class="form-row">
-                    <label>
-                        {{ 'profil-page.edit-modal.avatar' | translate }}
-                    </label>
+                    <label>{{ 'profil-page.edit-modal.avatar' | translate }}</label>
+
+                    <!-- Upload Button -->
+                    <div class="upload-row">
+                        <label class="upload-btn" [class.disabled]="uploadingAvatar">
+                            <input type="file" accept="image/*" (change)="onAvatarFileSelected($event)" [disabled]="uploadingAvatar" />
+                            <i class="fas fa-upload"></i>
+                            @if(uploadingAvatar) {
+                            <span>Téléversement...</span>
+                            } @else {
+                            <span>Téléverser un nouvel avatar</span>
+                            }
+                        </label>
+                        @if(uploadAvatarError) {
+                        <small class="error">{{ uploadAvatarError }}</small>
+                        }
+                    </div>
+
                     <div class="avatar-grid">
                         @for (avatar of ALL_AVATARS(); track $index) {
-                        <div class="avatar-chip" [class.selected]="selectedAvatarIndex() === $index" (click)="chooseAvatar($index)">
+                        <div
+                            class="avatar-chip"
+                            [class.selected]="selectedAvatarIndex() === $index"
+                            [class.custom]="!avatar.startsWith('assets/')"
+                            (click)="chooseAvatar($index)"
+                        >
                             <img [src]="avatar" alt="Avatar" />
+                            @if(!avatar.startsWith('assets/')) {
+                            <span class="custom-badge"><i class="fas fa-user"></i></span>
+                            }
                         </div>
                         }
                     </div>
@@ -174,10 +169,8 @@
                 }
 
                 <div class="modal-actions">
-                    <button type="button" class="button ghost" (click)="closeEdit()">
-                        {{ 'profil-page.edit-modal.cancel' | translate }}
-                    </button>
-                    <button type="submit" class="button primary" [disabled]="saving">
+                    <button type="button" class="button ghost" (click)="closeEdit()">{{ 'profil-page.edit-modal.cancel' | translate }}</button>
+                    <button type="submit" class="button primary" [disabled]="saving || uploadingAvatar">
                         {{ 'profil-page.edit-modal.save' | translate }}
                     </button>
                 </div>
@@ -188,7 +181,7 @@
             </form>
         </div>
     </div>
-    } @if(chatService.showChat() && !this.chatService.chatDetache()){
+    } @if(chatService.showChat() && !this.chatService.chatDetache()) {
     <div class="chat-container">
         <app-chat-container></app-chat-container>
     </div>
