@@ -69,15 +69,17 @@
     <div class="channels" id="panel-joined">
         @for(channel of filteredJoinedChannels; track channel.id){
         <div class="channel-item" (click)="openChannel(channel)">
-            @if(channel.id === channelGeneralId || gameRoomRegex.test(channel.id)){
-            <h3>{{ 'chat.' + channel.name | translate }}</h3>
-            } @else{
-            <h3>{{ channel.name }}</h3>
-            }
+            <div class="channel-title-row">
+                @if(channel.id === channelGeneralId || gameRoomRegex.test(channel.id)){
+                <h3>{{ 'chat.' + channel.name | translate }}</h3>
+                } @else{
+                <h3>{{ channel.name }}</h3>
+                }
 
-            @if (getUnreadCount(channel.id) > 0) {
-                <span class="channel-badge">{{ getUnreadCount(channel.id) }}</span>
-            }
+                @if (getUnreadCount(channel.id) > 0) {
+                    <span class="channel-badge">{{ getUnreadCount(channel.id) }}</span>
+                }
+            </div>
 
             <div class="actions">
                 @if (channel.isManageable) {
