@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal, computed } from '@angular/core';
 import { SERVER_ERROR_CONFIRM_DIALOG_DATA } from '@app/constants/channel-constants';
 import { ConfirmationDialogData } from '@app/interfaces/confirmation-dialog-date';
 import { ChatOnInitContext, PopupChatContext } from '@app/interfaces/popup-chat-context';
@@ -23,14 +23,48 @@ export class ChatService {
     private ipc?: IpcRenderer;
     roomMessages: ChatMessage[] = [];
     chatDetache = signal(false);
+    unreadChannels = signal<Map<string, number>>(new Map());
+    private notificationAudio: HTMLAudioElement | null = null;
+    private notificationsInitialized = false;
     showChat = signal(false);
 
     private userManager = inject(UserManagerService);
     private playerSocketService = inject(PlayerSocketService);
     private channelService = inject(ChannelService);
 
+    totalUnreadCount = computed(() => {
+        let total = 0;
+        this.unreadChannels().forEach((count) => {
+            total += count;
+        });
+        return total;
+    });
+
     constructor() {
         this.initIpc();
+    }
+
+    initNotificationListener(): void {
+        if (this.notificationsInitialized) return;
+        this.notificationsInitialized = true;
+
+        this.playerSocketService.onChatNotification((data) => {
+            const currentUserId = this.userManager.getCurrentUser().id;
+
+            
+            if (data.message.senderId === currentUserId) return;
+
+           
+            if (data.targetUserId && data.targetUserId !== currentUserId) return;
+
+          
+            this.incrementUnreadForChannel(data.roomId);
+
+            
+            if (!this.showChat()) {
+                this.playNotificationSound();
+            }
+        });
     }
 
     addMessage(roomMessage: ChatMessage) {
@@ -150,6 +184,38 @@ export class ChatService {
         }
     }
 
+    playNotificationSound(): void {
+        if (!this.notificationAudio) {
+            this.notificationAudio = new Audio('assets/sounds/notification.mp3');
+            this.notificationAudio.volume = 0.5;
+        }
+        this.notificationAudio.currentTime = 0;
+        this.notificationAudio.play().catch((err) => {
+            console.warn('Audio play failed:', err);
+        });
+    }
+
+    incrementUnreadForChannel(channelId: string): void {
+        this.unreadChannels.update((map) => {
+            const newMap = new Map(map);
+            const current = newMap.get(channelId) || 0;
+            newMap.set(channelId, current + 1);
+            return newMap;
+        });
+    }
+
+    markChannelAsRead(channelId: string): void {
+        this.unreadChannels.update((map) => {
+            const newMap = new Map(map);
+            newMap.delete(channelId);
+            return newMap;
+        });
+    }
+
+    getUnreadCountForChannel(channelId: string): number {
+        return this.unreadChannels().get(channelId) || 0;
+    }
+
     private handleServerError(err: unknown) {
         let serverKey = 'unknown';
 
@@ -219,7 +285,7 @@ export class ChatService {
         if (this.ipc) {
             this.ipc.send('popup:open', context);
         } else {
-            console.warn('detachChat() sans ipcRenderer (pas d’Electron)');
+            console.warn('detachChat() sans ipcRenderer (pas d\'Electron)');
         }
     }
 

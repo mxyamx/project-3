@@ -176,6 +176,13 @@ export class PlayerSocketService {
             callback(data);
         });
     }
+    onChatNotification(callback: (data: { roomId: string; message: ChatMessage; targetUserId?: string }) => void): void {
+        this.clientSocketService.on<{ roomId: string; message: ChatMessage; targetUserId?: string }>('chat-notification', callback);
+    }
+
+    unsubscribeChatNotification(): void {
+        this.clientSocketService.off('chat-notification');
+    }
 
     emitAddVirtualPlayer(gameId: string, profile: VirtualPlayerProfile): void {
         this.clientSocketService.emit('add-virtual-player', { gameId, profile });

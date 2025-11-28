@@ -430,3 +430,24 @@ app-combat-notification {
     left: 0;
     z-index: 1000;
 }
+
+.chat-nav-button {
+    position: relative;
+}
+
+.notification-badge-inline {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
+    color: white;
+    border-radius: 10px;
+    min-width: 18px;
+    height: 18px;
+    font-size: 11px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+}

@@ -9,6 +9,7 @@ import { Collection } from 'mongodb';
 import * as io from 'socket.io';
 import { CurrentGamesService } from '../current-games/current-games.service';
 import { DatabaseService } from '../database/database.service';
+import { ChannelMemberDoc } from '@app/interfaces/channel-member-doc';
 
 interface UserDoc {
     _id: string; // if you use ObjectId, change to ObjectId and cast senderIds accordingly
@@ -135,8 +136,83 @@ export class SocketGameCommunication {
                     }
                 }
             }
+            await this.emitGlobalNotification(roomId, message);
         });
     }
+private async emitGlobalNotification(roomId: string, message: ChatMessage): Promise<void> {
+    try {
+        const notification = { roomId, message };
+        
+        // Récupérer les sockets qui sont DÉJÀ dans la room (ils reçoivent déjà message-sent)
+        const socketsInRoom = await this.sio.in(roomId).fetchSockets();
+        const socketIdsInRoom = new Set(socketsInRoom.map(s => s.id));
+
+        // Pour le chat général, notifier tout le monde SAUF ceux dans la room
+        if (roomId === CHANNEL_GENERAL_ID) {
+            const allSockets = await this.sio.fetchSockets();
+            for (const socket of allSockets) {
+                if (!socketIdsInRoom.has(socket.id)) {
+                    socket.emit('chat-notification', notification);
+                }
+            }
+            return;
+        }
+
+        // Pour les game rooms, notifier SEULEMENT les joueurs de la partie qui ne sont pas dans la room chat
+        if (GAME_ROOM_REGEX.test(roomId)) {
+            // Extraire le gameId du roomId (format: "GAME-1234")
+            const gameId = roomId.split('-')[1];
+            const game = await this.gameService.getGame(gameId);
+            
+            if (!game) return;
+
+            // Récupérer les userIds des joueurs de la partie
+            const playerUserIds = new Set(game.players.map(p => p.userId).filter(id => id));
+
+            const allSockets = await this.sio.fetchSockets();
+            for (const socket of allSockets) {
+                // Vérifier si ce socket appartient à un joueur de la partie
+                const socketUserId = this.getFirebaseIdBySocketId(socket.id);
+                
+                // Notifier seulement si:
+                // 1. Le socket appartient à un joueur de la partie
+                // 2. Le socket n'est pas déjà dans la room chat
+                // 3. Ce n'est pas l'expéditeur du message
+                if (socketUserId && 
+                    playerUserIds.has(socketUserId) && 
+                    !socketIdsInRoom.has(socket.id) &&
+                    socketUserId !== message.senderId) {
+                    socket.emit('chat-notification', notification);
+                }
+            }
+            return;
+        }
+
+        // Pour les channels personnalisés, notifier les membres qui ne sont PAS dans la room
+        const memberCollection: Collection<ChannelMemberDoc> = this.databaseService.database.collection(process.env.CHANNEL_MEMBERS_COLLECTION_NAME);
+        const members = await memberCollection.find({ channelId: roomId }).toArray();
+        
+        const allSockets = await this.sio.fetchSockets();
+        
+        for (const member of members) {
+            if (member.userId !== message.senderId) {
+                // Trouver le socket de ce membre
+                for (const socket of allSockets) {
+                    const socketUserId = this.getFirebaseIdBySocketId(socket.id);
+                    // Envoyer seulement si c'est le bon user ET qu'il n'est pas dans la room
+                    if (socketUserId === member.userId && !socketIdsInRoom.has(socket.id)) {
+                        socket.emit('chat-notification', { 
+                            ...notification,
+                            targetUserId: member.userId 
+                        });
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error emitting global notification:', error);
+    }
+}
 
     private withOwnerLookup() {
         return [

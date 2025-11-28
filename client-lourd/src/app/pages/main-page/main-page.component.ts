@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, computed, inject, OnInit, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
 import { SocialsPopupComponent } from '@app/components/socials-popup/socials-popup.component';
@@ -19,7 +19,7 @@ import { Subscription } from 'rxjs';
     styleUrls: ['./main-page.component.scss'],
     imports: [RouterLink, ChatContainerComponent, TranslatePipe, SocialsPopupComponent],
 })
-export class MainPageComponent implements OnInit {
+export class MainPageComponent implements OnInit, OnDestroy {
     chatService = inject(ChatService);
     private authService: AuthentificationService = inject(AuthentificationService);
     private userManager: UserManagerService = inject(UserManagerService);
@@ -49,15 +49,20 @@ export class MainPageComponent implements OnInit {
         this.inviteCountSubscription = this.gameInviteService.getInvitationCountObservable().subscribe((count) => {
             this.gameInviteCount.set(count);
         });
+
+    
+        this.chatService.initNotificationListener();
     }
 
     ngOnDestroy(): void {
         this.inviteCountSubscription?.unsubscribe();
+        
     }
 
     logout() {
         const user = this.userManager.getCurrentUser();
         user.status = DeviceType.offline;
+        this.playerSocketService.unsubscribeChatNotification();
         this.playerSocketService.disconnect();
         this.friendService.cleanup();
         this.chatService.closePopup();
@@ -98,7 +103,6 @@ export class MainPageComponent implements OnInit {
 
         this.httpUserService.getUser(userId).subscribe({
             next: (user) => {
-                // Update all user fields from DB
                 this.userManager.currentUser.set(user);
             },
             error: (err) => console.error('Failed to refresh user data:', err),

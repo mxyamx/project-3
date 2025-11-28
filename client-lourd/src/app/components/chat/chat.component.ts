@@ -91,6 +91,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
 
         this.joinRoom();
         this.configureBaseSocketFeatures();
+        this.chatService.markChannelAsRead(this.roomId);
     }
 
     ngAfterViewChecked() {
@@ -124,6 +125,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
                 this.chatService.roomMessages = response.history;
                 this.needScroll = true;
                 this.isLoading.set(false);
+                this.chatService.markChannelAsRead(this.roomId);
             });
         }
     }
