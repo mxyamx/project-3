@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, WritableSignal, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, WritableSignal, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ChatContainerComponent } from '@app/components/chat-container/chat-container.component';
@@ -25,7 +25,7 @@ import { firstValueFrom } from 'rxjs';
     templateUrl: './creation-page.component.html',
     styleUrl: './creation-page.component.scss',
 })
-export class CreationPageComponent implements OnInit {
+export class CreationPageComponent implements OnInit, OnDestroy {
     showVisibilityAlert: boolean = false;
     showAlertConfirmation: boolean = false;
     gamesList: BoardGameDTO[] = [];
@@ -59,6 +59,17 @@ export class CreationPageComponent implements OnInit {
 
     async ngOnInit(): Promise<void> {
         await this.loadGames();
+        this.playerSocketService.onRefreshBoardGameList(() => this.loadGames());
+        this.playerSocketService.onRemoveBoardGame((payload: { id: string }) => {
+            this.gamesList = [...this.gamesList.filter((game) => game.id !== payload.id)];
+            if (this.gamesList.length > 0) {
+                this.displayedObject = this.gamesList[0];
+            }
+        });
+    }
+
+    ngOnDestroy(): void {
+        this.playerSocketService.offBoardGameListeners();
     }
 
     async loadGames(): Promise<void> {

@@ -34,6 +34,7 @@ import * as http from 'http';
 import { Collection } from 'mongodb';
 import * as io from 'socket.io';
 import { Container } from 'typedi';
+import { BoardGameSocketManager } from '../board-game/board-game-socket-manager';
 import { BoardGameService } from '../board-game/board-game.service';
 import { ChannelSocketManager } from '../channel/channel-socket-manager';
 import { FriendSocketManager } from '../friends/friend-socket.manager';
@@ -62,6 +63,7 @@ export class SocketManager {
     private boardGameService: BoardGameService;
     private refundedGames = new Set<string>();
     private preCurrentGames = new Set<string>();
+    private boardGameSocketManager: BoardGameSocketManager;
 
     constructor(
         server: http.Server,
@@ -97,7 +99,7 @@ export class SocketManager {
         this.vpSocketAddingHandler = new VpSocketAddingHandler(vpSocketAddingHandlerConfig);
         this.friendSocketManager = new FriendSocketManager(this.sio, this.userSessionManager);
         this.channelSocketManager = new ChannelSocketManager(this.sio, this.userSessionManager, this.databaseService);
-
+        this.boardGameSocketManager = new BoardGameSocketManager(this.sio);
         friendEvents.on('vp-eliminated', (payload: { player: Player; gameId: string }) => {
             const { player } = payload;
             const vpSocket = this.vpSockets.get(player.socketId);
@@ -120,6 +122,7 @@ export class SocketManager {
             this.socketGameCommunication.handleSockets(socket);
             this.friendSocketManager.handleUserConnection(socket);
             this.channelSocketManager.handleUserConnection(socket);
+            this.boardGameSocketManager.handleUserConnection(socket);
 
             socket.on('create-game', async (game: CurrentGame, callback) => {
                 try {
@@ -514,7 +517,7 @@ export class SocketManager {
                     await this.leavePlayer(game.id, player, 'timeout');
                 }
             });
-            
+
             this.vpSocketAddingHandler.register(socket);
 
             socket.on('player-emote', (data) => {
@@ -522,9 +525,8 @@ export class SocketManager {
                     successful: true,
                     playerId: data.playerId,
                     emote: data.emote,
-    });
-});
-
+                });
+            });
         });
     }
 

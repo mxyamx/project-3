@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
@@ -11,6 +11,7 @@ import { SaveBoardDialogComponent } from '@app/components/save-board-dialog/save
 import { AdminPageManagerService } from '@app/services/admin-page-manager/admin-page-manager.service';
 import { ChatService } from '@app/services/chat/chat.service';
 import { HttpBoardGameService } from '@app/services/http-manager/http-board-game.service';
+import { PlayerSocketService } from '@app/services/player-socket/player-socket.service';
 import { UserManagerService } from '@app/services/user-manager/user-manager.service';
 import { BoardGameDTO } from '@common/board-game';
 import { GameMode } from '@common/enums/game-mode';
@@ -23,7 +24,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     templateUrl: './admin-page.component.html',
     styleUrl: './admin-page.component.scss',
 })
-export class AdminPageComponent implements OnInit {
+export class AdminPageComponent implements OnInit, OnDestroy {
     showDeleteConfirmation: boolean = false;
     showAlertConfirmation: boolean = false;
     gameMode: typeof GameMode = GameMode;
@@ -31,6 +32,7 @@ export class AdminPageComponent implements OnInit {
     protected readonly gamePrivacies: GamePrivacy[] = [GamePrivacy.Public, GamePrivacy.Private, GamePrivacy.PrivateShared];
     protected adminPageManagerService: AdminPageManagerService = inject(AdminPageManagerService);
     private httpBoardGameService: HttpBoardGameService = inject(HttpBoardGameService);
+    private playerSocketService = inject(PlayerSocketService);
     userManager = inject(UserManagerService);
     showChat: WritableSignal<boolean> = signal(false);
     chatService: ChatService = inject(ChatService);
@@ -51,6 +53,11 @@ export class AdminPageComponent implements OnInit {
         this.adminPageManagerService.showDeleteConfirmation$.subscribe((show) => (this.showDeleteConfirmation = show));
 
         this.adminPageManagerService.showAlertConfirmation$.subscribe((show) => (this.showAlertConfirmation = show));
+
+        this.adminPageManagerService.onBoadGameChanges();
+    }
+    ngOnDestroy(): void {
+        this.playerSocketService.offBoardGameListeners();
     }
 
     setDisplayedObject(game: BoardGameDTO): void {
@@ -69,9 +76,9 @@ export class AdminPageComponent implements OnInit {
         this.adminPageManagerService.hideAlert();
     }
 
-    updateDisplayedObjectPrivacy($event: string): void {
+    async updateDisplayedObjectPrivacy($event: string): Promise<void> {
         if (this.isGamePrivacy($event)) {
-            this.adminPageManagerService.updateObjectPrivacy($event).subscribe();
+            await this.adminPageManagerService.updateObjectPrivacy($event);
         }
     }
 

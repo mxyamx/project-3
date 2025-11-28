@@ -50,7 +50,7 @@ export class GameOptionComponent {
 
         this.displayedBoardManager.updateDisplayedBoardGame(newBoard);
         this.displayedBoardManager.updateLoadedBoardGame(structuredClone(newBoard));
-
+        this.displayedBoardManager.isEditing = false;
         this.router.navigate([UrlPage.Editor]);
     }
 

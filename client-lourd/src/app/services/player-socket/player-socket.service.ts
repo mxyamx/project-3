@@ -124,6 +124,17 @@ export class PlayerSocketService {
         this.clientSocketService.on<string[]>('avatar-list-updated', callback);
     }
 
+    onRefreshBoardGameList(callback: () => void): void {
+        this.clientSocketService.on<void>('refresh-boardgame-list', callback);
+    }
+    onRemoveBoardGame(callback: (payload: { id: string }) => void): void {
+        this.clientSocketService.on<{ id: string }>('remove-boardgame', callback);
+    }
+    offBoardGameListeners(): void {
+        this.clientSocketService.off('refresh-boardgame-list');
+        this.clientSocketService.off('remove-boardgame');
+    }
+
     emitAvatarSelection(gameId: string, avatar: string, callback: (avatars: string[]) => void): void {
         this.clientSocketService.emit('avatar-selection', { gameId, avatar }, callback);
     }
