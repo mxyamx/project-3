@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal, computed } from '@angular/core';
 import { SERVER_ERROR_CONFIRM_DIALOG_DATA } from '@app/constants/channel-constants';
 import { ConfirmationDialogData } from '@app/interfaces/confirmation-dialog-date';
 import { ChatOnInitContext, PopupChatContext } from '@app/interfaces/popup-chat-context';
@@ -23,11 +23,19 @@ export class ChatService {
     private ipc?: IpcRenderer;
     roomMessages: ChatMessage[] = [];
     chatDetache = signal(false);
-    unreadMessageCount = signal(0);
+    unreadChannels = signal<Map<string, number>>(new Map());
     private notificationAudio: HTMLAudioElement | null = null;
     private userManager = inject(UserManagerService);
     private playerSocketService = inject(PlayerSocketService);
     private channelService = inject(ChannelService);
+
+    totalUnreadCount = computed(() => {
+        let total = 0;
+        this.unreadChannels().forEach((count) => {
+            total += count;
+        });
+        return total;
+    });
 
     constructor() {
         this.initIpc();
@@ -161,12 +169,25 @@ export class ChatService {
         });
     }
 
-    incrementUnread(): void {
-        this.unreadMessageCount.update(count => count + 1);
+    incrementUnreadForChannel(channelId: string): void {
+        this.unreadChannels.update((map) => {
+            const newMap = new Map(map);
+            const current = newMap.get(channelId) || 0;
+            newMap.set(channelId, current + 1);
+            return newMap;
+        });
     }
 
-    resetUnread(): void {
-        this.unreadMessageCount.set(0);
+    markChannelAsRead(channelId: string): void {
+        this.unreadChannels.update((map) => {
+            const newMap = new Map(map);
+            newMap.delete(channelId);
+            return newMap;
+        });
+    }
+
+    getUnreadCountForChannel(channelId: string): number {
+        return this.unreadChannels().get(channelId) || 0;
     }
 
     private handleServerError(err: unknown) {

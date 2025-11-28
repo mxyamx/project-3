@@ -65,43 +65,26 @@ export class MainPageComponent implements OnInit, OnDestroy {
         this.isListeningForNotifications = true;
 
         const currentUserId = this.userManager.getCurrentUser().id;
-        console.log('=== SETUP CHAT NOTIFICATIONS ===');
-        console.log('Current user ID:', currentUserId);
-        console.log('Socket connected:', this.playerSocketService.isConnected());
 
         this.playerSocketService.onChatNotification((data) => {
-            console.log('=== RECEIVED CHAT NOTIFICATION ===');
-            console.log('Data:', data);
-            console.log('Room ID:', data.roomId);
-            console.log('Message sender ID:', data.message.senderId);
-            console.log('Message text:', data.message.text);
-            console.log('Target user ID:', data.targetUserId);
-            console.log('Current user ID:', currentUserId);
-            console.log('Is chat open:', this.showChat());
-
             // Ignorer nos propres messages
             if (data.message.senderId === currentUserId) {
-                console.log('>>> IGNORED: Own message');
                 return;
             }
 
             // Ignorer si destiné à un autre utilisateur
             if (data.targetUserId && data.targetUserId !== currentUserId) {
-                console.log('>>> IGNORED: Message for other user');
                 return;
             }
 
-            // Notifier seulement si le chat est fermé
+            // Incrémenter le compteur pour ce canal spécifique
+            this.chatService.incrementUnreadForChannel(data.roomId);
+
+            // Jouer le son seulement si le chat est fermé
             if (!this.showChat()) {
-                console.log('>>> SHOWING NOTIFICATION!');
-                this.chatService.incrementUnread();
                 this.chatService.playNotificationSound();
-            } else {
-                console.log('>>> IGNORED: Chat is open');
             }
         });
-
-        console.log('Chat notification listener registered');
     }
 
     logout() {
@@ -136,9 +119,6 @@ export class MainPageComponent implements OnInit, OnDestroy {
 
     openGeneralChat() {
         this.showChat.set(!this.showChat());
-        if (this.showChat()) {
-            this.chatService.resetUnread();
-        }
     }
 
     openSettings(): void {

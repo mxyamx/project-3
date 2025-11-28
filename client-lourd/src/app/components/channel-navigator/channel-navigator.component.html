@@ -74,6 +74,11 @@
             } @else{
             <h3>{{ channel.name }}</h3>
             }
+
+            @if (getUnreadCount(channel.id) > 0) {
+                <span class="channel-badge">{{ getUnreadCount(channel.id) }}</span>
+            }
+
             <div class="actions">
                 @if (channel.isManageable) {
                 <i
